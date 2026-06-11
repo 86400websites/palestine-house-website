@@ -69,7 +69,7 @@ Do not merge anything.
 | 3 | (0.3a) `/experience` | ✅ 2026-06-12 (live strip = designed empty state until S7) | see git log |
 | 4 | (0.3b) `/bring-ph` | ✅ 2026-06-12 | see git log |
 | 5 | (0.3c) `/our-support` | ✅ 2026-06-12 — Sprint 0.3 complete | see git log |
-| 6 | (0.4a) `/live` | | |
+| 6 | (0.4a) `/live` | ✅ 2026-06-12 — approved empty states; watch view + filters go live with real data in S7 | see git log |
 | 7 | (0.4b) `/focus-areas` + `/about` | | |
 | 8 | (0.4c) `/contact` | | |
 | 9 | (0.5a) `/apply` | | |

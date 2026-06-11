@@ -937,6 +937,116 @@
 }
 
 /* ===========================================================================
+   Live Programming (/live) — page-specific (Live.html)
+   ======================================================================== */
+.live-filterbar {
+  border-block: var(--border-width) solid var(--border);
+  background: var(--background);
+  position: sticky;
+  top: 72px;
+  z-index: 20;
+}
+.live-filter-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding-block: var(--space-3);
+  flex-wrap: wrap;
+}
+.live-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--text-ui);
+  font-weight: var(--weight-semibold);
+  color: var(--muted-foreground);
+}
+.live-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+/* DS Tag chip (design-system Tag.jsx) */
+.live-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--ink-700);
+  border: var(--border-width) solid var(--border);
+}
+.live-filter-tag.is-active {
+  background: var(--brand-primary-tint);
+  color: var(--green-700);
+  border-color: transparent;
+}
+
+/* Section heads */
+.live-sec-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.live-sec-head h2 {
+  margin-top: var(--space-2);
+}
+
+/* Live now feature card (used from S7 when a session is on air) */
+.live-now-card {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: var(--space-8);
+  align-items: center;
+  margin-top: var(--space-8);
+  padding: var(--space-5);
+  background: var(--surface-card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.live-now-thumb {
+  position: relative;
+}
+.live-now-thumb .live-badge {
+  top: var(--space-3);
+  left: var(--space-3);
+}
+.live-now-kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.live-now-card h3 {
+  margin-top: var(--space-2);
+  font-size: var(--text-2xl);
+}
+.live-now-text {
+  margin-top: var(--space-3);
+  font: var(--text-lead);
+  color: var(--muted-foreground);
+}
+.live-now-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+@container page (max-width: 720px) {
+  .live-now-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================================================================
    Bring a House (/bring-ph) — page-specific (BringAHouse.html)
    ======================================================================== */
 
