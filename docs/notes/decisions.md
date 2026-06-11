@@ -6,7 +6,11 @@ Use this file to record decisions that affect implementation. Resolved decisions
 
 - **D2 — In-person events: RSVP at MVP?** Lean: listing-only at MVP. Needed by S7.
 
-## Closed decisions (2026-06-11, propagated to PROJECT-STATUS.md §4)
+## Closed decisions (propagated to PROJECT-STATUS.md §4)
+
+- **Header mega-menus (2026-06-12):** match the approved mockup — tooltip one-liners on all four nav labels plus mega-menu panels on The Model and Experience; the mega-menu link strings are approved-via-mockup (they appear only in `page-designs/shared/site-chrome.jsx`, not in `page-copy/`).
+
+### 2026-06-11
 
 - **D1 — Live Programming video host:** YouTube. CSP extended for the YouTube embed origin only (S7).
 - **D3 — Production domain:** Vercel domain for launch; custom domain connected later.

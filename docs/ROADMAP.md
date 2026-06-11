@@ -7,7 +7,7 @@
 ## A. Full feature list (MVP scope)
 
 ### Public shell
-- [ ] Locked site chrome — header (logo → Home + four nav labels with tooltip one-liners + Sign in + green **Apply** CTA), footer (link columns, lead-magnet block, legal, tagline), mobile Sheet menu
+- [x] Locked site chrome — header (logo → Home + four nav labels with tooltip one-liners, mega-menus on The Model + Experience per mockup, + Sign in + green **Apply** CTA), footer (link columns, lead-magnet block, legal, tagline), mobile Sheet menu *(built in 0.1, pending merge)*
 - [ ] `/` Home (full "Bring Palestine House to Your City" section)
 - [ ] `/model` The Model
 - [ ] `/experience` Experience — the decision page (hero artwork, day/night section, five programming threads, **live strip** from `programming_sessions`, closing CTA, lead magnet)

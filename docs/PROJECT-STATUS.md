@@ -9,10 +9,10 @@
 | | |
 |---|---|
 | **Current stage** | Stage 0 — Foundational build (in progress) |
-| **Active sprint** | 0.1 Foundation — scaffold merged; tokens/fonts/chrome/headers/404 remaining |
-| **Next action** | Complete 0.1: port `/docs/page-designs/design-system/tokens/` into `src/styles/globals.css`, `next/font` Spectral + Inter, motion primitives, security headers in `next.config.ts`, locked chrome (header + Tooltip nav + footer + mobile Sheet), 404/error pages |
+| **Active sprint** | 0.1 Foundation — **built + self-reviewed on `claude/sprint-0-1-foundation`; awaiting owner gate → PR → Preview → merge** |
+| **Next action** | Owner reviews 0.1 (tokens, fonts, motion, security headers, locked chrome, 404/error); after merge → Sprint 0.2 Home + Model |
 | **Production URL** | — (Vercel project connected; Preview deployments verified; no Production deploy yet) |
-| **Last updated** | 2026-06-11 — docs aligned with the repo (paths, mockup inventory, decisions, code state) |
+| **Last updated** | 2026-06-12 — Sprint 0.1 built; mega-menu decision recorded (§4) |
 
 ### How to resume in a fresh AI session
 1. Read this file, then the active sprint's scope + exit gate in `ROADMAP.md`.
@@ -28,7 +28,7 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | Stage / Sprint | Status | Merged PR(s) | Date | Notes |
 |---|---|---|---|---|
 | 0.0 Setup pre-sprints (0a–0d: repo, scaffold, CI, Vercel preview) | ✅ | #1, #2 | 2026-06 | Scaffold (`80c7fcc`), CI workflow, Vercel Preview verified — pre-completes parts of 1.1/1.2 |
-| 0.1 Foundation (tokens, fonts, chrome, headers, 404) | 🔵 | | | Scaffold done; design system is in-repo at `/docs/page-designs/design-system/` |
+| 0.1 Foundation (tokens, fonts, chrome, headers, 404) | 🔵 | | | Built + self-reviewed on `claude/sprint-0-1-foundation` (2026-06-12); awaiting owner gate → PR → Preview → merge |
 | 0.2 Home + The Model | ⬜ | | | |
 | 0.3 Experience · Bring a House · Our Support | ⬜ | | | |
 | 0.4 Live + Focus Areas + About + Contact | ⬜ | | | |
@@ -73,7 +73,7 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 
 ## 4. Locked decisions (do not reopen)
 
-- Public nav: logo → Home + four labels (The Model · Experience · Bring a House · Our Support) + **Sign in** + green **Apply** button; hover one-liners via the Tooltip component. Live Programming is not a top-nav label — it surfaces via Home, the footer "Explore" column, and the Experience live strip.
+- Public nav: logo → Home + four labels (The Model · Experience · Bring a House · Our Support) + **Sign in** + green **Apply** button; hover one-liners via the Tooltip component. **The Model and Experience additionally open mega-menu panels** (two link columns + three artwork thumbnails) — built per the approved mockup chrome; the mega-menu link strings (Who's who / How it works / The rooms / More to find columns) are approved-via-mockup (owner decision, 2026-06-12). Live Programming is not a top-nav label — it surfaces via the Experience mega-menu, Home, the footer "Explore" column, and the Experience live strip.
 - Footer (locked, identical everywhere): Explore (The Model · Experience · Live Programming) · Bring a House (Why bring one · Our support) · Account (Sign in) · Legal (Privacy · Terms · Contact) + Apply block + booklet lead-magnet block + tagline. `/focus-areas` and `/about` are secondary routes linked from page bodies, not chrome.
 - Single CTA: "Apply to bring a House" · *Every application is reviewed by HQ.* Questions → Contact. Never "create a free account."
 - **Apply = sign-up**, approval-gated: one form → pending account + application → HQ approval (`is_approved`) → unlock. No separate signup. Apply form uses a **single "Your name" field** (per mockup; resolves copy flag 5d — derive first name server-side if needed).
@@ -121,3 +121,4 @@ _Log every known bug here with severity; S10 cannot pass while this section is n
 | 2026-06-11 | Docs/ops package created: 8 core docs customized to Palestine House + `ROADMAP.md` + this tracker. Stage 0 ready to start. |
 | 2026-06 | Pre-sprints 0a–0d: repo created (`86400websites/palestine-house-website`), Next.js 15 scaffold merged, CI workflow added (PR #1), Vercel Preview verified (PR #2). |
 | 2026-06-11 | Full docs↔repo alignment pass: corrected all content-layer paths (`page-copy/`, `page-designs/`, `design-system/`, `source-assets/`), recorded the complete mockup + design-system + artwork inventory, propagated resolved decisions D1/D3/D4/D5/D6 from `notes/decisions.md`, recorded real token values in `DESIGN.md`, fixed nav/footer descriptions to match the locked chrome, and updated the sprint board with the true code state. Sprint structure unchanged. |
+| 2026-06-12 | Sprint 0.1 built on `claude/sprint-0-1-foundation`: real tokens → `globals.css`, Spectral + Inter via `next/font`, motion primitives (LazyMotion + Reveal/FadeIn/Stagger), security headers + CSP in `next.config.ts`, locked chrome (header with tooltip nav + mega-menus + mobile Sheet, footer with no-op lead form), branded 404/error pages, 6 mega-menu artworks in `/public/assets/art/`. Mega-menu header locked per mockup (owner decision). Self-review (7-angle /code-review) found and fixed: circular Tailwind font vars, Stagger single-child crash, skip-link focus, a11y describedby/aria-hidden, copy-preserving footer status line. typecheck/lint/build green; headers + chrome verified on the production build. |
