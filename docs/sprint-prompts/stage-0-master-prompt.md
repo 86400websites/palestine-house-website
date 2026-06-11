@@ -67,7 +67,7 @@ Do not merge anything.
 | 1 | (0.2a) `/` Home | ✅ 2026-06-12 (+ owner change: mobile hero art first) | `b999eeb` |
 | 2 | (0.2b) `/model` | ✅ 2026-06-12 | see git log |
 | 3 | (0.3a) `/experience` | ✅ 2026-06-12 (live strip = designed empty state until S7) | see git log |
-| 4 | (0.3b) `/bring-ph` | | |
+| 4 | (0.3b) `/bring-ph` | ✅ 2026-06-12 | see git log |
 | 5 | (0.3c) `/our-support` | | |
 | 6 | (0.4a) `/live` | | |
 | 7 | (0.4b) `/focus-areas` + `/about` | | |

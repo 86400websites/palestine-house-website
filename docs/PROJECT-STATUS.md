@@ -29,8 +29,8 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 |---|---|---|---|---|
 | 0.0 Setup pre-sprints (0a–0d: repo, scaffold, CI, Vercel preview) | ✅ | #1, #2 | 2026-06 | Scaffold (`80c7fcc`), CI workflow, Vercel Preview verified — pre-completes parts of 1.1/1.2 |
 | 0.1 Foundation (tokens, fonts, chrome, headers, 404) | 🔵 | | | Built + self-reviewed on `claude/sprint-0-1-foundation` (2026-06-12); awaiting owner gate → PR → Preview → merge |
-| 0.2 Home + The Model | ⬜ | | | |
-| 0.3 Experience · Bring a House · Our Support | ⬜ | | | |
+| 0.2 Home + The Model | ✅ | (Stage 0 PR) | 2026-06-12 | Built on the Stage 0 branch per the gated sub-step protocol (`docs/sprint-prompts/stage-0-master-prompt.md`) |
+| 0.3 Experience · Bring a House · Our Support | 🔵 | | | Experience + Bring a House done; Our Support next |
 | 0.4 Live + Focus Areas + About + Contact | ⬜ | | | |
 | 0.5 Apply UI + auth UI + legal + SEO | ⬜ | | | |
 | **Stage 0 exit gate** | ⬜ | | | |

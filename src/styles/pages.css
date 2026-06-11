@@ -937,6 +937,205 @@
 }
 
 /* ===========================================================================
+   Bring a House (/bring-ph) — page-specific (BringAHouse.html)
+   ======================================================================== */
+
+/* Who brings what — balanced two-panel split beneath the artwork */
+.bring-split-art {
+  max-width: 62rem;
+  margin: var(--space-12) auto 0;
+}
+.bring-split {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+  max-width: 62rem;
+  margin: var(--space-8) auto 0;
+}
+.bring-panel {
+  background: var(--surface-card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+}
+.bring-panel h3 {
+  font-size: var(--text-xl);
+}
+.bring-list {
+  list-style: none;
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.bring-list li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  color: var(--ink-700);
+  line-height: var(--leading-normal);
+}
+.bring-li-icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--brand-primary);
+  margin-top: 2px;
+}
+@container page (max-width: 760px) {
+  .bring-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The repointed triptych — one room, three moments of becoming */
+.bring-triptych {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+}
+.bring-stage {
+  margin: 0;
+}
+.bring-stage figcaption {
+  margin-top: var(--space-5);
+}
+.bring-stage-n {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  color: var(--brand-primary);
+}
+.bring-stage h3 {
+  margin-top: var(--space-2);
+  font-size: var(--text-xl);
+}
+.bring-stage p {
+  margin-top: var(--space-2);
+  color: var(--muted-foreground);
+}
+.bring-stages-close {
+  margin-top: var(--space-12);
+  font: var(--text-lead);
+  color: var(--muted-foreground);
+  max-width: 38rem;
+}
+@container page (max-width: 860px) {
+  .bring-triptych {
+    grid-template-columns: 1fr;
+    max-width: 24rem;
+    gap: var(--space-10);
+  }
+}
+
+/* Gates timeline — calm horizontal progression */
+.bring-gates {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-8);
+  margin: var(--space-12) 0 0;
+  padding: 0;
+  position: relative;
+}
+.bring-gates::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 18%;
+  height: var(--border-width);
+  background: var(--border-strong);
+}
+.bring-gate {
+  position: relative;
+  padding-right: var(--space-6);
+}
+.bring-gate-node {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--brand-primary);
+  color: var(--white);
+}
+.bring-gate-day {
+  display: block;
+  margin-top: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--brand-accent);
+}
+.bring-gate h3 {
+  margin-top: var(--space-2);
+  font-size: var(--text-xl);
+}
+.bring-gate p {
+  margin-top: var(--space-2);
+  color: var(--muted-foreground);
+  max-width: 22rem;
+}
+.bring-gates-note {
+  margin-top: var(--space-10);
+  font: var(--text-lead);
+  color: var(--muted-foreground);
+  max-width: 38rem;
+}
+@container page (max-width: 760px) {
+  .bring-gates {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .bring-gates::before {
+    top: 14px;
+    bottom: 14px;
+    left: 14px;
+    right: auto;
+    width: var(--border-width);
+    height: auto;
+  }
+  .bring-gate {
+    padding-left: var(--space-10);
+    padding-right: 0;
+  }
+  .bring-gate-node {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .bring-gate-day {
+    margin-top: 0;
+  }
+}
+
+/* Three rules close + statement heading */
+.bring-rules-close {
+  margin-top: var(--space-10);
+  font: var(--text-lead);
+  color: var(--muted-foreground);
+}
+.bring-statement-h {
+  margin-top: var(--space-3);
+}
+.bring-contact-link {
+  color: var(--brand-primary);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bring-contact-link:hover {
+  color: var(--brand-primary-hover);
+}
+
+/* ===========================================================================
    Home (/)
    ======================================================================== */
 
