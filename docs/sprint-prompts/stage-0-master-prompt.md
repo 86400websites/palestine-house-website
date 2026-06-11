@@ -71,7 +71,7 @@ Do not merge anything.
 | 5 | (0.3c) `/our-support` | ✅ 2026-06-12 — Sprint 0.3 complete | see git log |
 | 6 | (0.4a) `/live` | ✅ 2026-06-12 — approved empty states; watch view + filters go live with real data in S7 | see git log |
 | 7 | (0.4b) `/focus-areas` + `/about` | ✅ 2026-06-12 | see git log |
-| 8 | (0.4c) `/contact` | | |
+| 8 | (0.4c) `/contact` | ✅ 2026-06-12 — Sprint 0.4 complete; approved confirmation line ships with real send (S8) | see git log |
 | 9 | (0.5a) `/apply` | | |
 | 10 | (0.5b) auth shells | | |
 | 11 | (0.5c) `/privacy` + `/terms` | | |

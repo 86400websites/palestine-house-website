@@ -31,7 +31,7 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | 0.1 Foundation (tokens, fonts, chrome, headers, 404) | 🔵 | | | Built + self-reviewed on `claude/sprint-0-1-foundation` (2026-06-12); awaiting owner gate → PR → Preview → merge |
 | 0.2 Home + The Model | ✅ | (Stage 0 PR) | 2026-06-12 | Built on the Stage 0 branch per the gated sub-step protocol (`docs/sprint-prompts/stage-0-master-prompt.md`) |
 | 0.3 Experience · Bring a House · Our Support | ✅ | (Stage 0 PR) | 2026-06-12 | All three pages built; Experience live strip in designed empty state until S7 |
-| 0.4 Live + Focus Areas + About + Contact | ⬜ | | | |
+| 0.4 Live + Focus Areas + About + Contact | ✅ | (Stage 0 PR) | 2026-06-12 | `/live` ships the approved empty states (watch view + filters activate with real data, S7); contact form no-ops honestly until Resend (S8) |
 | 0.5 Apply UI + auth UI + legal + SEO | ⬜ | | | |
 | **Stage 0 exit gate** | ⬜ | | | |
 | 1.1 GitHub (protection + CI) | ⬜ | | | CI live since 0c; still to do: gitleaks step in `ci.yml`, branch protection on `main`, secret scanning + Dependabot |
