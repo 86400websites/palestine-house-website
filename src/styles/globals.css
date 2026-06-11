@@ -1,0 +1,82 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ---------------------------------------------------------------------------
+   Palestine House — light-only WARM PAPER starter foundation (Sprint 0B).
+
+   These are PLACEHOLDER tokens, not the final design system. The canonical
+   tokens (heritage green #1A6B4A, warm paper #F6F1E8, muted red #A8322D,
+   Spectral display + Inter body) are ported from the `_ds/` design system in
+   Sprint 0.1, together with the locked chrome. See the consuming stylesheets
+   in docs/page-designs/public-pages/{site-chrome,pages}.css.
+--------------------------------------------------------------------------- */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-sans);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Warm paper foundation (placeholder values, light-only) */
+  --background: oklch(0.967 0.013 84);
+  --foreground: oklch(0.21 0.01 60);
+
+  --card: oklch(0.985 0.008 84);
+  --card-foreground: oklch(0.21 0.01 60);
+  --popover: oklch(0.985 0.008 84);
+  --popover-foreground: oklch(0.21 0.01 60);
+
+  --primary: oklch(0.21 0.01 60);
+  --primary-foreground: oklch(0.985 0.008 84);
+  --secondary: oklch(0.93 0.012 84);
+  --secondary-foreground: oklch(0.21 0.01 60);
+  --muted: oklch(0.93 0.012 84);
+  --muted-foreground: oklch(0.5 0.012 60);
+  --accent: oklch(0.93 0.012 84);
+  --accent-foreground: oklch(0.21 0.01 60);
+
+  --destructive: oklch(0.55 0.18 27);
+  --destructive-foreground: oklch(0.985 0.008 84);
+
+  --border: oklch(0.89 0.012 84);
+  --input: oklch(0.89 0.012 84);
+  --ring: oklch(0.6 0.01 60);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}

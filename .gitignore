@@ -1,0 +1,40 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# vercel
+.vercel/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# local env files
+.env
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# testing / coverage
+/coverage
+
+# build tooling
+.turbo/
+
+# system files
+.DS_Store
+Thumbs.db
+
+# local AI reference folders
+# These are intentionally kept out of GitHub and pasted locally when needed.
+docs/page-copy/
+docs/page-designs/
+docs/source-assets/
