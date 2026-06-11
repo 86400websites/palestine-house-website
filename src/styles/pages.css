@@ -1136,6 +1136,127 @@
 }
 
 /* ===========================================================================
+   Our Support (/our-support) — page-specific (OurSupport.html)
+   ======================================================================== */
+
+/* The six artefacts every topic ships with — document-like rows, not icons-as-decor */
+.sup-artefacts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  margin-top: var(--space-12);
+}
+.sup-artefact {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  background: var(--surface-card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+}
+.sup-artefact-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  background: var(--green-50);
+  color: var(--brand-primary);
+}
+.sup-artefact h3 {
+  font-size: var(--text-md);
+}
+.sup-artefact p {
+  margin-top: var(--space-1);
+  font: var(--weight-regular) var(--text-sm) / 1.5 var(--font-body);
+  color: var(--muted-foreground);
+}
+@container page (max-width: 980px) {
+  .sup-artefacts {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@container page (max-width: 620px) {
+  .sup-artefacts {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 267 templates line */
+.sup-templates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-top: var(--space-10);
+  padding-top: var(--space-8);
+  border-top: var(--border-width) solid var(--border);
+}
+.sup-templates-line {
+  font: var(--text-lead);
+  font-size: var(--text-md);
+  color: var(--ink-700);
+  max-width: 38rem;
+}
+.sup-templates-line strong {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  color: var(--foreground);
+}
+
+/* Statement headings on this page */
+.sup-statement-h {
+  margin-top: var(--space-3);
+}
+
+/* Three stages, named lightly — the detail lives on Bring a House */
+.sup-stages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-top: var(--space-10);
+}
+.sup-stage-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+.sup-stage {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-xl);
+  color: var(--foreground);
+}
+.sup-stage-sep {
+  color: var(--brand-primary);
+  font-size: var(--text-lg);
+}
+.sup-gates-link {
+  font: var(--text-ui);
+  font-weight: var(--weight-semibold);
+  color: var(--brand-primary);
+  min-height: var(--tap-target);
+  display: inline-flex;
+  align-items: center;
+}
+.sup-gates-link:hover {
+  color: var(--brand-primary-hover);
+}
+.sup-after {
+  margin-top: var(--space-10);
+  font: var(--text-lead);
+  color: var(--muted-foreground);
+  max-width: 40rem;
+}
+
+/* ===========================================================================
    Home (/)
    ======================================================================== */
 

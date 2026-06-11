@@ -68,7 +68,7 @@ Do not merge anything.
 | 2 | (0.2b) `/model` | ✅ 2026-06-12 | see git log |
 | 3 | (0.3a) `/experience` | ✅ 2026-06-12 (live strip = designed empty state until S7) | see git log |
 | 4 | (0.3b) `/bring-ph` | ✅ 2026-06-12 | see git log |
-| 5 | (0.3c) `/our-support` | | |
+| 5 | (0.3c) `/our-support` | ✅ 2026-06-12 — Sprint 0.3 complete | see git log |
 | 6 | (0.4a) `/live` | | |
 | 7 | (0.4b) `/focus-areas` + `/about` | | |
 | 8 | (0.4c) `/contact` | | |
