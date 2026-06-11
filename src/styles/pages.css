@@ -1677,6 +1677,159 @@
 }
 
 /* ===========================================================================
+   Apply (/apply) — page-specific (Apply.html)
+   ======================================================================== */
+.apply-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: var(--space-10) var(--space-16);
+  align-items: start;
+}
+
+/* Context column — who brings what, the rules, what happens next */
+.apply-context {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.apply-context-art {
+  max-width: 30rem;
+}
+.apply-context-block p {
+  margin-top: var(--space-3);
+  color: var(--muted-foreground);
+  line-height: var(--leading-normal);
+  max-width: 32rem;
+}
+.apply-context-block p strong {
+  color: var(--foreground);
+}
+.apply-steps {
+  list-style: none;
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.apply-steps li {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+.apply-step-n {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  color: var(--brand-primary);
+  flex: none;
+  line-height: 1.4;
+}
+.apply-steps h3 {
+  font-size: var(--text-md);
+}
+.apply-steps p {
+  margin-top: var(--space-1);
+  font: var(--weight-regular) var(--text-sm) / 1.55 var(--font-body);
+  color: var(--muted-foreground);
+  max-width: 28rem;
+}
+.apply-questions {
+  margin-top: var(--space-5);
+  font: var(--weight-regular) var(--text-sm) / 1.5 var(--font-body);
+  color: var(--muted-foreground);
+}
+.apply-questions a {
+  color: var(--brand-primary);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.apply-questions a:hover {
+  color: var(--brand-primary-hover);
+}
+
+/* The form card */
+.apply-form-card {
+  background: var(--surface-card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-10);
+}
+.apply-form-title {
+  font-size: var(--text-2xl);
+}
+.apply-form-divider {
+  margin-top: var(--space-4);
+}
+.apply-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+.apply-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+.apply-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.apply-field label {
+  font: var(--text-ui);
+  color: var(--foreground);
+}
+.apply-field-hint {
+  color: var(--subtle-foreground);
+  font-weight: var(--weight-regular);
+}
+.apply-micro {
+  font: var(--weight-regular) var(--text-xs) / 1.5 var(--font-body);
+  color: var(--muted-foreground);
+}
+
+/* Confirmation state */
+.apply-confirm {
+  padding-block: var(--space-6);
+  text-align: center;
+}
+.apply-confirm-mark {
+  display: inline-flex;
+  color: var(--brand-primary);
+}
+.apply-confirm h3 {
+  margin-top: var(--space-5);
+  font-size: var(--text-xl);
+  text-wrap: balance;
+}
+.apply-confirm p {
+  margin: var(--space-3) auto 0;
+  color: var(--muted-foreground);
+  max-width: 26rem;
+}
+
+@container page (max-width: 920px) {
+  .apply-grid {
+    grid-template-columns: 1fr;
+  }
+  .apply-form-card {
+    padding: var(--space-8);
+    order: -1;
+  }
+}
+@container page (max-width: 520px) {
+  .apply-form-row {
+    grid-template-columns: 1fr;
+  }
+  .apply-form-card {
+    padding: var(--space-6);
+  }
+}
+
+/* ===========================================================================
    Home (/)
    ======================================================================== */
 
