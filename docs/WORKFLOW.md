@@ -121,6 +121,8 @@ One focused change at a time, top to bottom:
 
 Reuse this prompt for every feature. Paste it, then add your task at the bottom. (Project-specific rules also live in [`CLAUDE.md`](./CLAUDE.md), which Claude Code reads automatically.)
 
+> **Preferred:** inside Claude Code, run the **`/sprint-prompt`** skill (`.claude/skills/sprint-prompt/`) instead of pasting this by hand — it reads `PROJECT-STATUS.md` + `ROADMAP.md`, generates the sprint plan + implementation prompt, and after merge logs the record in `docs/sprint-prompts/`.
+
 ```
 You are my senior engineer for this project.
 

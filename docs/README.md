@@ -42,7 +42,7 @@ docs/
 │   ├── assets/art/              # final artwork the mockups reference (PH-*.png)
 │   └── content/                 # flat copy snapshot the mockups read + PH_Sitemap_Architecture_TECH.txt (locked sitemap, routes, access model, data)
 ├── source-assets/               # masters: images/ (artwork, textures, empty-state marks) + resources/ (booklets, focus areas, 267 templates, videos → Supabase Storage in S5d/6e)
-├── sprint-prompts/              # one-off sprint prompt records
+├── sprint-prompts/              # one record per completed sprint (the session memory — see its README; generated via the /sprint-prompt skill)
 └── notes/                       # decisions.md (build decisions) + cleanup-before-launch.md
 ```
 
