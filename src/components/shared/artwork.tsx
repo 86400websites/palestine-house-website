@@ -7,6 +7,8 @@ type ArtworkProps = {
   alt: string;
   /** Fixed height in px (block thumbnails); otherwise size via className. */
   height?: number;
+  /** CSS aspect-ratio, e.g. "16 / 9" — the mockups size art by ratio. */
+  ratio?: string;
   /** Tighter mask for small block-print thumbnails. */
   block?: boolean;
   rounded?: boolean;
@@ -21,6 +23,7 @@ export function Artwork({
   assetId,
   alt,
   height,
+  ratio,
   block = false,
   rounded = false,
   sizes = "(max-width: 920px) 100vw, 33vw",
@@ -33,6 +36,7 @@ export function Artwork({
       aria-hidden={alt === "" ? true : undefined}
       style={{
         ...(height ? { height } : undefined),
+        ...(ratio ? { aspectRatio: ratio, width: "100%" } : undefined),
         ...(rounded ? { borderRadius: "var(--radius-md)" } : undefined),
       }}
     >
