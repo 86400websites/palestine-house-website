@@ -73,7 +73,7 @@ Do not merge anything.
 | 7 | (0.4b) `/focus-areas` + `/about` | ✅ 2026-06-12 | see git log |
 | 8 | (0.4c) `/contact` | ✅ 2026-06-12 — Sprint 0.4 complete; approved confirmation line ships with real send (S8) | see git log |
 | 9 | (0.5a) `/apply` | ✅ 2026-06-12 — honest no-op confirm; approved confirmation ships with real signup (S3c) | see git log |
-| 10 | (0.5b) auth shells | | |
+| 10 | (0.5b) auth shells | ✅ 2026-06-12 — approved errors client-side; confirmations ship with real auth (S3) | see git log |
 | 11 | (0.5c) `/privacy` + `/terms` | | |
 | 12 | (0.5d) SEO | | |
 | 13 | Stage 0 exit gate | | |
