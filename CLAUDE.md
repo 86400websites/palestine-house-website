@@ -36,9 +36,9 @@ If the on-disk reality disagrees with this list, **trust the code** (especially 
 
 ## Locked content & design inputs (never invent these)
 
-- **Copy is verbatim** from `/docs/final-copy/` (global → public → auth → workspace → admin → elements). Never rewrite, "improve," or paraphrase approved copy. Brand voice rules live in `/docs/final-copy/00-global/brand-voice.md` — they apply to any *new* string (error states, aria labels, empty states): warm, short, concrete; never charity tone, franchise hype, political slogans, or startup filler.
-- **Design is from the mockups** in `/docs/mockups/` plus the bound design system in `_ds/` (tokens: colors, fonts, typography, spacing). The header and footer are **identical on every page — never redesign them per page**. Heritage green `#1A6B4A` leads; warm paper `#F6F1E8`; muted red `#A8322D` sparingly; Spectral (display) + Inter (body).
-- **Sitemap/architecture** is locked in `/docs/PH_Sitemap_Architecture_TECH.docx` (summarized in `TECH-ARCHITECTURE.md` §0).
+- **Copy is verbatim** from `/docs/page-copy/` (global → public → auth → workspace → admin → elements). Never rewrite, "improve," or paraphrase approved copy. Brand voice rules live in `/docs/page-copy/00-global/brand-voice.md` — they apply to any *new* string (error states, aria labels, empty states): warm, short, concrete; never charity tone, franchise hype, political slogans, or startup filler.
+- **Design is from the mockups** in `/docs/page-designs/` (`public/`, `auth/`, `member-workspace/`, `admin/`, locked chrome in `shared/`) plus the bound design system in `/docs/page-designs/design-system/` (tokens: colors, fonts, typography, spacing — values recorded in `DESIGN.md`). The header and footer are **identical on every page — never redesign them per page**. Heritage green `#1A6B4A` leads; warm paper washes (`#F6F1E8` hero, `#FAF8F3` card) on a white page; muted red `#A8322D` sparingly; Spectral (display) + Inter (body).
+- **Sitemap/architecture** is locked in `/docs/page-designs/content/PH_Sitemap_Architecture_TECH.txt` (summarized in `TECH-ARCHITECTURE.md` §0).
 - If copy, mockup, and sitemap disagree, stop and record the conflict in `PROJECT-STATUS.md` → Open decisions; don't pick silently.
 
 ## How to behave in this project
@@ -53,7 +53,7 @@ If the on-disk reality disagrees with this list, **trust the code** (especially 
 
 1. Inspect the repository structure.
 2. Confirm framework, package manager, scripts, and entry points from the repo itself.
-3. Read the relevant files — and the relevant copy file(s) under `/docs/final-copy/` — before editing.
+3. Read the relevant files — and the relevant copy file(s) under `/docs/page-copy/` — before editing.
 
 ## Plan before changing
 
@@ -126,7 +126,7 @@ Commit messages (short, imperative): `Build Experience page live strip`, `Add ap
 
 ## Hosting note
 
-If a change affects build output, scripts, security headers, routing, or env handling, keep `vercel.json` and `next.config.ts` consistent — and call it out. `next.config.ts` ships security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy); the CSP allow-list is extended only for the chosen Live Programming embed origin.
+If a change affects build output, scripts, security headers, routing, or env handling, keep `vercel.json` (once added) and `next.config.ts` consistent — and call it out. `next.config.ts` must ship security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) — added in Sprint 0.1; the CSP allow-list is extended only for the YouTube embed origin (resolved decision D1, S7).
 
 ## Local development
 

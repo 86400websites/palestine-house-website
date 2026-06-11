@@ -5,10 +5,11 @@
    Palestine House — light-only WARM PAPER starter foundation (Sprint 0B).
 
    These are PLACEHOLDER tokens, not the final design system. The canonical
-   tokens (heritage green #1A6B4A, warm paper #F6F1E8, muted red #A8322D,
-   Spectral display + Inter body) are ported from the `_ds/` design system in
-   Sprint 0.1, together with the locked chrome. See the consuming stylesheets
-   in docs/page-designs/public-pages/{site-chrome,pages}.css.
+   tokens (heritage green #1A6B4A, warm paper washes #F6F1E8/#FAF8F3 on a
+   white page, muted red #A8322D, Spectral display + Inter body) are ported
+   from docs/page-designs/design-system/tokens/ in Sprint 0.1, together with
+   the locked chrome. Consuming stylesheets: docs/page-designs/shared/
+   {site-chrome,pages}.css. Recorded values: docs/DESIGN.md section 3.
 --------------------------------------------------------------------------- */
 
 @theme inline {

@@ -7,7 +7,7 @@
 - This repository is the **Palestine House** website on the locked Next.js 15 stack in `TECH-ARCHITECTURE.md`.
 - **Two shells, one gate:** a public marketing shell (single CTA: Apply) and a private, approval-gated partner reference platform. Apply = sign-up (one form → pending account → HQ approval via `profiles.is_approved` → unlock). Admin approval queue at `/admin/approvals` is server-checked via an `admins` table.
 - It is a **reference, not a course** — no quizzes, no certificate. The only per-user interactivity is saved checklist progress in `/build`.
-- Copy is **verbatim** from `/docs/final-copy/`; design follows `/docs/mockups/` + the `_ds/` design tokens; the header/footer are locked and identical on every page. Proof numbers are fixed: **10 · 30 · 200+ · 267 · 3**.
+- Copy is **verbatim** from `/docs/page-copy/`; design follows `/docs/page-designs/` + the design tokens in `/docs/page-designs/design-system/`; the header/footer are locked and identical on every page. Proof numbers are fixed: **10 · 30 · 200+ · 267 · 3**.
 - GitHub is the source of truth; `main` is protected and production-ready. Vercel hosts Production and Preview.
 - The project is built **one sprint at a time** per `ROADMAP.md`. Agents make **focused, reviewable** contributions inside the active sprint. Default mode is **review**, not large edits.
 - Only code that ships in a production build is in scope. Verify claims against the repo before acting.
@@ -37,7 +37,7 @@
 3. **Server/client boundary** — secrets or heavy logic leaking into client components.
 4. **App Router correctness** — routing, metadata, server-side auth + approval checks.
 5. **Build & deploy health** — typecheck/lint/build pass; Vercel/env implications handled.
-6. **Content fidelity** — copy matches `/docs/final-copy/`; proof numbers correct; no invented strings on approved pages.
+6. **Content fidelity** — copy matches `/docs/page-copy/`; proof numbers correct; no invented strings on approved pages.
 7. **Maintainability** — only when it rises to a real problem.
 
 ## Security checks
@@ -105,7 +105,7 @@
 ## If an agent edits code (working agreements)
 
 1. Read `PROJECT-STATUS.md` and the active sprint in `ROADMAP.md`; inspect the repo.
-2. Read relevant files (and the relevant `/docs/final-copy/` page if copy is involved); explain the planned change briefly; keep scope narrow.
+2. Read relevant files (and the relevant `/docs/page-copy/` page if copy is involved); explain the planned change briefly; keep scope narrow.
 3. Make the smallest safe change; follow existing style.
 4. Run `pnpm run typecheck`, `pnpm run lint`, `pnpm run build`. Fix failures you caused; flag pre-existing ones.
 5. `git status`; confirm `.env.local` is not staged and no secrets are in the diff.

@@ -9,8 +9,8 @@ This project is built in **stages and sprints — never all at once**:
 1. **One sprint at a time.** Pick the next sprint from `ROADMAP.md`. Do not start a sprint while a previous one is unmerged.
 2. **One sprint = one (or a few) focused branches/PRs.** Big sprints are split into the phases listed in `ROADMAP.md`; each phase is its own branch → PR → Preview → merge loop.
 3. **Update `PROJECT-STATUS.md` in the same PR** that completes a sprint or phase (status, date, notes, any new decisions). The status file is how any fresh AI session (Claude Code, Codex, etc.) knows where to continue.
-4. **Sprint exit gate:** typecheck + lint + build green, CI green, Vercel Preview tested desktop + mobile, the sprint's checklist in `ROADMAP.md` ticked, relevant `SECURITY-CHECKLIST.md` sections passed, copy verbatim from `/docs/final-copy`, and proof numbers correct (**10 · 30 · 200+ · 267 · 3**, never a certificate).
-5. **Copy and design are locked inputs.** Page copy comes verbatim from `/docs/final-copy/`; layout/design comes from `/docs/mockups/` (+ the `_ds/` design-system tokens). Don't invent copy or redesign the locked header/footer — flag gaps in `PROJECT-STATUS.md` → Open decisions instead.
+4. **Sprint exit gate:** typecheck + lint + build green, CI green, Vercel Preview tested desktop + mobile, the sprint's checklist in `ROADMAP.md` ticked, relevant `SECURITY-CHECKLIST.md` sections passed, copy verbatim from `/docs/page-copy/`, and proof numbers correct (**10 · 30 · 200+ · 267 · 3**, never a certificate).
+5. **Copy and design are locked inputs.** Page copy comes verbatim from `/docs/page-copy/`; layout/design comes from `/docs/page-designs/` (+ the `design-system/` tokens). Don't invent copy or redesign the locked header/footer — flag gaps in `PROJECT-STATUS.md` → Open decisions instead.
 6. **Database changes follow §14 strictly** — versioned up + `.down.sql` + RLS in the PR, tested on the non-production Supabase project first, expand → migrate → contract.
 
 ---
@@ -120,6 +120,8 @@ One focused change at a time, top to bottom:
 ## 7. Claude Code implementation workflow
 
 Reuse this prompt for every feature. Paste it, then add your task at the bottom. (Project-specific rules also live in [`CLAUDE.md`](./CLAUDE.md), which Claude Code reads automatically.)
+
+> **Preferred:** inside Claude Code, run the **`/sprint-prompt`** skill (`.claude/skills/sprint-prompt/`) instead of pasting this by hand — it reads `PROJECT-STATUS.md` + `ROADMAP.md`, generates the sprint plan + implementation prompt, and after merge logs the record in `docs/sprint-prompts/`.
 
 ```
 You are my senior engineer for this project.
