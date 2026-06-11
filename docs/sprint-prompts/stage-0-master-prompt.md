@@ -64,8 +64,8 @@ Do not merge anything.
 | # | Step | Status | Commit |
 |---|---|---|---|
 | 0 | (0.1) Foundation: tokens, fonts, motion, headers, locked chrome, 404 | ✅ 2026-06-12 | `706bb35` |
-| 1 | (0.2a) `/` Home | | |
-| 2 | (0.2b) `/model` | | |
+| 1 | (0.2a) `/` Home | ✅ 2026-06-12 (+ owner change: mobile hero art first) | `b999eeb` |
+| 2 | (0.2b) `/model` | ✅ 2026-06-12 | see git log |
 | 3 | (0.3a) `/experience` | | |
 | 4 | (0.3b) `/bring-ph` | | |
 | 5 | (0.3c) `/our-support` | | |
