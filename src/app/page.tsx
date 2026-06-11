@@ -4,7 +4,7 @@ import { Artwork } from "@/components/shared/artwork";
 import { TatreezDivider } from "@/components/shared/tatreez-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { HomeLeadForm } from "@/components/sections/home-lead-form";
+import { LeadForm } from "@/components/sections/lead-form";
 
 /* Home (/) — copy verbatim from docs/page-copy/01-public-pages/home.md;
    layout from docs/page-designs/public/Home.app.jsx (approved mockup). */
@@ -244,7 +244,7 @@ export default function HomePage() {
         <div className="ph-container">
           <Reveal className="home-leadmagnet-inner">
             <h2>Get The House Promise — free.</h2>
-            <HomeLeadForm />
+            <LeadForm single idPrefix="home-lead" />
           </Reveal>
         </div>
       </section>
