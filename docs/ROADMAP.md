@@ -1,13 +1,13 @@
 # Palestine House — Roadmap (Features & Sprints)
 
-> **What we build, in what order.** This is the master plan: the full feature list, then the stage/sprint sequence with scope, dependencies, and exit gates. Run **one sprint at a time**; big sprints are split into lettered phases, each its own branch → PR → Preview → merge loop (`WORKFLOW.md`). Where we currently stand lives in [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) — update it in the same PR that completes a sprint or phase. Architecture detail: [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md) §0 and `/docs/PH_Sitemap_Architecture_TECH.docx`.
+> **What we build, in what order.** This is the master plan: the full feature list, then the stage/sprint sequence with scope, dependencies, and exit gates. Run **one sprint at a time**; big sprints are split into lettered phases, each its own branch → PR → Preview → merge loop (`WORKFLOW.md`). Where we currently stand lives in [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) — update it in the same PR that completes a sprint or phase. Architecture detail: [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md) §0 and `/docs/page-designs/content/PH_Sitemap_Architecture_TECH.txt`.
 
 ---
 
 ## A. Full feature list (MVP scope)
 
 ### Public shell
-- [ ] Locked site chrome — header (5 nav labels + tooltip one-liners + Sign in + green **Apply** CTA), footer (secondary links, lead-magnet block, legal, tagline), mobile Sheet menu
+- [ ] Locked site chrome — header (logo → Home + four nav labels with tooltip one-liners + Sign in + green **Apply** CTA), footer (link columns, lead-magnet block, legal, tagline), mobile Sheet menu
 - [ ] `/` Home (full "Bring Palestine House to Your City" section)
 - [ ] `/model` The Model
 - [ ] `/experience` Experience — the decision page (hero artwork, day/night section, five programming threads, **live strip** from `programming_sessions`, closing CTA, lead magnet)
@@ -15,7 +15,7 @@
 - [ ] `/our-support` Our Support
 - [ ] `/live` Live Programming — public listing (Upcoming / Live now / Past; in-person, livestream, recorded) + watch view  **[public hero feature]**
 - [ ] `/apply` — single merged form: apply **=** sign-up → pending account + application record (zod + rate limit + Turnstile)
-- [ ] `/about`, `/contact` (contact form via Resend), `/focus-areas` (footer route), `/privacy`, `/terms`
+- [ ] `/about`, `/contact` (contact form via Resend), `/focus-areas` (secondary route, linked from page bodies), `/privacy`, `/terms`
 - [ ] Lead magnets: the two public booklets (*The House Promise*, *Operating Model & Governance*) — capture via Mailchimp tags `lead-booklet-a` / `lead-booklet-b`
 - [ ] SEO: per-route metadata, `sitemap.ts`, `robots.ts`, OG image, JSON-LD (Organization, WebSite)
 
@@ -56,8 +56,8 @@ Goal: a complete, polished, working public website running locally. All forms re
 
 | Sprint | Scope | Notes |
 |---|---|---|
-| **0.1 Foundation** | Scaffold (Next.js 15, TS strict, pnpm, Tailwind v4, shadcn/ui, Framer Motion); copy the 10 core docs + `/docs` content layer in; port `_ds/` tokens + `pages.css` primitives into `globals.css`; `next/font` Spectral + Inter; motion primitives; security headers in `next.config.ts`; locked chrome (header + Tooltip nav + footer + mobile Sheet); 404/error pages | ⚠ requires the `_ds/` design-system folder |
-| **0.2 Home + Model** | `/` and `/model` from mockups + `final-copy`, with placeholder artwork at correct aspect ratios | |
+| **0.1 Foundation** | Scaffold (Next.js 15, TS strict, pnpm, Tailwind v4, shadcn/ui, Framer Motion); copy the 10 core docs + `/docs` content layer in; port `/docs/page-designs/design-system/tokens/` + `shared/pages.css` primitives into `globals.css`; `next/font` Spectral + Inter; motion primitives; security headers in `next.config.ts`; locked chrome (header + Tooltip nav + footer + mobile Sheet); 404/error pages | Scaffold + repo + CI + Vercel Preview pre-completed (pre-sprints 0a–0d, PRs #1–#2); design system is in-repo |
+| **0.2 Home + Model** | `/` and `/model` from `/docs/page-designs/` + `/docs/page-copy/`, with final artwork from `/docs/page-designs/assets/art/` | |
 | **0.3 New marketing pages** | `/experience` (live strip in empty/fallback state), `/bring-ph` (triptych + gates timeline), `/our-support` | Densest pages — pace per `DESIGN.md` §12 |
 | **0.4 Live + supporting pages** | `/live` public listing + watch view (static empty states), `/focus-areas`, `/about`, `/contact` (form UI, no-op) | |
 | **0.5 Apply + auth UI + legal + SEO** | `/apply` form UI (no-op submit with honest "not yet live" handling), `/login` `/forgot-password` `/update-password` UI shells, `/privacy` `/terms`, metadata + sitemap + robots + OG | |
@@ -68,8 +68,8 @@ Goal: a complete, polished, working public website running locally. All forms re
 
 | Step | Scope |
 |---|---|
-| **1.1 GitHub** | Push repo; branch protection on `main`; CI (install, typecheck, lint, build, gitleaks) as required check; secret scanning + Dependabot on |
-| **1.2 Vercel** | Import (`nextjs` preset); env vars per environment (`SUPABASE-VERCEL-SETUP.md`); Production deploy of the public site (Vercel domain; custom domain when decided) |
+| **1.1 GitHub** | Push repo; branch protection on `main`; CI (install, typecheck, lint, build, gitleaks) as required check; secret scanning + Dependabot on — *repo + base CI already live since pre-sprint 0c; remaining: gitleaks step, branch protection, secret scanning, Dependabot* |
+| **1.2 Vercel** | Import (`nextjs` preset); env vars per environment (`SUPABASE-VERCEL-SETUP.md`); Production deploy of the public site (Vercel domain per resolved decision D3; custom domain later) — *project already connected with Preview verified (PR #2); remaining: env vars + first Production deploy* |
 | **1.3 Supabase projects** | Create **production + non-production** projects (no schema yet); Auth → URL Configuration (Site URL, local + Preview wildcard + Production redirects); record refs in `SUPABASE-VERCEL-SETUP.md` + `PROJECT-STATUS.md` |
 
 **Stage 1 exit gate:** live public site verified desktop + mobile · CI required + branch protection active · Preview deployments working · env matrix recorded.
@@ -84,9 +84,9 @@ Goal: a complete, polished, working public website running locally. All forms re
 | **S2 — Database phase 1: identity & approval** | 2a `profiles` (+`is_approved`), `applications`, `admins` + RLS + RPCs · 2b apply to non-prod, test anon/authed, then prod | Versioned up + `.down.sql` + policies in PR; default-deny verified | Stage 1 |
 | **S3 — Auth complete** | 3a Supabase clients + `middleware.ts` + login/logout · 3b forgot/update password (same-origin redirects; Preview emails → Preview) · 3c **Apply live** = sign-up + pending account + application record (zod; first-name handling per resolved flag 5d) | All auth flows pass on local + Preview; `SUPABASE-VERCEL-SETUP.md` checklists green | S2 |
 | **S4 — Approval gate + admin** | 4a gated shell + sidebar + `/dashboard` pending state · 4b `/admin/approvals` queue (server-checked `admins`) · 4c server-side `is_approved` enforcement on every gated route/RPC + approval notification email (Resend) | 🔴 `SECURITY-CHECKLIST.md` §15 fully verified; pending user sees only pending state; approval unlocks without re-login | S3 |
-| **S5 — Database phase 2: content schema** | 5a `elements` + content ingestion (30 topics from `/docs/final-copy/06-elements`) · 5b `checklist_items` + `checklist_progress` (200+ items, 3 gates) · 5c `programming_sessions` (anon-safe public read) · 5d `resources` metadata + private Storage bucket + 267 templates upload · 5e `academy_modules` | Each phase: non-prod first, RLS verified anon vs pending vs approved | S4 |
-| **S6 — Private platform pages** | 6a `/dashboard` full (current-stage snapshot rule) · 6b `/plan` + `/operate` · 6c `/build` checklist tracker (saved progress, 3 gates) · 6d element page component + 30 instances · 6e `/resources` hub + signed-URL downloads · 6f `/academy` · 6g `/tools` placeholder + `/account` + `/support` | New private-page mockups dropped into `/docs/mockups/` per phase before building it | S5 |
-| **S7 — Live Programming** | 7a `/live` on real data + watch view (embed; CSP for chosen origin) · 7b Experience live-strip wired to the same feed/component · 7c partner publishing tools (owner-scoped writes) | Requires the video-host decision (Open decisions); empty states still graceful | S5 (S6a for partner UI) |
+| **S5 — Database phase 2: content schema** | 5a `elements` + content ingestion (30 topics from `/docs/page-copy/06-elements`) · 5b `checklist_items` + `checklist_progress` (200+ items, 3 gates) · 5c `programming_sessions` (anon-safe public read) · 5d `resources` metadata + private Storage bucket + 267 templates upload · 5e `academy_modules` | Each phase: non-prod first, RLS verified anon vs pending vs approved | S4 |
+| **S6 — Private platform pages** | 6a `/dashboard` full (current-stage snapshot rule) · 6b `/plan` + `/operate` · 6c `/build` checklist tracker (saved progress, 3 gates) · 6d element page component + 30 instances · 6e `/resources` hub + signed-URL downloads · 6f `/academy` · 6g `/tools` placeholder + `/account` + `/support` | Private-page mockups already in `/docs/page-designs/member-workspace/` (admin in `/docs/page-designs/admin/`) | S5 |
+| **S7 — Live Programming** | 7a `/live` on real data + watch view (YouTube embed; CSP extended for the YouTube origin only — resolved decision D1) · 7b Experience live-strip wired to the same feed/component · 7c partner publishing tools (owner-scoped writes) | 7c needs the partner-publishing UI design + copy (flagged gap, `PROJECT-STATUS.md` §3); D2 (RSVP) is the only open decision; empty states still graceful | S5 (S6a for partner UI) |
 | **S8 — Email automations & lead magnets** | 8a Mailchimp: booklet capture (`lead-booklet-a/b`) + newsletter + apply tagging · 8b Resend: contact form + transactional; verify sending domain (SPF/DKIM/DMARC) | Real deliveries verified on Preview + Production; keys server-only | S3 |
 | **S9 — Hardening** | 9a Upstash rate limiting on all public writes · 9b Turnstile on public forms · 9c fail-closed verification in Production; CSP/headers verified live; threat-model pass on any secret-key path | Full `SECURITY-CHECKLIST.md` §1–§15 pass | S7, S8 |
 | **S10 — Final review & launch** | 10a full-site QA: cross-browser/device, 0 known bugs, consistency sweep · 10b content verification (copy verbatim, numbers, booklet filename mapping) · 10c SEO/structured data + performance (CWV) · 10d custom domain go-live + post-deploy checks | Every checklist in every doc green; `PROJECT-STATUS.md` marked **Launched** | S9 |

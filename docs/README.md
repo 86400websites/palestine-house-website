@@ -34,15 +34,19 @@ Plus the **`/docs` content layer** (locked inputs, never invented by agents):
 
 ```
 docs/
-├── final-copy/                  # approved page copy, verbatim (global / public / auth / workspace / admin / elements)
-├── mockups/                     # approved page designs (.html previews + .app.jsx) + site-chrome + pages.css
-│   └── _ds/                     # the bound design system — canonical tokens (colors, fonts, typography, spacing)  ⚠ must be included
-├── PH_Sitemap_Architecture_TECH.docx   # locked sitemap, routes, access model, data
-├── Website_Map_and_Features_Palestine_House.docx  # client-facing sitemap & features
-└── resources-content/           # booklets, focus areas, topics, 267 templates (uploaded to Supabase Storage in Sprint 6e)
+├── page-copy/                   # approved page copy, verbatim (00-global / 01-public / 02-auth / 03-workspace / 04-admin / 06-elements; 05-review = reconciliation record)
+├── page-designs/                # approved high-fidelity mockups (.html previews + .app.jsx) for all 30 pages
+│   ├── public/  auth/  member-workspace/  admin/   # the pages (open index.html / WorkspaceIndex.html to browse)
+│   ├── shared/                  # locked chrome + page primitives (site-chrome, workspace-chrome, admin-chrome, pages.css)
+│   ├── design-system/           # the bound design system — tokens/ (colors, fonts, typography, spacing), base.css, styles.css, fonts/
+│   ├── assets/art/              # final artwork the mockups reference (PH-*.png)
+│   └── content/                 # flat copy snapshot the mockups read + PH_Sitemap_Architecture_TECH.txt (locked sitemap, routes, access model, data)
+├── source-assets/               # masters: images/ (artwork, textures, empty-state marks) + resources/ (booklets, focus areas, 267 templates, videos → Supabase Storage in S5d/6e)
+├── sprint-prompts/              # one-off sprint prompt records
+└── notes/                       # decisions.md (build decisions) + cleanup-before-launch.md
 ```
 
-> ⚠ The mockup pages load their tokens from `_ds/palestine-house-design-system-v2-*/`. That folder must ship into `/docs/mockups/` — without it the mockups don't render and the token values can't be ported.
+> `/docs/page-copy/` is the canonical copy source; the flat `/docs/page-designs/content/` folder is the snapshot the mockup HTML reads. If they ever disagree, `page-copy/` wins — fix the snapshot.
 
 ## Locked stack (override consciously — `TECH-ARCHITECTURE.md` is canonical)
 
@@ -59,7 +63,7 @@ In-scope integrations (each no-ops when env vars are absent; fail closed in Prod
 5. **Vercel Preview is tested before merge.** Local green is necessary but not sufficient.
 6. **Secrets never touch the repo.** No `.env.local`, no keys in code, no secret behind `NEXT_PUBLIC_*`. Supabase secret keys stay server-only.
 7. **The approval gate is sacred.** Reference content is never public; every gated path checks `is_approved` server-side (blocking invariants: `SECURITY-CHECKLIST.md` §15).
-8. **Copy and design are locked inputs.** Verbatim from `/docs/final-copy/`; designs from `/docs/mockups/` + `_ds/`. Gaps become Open decisions in `PROJECT-STATUS.md`, never improvisation.
+8. **Copy and design are locked inputs.** Verbatim from `/docs/page-copy/`; designs from `/docs/page-designs/` + its `design-system/` tokens. Gaps become Open decisions in `PROJECT-STATUS.md`, never improvisation.
 
 ## Correct order to use the docs
 
@@ -72,13 +76,13 @@ In-scope integrations (each no-ops when env vars are absent; fail closed in Prod
 
 ## New repo setup flow (Stage 0 → Stage 1, short version)
 
-The full version with exit gates is `ROADMAP.md`.
+The full version with exit gates is `ROADMAP.md`. *(Steps 1–4 and the CI/Vercel parts of 7–9 are already done — pre-sprints 0a–0d; see `PROJECT-STATUS.md` §2 for exactly what remains.)*
 
 1. Create the private GitHub repo `palestine-house`.
 2. Scaffold locally on the locked stack (Next.js 15 App Router, TS strict, Tailwind v4, src dir) + shadcn/ui + Framer Motion. Supabase is added in Sprint 2/3, not at scaffold time.
 3. Commit `pnpm-lock.yaml`. Never `package-lock.json` / `yarn.lock`.
 4. Copy the **ten core files** + `/docs` content layer into the repo.
-5. Port the `_ds/` tokens into `src/styles/globals.css`; build the locked chrome; then the public pages, sprint by sprint (Stage 0).
+5. Port the `/docs/page-designs/design-system/tokens/` into `src/styles/globals.css`; build the locked chrome; then the public pages, sprint by sprint (Stage 0).
 6. Confirm `.env.local` is gitignored; create it with `NEXT_PUBLIC_SITE_URL=http://localhost:3000`.
 7. Push to `main`, import into **Vercel** (`nextjs` preset), add env vars per environment (`SUPABASE-VERCEL-SETUP.md`).
 8. Add CI (install + typecheck + lint + build + gitleaks) as a **required** check; turn on branch protection for `main`.
@@ -103,4 +107,4 @@ The full version with exit gates is `ROADMAP.md`.
 | `[PRODUCTION_DOMAIN]` | **TBD** before Stage 1 (Vercel default domain until then) |
 | `[VERCEL_TEAM_SLUG]` / `[SUPABASE_PROJECT_REF]`s | **TBD** — recorded in `SUPABASE-VERCEL-SETUP.md` + `PROJECT-STATUS.md` when created |
 
-Open decisions (video host, contact/legal email, domain) live in `PROJECT-STATUS.md` — resolve them there, once, and they propagate.
+Open decisions live in `PROJECT-STATUS.md` §5 — resolve them there, once, and they propagate. (Video host → YouTube, domain → Vercel for launch, and contact/legal email → added later were resolved 2026-06-11; only RSVP-at-MVP remains open.)

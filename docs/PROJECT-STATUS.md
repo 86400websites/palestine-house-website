@@ -8,11 +8,11 @@
 
 | | |
 |---|---|
-| **Current stage** | Stage 0 — Foundational build (not started) |
-| **Active sprint** | 0.1 Foundation |
-| **Next action** | Scaffold the repo per `README.md` setup flow; port `_ds/` tokens; build the locked chrome |
-| **Production URL** | — (none yet) |
-| **Last updated** | 2026-06-11 — docs package created; no code yet |
+| **Current stage** | Stage 0 — Foundational build (in progress) |
+| **Active sprint** | 0.1 Foundation — scaffold merged; tokens/fonts/chrome/headers/404 remaining |
+| **Next action** | Complete 0.1: port `/docs/page-designs/design-system/tokens/` into `src/styles/globals.css`, `next/font` Spectral + Inter, motion primitives, security headers in `next.config.ts`, locked chrome (header + Tooltip nav + footer + mobile Sheet), 404/error pages |
+| **Production URL** | — (Vercel project connected; Preview deployments verified; no Production deploy yet) |
+| **Last updated** | 2026-06-11 — docs aligned with the repo (paths, mockup inventory, decisions, code state) |
 
 ### How to resume in a fresh AI session
 1. Read this file, then the active sprint's scope + exit gate in `ROADMAP.md`.
@@ -27,14 +27,15 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 
 | Stage / Sprint | Status | Merged PR(s) | Date | Notes |
 |---|---|---|---|---|
-| 0.1 Foundation (scaffold, tokens, chrome) | ⬜ | | | Needs `_ds/` folder in `/docs/mockups/` |
+| 0.0 Setup pre-sprints (0a–0d: repo, scaffold, CI, Vercel preview) | ✅ | #1, #2 | 2026-06 | Scaffold (`80c7fcc`), CI workflow, Vercel Preview verified — pre-completes parts of 1.1/1.2 |
+| 0.1 Foundation (tokens, fonts, chrome, headers, 404) | 🔵 | | | Scaffold done; design system is in-repo at `/docs/page-designs/design-system/` |
 | 0.2 Home + The Model | ⬜ | | | |
 | 0.3 Experience · Bring a House · Our Support | ⬜ | | | |
 | 0.4 Live + Focus Areas + About + Contact | ⬜ | | | |
 | 0.5 Apply UI + auth UI + legal + SEO | ⬜ | | | |
 | **Stage 0 exit gate** | ⬜ | | | |
-| 1.1 GitHub (protection + CI) | ⬜ | | | |
-| 1.2 Vercel (envs + production deploy) | ⬜ | | | |
+| 1.1 GitHub (protection + CI) | ⬜ | | | CI live since 0c; still to do: gitleaks step in `ci.yml`, branch protection on `main`, secret scanning + Dependabot |
+| 1.2 Vercel (envs + production deploy) | ⬜ | | | Vercel connected, Preview verified (PR #2); still to do: env vars per environment + first Production deploy |
 | 1.3 Supabase projects (prod + non-prod, auth URLs) | ⬜ | | | |
 | **Stage 1 exit gate — barebones site LIVE** | ⬜ | | | |
 | S1 Design consistency pass (1a–1d) | ⬜ | | | |
@@ -42,36 +43,45 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | S3 Auth complete (3a–3c, Apply live) | ⬜ | | | |
 | S4 Approval gate + /admin/approvals (4a–4c) | ⬜ | | | 🔴 §15 invariants verified here |
 | S5 DB phase 2 — content schema (5a–5e) | ⬜ | | | |
-| S6 Private platform pages (6a–6g) | ⬜ | | | Private-page mockups required per phase |
-| S7 Live Programming (7a–7c) | ⬜ | | | Blocked on video-host decision (§5) |
-| S8 Email automations & lead magnets (8a–8b) | ⬜ | | | |
+| S6 Private platform pages (6a–6g) | ⬜ | | | Mockups already in `/docs/page-designs/member-workspace/` + `admin/` |
+| S7 Live Programming (7a–7c) | ⬜ | | | Video host resolved: **YouTube** (§4); partner-publishing UI not yet designed (§3 gaps); only D2 (RSVP) open |
+| S8 Email automations & lead magnets (8a–8b) | ⬜ | | | Mailchimp audience + Resend domain values added by owner at build time (§5) |
 | S9 Hardening (9a–9c) | ⬜ | | | |
 | S10 Final review & launch (10a–10d) | ⬜ | | | |
 
 ## 3. What exists / what's pending
 
 **Done so far**
-- Locked sitemap & architecture (`/docs/PH_Sitemap_Architecture_TECH.docx`) and client-facing map & features doc.
-- Complete development-ready copy set (`/docs/final-copy/` — global, 12 public pages, 3 auth pages, 12 workspace pages, 3 admin pages, 30 element pages). All review flags resolved (see copy `05-review/`).
-- Design system v2 (`_ds/` tokens) + approved mockups for **public + auth pages** (`/docs/mockups/`): Home, The Model, Experience, Bring a House, Our Support, Live, Apply, Focus Areas, About, Contact, Privacy, Terms, Login, Forgot/Update Password + shared chrome.
-- Content package (`/docs/resources-content/`): 2 public booklets, 10 focus areas, 30 topics, 267 templates.
-- This docs/ops package (10 core MD files).
+- Locked sitemap & architecture: `/docs/page-designs/content/PH_Sitemap_Architecture_TECH.txt` (summarized in `TECH-ARCHITECTURE.md` §0).
+- Complete development-ready copy set (`/docs/page-copy/` — `00-global`, 12 public pages, 3 auth pages, 12 workspace pages, 3 admin pages, 30 element pages in `06-elements/`). All review flags resolved; the 30-topic reconciliation record is `/docs/page-copy/05-review/structure-reconciliation.md`. (The flat copy under `/docs/page-designs/content/` is the snapshot the mockups read — `/docs/page-copy/` is canonical.)
+- **Approved high-fidelity mockups for all 30 pages** (`/docs/page-designs/`): `public/` (12) · `auth/` (3) · `member-workspace/` (12, incl. Search) · `admin/` (3), plus the locked shared chrome (`shared/site-chrome.*`, `workspace-chrome.*`, `admin-chrome.*`, `pages.css`) and browsable hubs (`index.html`, `WorkspaceIndex.html`). See `/docs/page-designs/README.md` for the route map and design rules.
+- **Bound design system v2 in-repo**: `/docs/page-designs/design-system/` — `tokens/` (colors, fonts, typography, spacing), `base.css`, `styles.css`, self-hosted Spectral + Inter, component bundle.
+- **Final artwork in-repo**: `/docs/page-designs/assets/art/` (mockup-referenced `PH-*.png`) + masters incl. textures and empty-state marks in `/docs/source-assets/images/`.
+- Content package (`/docs/source-assets/resources/`): booklets, 10 focus areas, 30 topics, 267 templates, videos (uploaded to Supabase Storage in Sprint 5d/6e).
+- Repo scaffolded on the locked stack (Next.js 15, TS strict, pnpm, Tailwind v4, shadcn/ui, Framer Motion) with CI and a verified Vercel Preview pipeline (PRs #1–#2).
+- This docs/ops package (10 core MD files), aligned with the repo on 2026-06-11.
+
+**Known design gaps (flagged in `/docs/page-designs/README.md` — never invent these)**
+- `/live` **partner publishing tools** UI is not designed and has no approved copy — design + copy needed before S7c.
+- `/academy/[slug]` dedicated module view not designed — each topic's Video tab covers MVP behavior; design only if embeds need their own page.
+- 4 topics missing the "Watch Out For" file (**H2, H3, I3, J2**) — keep the approved empty-state line until source content is added.
+- Gate 2's label ("Build-out") is unapproved; Gate 1 = "Day 30: Foundation" and Gate 3 ≈ "ready to host" are approved.
 
 **Pending inputs (owner)**
-- ⚠ Confirm the `_ds/` design-system folder is included with the mockups in the repo.
-- Private platform page mockups (dashboard, plan, build, operate, elements, resources, academy, tools, account, support) — needed per S6 phase; drop into `/docs/mockups/` as they're ready.
-- Final artwork assets (per `ART_ASSET_PLAN.md` IDs) — placeholders at correct ratios until then.
-- Decisions in §5.
+- Mailchimp audience + Resend sending domain + contact/legal email — owner adds as env vars before S8 (see §4 D4).
+- Decision D2 in §5.
 
 ## 4. Locked decisions (do not reopen)
 
-- Public nav: Home · The Model · Experience · Bring a House · Our Support + green **Apply** button; hover one-liners via the Tooltip component.
+- Public nav: logo → Home + four labels (The Model · Experience · Bring a House · Our Support) + **Sign in** + green **Apply** button; hover one-liners via the Tooltip component. Live Programming is not a top-nav label — it surfaces via Home, the footer "Explore" column, and the Experience live strip.
+- Footer (locked, identical everywhere): Explore (The Model · Experience · Live Programming) · Bring a House (Why bring one · Our support) · Account (Sign in) · Legal (Privacy · Terms · Contact) + Apply block + booklet lead-magnet block + tagline. `/focus-areas` and `/about` are secondary routes linked from page bodies, not chrome.
 - Single CTA: "Apply to bring a House" · *Every application is reviewed by HQ.* Questions → Contact. Never "create a free account."
-- **Apply = sign-up**, approval-gated: one form → pending account + application → HQ approval (`is_approved`) → unlock. No separate signup.
+- **Apply = sign-up**, approval-gated: one form → pending account + application → HQ approval (`is_approved`) → unlock. No separate signup. Apply form uses a **single "Your name" field** (per mockup; resolves copy flag 5d — derive first name server-side if needed).
 - **Reference, not a course:** no quizzes, **no certificate**; Academy = optional gated video library; only per-user state = `/build` checklist progress.
-- Stages: Plan & Prepare · Design & Build · Operate & Program. "Managing & Operating" (sidebar) and "Operate & Program" (stage) both resolve to `/operate` — intentional, not a duplicate.
+- Stages: Plan & Prepare · Design & Build · Operate & Program. "Managing & Operating" (sidebar) and "Operate & Program" (stage) both resolve to `/operate` — intentional, not a duplicate. **Resources sits in the workspace sidebar as a primary destination** (accepted deviation, flagged in the design handoff).
 - Proof numbers: **10 focus areas · 30 topics · 200+ checklist items · 267 templates · 3 gates** (267 is the true count; "543"/"250+" retired).
-- Live Programming: public listing + partner livestream tools, one `programming_sessions` feed; highlights strip on Experience reuses the same component.
+- Live Programming: public listing + partner livestream tools, one `programming_sessions` feed; highlights strip on Experience reuses the same component. **Video host = YouTube** (resolved 2026-06-11, `notes/decisions.md`); CSP extended for the YouTube embed origin only (S7). Partner publishing behind approval, as specified in the architecture doc.
+- Launch on the **Vercel domain**; custom domain connected later (resolved 2026-06-11). Contact/legal email: none yet — owner adds later as env vars before S8/legal go-live (resolved 2026-06-11).
 - `/tools` ships as a coming-soon placeholder. No donations/payments/store, no political/advocacy features, no hype mechanics. English first.
 - Booklet lead magnets: *The House Promise* (Booklet A) + *Operating Model & Governance* (Booklet B), public, tags `lead-booklet-a` / `lead-booklet-b`.
 - Stack: locked per `TECH-ARCHITECTURE.md`; build process per `WORKFLOW.md`; one sprint at a time.
@@ -81,28 +91,25 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 
 | # | Decision | Needed by | Options / lean | Status |
 |---|---|---|---|---|
-| D1 | Live Programming video host | S7 (CSP + embed) | YouTube vs Vimeo — architecture doc leans embed-only, partner publishing behind approval | OPEN |
 | D2 | In-person events: RSVP at MVP? | S7 | Recommendation: listing-only at MVP | OPEN |
-| D3 | Production domain | Stage 1.2 (latest S10) | — | OPEN |
-| D4 | Contact / legal email address | S8 + legal pages | — | OPEN |
-| D5 | Apply form name field | S3c | Split first/last vs derive first name server-side (copy flag 5d) — pick at build | OPEN |
-| D6 | Partner-publishing UI at MVP vs HQ-managed sessions | S7c | Architecture doc recommends partner publishing behind approval | OPEN |
+
+> D1 (video host → YouTube), D3 (domain → Vercel for launch), D4 (contact/legal email → added later as env vars), D5 (Apply name field → single field per mockup), D6 (partner publishing → behind approval as specified) were resolved on 2026-06-11 in `notes/decisions.md` and moved to §4.
 
 ## 6. Environment & infrastructure record (names/refs only — never keys)
 
 | Item | Value |
 |---|---|
-| GitHub repo | TBD (Stage 1.1) |
-| Vercel project / team slug | TBD (Stage 1.2) |
+| GitHub repo | `86400websites/palestine-house-website` |
+| Vercel project / team slug | Connected (Preview verified); record slug here at Stage 1.2 |
 | Supabase production ref | TBD (Stage 1.3) |
 | Supabase non-production ref | TBD (Stage 1.3) |
-| Mailchimp audience | TBD (S8) |
-| Resend sending domain | TBD (S8) — verify SPF/DKIM/DMARC |
+| Mailchimp audience | TBD (S8 — owner adds env vars) |
+| Resend sending domain | TBD (S8 — owner adds env vars; verify SPF/DKIM/DMARC) |
 | Upstash / Turnstile | TBD (S9) |
 
 ## 7. Known issues / bugs
 
-_None — no code yet. Log every known bug here with severity; S10 cannot pass while this section is non-empty._
+_Log every known bug here with severity; S10 cannot pass while this section is non-empty._
 
 | # | Severity | Where | Issue | Status |
 |---|---|---|---|---|
@@ -112,3 +119,5 @@ _None — no code yet. Log every known bug here with severity; S10 cannot pass w
 | Date | Entry |
 |---|---|
 | 2026-06-11 | Docs/ops package created: 8 core docs customized to Palestine House + `ROADMAP.md` + this tracker. Stage 0 ready to start. |
+| 2026-06 | Pre-sprints 0a–0d: repo created (`86400websites/palestine-house-website`), Next.js 15 scaffold merged, CI workflow added (PR #1), Vercel Preview verified (PR #2). |
+| 2026-06-11 | Full docs↔repo alignment pass: corrected all content-layer paths (`page-copy/`, `page-designs/`, `design-system/`, `source-assets/`), recorded the complete mockup + design-system + artwork inventory, propagated resolved decisions D1/D3/D4/D5/D6 from `notes/decisions.md`, recorded real token values in `DESIGN.md`, fixed nav/footer descriptions to match the locked chrome, and updated the sprint board with the true code state. Sprint structure unchanged. |

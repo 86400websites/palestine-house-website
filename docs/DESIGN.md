@@ -1,6 +1,6 @@
 # Palestine House — Design System
 
-> **Companion to [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md).** TECH-ARCHITECTURE fixes the *mechanics* (Tailwind v4, shadcn/ui, `next/font`, `next/image`, Framer Motion). This file fixes the *taste* for Palestine House. **The canonical source of token values is the bound design system shipped with the mockups** (`/docs/mockups/_ds/palestine-house-design-system-v2-*/tokens/` — colors, fonts, typography, spacing — plus `site-chrome.css` and `pages.css`). Port those values into `src/styles/globals.css` in Sprint 0.1 and keep this file in sync. Where this file and the `_ds/` tokens disagree, **`_ds/` wins** — update this file.
+> **Companion to [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md).** TECH-ARCHITECTURE fixes the *mechanics* (Tailwind v4, shadcn/ui, `next/font`, `next/image`, Framer Motion). This file fixes the *taste* for Palestine House. **The canonical source of token values is the bound design system shipped with the mockups** (`/docs/page-designs/design-system/tokens/` — colors, fonts, typography, spacing — plus `/docs/page-designs/shared/site-chrome.css` and `shared/pages.css`). Port those values into `src/styles/globals.css` in Sprint 0.1 and keep this file in sync. Where this file and the design-system tokens disagree, **the tokens win** — update this file.
 
 ---
 
@@ -23,7 +23,7 @@ Universal anti-patterns (avoid everywhere):
 - **Core offer:** **Apply to bring a House** — the single public CTA (compact nav button "Apply"; supporting line *Every application is reviewed by HQ.*). Questions route to Contact. Never "create a free account," never "join now."
 - **Personality:** warm · rooted · dignified · disciplined · premium.
 - **Register / archetype:** **Editorial** with a minimal/premium lean — serif display type, generous whitespace, restrained refined motion. Think long-read cultural publications, not SaaS.
-- **Art direction:** "One House, Many Rooms" — original ink linework + soft gouache washes on warm paper, blending into the warm-white page background; one warm light source; the recurring Palestinian arch; tatreez-derived accents (e.g. the section divider). Asset prompts and IDs live in the design package (`ART_DIRECTION.md` / `ART_ASSET_PLAN.md` in `/docs`).
+- **Art direction:** "One House, Many Rooms" — original ink linework + soft gouache washes on warm paper, blending into the warm-white page background; one warm light source; the recurring Palestinian arch; tatreez-derived accents (e.g. the section divider). Final artwork by asset ID lives in `/docs/page-designs/assets/art/` (mockup-referenced) with masters, textures, and empty-state marks in `/docs/source-assets/images/`.
 - **Reference sites (adapt, never copy):** Akub (akub-restaurant.com) — rooted, chaptered "feel the place" scroll; Pioneer Works (pioneerworks.org) — time-of-day programming vignettes; Barbican & Southbank Centre "What's On" — editorial live-events strips; Serpentine — honest, anti-hype institutional voice.
 - **The one-sentence test:** "When someone lands, it should feel **like stepping into a warm, confident cultural home that has nothing to prove.**"
 
@@ -37,54 +37,59 @@ Universal anti-patterns (avoid everywhere):
 
 A rooted palette: **heritage green leads**, with muted red, ink black, and warm whites as refined fine-art tones. Red is an accent — used sparingly and intentionally (a highlight, a status, a thread of tatreez), never a second primary.
 
+All values below are recorded **verbatim from `/docs/page-designs/design-system/tokens/colors.css`** (the canonical source — re-verify there if in doubt):
+
 | Token | Value | Use |
 |---|---|---|
-| Brand primary | `#1A6B4A` (heritage green) | Apply CTA, active nav, key accents, links |
-| Brand primary hover | darker green per `_ds/` (≈ `#14563B` — verify against tokens) | Hover state for primary elements |
-| Accent | `#A8322D` (muted red) | Sparing accents only — status, tatreez details |
-| Foreground / text | ink near-black per `_ds/` | Body text, headings |
-| Secondary text | warm grey per `_ds/` | Supporting copy |
-| Border / divider | warm light per `_ds/` | Borders, dividers, inputs |
-| Background | `#F6F1E8` (warm paper) | Page background |
-| Surface / card | warm white per `_ds/` (`#F2EEE5` appears in hero surfaces) | Cards, panels, `--surface-hero` |
-| Muted / alt section | warm tint per `_ds/` | Alternate section backgrounds |
+| Brand primary | `#1A6B4A` (heritage green, `--green-600`) | Apply CTA, active nav, key accents, links — the single action color |
+| Brand primary hover / pressed | `#0A5C42` (`--green-700`) | Hover state for primary elements, link hover |
+| Brand primary tint | `#E4EEE8` (`--green-100`); faintest wash `#F1F7F3` (`--green-50`) | Active nav wash, success backgrounds |
+| Accent | `#A8322D` (muted red, `--red-600`); pressed `#8A2823`; tint `#F4E4E2` | Sparing accents only — eyebrow labels, destructive/blockers, tatreez details |
+| Foreground / text | `#1A1A17` (warm near-black, `--ink-900`); strong secondary `#3A3A35` | Body text, headings |
+| Secondary text | `#6B6A63` (`--stone-500`); placeholder/disabled `#908E85` | Supporting copy |
+| Border / divider | `#E6E2D9` (`--line-200`); strong `#C4BFB4` | Borders, dividers, inputs |
+| Background (page) | `#FFFFFF` | Page background — the warm feel comes from the surfaces below, not the page itself |
+| Hero wash | `#F6F1E8` (warm paper, `--paper-150`, `--surface-hero`) | Public hero sections |
+| Surface / card | `#FAF8F3` (warm white, `--paper-100`) | Cards, panels |
+| Muted / alt section | `#F2EEE5` (`--paper-200`, `--surface-muted`) | Alternate section backgrounds |
+| Status | success `#1A6B4A` · warning `#B58A2D` (bg `#F6EEDB`) · error `#B23A2E` (bg `#F6E5E2`) | Status error is deliberately distinct from the accent red |
 
-> Exact values for the "per `_ds/`" entries must be copied from `_ds/tokens/colors.css` during Sprint 0.1 and recorded here. Never eyeball or invent them.
+> Never eyeball or invent values. Hard rule from the token file: never arrange green / red / black / white as stripes or a triangle, and never render them at full flag saturation in UI chrome — color lives most powerfully in the artwork.
 
 ### CSS variables (`src/styles/globals.css`)
 
-Tailwind v4 is **CSS-first**: `@import "tailwindcss";`, raw values in `:root`, exposed via `@theme inline` (shadcn's v4 setup). Map the `_ds/` tokens to the shadcn variable names so every component inherits the brand:
+Tailwind v4 is **CSS-first**: `@import "tailwindcss";`, raw values in `:root`, exposed via `@theme inline` (shadcn's v4 setup). Map the design-system tokens to the shadcn variable names so every component inherits the brand (values from `design-system/tokens/colors.css`):
 
 ```css
 @layer base {
   :root {
     --brand-primary: #1A6B4A;
-    --brand-primary-hover: /* from _ds */;
+    --brand-primary-hover: #0A5C42;
     --brand-accent: #A8322D;
 
-    --background: #F6F1E8;
-    --foreground: /* ink, from _ds */;
-    --card: /* warm white, from _ds */;
-    --card-foreground: /* ink */;
-    --popover: /* warm white */;
-    --popover-foreground: /* ink */;
+    --background: #FFFFFF;          /* page is white; warmth comes from surfaces */
+    --foreground: #1A1A17;          /* ink-900 */
+    --card: #FAF8F3;                /* paper-100, warm white */
+    --card-foreground: #1A1A17;
+    --popover: #FAF8F3;
+    --popover-foreground: #1A1A17;
     --primary: #1A6B4A;
     --primary-foreground: #FFFFFF;
-    --secondary: /* muted warm tint */;
-    --secondary-foreground: /* ink */;
-    --muted: /* muted warm tint */;
-    --muted-foreground: /* warm grey */;
-    --accent: /* subtle warm tint (background accent) */;
-    --accent-foreground: /* ink */;
-    --border: /* warm light */;
-    --input: /* warm light */;
+    --secondary: #F2EEE5;           /* paper-200, muted warm tint */
+    --secondary-foreground: #1A1A17;
+    --muted: #F2EEE5;
+    --muted-foreground: #6B6A63;    /* stone-500, warm grey */
+    --accent: #F6F1E8;              /* paper-150 — subtle warm background accent */
+    --accent-foreground: #1A1A17;
+    --border: #E6E2D9;              /* line-200, warm light */
+    --input: #E6E2D9;
     --ring: #1A6B4A;
-    --radius: /* from _ds — restrained, not pill */;
+    --radius: 8px;                  /* default; 12px cards, 16px feature cards — never pill */
   }
 }
 ```
 
-Also port the page primitives the mockups rely on: the `_ds/` spacing scale (plus `--space-7: 1.75rem` and `--space-14: 3.5rem` defined in `pages.css`), `--surface-hero`, `--measure`, `--reveal-travel`, `--duration-slow`, `--ease-out`, and the tatreez `.page-divider`.
+Also port the page primitives the mockups rely on: the `design-system/tokens/spacing.css` scale (plus `--space-7: 1.75rem` and `--space-14: 3.5rem` defined in `shared/pages.css`), `--surface-hero` (`#F6F1E8`), `--measure`, `--reveal-travel`, `--duration-slow`, `--ease-out`, and the tatreez `.page-divider`.
 
 Verify every text/background pair passes **WCAG AA** — especially heritage green on warm paper (use it at sizes/weights that pass, or the darker hover green for small text).
 
@@ -93,7 +98,7 @@ Verify every text/background pair passes **WCAG AA** — especially heritage gre
 - **Display font:** **Spectral** — headings, the editorial voice. Serif = institutional, literary, rooted.
 - **Body font:** **Inter** — paragraphs, UI, forms, labels.
 - **Fallbacks:** `Georgia, serif` for display; `system-ui, sans-serif` for body.
-- **Loading rule (non-negotiable):** via **`next/font`** (`Spectral`, `Inter` from `next/font/google`) — never a `<link>` to Google Fonts. Load only the weights the `_ds/typography.css` scale actually uses.
+- **Loading rule (non-negotiable):** via **`next/font`** (`Spectral`, `Inter` from `next/font/google`) — never a `<link>` to Google Fonts. Load only the weights the `design-system/tokens/typography.css` scale actually uses.
 
 ```css
 @theme inline {
@@ -104,28 +109,28 @@ Verify every text/background pair passes **WCAG AA** — especially heritage gre
 
 ### Type scale
 
-Port the scale from `_ds/tokens/typography.css`. Known anchors from the mockups: page-hero `h1` uses `clamp(2.6rem, 2.2vw + 1.6rem, 4rem)`; body never below 16px; line-height ~1.55 for body, ~1.1 for h1. All-caps reserved for small tracked eyebrow/category labels only — never headings, nav, or body. One `<h1>` per page matching intent; `h1 → h2 → h3` in order, never skipped.
+Port the scale from `design-system/tokens/typography.css`. Known anchors from the mockups: page-hero `h1` uses `clamp(2.6rem, 2.2vw + 1.6rem, 4rem)`; body never below 16px; line-height ~1.55 for body, ~1.1 for h1. All-caps reserved for small tracked eyebrow/category labels only — never headings, nav, or body. One `<h1>` per page matching intent; `h1 → h2 → h3` in order, never skipped.
 
 ## 5. Layout principles
 
-- **Max content width** and gutters per `_ds/base.css` / `pages.css` (`.ph-page` container queries; `--measure` for prose width).
+- **Max content width** and gutters per `design-system/base.css` / `shared/pages.css` (`.ph-page` container queries; `--measure` for prose width).
 - **Section vertical rhythm:** generous (`--space-16`-class hero padding; tatreez divider between major sections). Default to more whitespace.
 - Editorial asymmetry where it earns its place — artwork in negative space (e.g. the Experience hero headline sits in the artwork's negative space), offset vignettes, the day/night paired panels. Coherent, never chaotic.
 - Every scroll reveals something — but **calmly**: a new section treatment, not a new gimmick.
 - Responsive from **320px** up; tap targets ≥ 44×44px.
-- **The header and footer are locked** (`site-chrome.css` / `site-chrome.jsx`): identical on every page, never redesigned per page. Footer carries secondary links (Apply, Live Programming, How It Works, Focus Areas, About), the lead-magnet block, legal, and the tagline.
+- **The header and footer are locked** (`shared/site-chrome.css` / `site-chrome.jsx`): identical on every page, never redesigned per page. Footer carries the brand block, four link columns — Explore (The Model · Experience · Live Programming) · Bring a House (Why bring one · Our support) · Account (Sign in) · Legal (Privacy · Terms · Contact) — the Apply block, the booklet lead-magnet block, and the tagline (per `/docs/page-copy/00-global/footer-copy.md`).
 
 ## 6. Component rules
 
 Build on shadcn/ui primitives themed via §3 — not one-off overrides.
 
-- **Buttons:** *primary* = heritage green (the Apply CTA), *secondary/outline* = ink outline on paper. Display-font weight for button text. Shape per `_ds/` radius — restrained, not pill.
-- **Nav tooltip (project-specific):** each of the five nav labels renders a styled hover one-liner via a single reusable Tooltip component — **never raw `title` attributes**. On mobile, the one-liner shows as a sub-label inside the shadcn `Sheet` menu. Copy owned by `/docs/final-copy/00-global/navigation-copy.md`.
+- **Buttons:** *primary* = heritage green (the Apply CTA), *secondary/outline* = ink outline on paper. Display-font weight for button text. Shape per the design-system radius (8px default, 12px cards, 16px feature cards) — restrained, never pill.
+- **Nav tooltip (project-specific):** each of the four nav labels renders a styled hover one-liner via a single reusable Tooltip component — **never raw `title` attributes**. On mobile, the one-liner shows as a sub-label inside the shadcn `Sheet` menu. Copy owned by `/docs/page-copy/00-global/navigation-copy.md`.
 - **Forms (react-hook-form + zod):** light surface, 1px warm border; focus ring uses `--ring`; error = colored border **and** text message (never color alone); labels above inputs. The Apply form is the flagship form — calm, single column, dignified.
 - **Cards / surfaces:** consistent radius, subtle warm border, gentle lift on hover (≤1.02). Session cards (Live Programming) are one shared component reused on `/live` and the Experience live strip — never two implementations.
 - **Status badges (Live now / Upcoming / Recording):** color + text, never color alone.
-- **Navigation:** logo top-left; five labels (The Model · Experience · Bring a House · Our Support) + Sign in (text) + **Apply** (primary CTA) right; mobile uses the shadcn `Sheet`. Active state by weight + accent indicator.
-- **Gated shell:** persistent left sidebar (Welcome · Stages · Managing & Operating · Programming/Live Programming · Academy · House Applications · Account, Support at bottom); pending state shows items visible but locked.
+- **Navigation:** logo top-left (→ Home); four labels (The Model · Experience · Bring a House · Our Support) + Sign in (text) + **Apply** (primary CTA) right; mobile uses the shadcn `Sheet`. Active state by weight + green mark. Live Programming is not a top-nav label — it surfaces via Home, the footer, and the Experience live strip.
+- **Gated shell:** persistent left sidebar (Welcome · Stages · Managing & Operating · Programming/Live Programming · Academy · Resources · House Applications · Account, Support pinned at bottom — Resources included per the accepted deviation in `PROJECT-STATUS.md` §4); pending state shows items visible but locked (lock icon + "Locked" label, never color alone).
 
 ## 7. shadcn/ui & Tailwind v4 usage
 
@@ -149,11 +154,11 @@ Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal 
 
 ## 9. Image / media guidance
 
-- **All artwork is original** ink-and-gouache illustration per the art direction — never stock photos, never generic icons. Asset IDs (PH-EXP-01, PH-BRING-01/02, PH-SUPPORT-01, PH-HIW-01/02/03 triptych, etc.) and prompts live in `ART_ASSET_PLAN.md` / `NEW-PAGE-DESIGN-PROMPTS.md` in `/docs`.
+- **All artwork is original** ink-and-gouache illustration per the art direction — never stock photos, never generic icons. The final artwork ships in-repo by asset ID (PH-HOME-01, PH-EXP-01…03e, PH-BRING-01/02, PH-SUPPORT-01, PH-HIW-01/02/03 triptych, etc.): `/docs/page-designs/assets/art/` (the files the mockups reference) and `/docs/source-assets/images/` (masters plus textures `PH-TEX-*` and empty-state marks `PH-EMPTY-*`).
 - All images via `next/image` — never raw `<img>`. `priority` above the fold; explicit `width`/`height` (CLS).
 - All images under `/public/assets/`, organized by page (`/assets/home/`, `/assets/experience/`, `/assets/logo/`…), referenced by path. To update an image, replace the file in place, same filename.
-- Aspect ratios from the asset plan (e.g. PH-EXP-01: 16:9 desktop / 4:5 mobile; vignette pairs 4:5 with identical framing). Compress to <~200KB where possible; meaningful `alt` text always.
-- During development, neutral placeholders at the **correct aspect ratios** are fine; replace with final artwork before launch — and never lock layout against the wrong ratio.
+- Aspect ratios per the mockups (e.g. PH-EXP-01: 16:9 desktop / 4:5 mobile; vignette pairs 4:5 with identical framing) — measure against the rendered mockup page, never guess. Compress to <~200KB where possible; meaningful `alt` text always.
+- The final artwork already exists in `/docs` (above) — copy it into `/public/assets/` as pages are built. If a new asset is ever genuinely missing, use a neutral placeholder at the **correct aspect ratio** and flag it; never lock layout against the wrong ratio.
 
 ## 10. Responsive design rules
 
@@ -180,7 +185,7 @@ Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal 
 
 ## 13. What not to over-customize
 
-- Don't invent tokens beyond the `_ds/` system; expand only when a real screen needs it, and record it here.
+- Don't invent tokens beyond the bound design system (`/docs/page-designs/design-system/`); expand only when a real screen needs it, and record it here.
 - No dark mode, no second primary color, no third typeface.
 - Don't hand-build what shadcn/ui provides; theme the primitive.
 - Don't over-animate — restraint *is* the brand.

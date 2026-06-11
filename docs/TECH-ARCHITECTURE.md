@@ -1,6 +1,6 @@
 # Tech Architecture — Core Reference
 
-> **Project: Palestine House** — `palestine-house`. This file is the generic locked stack **plus** the Palestine House specifics below. When any other doc disagrees with this one about the stack, this one wins. The full route map, access model, and data notes live in `PH_Sitemap_Architecture_TECH.docx` (repo `/docs`); the sprint order lives in [`ROADMAP.md`](./ROADMAP.md); current state lives in [`PROJECT-STATUS.md`](./PROJECT-STATUS.md).
+> **Project: Palestine House** — `palestine-house`. This file is the generic locked stack **plus** the Palestine House specifics below. When any other doc disagrees with this one about the stack, this one wins. The full route map, access model, and data notes live in `/docs/page-designs/content/PH_Sitemap_Architecture_TECH.txt`; the sprint order lives in [`ROADMAP.md`](./ROADMAP.md); current state lives in [`PROJECT-STATUS.md`](./PROJECT-STATUS.md).
 
 ## 0. Palestine House — project architecture summary
 
@@ -16,7 +16,7 @@
 
 **Core data (Supabase):** `profiles` (incl. `is_approved`) · `applications` · `admins` · `elements` (30, MDX bodies) · `checklist_items` + per-user `checklist_progress` (200+ items, 3 gates) · `programming_sessions` (title, mode, status, venue, stream_url, recording_url, starts_at, cover — public read anon-safe, partner writes owner-scoped) · `resources` (metadata + private Storage bucket, signed URLs) · `academy_modules`. RLS default-deny on all; public projections via anon-safe RPCs expose titles/overviews only.
 
-**Integrations in scope:** Supabase (auth + DB + Storage), Mailchimp (lead magnets `lead-booklet-a` / `lead-booklet-b`, newsletter, apply tagging), Resend (contact + transactional), Upstash (rate limiting), Turnstile (public forms), PostHog + Sentry (optional). Live Programming embeds via YouTube or Vimeo (decision pending — extend CSP for the chosen origin only).
+**Integrations in scope:** Supabase (auth + DB + Storage), Mailchimp (lead magnets `lead-booklet-a` / `lead-booklet-b`, newsletter, apply tagging), Resend (contact + transactional), Upstash (rate limiting), Turnstile (public forms), PostHog + Sentry (optional). Live Programming embeds via **YouTube** (resolved decision D1, `PROJECT-STATUS.md` §4 — extend CSP for the YouTube origin only).
 
 **Blocking security invariants (never merge with one unresolved — also in [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15):** approval enforcement server-side in every workspace RPC; RLS default-deny everywhere; hardened `SECURITY DEFINER` RPCs; public writes zod + rate-limit + Turnstile, fail-closed in Production; no secret client-side; templates served only by server-issued signed URLs to approved users; admin via server-checked `admins` table; security headers + tight CSP.
 
