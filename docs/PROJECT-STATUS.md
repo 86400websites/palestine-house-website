@@ -12,7 +12,7 @@
 | **Active sprint** | — (between sprints; S1 next) |
 | **Next action** | Owner: confirm the Vercel Supabase values point at `jwogtqizqujwhbvpoziu` (not the Singapore project) and the Singapore secret key was rotated; review Dependabot PRs with Claude; then start **S1 — design consistency pass** (incl. artwork compression) |
 | **Production URL** | **https://palestine-house-website.vercel.app** — live, verified 2026-06-12 (headers, canonical, sitemap, robots, OG, 404, copy) |
-| **Last updated** | 2026-06-12 — Stage 0 merged (PR #4) · 1.1 merged (PR #5) · Supabase production ref recorded |
+| **Last updated** | 2026-06-12 — **Stage 1 complete, site LIVE**; Vercel Supabase values corrected to the `palestine-house` project (owner confirmed); ~7 Dependabot PRs open, review at next session start |
 
 ### How to resume in a fresh AI session
 1. Read this file, then the active sprint's scope + exit gate in `ROADMAP.md`.
@@ -34,7 +34,7 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | 0.4 Live + Focus Areas + About + Contact | ✅ | #4 | 2026-06-12 | `/live` ships the approved empty states (watch view + filters activate with real data, S7); contact form no-ops honestly until Resend (S8) |
 | 0.5 Apply UI + auth UI + legal + SEO | ✅ | #4 | 2026-06-12 | Apply + auth forms no-op honestly until S3; legal pages carry the approved counsel-review note; sitemap/robots/OG/JSON-LD live |
 | **Stage 0 exit gate** | ✅ | #4 | 2026-06-12 | Build-side gate + owner Preview sign-off passed; merged to `main` |
-| 1.1 GitHub (protection + CI) | ✅ | #5 | 2026-06-12 | gitleaks + Dependabot merged; owner Settings items (visibility→private, protection rule, secret scanning) tracked in §1 |
+| 1.1 GitHub (protection + CI) | ✅ | #5 | 2026-06-12 | gitleaks (+ `pull-requests: read` fix) + Dependabot merged; branch protection rule + secret scanning set by owner; **repo stays public** (owner decision, §4 — gated content leaves the repo by S5) |
 | 1.2 Vercel (envs + production deploy) | ✅ | | 2026-06-12 | `NEXT_PUBLIC_SITE_URL` + Supabase vars set (Production only) and redeployed; live site verified |
 | 1.3 Supabase projects (prod + non-prod, auth URLs) | ✅ | | 2026-06-12 | Production project `jwogtqizqujwhbvpoziu` configured (Site URL + 3 redirects); **non-prod project at S2 start in a free org** (owner decision, §4) |
 | **Stage 1 exit gate — barebones site LIVE** | ✅ | | 2026-06-12 | https://palestine-house-website.vercel.app verified (headers/canonical/sitemap/robots/OG/404/copy); CI + protection live; Preview pipeline working |
