@@ -10,7 +10,7 @@
 |---|---|
 | **Current stage** | Stage 1 — Connect & launch the barebones site |
 | **Active sprint** | 1.2 Vercel envs + 1.3 Supabase auth URLs (owner dashboard steps) |
-| **Next action** | Owner: repo visibility → **private**; rotate the Supabase secret key; branch protection rule on `main`; secret scanning ON (Advanced Security); Vercel `NEXT_PUBLIC_SITE_URL` (Production) + Supabase vars (Production only) + redeploy; Supabase Auth URL config. Then Stage 1 exit gate ✅ |
+| **Next action** | Owner: correct the three Supabase env values in Vercel to the **palestine-house** project (`jwogtqizqujwhbvpoziu` — the values first added belong to the Singapore Way project) + redeploy; rotate the Singapore Way project's secret key; merge PR #13; branch protection rule on `main`; secret scanning ON; Supabase Auth URL config (Site URL + 3 redirects). Then Stage 1 exit gate ✅ |
 | **Production URL** | Vercel domain — Production deploys automatically from `main` (Stage 0 merge = first full-site deploy); record the URL here once `NEXT_PUBLIC_SITE_URL` is set |
 | **Last updated** | 2026-06-12 — Stage 0 merged (PR #4) · 1.1 merged (PR #5) · Supabase production ref recorded |
 
@@ -36,7 +36,7 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | **Stage 0 exit gate** | ✅ | #4 | 2026-06-12 | Build-side gate + owner Preview sign-off passed; merged to `main` |
 | 1.1 GitHub (protection + CI) | ✅ | #5 | 2026-06-12 | gitleaks + Dependabot merged; owner Settings items (visibility→private, protection rule, secret scanning) tracked in §1 |
 | 1.2 Vercel (envs + production deploy) | ⬜ | | | Vercel connected, Preview verified (PR #2); still to do: env vars per environment + first Production deploy |
-| 1.3 Supabase projects (prod + non-prod, auth URLs) | 🔵 | | 2026-06-12 | Production project created (ref `kdawymeskszjfqbbcknj`); **non-production project deferred to the start of S2** (owner decision — see §4); auth URLs to configure |
+| 1.3 Supabase projects (prod + non-prod, auth URLs) | 🔵 | | 2026-06-12 | Production project created (ref `jwogtqizqujwhbvpoziu`); **non-production project deferred to the start of S2** (owner decision — see §4); auth URLs to configure |
 | **Stage 1 exit gate — barebones site LIVE** | ⬜ | | | |
 | S1 Design consistency pass (1a–1d) | ⬜ | | | |
 | S2 DB phase 1 — identity & approval (2a–2b) | ⬜ | | | |
@@ -84,7 +84,8 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 - Launch on the **Vercel domain**; custom domain connected later (resolved 2026-06-11). Contact/legal email: none yet — owner adds later as env vars before S8/legal go-live (resolved 2026-06-11).
 - `/tools` ships as a coming-soon placeholder. No donations/payments/store, no political/advocacy features, no hype mechanics. English first.
 - Booklet lead magnets: *The House Promise* (Booklet A) + *Operating Model & Governance* (Booklet B), public, tags `lead-booklet-a` / `lead-booklet-b`.
-- **Supabase environments (owner decision, 2026-06-12):** one project for now = **production** (`kdawymeskszjfqbbcknj`). The separate **non-production** project is created at the start of S2, before any schema work — Production/Preview/Development must never share one database once schema or users exist (WORKFLOW §14). Until then, Supabase env vars are set in Vercel **Production only**; Preview/Development get the non-prod project's values at S2.
+- **Supabase environments (owner decision, 2026-06-12):** one project for now = **production** (`jwogtqizqujwhbvpoziu`, project `palestine-house-website`). The separate **non-production** project is created at the start of S2 — in a separate free Supabase org so it costs nothing — before any schema work; Production/Preview/Development must never share one database once schema or users exist (WORKFLOW §14). Until then, Supabase env vars are set in Vercel **Production only**; Preview/Development get the non-prod project's values at S2.
+- **Repo visibility (owner decision, 2026-06-12): the GitHub repo stays public** — owner accepts the trade-off knowingly. Consequence: the gated source content currently in the repo (`docs/page-copy/06-elements/`, `docs/source-assets/resources/`) is world-readable until removed. Mitigation locked in: that content moves out of the repo (or the repo flips private) **no later than S5 content ingestion / pre-launch cleanup** — tracked in `notes/cleanup-before-launch.md`. Upside: Free-plan branch protection stays enforceable.
 - Stack: locked per `TECH-ARCHITECTURE.md`; build process per `WORKFLOW.md`; one sprint at a time.
 - Dashboard snapshot leads with "Current stage"; Design & Build % hidden until Build starts. Soft opening Day 108 within the 120-day window (deliberate buffer).
 
@@ -102,7 +103,7 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 |---|---|
 | GitHub repo | `86400websites/palestine-house-website` |
 | Vercel project / team slug | Connected (Preview verified); record slug here at Stage 1.2 |
-| Supabase production ref | `kdawymeskszjfqbbcknj` |
+| Supabase production ref | `jwogtqizqujwhbvpoziu` |
 | Supabase non-production ref | To create at the start of S2 (owner decision, 2026-06-12 — see §4) |
 | Mailchimp audience | TBD (S8 — owner adds env vars) |
 | Resend sending domain | TBD (S8 — owner adds env vars; verify SPF/DKIM/DMARC) |
