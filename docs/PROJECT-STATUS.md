@@ -10,7 +10,7 @@
 |---|---|
 | **Current stage** | **Stage 1 COMPLETE — barebones site LIVE.** Next: S1 design consistency pass |
 | **Active sprint** | — (between sprints; S1 next) |
-| **Next action** | Owner: confirm the Vercel Supabase values point at `jwogtqizqujwhbvpoziu` (not the Singapore project) and the Singapore secret key was rotated; review Dependabot PRs with Claude; then start **S1 — design consistency pass** (incl. artwork compression) |
+| **Next action** | Owner: merge the skill-alignment PR; Dependabot triage per 2026-06-12 review — **merge #6, #7, #8** (Actions bumps, after "Update branch" + green CI) and **comment `@dependabot ignore this major version` on #9, #10, #11, #12** (Next 16 / TS 6 / types majors = locked-stack upgrades, deliberate future sprint). Then start **S1 — design consistency pass** (incl. artwork compression) |
 | **Production URL** | **https://palestine-house-website.vercel.app** — live, verified 2026-06-12 (headers, canonical, sitemap, robots, OG, 404, copy) |
 | **Last updated** | 2026-06-12 — **Stage 1 complete, site LIVE**; Vercel Supabase values corrected to the `palestine-house` project (owner confirmed); ~7 Dependabot PRs open, review at next session start |
 
