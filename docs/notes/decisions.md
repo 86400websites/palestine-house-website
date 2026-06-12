@@ -8,6 +8,9 @@ Use this file to record decisions that affect implementation. Resolved decisions
 
 ## Closed decisions (propagated to PROJECT-STATUS.md §4)
 
+- **Supabase environments (2026-06-12):** one project for now, used as **production** (ref `jwogtqizqujwhbvpoziu`, project `palestine-house-website`). The separate non-production project is created at the start of S2 — in a separate **free** Supabase org so it adds no billing — before any schema lands; environments never share a database once schema/users exist. Supabase env vars live in Vercel Production only until then. (Note: ref `kdawymeskszjfqbbcknj` belongs to `the-singapore-way-website`, a different site.)
+- **Repo visibility (2026-06-12): stays public** (owner decision, accepted trade-off). Gated source content (`page-copy/06-elements/`, `source-assets/resources/`) must leave the repo by S5 ingestion / before launch — see `cleanup-before-launch.md`. Free-plan branch protection remains enforceable as a result.
+
 - **Header mega-menus (2026-06-12):** match the approved mockup — tooltip one-liners on all four nav labels plus mega-menu panels on The Model and Experience; the mega-menu link strings are approved-via-mockup (they appear only in `page-designs/shared/site-chrome.jsx`, not in `page-copy/`).
 
 ### 2026-06-11
