@@ -3,6 +3,7 @@ import { Inter, Spectral } from "next/font/google";
 import { Providers } from "@/app/providers";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 import "@/styles/globals.css";
 
 /* Brand faces (DESIGN.md §4) — Spectral for display, Inter for body/UI.
@@ -22,11 +23,42 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Palestine House",
-    template: "%s · Palestine House",
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
   },
-  description: "A fixed address for Palestinian culture, in every city.",
+  description: SITE_TAGLINE,
+  alternates: {
+    /* Resolves to each route's own path against metadataBase. */
+    canonical: "./",
+  },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "en",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+};
+
+/* JSON-LD: Organization + WebSite (TECH-ARCHITECTURE §14). */
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: SITE_TAGLINE,
+    },
+    {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -35,6 +67,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${spectral.variable} ${inter.variable}`}>
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Providers>
           <div className="ph-page">
             <a className="ph-skip-link" href="#main-content">

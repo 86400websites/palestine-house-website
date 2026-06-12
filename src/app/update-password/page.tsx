@@ -10,6 +10,7 @@ import { UpdatePasswordForm } from "@/components/sections/auth-forms";
 export const metadata: Metadata = {
   title: "Update password",
   description: "Set a new Palestine House password.",
+  robots: { index: false, follow: true },
 };
 
 export default function UpdatePasswordPage() {

@@ -75,5 +75,5 @@ Do not merge anything.
 | 9 | (0.5a) `/apply` | ✅ 2026-06-12 — honest no-op confirm; approved confirmation ships with real signup (S3c) | see git log |
 | 10 | (0.5b) auth shells | ✅ 2026-06-12 — approved errors client-side; confirmations ship with real auth (S3) | see git log |
 | 11 | (0.5c) `/privacy` + `/terms` | ✅ 2026-06-12 — placeholder legal copy with visible counsel-review note (approved); [contact email] pending D4 | see git log |
-| 12 | (0.5d) SEO | | |
+| 12 | (0.5d) SEO | ✅ 2026-06-12 — Sprint 0.5 complete: metadata + canonicals, sitemap (12 routes), robots, OG image, JSON-LD; auth pages noindexed | see git log |
 | 13 | Stage 0 exit gate | | |

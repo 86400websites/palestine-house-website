@@ -9,6 +9,7 @@ import { ForgotPasswordForm } from "@/components/sections/auth-forms";
 export const metadata: Metadata = {
   title: "Forgot password",
   description: "Request a password reset link for Palestine House.",
+  robots: { index: false, follow: true },
 };
 
 export default function ForgotPasswordPage() {

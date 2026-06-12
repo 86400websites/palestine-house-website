@@ -32,7 +32,7 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | 0.2 Home + The Model | ✅ | (Stage 0 PR) | 2026-06-12 | Built on the Stage 0 branch per the gated sub-step protocol (`docs/sprint-prompts/stage-0-master-prompt.md`) |
 | 0.3 Experience · Bring a House · Our Support | ✅ | (Stage 0 PR) | 2026-06-12 | All three pages built; Experience live strip in designed empty state until S7 |
 | 0.4 Live + Focus Areas + About + Contact | ✅ | (Stage 0 PR) | 2026-06-12 | `/live` ships the approved empty states (watch view + filters activate with real data, S7); contact form no-ops honestly until Resend (S8) |
-| 0.5 Apply UI + auth UI + legal + SEO | ⬜ | | | |
+| 0.5 Apply UI + auth UI + legal + SEO | ✅ | (Stage 0 PR) | 2026-06-12 | Apply + auth forms no-op honestly until S3; legal pages carry the approved counsel-review note; sitemap/robots/OG/JSON-LD live |
 | **Stage 0 exit gate** | ⬜ | | | |
 | 1.1 GitHub (protection + CI) | ⬜ | | | CI live since 0c; still to do: gitleaks step in `ci.yml`, branch protection on `main`, secret scanning + Dependabot |
 | 1.2 Vercel (envs + production deploy) | ⬜ | | | Vercel connected, Preview verified (PR #2); still to do: env vars per environment + first Production deploy |
