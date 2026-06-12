@@ -34,7 +34,7 @@ const HOME_FEELS = [
   {
     key: "cafe",
     id: "PH-FOOD-02",
-    text: "A café where the za’atar is someone’s grandmother’s recipe.",
+    text: "A café where the recipes are here to stay.",
     alt: "A still-life illustration of knafeh and za’atar on the House’s long table in warm light.",
   },
   {

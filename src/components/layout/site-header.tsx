@@ -25,29 +25,35 @@ import {
    one-liners from navigation-copy.md; mega-menus on The Model + Experience,
    approved via mockup — PROJECT-STATUS §4) · Sign in · green Apply. */
 
+/* tip = desktop hover one-liner (navigation-copy.md, verbatim);
+   tipShort = mobile menu sub-label (owner-approved short set, 2026-06-12). */
 const NAV_LINKS = [
   {
     key: "model",
     label: "The Model",
     tip: "Who the players are, and how it works.",
+    tipShort: "How it works.",
     href: "/model",
   },
   {
     key: "experience",
     label: "Experience",
     tip: "Step inside a House — the feeling, the programs, the people.",
+    tipShort: "Step inside a House.",
     href: "/experience",
   },
   {
     key: "bring",
     label: "Bring a House",
     tip: "Why bring Palestine House to your city, and what it takes.",
+    tipShort: "What it takes.",
     href: "/bring-ph",
   },
   {
     key: "support",
     label: "Our Support",
     tip: "What HQ gives every partner, behind every House.",
+    tipShort: "Behind every House.",
     href: "/our-support",
   },
 ] as const;
@@ -213,7 +219,7 @@ export function SiteHeader() {
                       onClick={() => setMobileOpen(false)}
                     >
                       <span className="phx-mobile-label">{l.label}</span>
-                      <span className="phx-mobile-sub">{l.tip}</span>
+                      <span className="phx-mobile-sub">{l.tipShort}</span>
                     </Link>
                   ))}
                   <Link
