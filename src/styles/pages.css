@@ -134,9 +134,11 @@
 .feature-card {
   display: flex;
   flex-direction: column;
-  background: var(--surface-card);
+  /* Premium card recipe (owner scheme, 2026-06-12) — keep in sync with .ph-card */
+  background: var(--white);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   padding: var(--space-7);
   transition:
     transform var(--duration) var(--ease-out),
@@ -872,9 +874,11 @@
 .live-card {
   display: flex;
   flex-direction: column;
-  background: var(--surface-card);
+  /* Premium card recipe (owner scheme, 2026-06-12) — keep in sync with .ph-card */
+  background: var(--white);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition:
     transform var(--duration) var(--ease-out),
