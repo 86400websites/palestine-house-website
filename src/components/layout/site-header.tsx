@@ -87,9 +87,9 @@ const MEGA_MENUS: Partial<
       },
     ],
     thumbs: [
-      { id: "PH-MODEL-01", cue: "the rooted House" },
+      { id: "PH-HIW-01", cue: "the quiet corner" },
       { id: "PH-HIW-02", cue: "hands at work" },
-      { id: "PH-HOME-01", cue: "the café" },
+      { id: "PH-HIW-03", cue: "the room alive" },
     ],
   },
   experience: {
@@ -112,9 +112,9 @@ const MEGA_MENUS: Partial<
       },
     ],
     thumbs: [
-      { id: "PH-EXP-03a", cue: "coffee & table" },
-      { id: "PH-EXP-03b", cue: "the low stage" },
-      { id: "PH-EXP-03e", cue: "the gathering" },
+      { id: "PH-APPLY-01", cue: "the key turns" },
+      { id: "PH-LIVE-02", cue: "a night live" },
+      { id: "PH-EXP-01", cue: "the main room" },
     ],
   },
 };
