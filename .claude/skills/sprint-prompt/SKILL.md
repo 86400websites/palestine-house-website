@@ -27,8 +27,8 @@ When the user gives a rough dump, a sprint ID (e.g. "0.1", "S3a"), or says "plan
    - **B. Sprint goal & scope** — exact scope from ROADMAP + anything explicitly added/excluded.
    - **C. Branch name** — per CLAUDE.md convention, e.g. `claude/sprint-0-1-foundation`.
    - **D. Step checklist** — sequential build steps for this sprint, each small and verifiable.
-   - **E. Ready-to-copy Claude Code prompt** — one clean code block using the template below.
-   - **F. Optional Codex review prompt** — only for risky sprints (auth, approval gate, RLS/schema, env, headers, CSP); otherwise say review is optional and skip it.
+   - **E. Ready-to-copy Claude Code prompt** — one clean code block using the template below. *(Bug-fix variant: same template, but replace the Goal block with `Problem: <paste the bug/error/behavior>` and add to the report: root cause + fix summary. UI-only variant: add "reuse existing components/styles; no new dependencies; responsive + accessible".)*
+   - **F. Optional Codex review prompt** — only for risky sprints (auth, approval gate, RLS/schema, env, headers, CSP); use the template below. Otherwise say review is optional and skip it.
    - **G. Checklists** — don't restate; point to `WORKFLOW.md` §9 (local), §10 (PR), §11 (Preview), §12 (merge), §13 (rollback).
 5. **Offer execution:** since this *is* Claude Code, offer to execute the prompt directly in this session on the new branch — or the user can paste it into a fresh session.
 
@@ -70,7 +70,26 @@ Verification (must pass before reporting done):
 
 When the sprint is complete, in the same branch: update docs/PROJECT-STATUS.md (§1, §2, change log) and tick the sprint in docs/ROADMAP.md.
 
-Report at the end: summary · files changed · commands + results · risks/follow-ups · suggested commit message · sprint status. Do not push unless I explicitly ask.
+Report at the end: summary · files changed · commands + results · risks/follow-ups · suggested commit message · sprint status. Push policy: commit after every gated sub-step, and push if the owner's standing push-per-step authorization applies (granted 2026-06-12); never merge, never push beyond the task branch.
+```
+
+### Codex review prompt template (Mode A, section F — risky sprints only)
+
+```text
+You are my independent code reviewer for the Palestine House website.
+Read AGENTS.md in the repo root — it defines your rules, priorities, and the
+blocking gating checks. Review the branch DIFF only (vs main), not the whole repo.
+
+Report serious issues only: correctness, security/data safety, secret leaks,
+broken approval gating, App Router boundary mistakes (server/client, secrets
+into client components), Supabase/RLS risks, Vercel/env risks, build breakage.
+No style nits; do not critique approved copy or the locked design.
+
+Any failure of the AGENTS.md "Palestine House gating checks" is blocking.
+
+Return: Blocking issues · Non-blocking issues · Missing checks · exact
+file:line locations · suggested fix for each · merge recommendation
+(approve / request changes / blocking). Do not make changes, push, or merge.
 ```
 
 ## Mode B — Save the sprint record ("save", after merge)
