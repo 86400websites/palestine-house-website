@@ -7,17 +7,17 @@
 ## A. Full feature list (MVP scope)
 
 ### Public shell
-- [ ] Locked site chrome — header (logo → Home + four nav labels with tooltip one-liners + Sign in + green **Apply** CTA), footer (link columns, lead-magnet block, legal, tagline), mobile Sheet menu
-- [ ] `/` Home (full "Bring Palestine House to Your City" section)
-- [ ] `/model` The Model
-- [ ] `/experience` Experience — the decision page (hero artwork, day/night section, five programming threads, **live strip** from `programming_sessions`, closing CTA, lead magnet)
-- [ ] `/bring-ph` Bring a House (absorbs How It Works: stage triptych + Day 30/60/108 gates timeline, "who brings what," three rules)
-- [ ] `/our-support` Our Support
-- [ ] `/live` Live Programming — public listing (Upcoming / Live now / Past; in-person, livestream, recorded) + watch view  **[public hero feature]**
-- [ ] `/apply` — single merged form: apply **=** sign-up → pending account + application record (zod + rate limit + Turnstile)
-- [ ] `/about`, `/contact` (contact form via Resend), `/focus-areas` (secondary route, linked from page bodies), `/privacy`, `/terms`
-- [ ] Lead magnets: the two public booklets (*The House Promise*, *Operating Model & Governance*) — capture via Mailchimp tags `lead-booklet-a` / `lead-booklet-b`
-- [ ] SEO: per-route metadata, `sitemap.ts`, `robots.ts`, OG image, JSON-LD (Organization, WebSite)
+- [x] Locked site chrome — header (logo → Home + four nav labels with tooltip one-liners, mega-menus on The Model + Experience per mockup, + Sign in + green **Apply** CTA), footer (link columns, lead-magnet block, legal, tagline), mobile Sheet menu
+- [x] `/` Home (full "Bring Palestine House to Your City" section)
+- [x] `/model` The Model
+- [x] `/experience` Experience — the decision page (hero artwork, day/night section, five programming threads, closing CTA, lead magnet) — *live strip in designed empty state until S7 wires `programming_sessions`*
+- [x] `/bring-ph` Bring a House (absorbs How It Works: stage triptych + Day 30/60/108 gates timeline, "who brings what," three rules)
+- [x] `/our-support` Our Support
+- [ ] `/live` Live Programming — *listing built with approved empty states (Stage 0); real session data, watch view, and live filters in S7*  **[public hero feature]**
+- [ ] `/apply` — *form UI built (Stage 0, single "Your name" field per D5, honest no-op); live submit = sign-up → pending account + application record (zod + rate limit + Turnstile) in S3c*
+- [x] `/about`, `/contact` (form UI built; sends via Resend in S8b), `/focus-areas` (secondary route, linked from page bodies), `/privacy`, `/terms` (placeholder legal copy, counsel before launch)
+- [ ] Lead magnets: the two public booklets (*The House Promise*, *Operating Model & Governance*) — *capture forms built (Stage 0, honest no-op); Mailchimp tags `lead-booklet-a` / `lead-booklet-b` in S8a*
+- [x] SEO: per-route metadata, `sitemap.ts`, `robots.ts`, OG image, JSON-LD (Organization, WebSite)
 
 ### Auth & access
 - [ ] `/login`, `/forgot-password`, `/update-password` (no separate signup — retired, merged into Apply)
