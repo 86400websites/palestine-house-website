@@ -23,7 +23,7 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Full history so the secret scan covers every commit in the PR.
           fetch-depth: 0
