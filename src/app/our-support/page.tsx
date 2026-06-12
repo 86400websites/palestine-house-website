@@ -232,23 +232,8 @@ export default function OurSupportPage() {
         </Reveal>
       </section>
 
-      {/* 7 — Lead magnet */}
-      <section className="ph-section bg-hero">
-        <Reveal className="ph-container leadmagnet">
-          <p className="ph-eyebrow">Free reads</p>
-          <h2>See two of the foundations for yourself — free, no account needed.</h2>
-          <p className="leadmagnet-books">
-            <strong>The House Promise</strong> — what a House is, and why it
-            matters.
-            <br />
-            <strong>Operating Model &amp; Governance</strong> — how a House
-            actually runs.
-          </p>
-          <LeadForm idPrefix="sup-lead" />
-        </Reveal>
-      </section>
-
-      {/* 8 — Closing CTA */}
+      {/* 7 — Closing CTA (moved before the lead magnet so the page ends on
+          the booklet block like every other page — owner decision, 2026-06-12) */}
       <section className="ph-section-lg">
         <Reveal className="ph-container statement">
           <p className="ph-eyebrow">Behind every House</p>
@@ -273,6 +258,22 @@ export default function OurSupportPage() {
           <p className="page-hero-support" style={{ textAlign: "center" }}>
             Every application is reviewed by HQ.
           </p>
+        </Reveal>
+      </section>
+
+      {/* 8 — Lead magnet (page closer, consistent with Experience/Bring) */}
+      <section className="ph-section bg-hero">
+        <Reveal className="ph-container leadmagnet">
+          <p className="ph-eyebrow">Free reads</p>
+          <h2>See two of the foundations for yourself — free, no account needed.</h2>
+          <p className="leadmagnet-books">
+            <strong>The House Promise</strong> — what a House is, and why it
+            matters.
+            <br />
+            <strong>Operating Model &amp; Governance</strong> — how a House
+            actually runs.
+          </p>
+          <LeadForm idPrefix="sup-lead" />
         </Reveal>
       </section>
     </>
