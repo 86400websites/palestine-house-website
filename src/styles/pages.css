@@ -1875,7 +1875,18 @@
 
 /* --- 1 · Hero — headline + CTAs left, large art right -------------------- */
 .home-hero {
-  padding-top: var(--space-8);
+  /* Sits clear of the 72px sticky nav and composes the landing viewport
+     (owner change, 2026-06-12). */
+  padding-block: var(--space-10) var(--space-10);
+}
+@container page (min-width: 921px) {
+  .home-hero {
+    display: grid;
+    align-content: center;
+    min-height: calc(100vh - 72px);
+    min-height: calc(100svh - 72px);
+    padding-block: var(--space-8) var(--space-16);
+  }
 }
 .home-hero-grid {
   display: grid;
