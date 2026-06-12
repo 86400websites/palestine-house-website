@@ -122,8 +122,8 @@ export default function ModelPage() {
         </Reveal>
       </section>
 
-      {/* 3 — Three layers, one team */}
-      <section className="ph-section-lg bg-muted">
+      {/* 3 — Three layers, one team (artwork section — white per owner scheme) */}
+      <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head is-center">
             <p className="ph-eyebrow">How it fits together</p>

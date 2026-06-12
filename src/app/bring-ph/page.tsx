@@ -144,8 +144,8 @@ export default function BringAHousePage() {
         </Reveal>
       </section>
 
-      {/* 3 — Who brings what */}
-      <section className="ph-section-lg bg-muted">
+      {/* 3 — Who brings what (artwork section — white per owner scheme) */}
+      <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head is-center">
             <p className="ph-eyebrow">The partnership</p>
@@ -164,7 +164,7 @@ export default function BringAHousePage() {
             />
           </Reveal>
           <Reveal className="bring-split">
-            <div className="bring-panel">
+            <div className="ph-card bring-panel">
               <h3>You bring</h3>
               <ul className="bring-list">
                 {BRING_YOU.map((t) => (
@@ -177,7 +177,7 @@ export default function BringAHousePage() {
                 ))}
               </ul>
             </div>
-            <div className="bring-panel">
+            <div className="ph-card bring-panel">
               <h3>We bring</h3>
               <ul className="bring-list">
                 {BRING_WE.map((t) => (
@@ -266,7 +266,7 @@ export default function BringAHousePage() {
       </section>
 
       {/* 6 — Three rules, no exceptions */}
-      <section className="ph-section-lg bg-muted">
+      <section className="ph-section-lg ph-section-dark">
         <div className="ph-container">
           <Reveal className="sec-head">
             <p className="ph-eyebrow">The commitments</p>

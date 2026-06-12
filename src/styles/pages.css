@@ -213,7 +213,9 @@
 
 /* Big art-led hero: copy column + large painted art, editorial asymmetry. */
 .art-hero {
-  background: var(--surface-hero);
+  /* White so the white-background hero art dissolves into the page
+     (owner scheme, 2026-06-12; was var(--surface-hero)). */
+  background: var(--background);
   border-bottom: var(--border-width) solid var(--border);
   overflow: hidden;
 }
@@ -665,6 +667,51 @@
   background: var(--surface-hero);
 }
 
+/* --- On-dark overrides for .ph-section-dark (owner scheme, 2026-06-12) ----
+   Mirrors the footer's on-dark language: white text, white-80 secondary,
+   white-12 hairlines, pale green accents. */
+.ph-section-dark .statement-line {
+  color: var(--white);
+}
+.ph-section-dark
+  :is(
+    .statement-sub,
+    .split-copy p,
+    .editorial-col p,
+    .live-empty,
+    .fa-read-text,
+    .fa-entry-blurb,
+    .fa-topic-sub,
+    .fa-caps,
+    .bring-rules-close
+  ) {
+  color: rgba(255, 255, 255, 0.8);
+}
+.ph-section-dark :is(.editorial-index, .fa-letter, .fa-caps-label) {
+  color: var(--green-100);
+}
+.ph-section-dark .editorial-col {
+  border-left-color: rgba(255, 255, 255, 0.12);
+}
+.ph-section-dark .fa-entry {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+.ph-section-dark .stat-item dd {
+  color: var(--white);
+}
+.ph-section-dark .stat-item dt {
+  color: rgba(255, 255, 255, 0.8);
+}
+.ph-section-dark .fa-topic {
+  color: rgba(255, 255, 255, 0.7);
+}
+.ph-section-dark .fa-topic-title {
+  color: var(--white);
+}
+.ph-section-dark.fa-stats {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
 /* ===========================================================================
    The Model (/model) — page-specific (TheModel.html)
    ======================================================================== */
@@ -1068,9 +1115,6 @@
   margin: var(--space-8) auto 0;
 }
 .bring-panel {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-8);
 }
 .bring-panel h3 {
@@ -1265,9 +1309,6 @@
   display: flex;
   gap: var(--space-4);
   align-items: flex-start;
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-md);
   padding: var(--space-6);
 }
 .sup-artefact-icon {
@@ -1612,9 +1653,6 @@
   align-items: start;
 }
 .contact-form-card {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-8);
 }
 .contact-form-card form {
@@ -1756,9 +1794,6 @@
 
 /* The form card */
 .apply-form-card {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-10);
 }
 .apply-form-title {

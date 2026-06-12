@@ -165,8 +165,8 @@ export default function FocusAreasPage() {
         </div>
       </section>
 
-      {/* 2 — Proof line */}
-      <section className="fa-stats">
+      {/* 2 — Proof line (dark band, matching the Home proof strip) */}
+      <section className="fa-stats ph-section-dark">
         <Reveal className="ph-container">
           <dl className="stat-strip is-center">
             {FA_STATS.map((s) => (
@@ -211,7 +211,7 @@ export default function FocusAreasPage() {
       </section>
 
       {/* 4 — The full map (editorial index) */}
-      <section className="ph-section-lg bg-muted">
+      <section className="ph-section-lg ph-section-dark">
         <div className="ph-container">
           <Reveal className="sec-head fa-head-wide">
             <p className="ph-eyebrow">Ten focus areas · Thirty topics</p>

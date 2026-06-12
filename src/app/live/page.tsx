@@ -82,7 +82,7 @@ export default function LivePage() {
       </section>
 
       {/* Upcoming */}
-      <section className="ph-section bg-muted">
+      <section className="ph-section ph-section-dark">
         <div className="ph-container">
           <Reveal className="live-sec-head">
             <div>

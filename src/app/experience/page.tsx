@@ -178,7 +178,7 @@ export default function ExperiencePage() {
       </section>
 
       {/* 4 — Live strip (designed empty state until S7 wires the feed) */}
-      <section className="ph-section-lg bg-muted" id="whats-on">
+      <section className="ph-section-lg ph-section-dark" id="whats-on">
         <div className="ph-container">
           <Reveal className="exp-live-head">
             <div className="sec-head">

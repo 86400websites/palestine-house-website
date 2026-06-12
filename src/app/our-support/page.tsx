@@ -112,7 +112,7 @@ export default function OurSupportPage() {
           </Reveal>
           <Reveal className="sup-artefacts">
             {SUP_ARTEFACTS.map((a) => (
-              <div key={a.name} className="sup-artefact">
+              <div key={a.name} className="ph-card sup-artefact">
                 <span className="sup-artefact-icon">
                   <a.icon size={20} aria-hidden="true" />
                 </span>
@@ -157,7 +157,7 @@ export default function OurSupportPage() {
       </section>
 
       {/* 4 — Aswātna */}
-      <section className="ph-section-lg bg-muted">
+      <section className="ph-section-lg ph-section-dark">
         <div className="ph-container split is-centered">
           <Reveal className="split-a sec-head">
             <p className="ph-eyebrow">Aswātna</p>
