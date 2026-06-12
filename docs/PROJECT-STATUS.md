@@ -8,10 +8,10 @@
 
 | | |
 |---|---|
-| **Current stage** | Stage 1 — Connect & launch the barebones site |
-| **Active sprint** | 1.2 Vercel envs + 1.3 Supabase auth URLs (owner dashboard steps) |
-| **Next action** | Owner: correct the three Supabase env values in Vercel to the **palestine-house** project (`jwogtqizqujwhbvpoziu` — the values first added belong to the Singapore Way project) + redeploy; rotate the Singapore Way project's secret key; merge PR #13; branch protection rule on `main`; secret scanning ON; Supabase Auth URL config (Site URL + 3 redirects). Then Stage 1 exit gate ✅ |
-| **Production URL** | Vercel domain — Production deploys automatically from `main` (Stage 0 merge = first full-site deploy); record the URL here once `NEXT_PUBLIC_SITE_URL` is set |
+| **Current stage** | **Stage 1 COMPLETE — barebones site LIVE.** Next: S1 design consistency pass |
+| **Active sprint** | — (between sprints; S1 next) |
+| **Next action** | Owner: confirm the Vercel Supabase values point at `jwogtqizqujwhbvpoziu` (not the Singapore project) and the Singapore secret key was rotated; review Dependabot PRs with Claude; then start **S1 — design consistency pass** (incl. artwork compression) |
+| **Production URL** | **https://palestine-house-website.vercel.app** — live, verified 2026-06-12 (headers, canonical, sitemap, robots, OG, 404, copy) |
 | **Last updated** | 2026-06-12 — Stage 0 merged (PR #4) · 1.1 merged (PR #5) · Supabase production ref recorded |
 
 ### How to resume in a fresh AI session
@@ -35,9 +35,9 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | 0.5 Apply UI + auth UI + legal + SEO | ✅ | #4 | 2026-06-12 | Apply + auth forms no-op honestly until S3; legal pages carry the approved counsel-review note; sitemap/robots/OG/JSON-LD live |
 | **Stage 0 exit gate** | ✅ | #4 | 2026-06-12 | Build-side gate + owner Preview sign-off passed; merged to `main` |
 | 1.1 GitHub (protection + CI) | ✅ | #5 | 2026-06-12 | gitleaks + Dependabot merged; owner Settings items (visibility→private, protection rule, secret scanning) tracked in §1 |
-| 1.2 Vercel (envs + production deploy) | ⬜ | | | Vercel connected, Preview verified (PR #2); still to do: env vars per environment + first Production deploy |
-| 1.3 Supabase projects (prod + non-prod, auth URLs) | 🔵 | | 2026-06-12 | Production project created (ref `jwogtqizqujwhbvpoziu`); **non-production project deferred to the start of S2** (owner decision — see §4); auth URLs to configure |
-| **Stage 1 exit gate — barebones site LIVE** | ⬜ | | | |
+| 1.2 Vercel (envs + production deploy) | ✅ | | 2026-06-12 | `NEXT_PUBLIC_SITE_URL` + Supabase vars set (Production only) and redeployed; live site verified |
+| 1.3 Supabase projects (prod + non-prod, auth URLs) | ✅ | | 2026-06-12 | Production project `jwogtqizqujwhbvpoziu` configured (Site URL + 3 redirects); **non-prod project at S2 start in a free org** (owner decision, §4) |
+| **Stage 1 exit gate — barebones site LIVE** | ✅ | | 2026-06-12 | https://palestine-house-website.vercel.app verified (headers/canonical/sitemap/robots/OG/404/copy); CI + protection live; Preview pipeline working |
 | S1 Design consistency pass (1a–1d) | ⬜ | | | |
 | S2 DB phase 1 — identity & approval (2a–2b) | ⬜ | | | |
 | S3 Auth complete (3a–3c, Apply live) | ⬜ | | | |
@@ -102,7 +102,7 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | Item | Value |
 |---|---|
 | GitHub repo | `86400websites/palestine-house-website` |
-| Vercel project / team slug | Connected (Preview verified); record slug here at Stage 1.2 |
+| Vercel project / team slug | `palestine-house-website` / `86400-s-projects` — production: https://palestine-house-website.vercel.app |
 | Supabase production ref | `jwogtqizqujwhbvpoziu` |
 | Supabase non-production ref | To create at the start of S2 (owner decision, 2026-06-12 — see §4) |
 | Mailchimp audience | TBD (S8 — owner adds env vars) |
