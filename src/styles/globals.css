@@ -276,6 +276,14 @@
     border-radius: var(--radius-sm);
   }
 
+  /* On dark surfaces the green ring falls under the 3:1 non-text minimum —
+     use the pale green tint there (S1 1d audit, 2026-06-12). */
+  .phx-footer :where(a, button, input, select, textarea, [tabindex]):focus-visible,
+  .ph-section-dark
+    :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline-color: var(--green-100);
+  }
+
   * {
     border-color: var(--border);
   }
