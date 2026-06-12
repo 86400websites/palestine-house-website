@@ -134,9 +134,11 @@
 .feature-card {
   display: flex;
   flex-direction: column;
-  background: var(--surface-card);
+  /* Premium card recipe (owner scheme, 2026-06-12) — keep in sync with .ph-card */
+  background: var(--white);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   padding: var(--space-7);
   transition:
     transform var(--duration) var(--ease-out),
@@ -213,7 +215,9 @@
 
 /* Big art-led hero: copy column + large painted art, editorial asymmetry. */
 .art-hero {
-  background: var(--surface-hero);
+  /* White so the white-background hero art dissolves into the page
+     (owner scheme, 2026-06-12; was var(--surface-hero)). */
+  background: var(--background);
   border-bottom: var(--border-width) solid var(--border);
   overflow: hidden;
 }
@@ -665,6 +669,51 @@
   background: var(--surface-hero);
 }
 
+/* --- On-dark overrides for .ph-section-dark (owner scheme, 2026-06-12) ----
+   Mirrors the footer's on-dark language: white text, white-80 secondary,
+   white-12 hairlines, pale green accents. */
+.ph-section-dark .statement-line {
+  color: var(--white);
+}
+.ph-section-dark
+  :is(
+    .statement-sub,
+    .split-copy p,
+    .editorial-col p,
+    .live-empty,
+    .fa-read-text,
+    .fa-entry-blurb,
+    .fa-topic-sub,
+    .fa-caps,
+    .bring-rules-close
+  ) {
+  color: rgba(255, 255, 255, 0.8);
+}
+.ph-section-dark :is(.editorial-index, .fa-letter, .fa-caps-label) {
+  color: var(--green-100);
+}
+.ph-section-dark .editorial-col {
+  border-left-color: rgba(255, 255, 255, 0.12);
+}
+.ph-section-dark .fa-entry {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+.ph-section-dark .stat-item dd {
+  color: var(--white);
+}
+.ph-section-dark .stat-item dt {
+  color: rgba(255, 255, 255, 0.8);
+}
+.ph-section-dark .fa-topic {
+  color: rgba(255, 255, 255, 0.7);
+}
+.ph-section-dark .fa-topic-title {
+  color: var(--white);
+}
+.ph-section-dark.fa-stats {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
 /* ===========================================================================
    The Model (/model) — page-specific (TheModel.html)
    ======================================================================== */
@@ -825,9 +874,11 @@
 .live-card {
   display: flex;
   flex-direction: column;
-  background: var(--surface-card);
+  /* Premium card recipe (owner scheme, 2026-06-12) — keep in sync with .ph-card */
+  background: var(--white);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition:
     transform var(--duration) var(--ease-out),
@@ -1068,9 +1119,6 @@
   margin: var(--space-8) auto 0;
 }
 .bring-panel {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-8);
 }
 .bring-panel h3 {
@@ -1265,9 +1313,6 @@
   display: flex;
   gap: var(--space-4);
   align-items: flex-start;
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-md);
   padding: var(--space-6);
 }
 .sup-artefact-icon {
@@ -1612,9 +1657,6 @@
   align-items: start;
 }
 .contact-form-card {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-8);
 }
 .contact-form-card form {
@@ -1756,9 +1798,6 @@
 
 /* The form card */
 .apply-form-card {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-10);
 }
 .apply-form-title {
@@ -1840,7 +1879,18 @@
 
 /* --- 1 · Hero — headline + CTAs left, large art right -------------------- */
 .home-hero {
-  padding-top: var(--space-8);
+  /* Sits clear of the 72px sticky nav and composes the landing viewport
+     (owner change, 2026-06-12). */
+  padding-block: var(--space-10) var(--space-10);
+}
+@container page (min-width: 921px) {
+  .home-hero {
+    display: grid;
+    align-content: center;
+    min-height: calc(100vh - 72px);
+    min-height: calc(100svh - 72px);
+    padding-block: var(--space-8) var(--space-16);
+  }
 }
 .home-hero-grid {
   display: grid;
@@ -1923,17 +1973,7 @@
 .home-feel-card {
   display: flex;
   flex-direction: column;
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition:
-    transform var(--duration) var(--ease-out),
-    box-shadow var(--duration) var(--ease-out);
-}
-.home-feel-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
 }
 .home-feel-art {
   padding: var(--space-3) var(--space-3) 0;
@@ -2020,9 +2060,7 @@
 }
 
 /* --- 4 · Proof numbers — stated plainly, centred -------------------------- */
-.home-proof {
-  background: var(--surface-muted);
-}
+/* .home-proof background comes from .ph-section-dark (owner scheme, 2026-06-12) */
 .home-proof-inner {
   text-align: center;
 }
@@ -2053,12 +2091,12 @@
   font-size: clamp(2.25rem, 2.6vw + 1rem, 3.5rem);
   line-height: 1;
   letter-spacing: var(--tracking-tight);
-  color: var(--foreground);
+  color: var(--white);
 }
 .home-proof-item dt {
   font: var(--text-ui);
   font-weight: var(--weight-medium);
-  color: var(--muted-foreground);
+  color: rgba(255, 255, 255, 0.8);
 }
 @container page (max-width: 860px) {
   .home-proof-strip {
@@ -2080,9 +2118,6 @@
   max-width: 32rem;
 }
 .home-platform-card {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-10);
 }
 .home-platform-title {

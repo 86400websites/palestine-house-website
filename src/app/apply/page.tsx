@@ -104,7 +104,7 @@ export default function ApplyPage() {
             </div>
           </Reveal>
 
-          <Reveal className="apply-form-card">
+          <Reveal className="ph-card apply-form-card">
             <h2 className="apply-form-title">The application.</h2>
             <div className="apply-form-divider">
               <TatreezDivider width="120px" opacity={0.7} />

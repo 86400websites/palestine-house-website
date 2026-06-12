@@ -26,7 +26,7 @@ When the user gives a rough dump, a sprint ID (e.g. "0.1", "S3a"), or says "plan
    - **A. Diagnosis** — 2–4 lines: what this sprint achieves and why now.
    - **B. Sprint goal & scope** — exact scope from ROADMAP + anything explicitly added/excluded.
    - **C. Branch name** — per CLAUDE.md convention, e.g. `claude/sprint-0-1-foundation`.
-   - **D. Step checklist** — sequential build steps for this sprint, each small and verifiable.
+   - **D. Step checklist** — sequential build steps for this sprint, each small and verifiable. These become the numbered **gated sub-steps** in the prompt (section E) — the owner gates each one with "proceed".
    - **E. Ready-to-copy Claude Code prompt** — one clean code block using the template below. *(Bug-fix variant: same template, but replace the Goal block with `Problem: <paste the bug/error/behavior>` and add to the report: root cause + fix summary. UI-only variant: add "reuse existing components/styles; no new dependencies; responsive + accessible".)*
    - **F. Optional Codex review prompt** — only for risky sprints (auth, approval gate, RLS/schema, env, headers, CSP); use the template below. Otherwise say review is optional and skip it.
    - **G. Checklists** — don't restate; point to `WORKFLOW.md` §9 (local), §10 (PR), §11 (Preview), §12 (merge), §13 (rollback).
@@ -34,7 +34,7 @@ When the user gives a rough dump, a sprint ID (e.g. "0.1", "S3a"), or says "plan
 
 ### Implementation prompt template (Mode A, section E)
 
-Fill the bracketed parts; keep everything else. Do not weaken the safety lines.
+Fill the bracketed parts; keep everything else. Do not weaken the safety lines. Every sprint prompt is a **gated master prompt**: the work is split into numbered sub-steps, and after each one the engine must self-review, fix, verify nothing is broken, commit, report briefly, then **STOP and wait for the owner's "proceed"** — exactly the protocol proven in `docs/sprint-prompts/stage-0-master-prompt.md`.
 
 ```text
 You are my senior engineer for the Palestine House website, working in Claude Code.
@@ -46,6 +46,23 @@ Branch: [claude/sprint-x-y-name] (create from latest main)
 
 Goal:
 [2–5 lines: exactly what this sprint delivers, from ROADMAP + the user's intent]
+
+Execute in gated sub-steps (one owner gate after each):
+[1. (1a) <first sub-step — small and verifiable>]
+[2. (1b) <next sub-step>]
+[…]
+[N. Sprint exit gate — full-diff review of the whole sprint, fix everything found, update docs/PROJECT-STATUS.md + tick docs/ROADMAP.md]
+
+Per-step protocol (every sub-step, no exceptions):
+1. Read the exact locked input(s) for this sub-step BEFORE coding.
+2. Build it: smallest safe change, one focused concern.
+3. Verify: pnpm run typecheck && pnpm run lint && pnpm run build; spot-check the affected routes and confirm nothing else broke.
+4. Self-review the diff for bugs and fix them before committing (full review happens at the exit-gate step).
+5. Commit AND push to the task branch — every sub-step, so the owner can review live in the open PR.
+6. Report in ≤6 lines: what shipped, checks run, anything flagged — then STOP and WAIT for "proceed". Never start the next sub-step without it.
+
+Owner remote commands: "proceed" = next step · "pause" = hold · "status" = where are we ·
+"fix <thing>" = fix before continuing · "skip to <n>" = jump (record the skip in PROJECT-STATUS.md).
 
 Locked inputs (never invent, never paraphrase):
 - Copy, verbatim: docs/page-copy/[exact file(s)]
@@ -70,7 +87,7 @@ Verification (must pass before reporting done):
 
 When the sprint is complete, in the same branch: update docs/PROJECT-STATUS.md (§1, §2, change log) and tick the sprint in docs/ROADMAP.md.
 
-Report at the end: summary · files changed · commands + results · risks/follow-ups · suggested commit message · sprint status. Push policy: commit after every gated sub-step, and push if the owner's standing push-per-step authorization applies (granted 2026-06-12); never merge, never push beyond the task branch.
+Report at the end: summary · files changed · commands + results · risks/follow-ups · suggested commit message · sprint status. Push policy: commit + push after every gated sub-step (standing authorization, 2026-06-12) so the owner reviews in the open PR; never merge, never push beyond the task branch.
 ```
 
 ### Codex review prompt template (Mode A, section F — risky sprints only)
@@ -109,6 +126,7 @@ If the user asks for a prompt that is *not* a sprint for this repo (research, wr
 ## Never
 
 - Never plan more than one sprint/phase at a time, or bundle sprints into one branch.
+- Never write an implementation prompt without the gated sub-step protocol, and never let the engine run past a sub-step without the owner's "proceed".
 - Never write copy or invent design values in the prompt — point to the exact locked files.
 - Never include secret values anywhere; env vars by name only.
 - Never instruct pushing/merging — the owner decides; prompts end with "do not push unless I explicitly ask".

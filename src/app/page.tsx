@@ -34,7 +34,7 @@ const HOME_FEELS = [
   {
     key: "cafe",
     id: "PH-FOOD-02",
-    text: "A café where the za’atar is someone’s grandmother’s recipe.",
+    text: "A café where the recipes are here to stay.",
     alt: "A still-life illustration of knafeh and za’atar on the House’s long table in warm light.",
   },
   {
@@ -110,7 +110,10 @@ export default function HomePage() {
           <div className="home-feels-grid">
             {HOME_FEELS.map((f, i) => (
               <Reveal key={f.key} delay={i * 0.09}>
-                <article data-feel={f.key} className="home-feel-card">
+                <article
+                  data-feel={f.key}
+                  className="ph-card ph-card--lift home-feel-card"
+                >
                   <div className="home-feel-art">
                     <Artwork assetId={f.id} alt={f.alt} ratio="3 / 2" />
                   </div>
@@ -159,7 +162,7 @@ export default function HomePage() {
       </section>
 
       {/* 4 — A complete system, not a binder (proof numbers) */}
-      <section className="ph-section-lg home-proof">
+      <section className="ph-section-lg ph-section-dark home-proof">
         <Reveal className="ph-container home-proof-inner">
           <div className="home-proof-head">
             <h2>A complete system, not a binder.</h2>
@@ -195,7 +198,7 @@ export default function HomePage() {
             </p>
           </Reveal>
           <Reveal delay={0.12}>
-            <div className="home-platform-card">
+            <div className="ph-card home-platform-card">
               <h2 className="home-platform-title">
                 A private platform for partners.
               </h2>

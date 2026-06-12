@@ -30,7 +30,7 @@ export default function ContactPage() {
       {/* 2 — Form + art */}
       <section className="ph-section-lg">
         <div className="ph-container contact-grid">
-          <Reveal className="contact-form-card">
+          <Reveal className="ph-card contact-form-card">
             <ContactForm />
           </Reveal>
           <Reveal className="contact-art">

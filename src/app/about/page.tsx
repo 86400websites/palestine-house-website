@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
 import { TatreezDivider } from "@/components/shared/tatreez-divider";
+import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
-import { Button } from "@/components/ui/button";
 
 /* About (/about) — short, human manifesto. Copy verbatim from
    docs/page-copy/01-public-pages/about.md; layout from
@@ -90,20 +88,7 @@ export default function AboutPage() {
             <br />
             Discipline delivers.
           </p>
-          <div className="page-hero-ctas" style={{ justifyContent: "center" }}>
-            <Button asChild size="lg">
-              <Link href="/apply">
-                Apply to bring a House
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/contact">Contact</Link>
-            </Button>
-          </div>
-          <p className="page-hero-support" style={{ textAlign: "center" }}>
-            Every application is reviewed by HQ.
-          </p>
+          <ApplyCta secondaryHref="/contact" secondaryLabel="Contact" />
         </Reveal>
       </section>
     </>

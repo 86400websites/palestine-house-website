@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight, Lock, LockOpen } from "lucide-react";
+import { Lock, LockOpen } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
+import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
-import { Button } from "@/components/ui/button";
 
 /* Focus Areas (/focus-areas) — the public, anon-safe map of the playbook:
    titles + overviews only; full depth opens to approved partners. Copy
@@ -165,8 +164,8 @@ export default function FocusAreasPage() {
         </div>
       </section>
 
-      {/* 2 — Proof line */}
-      <section className="fa-stats">
+      {/* 2 — Proof line (dark band, matching the Home proof strip) */}
+      <section className="fa-stats ph-section-dark">
         <Reveal className="ph-container">
           <dl className="stat-strip is-center">
             {FA_STATS.map((s) => (
@@ -211,7 +210,7 @@ export default function FocusAreasPage() {
       </section>
 
       {/* 4 — The full map (editorial index) */}
-      <section className="ph-section-lg bg-muted">
+      <section className="ph-section-lg ph-section-dark">
         <div className="ph-container">
           <Reveal className="sec-head fa-head-wide">
             <p className="ph-eyebrow">Ten focus areas · Thirty topics</p>
@@ -264,17 +263,7 @@ export default function FocusAreasPage() {
             You’ve seen the map. The guides, checklists, videos, and templates
             behind every topic open to approved partners.
           </p>
-          <div className="page-hero-ctas" style={{ justifyContent: "center" }}>
-            <Button asChild size="lg">
-              <Link href="/apply">
-                Apply to bring a House
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
-          </div>
-          <p className="page-hero-support" style={{ textAlign: "center" }}>
-            Every application is reviewed by HQ.
-          </p>
+          <ApplyCta />
         </Reveal>
       </section>
     </>

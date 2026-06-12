@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
+import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/sections/lead-form";
@@ -112,7 +113,7 @@ export default function OurSupportPage() {
           </Reveal>
           <Reveal className="sup-artefacts">
             {SUP_ARTEFACTS.map((a) => (
-              <div key={a.name} className="sup-artefact">
+              <div key={a.name} className="ph-card sup-artefact">
                 <span className="sup-artefact-icon">
                   <a.icon size={20} aria-hidden="true" />
                 </span>
@@ -157,7 +158,7 @@ export default function OurSupportPage() {
       </section>
 
       {/* 4 — Aswātna */}
-      <section className="ph-section-lg bg-muted">
+      <section className="ph-section-lg ph-section-dark">
         <div className="ph-container split is-centered">
           <Reveal className="split-a sec-head">
             <p className="ph-eyebrow">Aswātna</p>
@@ -232,7 +233,23 @@ export default function OurSupportPage() {
         </Reveal>
       </section>
 
-      {/* 7 — Lead magnet */}
+      {/* 7 — Closing CTA (moved before the lead magnet so the page ends on
+          the booklet block like every other page — owner decision, 2026-06-12) */}
+      <section className="ph-section-lg">
+        <Reveal className="ph-container statement">
+          <p className="ph-eyebrow">Behind every House</p>
+          <h2 className="statement-line sup-statement-h">
+            This is what’s behind every House.
+          </h2>
+          <p className="statement-sub">
+            If you’re ready to open one in your city, apply — every application
+            is reviewed by HQ.
+          </p>
+          <ApplyCta secondaryHref="/bring-ph" secondaryLabel="See what it takes" />
+        </Reveal>
+      </section>
+
+      {/* 8 — Lead magnet (page closer, consistent with Experience/Bring) */}
       <section className="ph-section bg-hero">
         <Reveal className="ph-container leadmagnet">
           <p className="ph-eyebrow">Free reads</p>
@@ -245,34 +262,6 @@ export default function OurSupportPage() {
             actually runs.
           </p>
           <LeadForm idPrefix="sup-lead" />
-        </Reveal>
-      </section>
-
-      {/* 8 — Closing CTA */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">Behind every House</p>
-          <h2 className="statement-line sup-statement-h">
-            This is what’s behind every House.
-          </h2>
-          <p className="statement-sub">
-            If you’re ready to open one in your city, apply — every application
-            is reviewed by HQ.
-          </p>
-          <div className="page-hero-ctas" style={{ justifyContent: "center" }}>
-            <Button asChild size="lg">
-              <Link href="/apply">
-                Apply to bring a House
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/bring-ph">See what it takes</Link>
-            </Button>
-          </div>
-          <p className="page-hero-support" style={{ textAlign: "center" }}>
-            Every application is reviewed by HQ.
-          </p>
         </Reveal>
       </section>
     </>
