@@ -311,6 +311,41 @@
   padding-block: var(--section-y-lg);
 }
 
+/* Dark editorial section — the footer's surface language for statement
+   sections without artwork (owner decision, 2026-06-12). Artwork sections
+   stay white so the white-background art dissolves into the page. */
+.ph-section-dark {
+  background: var(--ink-900);
+  color: var(--white);
+}
+.ph-section-dark :is(h1, h2, h3) {
+  color: var(--white);
+}
+.ph-section-dark .ph-lead {
+  color: rgba(255, 255, 255, 0.8);
+}
+.ph-section-dark .ph-eyebrow {
+  color: var(--green-100);
+}
+
+/* Premium card — white surface so House artwork dissolves into it;
+   hairline border + soft layered shadow (owner decision, 2026-06-12). */
+.ph-card {
+  background: var(--white);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.ph-card--lift {
+  transition:
+    transform var(--duration) var(--ease-out),
+    box-shadow var(--duration) var(--ease-out);
+}
+.ph-card--lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
 /* Centered single-column stack — interim pages, 404, error states. */
 .ph-center-stack {
   display: flex;

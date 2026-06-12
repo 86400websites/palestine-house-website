@@ -1923,17 +1923,7 @@
 .home-feel-card {
   display: flex;
   flex-direction: column;
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition:
-    transform var(--duration) var(--ease-out),
-    box-shadow var(--duration) var(--ease-out);
-}
-.home-feel-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
 }
 .home-feel-art {
   padding: var(--space-3) var(--space-3) 0;
@@ -2020,9 +2010,7 @@
 }
 
 /* --- 4 · Proof numbers — stated plainly, centred -------------------------- */
-.home-proof {
-  background: var(--surface-muted);
-}
+/* .home-proof background comes from .ph-section-dark (owner scheme, 2026-06-12) */
 .home-proof-inner {
   text-align: center;
 }
@@ -2053,12 +2041,12 @@
   font-size: clamp(2.25rem, 2.6vw + 1rem, 3.5rem);
   line-height: 1;
   letter-spacing: var(--tracking-tight);
-  color: var(--foreground);
+  color: var(--white);
 }
 .home-proof-item dt {
   font: var(--text-ui);
   font-weight: var(--weight-medium);
-  color: var(--muted-foreground);
+  color: rgba(255, 255, 255, 0.8);
 }
 @container page (max-width: 860px) {
   .home-proof-strip {
@@ -2080,9 +2068,6 @@
   max-width: 32rem;
 }
 .home-platform-card {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-10);
 }
 .home-platform-title {
