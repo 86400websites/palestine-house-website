@@ -80,6 +80,8 @@ Do not merge anything.
 
 ## Stage 0 record (outcome)
 
+**Merged:** PR #4 → `main` (`efb0b04`), 2026-06-12. Owner verified the Preview and merged; branch deleted.
+
 **What shipped:** the complete public shell — locked chrome (header with tooltip nav + mega-menus + mobile Sheet, dark footer with lead form), 12 public pages, 3 auth UI shells, branded 404/error, design tokens + 5 page-pattern CSS layers ported from the mockups, motion primitives (lazy-loaded Framer features), security headers + tight CSP, 18 final artworks, SEO layer (canonicals, sitemap, robots, OG image, JSON-LD).
 
 **Checks & results:** typecheck ✅ lint ✅ build ✅ on every step (19 production builds) · copy verified verbatim per page by grep against `page-copy/` (200+ strings) · proof numbers correct everywhere they appear · chrome identical on all 16 routes (incl. 404) · reduced-motion respected (global CSS + `useReducedMotion`) · canonicals verified per-route · security headers verified on responses · two multi-angle /code-review passes (foundation + exit gate), all confirmed findings fixed.

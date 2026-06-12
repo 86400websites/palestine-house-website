@@ -1,0 +1,17 @@
+# Dependabot — weekly dependency + Actions update PRs (ROADMAP Stage 1.1).
+# Each PR still runs the full CI gate; merge only after CI + Preview pass.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

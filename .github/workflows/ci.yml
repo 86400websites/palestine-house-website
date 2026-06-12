@@ -24,6 +24,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history so the secret scan covers every commit in the PR.
+          fetch-depth: 0
+
+      # Fails the run if a secret is committed (WORKFLOW.md / TECH-ARCHITECTURE §16).
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # pnpm version comes from the "packageManager" field in package.json.
       - name: Enable Corepack

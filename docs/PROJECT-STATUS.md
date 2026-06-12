@@ -8,11 +8,11 @@
 
 | | |
 |---|---|
-| **Current stage** | Stage 0 — Foundational build (**COMPLETE, pending owner Preview sign-off + merge**) |
-| **Active sprint** | Stage 0 exit gate — all build items done on `claude/sprint-0-1-foundation` (13 gated sub-steps, `docs/sprint-prompts/stage-0-master-prompt.md`) |
-| **Next action** | Owner: verify the branch Preview at 320px→desktop against the mockups, open the Stage 0 PR, merge. Then Stage 1 remainder: 1.1 (gitleaks + branch protection + Dependabot), 1.2 (env vars + first Production deploy), 1.3 (Supabase projects) |
-| **Production URL** | — (Vercel project connected; branch Preview carries the full public site) |
-| **Last updated** | 2026-06-12 — Stage 0 complete: 12 public pages + 3 auth shells + chrome + SEO, exit-gate review passed |
+| **Current stage** | Stage 1 — Connect & launch the barebones site |
+| **Active sprint** | 1.1 GitHub hardening (gitleaks + Dependabot in PR; branch protection + secret scanning = owner Settings) → then 1.2 env vars, 1.3 Supabase projects |
+| **Next action** | Owner: merge the 1.1 PR; flip branch protection + secret scanning in GitHub Settings; add `NEXT_PUBLIC_SITE_URL` in Vercel (Production) and redeploy; create the two Supabase projects (1.3) |
+| **Production URL** | Vercel domain — Production deploys automatically from `main` (Stage 0 merge = first full-site deploy); record the URL here once `NEXT_PUBLIC_SITE_URL` is set |
+| **Last updated** | 2026-06-12 — **Stage 0 merged to `main` (PR #4)**; Sprint 1.1 branch open |
 
 ### How to resume in a fresh AI session
 1. Read this file, then the active sprint's scope + exit gate in `ROADMAP.md`.
@@ -28,13 +28,13 @@ Status legend: ⬜ not started · 🔵 in progress · ✅ done · ⏸ blocked (s
 | Stage / Sprint | Status | Merged PR(s) | Date | Notes |
 |---|---|---|---|---|
 | 0.0 Setup pre-sprints (0a–0d: repo, scaffold, CI, Vercel preview) | ✅ | #1, #2 | 2026-06 | Scaffold (`80c7fcc`), CI workflow, Vercel Preview verified — pre-completes parts of 1.1/1.2 |
-| 0.1 Foundation (tokens, fonts, chrome, headers, 404) | ✅ | (Stage 0 PR) | 2026-06-12 | Real tokens, Spectral+Inter, motion primitives, security headers + CSP, locked chrome (mega-menus per mockup), 404/error |
-| 0.2 Home + The Model | ✅ | (Stage 0 PR) | 2026-06-12 | Built on the Stage 0 branch per the gated sub-step protocol (`docs/sprint-prompts/stage-0-master-prompt.md`) |
-| 0.3 Experience · Bring a House · Our Support | ✅ | (Stage 0 PR) | 2026-06-12 | All three pages built; Experience live strip in designed empty state until S7 |
-| 0.4 Live + Focus Areas + About + Contact | ✅ | (Stage 0 PR) | 2026-06-12 | `/live` ships the approved empty states (watch view + filters activate with real data, S7); contact form no-ops honestly until Resend (S8) |
-| 0.5 Apply UI + auth UI + legal + SEO | ✅ | (Stage 0 PR) | 2026-06-12 | Apply + auth forms no-op honestly until S3; legal pages carry the approved counsel-review note; sitemap/robots/OG/JSON-LD live |
-| **Stage 0 exit gate** | 🔵 | | 2026-06-12 | Build-side gate passed (typecheck/lint/build, copy verbatim audit, proof numbers, chrome identical on 16 routes, reduced-motion, two multi-angle code reviews + fixes). Remaining: owner visual sign-off on Preview at 320px→desktop + merge |
-| 1.1 GitHub (protection + CI) | ⬜ | | | CI live since 0c; still to do: gitleaks step in `ci.yml`, branch protection on `main`, secret scanning + Dependabot |
+| 0.1 Foundation (tokens, fonts, chrome, headers, 404) | ✅ | #4 | 2026-06-12 | Real tokens, Spectral+Inter, motion primitives, security headers + CSP, locked chrome (mega-menus per mockup), 404/error |
+| 0.2 Home + The Model | ✅ | #4 | 2026-06-12 | Built on the Stage 0 branch per the gated sub-step protocol (`docs/sprint-prompts/stage-0-master-prompt.md`) |
+| 0.3 Experience · Bring a House · Our Support | ✅ | #4 | 2026-06-12 | All three pages built; Experience live strip in designed empty state until S7 |
+| 0.4 Live + Focus Areas + About + Contact | ✅ | #4 | 2026-06-12 | `/live` ships the approved empty states (watch view + filters activate with real data, S7); contact form no-ops honestly until Resend (S8) |
+| 0.5 Apply UI + auth UI + legal + SEO | ✅ | #4 | 2026-06-12 | Apply + auth forms no-op honestly until S3; legal pages carry the approved counsel-review note; sitemap/robots/OG/JSON-LD live |
+| **Stage 0 exit gate** | ✅ | #4 | 2026-06-12 | Build-side gate + owner Preview sign-off passed; merged to `main` |
+| 1.1 GitHub (protection + CI) | 🔵 | | 2026-06-12 | gitleaks + Dependabot in the 1.1 PR; owner Settings: branch protection on `main` (require PR + CI), secret scanning ON |
 | 1.2 Vercel (envs + production deploy) | ⬜ | | | Vercel connected, Preview verified (PR #2); still to do: env vars per environment + first Production deploy |
 | 1.3 Supabase projects (prod + non-prod, auth URLs) | ⬜ | | | |
 | **Stage 1 exit gate — barebones site LIVE** | ⬜ | | | |
