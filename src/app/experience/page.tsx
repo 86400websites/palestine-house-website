@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
-import { TatreezDivider } from "@/components/shared/tatreez-divider";
+import { PageDivider } from "@/components/shared/page-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/sections/lead-form";
@@ -137,9 +137,7 @@ export default function ExperiencePage() {
         </div>
       </section>
 
-      <div className="page-divider">
-        <TatreezDivider width="160px" opacity={0.7} />
-      </div>
+      <PageDivider />
 
       {/* 3 — Five kinds of programming */}
       <section className="ph-section-lg" id="programming">
@@ -221,9 +219,7 @@ export default function ExperiencePage() {
         </Reveal>
       </section>
 
-      <div className="page-divider">
-        <TatreezDivider width="160px" opacity={0.7} />
-      </div>
+      <PageDivider />
 
       {/* 6 — Closing */}
       <section className="ph-section-lg">

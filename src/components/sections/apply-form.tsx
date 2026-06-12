@@ -14,10 +14,17 @@ import { Textarea } from "@/components/ui/textarea";
    ("Thank you — your application is in…") ships with it. */
 export function ApplyForm() {
   const [sent, setSent] = React.useState(false);
+  const confirmRef = React.useRef<HTMLDivElement>(null);
+
+  /* The confirmation replaces the form (and the focused submit button) —
+     move focus to it so keyboard/AT users land on the message. */
+  React.useEffect(() => {
+    if (sent) confirmRef.current?.focus();
+  }, [sent]);
 
   if (sent) {
     return (
-      <div className="apply-confirm" role="status">
+      <div className="apply-confirm" role="status" ref={confirmRef} tabIndex={-1}>
         <span className="apply-confirm-mark" aria-hidden="true">
           <svg viewBox="0 0 60 68" width="34" height="38" fill="none">
             <path

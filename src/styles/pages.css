@@ -417,6 +417,11 @@
   font: var(--weight-regular) var(--text-sm) / 1.4 var(--font-body);
   color: var(--status-error);
 }
+/* Neutral status note (e.g. "not switched on yet") — never error-red. */
+.auth-note {
+  font: var(--weight-regular) var(--text-sm) / 1.4 var(--font-body);
+  color: var(--muted-foreground);
+}
 .auth-confirm {
   padding-block: var(--space-4);
 }
@@ -1981,13 +1986,6 @@
     gap: var(--space-6);
     max-width: 30rem;
   }
-}
-
-/* --- Tatreez dividers between sections ------------------------------------ */
-.home-divider {
-  display: flex;
-  justify-content: center;
-  padding-block: var(--space-2);
 }
 
 /* --- 3 · One path, three stages ------------------------------------------- */

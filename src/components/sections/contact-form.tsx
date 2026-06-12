@@ -72,11 +72,14 @@ export function ContactForm() {
           Send message
           <ArrowRight aria-hidden="true" />
         </Button>
-        <span className="contact-help" role="status">
-          {sent
-            ? "Messages aren’t being delivered just yet — check back soon."
-            : "We’ll get back to you."}
-        </span>
+        {/* Approved micro-copy stays static; the live region only fills on submit. */}
+        {sent ? (
+          <span className="contact-help" role="status">
+            Messages aren’t being delivered just yet — check back soon.
+          </span>
+        ) : (
+          <span className="contact-help">We’ll get back to you.</span>
+        )}
       </div>
     </form>
   );

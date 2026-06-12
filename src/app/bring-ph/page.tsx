@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
-import { TatreezDivider } from "@/components/shared/tatreez-divider";
+import { PageDivider } from "@/components/shared/page-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/sections/lead-form";
@@ -232,9 +232,7 @@ export default function BringAHousePage() {
         </div>
       </section>
 
-      <div className="page-divider">
-        <TatreezDivider width="160px" opacity={0.7} />
-      </div>
+      <PageDivider />
 
       {/* 5 — Three checkpoints: the gates timeline */}
       <section className="ph-section-lg" id="checkpoints">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Download } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
-import { TatreezDivider } from "@/components/shared/tatreez-divider";
+import { PageDivider } from "@/components/shared/page-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/sections/lead-form";
@@ -59,13 +59,6 @@ const HOME_PROOF = [
   { n: "3", label: "gates" },
 ] as const;
 
-function HomeDivider() {
-  return (
-    <div className="home-divider">
-      <TatreezDivider width="160px" opacity={0.7} />
-    </div>
-  );
-}
 
 export default function HomePage() {
   return (
@@ -102,7 +95,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <HomeDivider />
+      <PageDivider />
 
       {/* 2 — Culture deserves more than a moment (feeling cards) */}
       <section className="ph-section-lg home-feels">
@@ -139,7 +132,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <HomeDivider />
+      <PageDivider />
 
       {/* 3 — One path, three stages */}
       <section className="ph-section-lg">
@@ -237,7 +230,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <HomeDivider />
+      <PageDivider />
 
       {/* 6 — Lead-magnet capture */}
       <section className="ph-section-lg home-leadmagnet" id="booklet">

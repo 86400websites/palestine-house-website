@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
-import { TatreezDivider } from "@/components/shared/tatreez-divider";
+import { PageDivider } from "@/components/shared/page-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -166,9 +166,7 @@ export default function ModelPage() {
         </Reveal>
       </section>
 
-      <div className="page-divider">
-        <TatreezDivider width="160px" opacity={0.7} />
-      </div>
+      <PageDivider />
 
       {/* 5 — What never bends */}
       <section className="ph-section-lg">

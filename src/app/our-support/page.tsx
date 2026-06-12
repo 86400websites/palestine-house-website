@@ -10,7 +10,7 @@ import {
   Play,
 } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
-import { TatreezDivider } from "@/components/shared/tatreez-divider";
+import { PageDivider } from "@/components/shared/page-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/sections/lead-form";
@@ -139,9 +139,7 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      <div className="page-divider">
-        <TatreezDivider width="160px" opacity={0.7} />
-      </div>
+      <PageDivider />
 
       {/* 3 — Standards */}
       <section className="ph-section-lg">
@@ -217,9 +215,7 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      <div className="page-divider">
-        <TatreezDivider width="160px" opacity={0.7} />
-      </div>
+      <PageDivider />
 
       {/* 6 — The honest counterweight */}
       <section className="ph-section-lg">

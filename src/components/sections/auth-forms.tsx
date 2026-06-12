@@ -85,7 +85,7 @@ export function LoginForm() {
           </Link>
         </div>
         {status ? (
-          <p className="auth-error" role="status">
+          <p className="auth-note" role="status">
             {status}
           </p>
         ) : null}
@@ -124,7 +124,7 @@ export function ForgotPasswordForm() {
           required
         />
         {status ? (
-          <p className="auth-error" role="status">
+          <p className="auth-note" role="status">
             {status}
           </p>
         ) : null}
@@ -184,7 +184,7 @@ export function UpdatePasswordForm() {
           error={confirmError}
         />
         {status ? (
-          <p className="auth-error" role="status">
+          <p className="auth-note" role="status">
             {status}
           </p>
         ) : null}

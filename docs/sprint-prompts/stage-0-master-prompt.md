@@ -76,4 +76,23 @@ Do not merge anything.
 | 10 | (0.5b) auth shells | ✅ 2026-06-12 — approved errors client-side; confirmations ship with real auth (S3) | see git log |
 | 11 | (0.5c) `/privacy` + `/terms` | ✅ 2026-06-12 — placeholder legal copy with visible counsel-review note (approved); [contact email] pending D4 | see git log |
 | 12 | (0.5d) SEO | ✅ 2026-06-12 — Sprint 0.5 complete: metadata + canonicals, sitemap (12 routes), robots, OG image, JSON-LD; auth pages noindexed | see git log |
-| 13 | Stage 0 exit gate | | |
+| 13 | Stage 0 exit gate | ✅ 2026-06-12 — build-side gate passed; owner Preview sign-off + merge pending | see git log |
+
+## Stage 0 record (outcome)
+
+**What shipped:** the complete public shell — locked chrome (header with tooltip nav + mega-menus + mobile Sheet, dark footer with lead form), 12 public pages, 3 auth UI shells, branded 404/error, design tokens + 5 page-pattern CSS layers ported from the mockups, motion primitives (lazy-loaded Framer features), security headers + tight CSP, 18 final artworks, SEO layer (canonicals, sitemap, robots, OG image, JSON-LD).
+
+**Checks & results:** typecheck ✅ lint ✅ build ✅ on every step (19 production builds) · copy verified verbatim per page by grep against `page-copy/` (200+ strings) · proof numbers correct everywhere they appear · chrome identical on all 16 routes (incl. 404) · reduced-motion respected (global CSS + `useReducedMotion`) · canonicals verified per-route · security headers verified on responses · two multi-angle /code-review passes (foundation + exit gate), all confirmed findings fixed.
+
+**Deviations & decisions (all owner-approved or rule-driven):**
+- Header mega-menus per mockup (owner decision, recorded in PROJECT-STATUS §4 + notes/decisions.md).
+- Home mobile: hero art stacks above headline (owner change).
+- Honest no-op submits everywhere a backend is missing — approved confirmations ship with the real flows (Apply→S3c, contact→S8b, booklets→S8a, auth→S3). Contact mockup's success string differed from the copy file; copy file wins (ships in S8b).
+- `/live` ships the three approved empty states; the mockups' session cards are fictional demo data and were not shipped.
+
+**Follow-ups (tracked):**
+- S1: compress the 2–3 MB artwork PNGs (owner sign-off — final art); consider extracting the repeated Apply-CTA block (~11 call-sites) into a shared component.
+- S3: real auth flows + approved confirmations; S3c live Apply.
+- S7: `/live` session data, watch view, live filter chips, live-now card (styles already ported); Experience live strip on the same feed.
+- S8: Mailchimp booklet capture + newsletter; Resend contact sends + approved confirmation line.
+- Before launch (S10): counsel-reviewed legal text; fill `[contact email]` (D4); navigation-copy.md "five short labels" heading vs four labels — cosmetic discrepancy in approved copy, flagged not fixed.
