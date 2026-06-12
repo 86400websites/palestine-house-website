@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight, Lock, LockOpen } from "lucide-react";
+import { Lock, LockOpen } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
+import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
-import { Button } from "@/components/ui/button";
 
 /* Focus Areas (/focus-areas) — the public, anon-safe map of the playbook:
    titles + overviews only; full depth opens to approved partners. Copy
@@ -264,17 +263,7 @@ export default function FocusAreasPage() {
             You’ve seen the map. The guides, checklists, videos, and templates
             behind every topic open to approved partners.
           </p>
-          <div className="page-hero-ctas" style={{ justifyContent: "center" }}>
-            <Button asChild size="lg">
-              <Link href="/apply">
-                Apply to bring a House
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
-          </div>
-          <p className="page-hero-support" style={{ textAlign: "center" }}>
-            Every application is reviewed by HQ.
-          </p>
+          <ApplyCta />
         </Reveal>
       </section>
     </>

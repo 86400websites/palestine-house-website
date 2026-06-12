@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
+import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -202,20 +203,7 @@ export default function ModelPage() {
             <li>Not a campaign.</li>
           </ul>
           <p className="model-leads">Culture leads.</p>
-          <div className="page-hero-ctas" style={{ justifyContent: "center" }}>
-            <Button asChild size="lg">
-              <Link href="/apply">
-                Apply to bring a House
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/our-support">See our support</Link>
-            </Button>
-          </div>
-          <p className="page-hero-support" style={{ textAlign: "center" }}>
-            Every application is reviewed by HQ.
-          </p>
+          <ApplyCta secondaryHref="/our-support" secondaryLabel="See our support" />
         </Reveal>
       </section>
     </>
