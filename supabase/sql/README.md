@@ -51,11 +51,12 @@ Each change is a **pair**: an `*.up.sql` (makes the change) and a matching `*.do
 | # | File (`migrations/…`) | In plain English, this file… |
 |---|---|---|
 | 0001 | `0001_profiles.up.sql` | Creates the **`profiles`** table — one row per signed-up user, holding the **`is_approved`** approval flag. Turns on Row Level Security so a user can read **only their own** profile, and adds a trigger that automatically creates a profile row whenever a new account is created. `is_approved` can never be set by the user themselves. |
-| 0002 | `0002_applications.up.sql` | Creates the **`applications`** table — the partner application someone submits on `/apply` (name, email, city, organisation, why). Row Level Security lets a user **insert and read only their own** application — never anyone else's. |
+| 0002 | `0002_applications.up.sql` | Creates the **`applications`** table — the partner application someone submits on `/apply` (name, email, city, organisation, why). Row Level Security lets a user **insert and read only their own** application — never anyone else's (and only in the `pending` state; tightened by 0007). |
 | 0003 | `0003_admins_helpers.up.sql` | Creates the **`admins`** table (who at HQ is an admin) — locked down so **no app user can read it at all**. Adds two safe helper functions: **`is_admin()`** and **`is_approved()`**, which tell the app whether the current user is an admin / is approved, without exposing the underlying tables. |
 | 0004 | `0004_profile_read_rpc.up.sql` | Adds **`get_my_profile()`** — a safe function that returns **only the current user's own** approval status + name. A not-yet-approved user can see their own status and nothing else. |
 | 0005 | `0005_function_execute_hardening.up.sql` | Security fix found during testing: signed-out visitors (`anon`) could still *call* the helper functions. This **removes that access** so only signed-in users can call them. |
 | 0006 | `0006_handle_new_user_execute_lockdown.up.sql` | Security fix found during the production check: the profile-creation trigger function was still callable by signed-in users (harmless, but unintended). This **locks it down** so no app role can call it directly. |
+| 0007 | `0007_applications_insert_pending_only.up.sql` | Security fix found during the independent code review: a user could create their own application **pre-set to `approved`**. This restricts the insert policy so a user can only ever create their application in the **`pending`** state — only the HQ admin path changes status later. |
 
 Every `*.down.sql` reverses **only** its own `*.up.sql`.
 
@@ -63,13 +64,13 @@ Every `*.down.sql` reverses **only** its own `*.up.sql`.
 
 | File | In plain English… |
 |---|---|
-| `S2_apply_all.sql` | Migrations **0001–0006 combined into one script**, already in their final, fixed form. Paste it once into a **fresh** database (this is what was used for production) instead of running six files by hand. It produces exactly the same result as running the migrations in order. |
+| `S2_apply_all.sql` | Migrations **0001–0007 combined into one script**, already in their final, fixed form. Paste it once into a **fresh** database instead of running the files one by one. It produces exactly the same result as running the migrations in order. |
 
 ### `verification/` — checks (run AFTER applying)
 
 | File | Where to run it | In plain English… |
 |---|---|---|
-| `S2_verify_TEST_db_only.sql` | **Test DB only** | Full security proof. It **creates throwaway test users and rows** and checks the access rules from every angle (signed-out sees nothing, a user sees only their own data, no one can self-approve, etc.). Because it writes data, **never run it on production.** |
+| `S2_verify_TEST_db_only.sql` | **Test DB** (intended) | Full security proof, checked from every angle (signed-out sees nothing, a user sees only their own data, no one can self-approve, status can't be forged, etc.). Every check runs inside `begin … rollback`, so it makes **no permanent changes** — but it's still meant for the test database. |
 | `S2_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check — looks but never writes. Confirms the tables, security, functions, trigger and policies all landed, and that signed-out users can't call the functions. Safe to run on the live database. |
 
 ---
@@ -83,7 +84,7 @@ Every `*.down.sql` reverses **only** its own `*.up.sql`.
 
 1. Open the **test** project in Supabase → **SQL Editor**.
 2. Open `migrations/0001_…up.sql`, paste the whole file, **Run**. Confirm no errors.
-3. Repeat for each file **in ascending number order** (0001 → 0002 → … → 0006).
+3. Repeat for each file **in ascending number order** (0001 → 0002 → … → 0007).
 4. Run the test verification (`verification/S2_verify_TEST_db_only.sql`) and confirm every
    `EXPECT` matches.
 5. Only then repeat steps 1–3 on the **production** project, and finish with the read-only
@@ -104,6 +105,7 @@ Record what you applied, to which database, and when, in the PR and in
 Run the matching `*.down.sql` files **in reverse number order** (newest first):
 
 ```
+0007_applications_insert_pending_only.down.sql
 0006_handle_new_user_execute_lockdown.down.sql
 0005_function_execute_hardening.down.sql
 0004_profile_read_rpc.down.sql
@@ -143,11 +145,11 @@ These mirror the binding docs — follow them, don't restate them:
 
 ## 6. Naming & how future sprints add to this folder
 
-- **Migrations** keep a single, ever-increasing number across all sprints. S2 used `0001`–`0006`;
-  the next database sprint (S5, content schema) continues at `0007`, `0008`, … Never reuse or
+- **Migrations** keep a single, ever-increasing number across all sprints. S2 used `0001`–`0007`;
+  the next database sprint (S5, content schema) continues at `0008`, `0009`, … Never reuse or
   renumber. Once a migration has been applied to production it is **immutable** — a correction
-  is a **new** numbered pair, never an edit to the old file (that's exactly why 0005 and 0006
-  exist as their own files rather than edits to 0003/0004).
+  is a **new** numbered pair, never an edit to the old file (that's exactly why 0005, 0006 and
+  0007 exist as their own files rather than edits to 0003/0004/0002).
 - **Bundles** and **verification** scripts are prefixed with the sprint (`S2_…`). Each sprint
   adds its own; they don't replace earlier ones.
 - So in a fresh session: open this folder, read this README, look at `migrations/` for the full
@@ -159,6 +161,8 @@ These mirror the binding docs — follow them, don't restate them:
 
 Migrations `0001`–`0006` have been applied to **both** the test database (`sdszcralogcrujtyghig`)
 and production (`jwogtqizqujwhbvpoziu`), and verified (test: full role matrix; production:
-read-only smoke check). Tables: `profiles`, `applications`, `admins`. No application code reads
-these yet — the Supabase clients, login, and the Apply write path arrive in S3; the approval
-queue (`/admin/approvals`) and the approval flip arrive in S4.
+read-only smoke check). **`0007` (from the independent code review) is in the repo and must be
+applied to both databases — test first, then production — and re-verified.** Tables: `profiles`,
+`applications`, `admins`. No application code reads these yet — the Supabase clients, login, and
+the Apply write path arrive in S3; the approval queue (`/admin/approvals`) and the approval flip
+arrive in S4.

@@ -29,26 +29,30 @@ where tgrelid = 'auth.users'::regclass
   and tgname = 'on_auth_user_created';
 -- EXPECT: on_auth_user_created
 
--- 4) Policies present (and admins deliberately has none)
-select tablename, policyname
+-- 4) Policy definitions (names AND rules, so policy drift is visible)
+select tablename, policyname, cmd, roles, qual, with_check
 from pg_policies
 where schemaname = 'public'
 order by tablename, policyname;
--- EXPECT:
---   applications -> applications_insert_own, applications_select_own
---   profiles     -> profiles_select_own
---   admins       -> (no rows)
+-- EXPECT (admins has NO row):
+--   applications | applications_insert_own | INSERT | {authenticated} | qual = (null) |
+--       with_check = ((user_id = ( SELECT auth.uid())) AND (status = 'pending'::text))
+--   applications | applications_select_own | SELECT | {authenticated} |
+--       qual = (user_id = ( SELECT auth.uid())) | with_check = (null)
+--   profiles     | profiles_select_own     | SELECT | {authenticated} |
+--       qual = (id = ( SELECT auth.uid())) | with_check = (null)
 
--- 5) anon has NO EXECUTE on any S2 function (the 0005 hardening)
-select p.proname, r.rolname as execute_granted_to
-from pg_proc p
-join pg_namespace n on n.oid = p.pronamespace
-cross join lateral aclexplode(p.proacl) acl
-join pg_roles r on r.oid = acl.grantee
-where n.nspname = 'public'
-  and p.proname in ('is_admin', 'is_approved', 'get_my_profile', 'handle_new_user')
-  and acl.privilege_type = 'EXECUTE'
-order by p.proname, r.rolname;
--- EXPECT: 'anon' NEVER appears. 'authenticated' appears for get_my_profile,
---         is_admin, is_approved. (The table owner / postgres may appear; that
---         is fine. The critical assertion: no row names anon.)
+-- 5) Function EXECUTE privileges, the definitive way. has_function_privilege()
+--    counts grants via PUBLIC too — a plain pg_proc.proacl join to pg_roles
+--    silently drops PUBLIC (grantee OID 0) and could miss a PUBLIC execute grant.
+select
+  has_function_privilege('anon', 'public.is_admin()', 'execute')        as anon_is_admin,
+  has_function_privilege('anon', 'public.is_approved()', 'execute')     as anon_is_approved,
+  has_function_privilege('anon', 'public.get_my_profile()', 'execute')  as anon_get_my_profile,
+  has_function_privilege('anon', 'public.handle_new_user()', 'execute') as anon_handle_new_user,
+  has_function_privilege('authenticated', 'public.handle_new_user()', 'execute') as authed_handle_new_user,
+  has_function_privilege('authenticated', 'public.is_admin()', 'execute')        as authed_is_admin,
+  has_function_privilege('authenticated', 'public.is_approved()', 'execute')     as authed_is_approved,
+  has_function_privilege('authenticated', 'public.get_my_profile()', 'execute')  as authed_get_my_profile;
+-- EXPECT: every anon_* = false AND authed_handle_new_user = false;
+--         authed_is_admin = authed_is_approved = authed_get_my_profile = true.

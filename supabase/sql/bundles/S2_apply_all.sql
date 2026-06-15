@@ -2,12 +2,13 @@
 --
 -- A single-pass apply of all of S2 to a FRESH database (e.g. production), so it
 -- need not be run as separate fragments. This is the FINAL STATE of migrations
--- 0001–0006: the functions already carry their final hardened grants (EXECUTE
--- revoked from public + anon, and handle_new_user also from authenticated —
--- the fixes that 0005 and 0006 applied after verification). Running this
--- top-to-bottom produces exactly the state verified on the non-production project.
+-- 0001–0007: the functions carry their final hardened grants (EXECUTE revoked
+-- from public + anon, and handle_new_user also from authenticated — fixes 0005
+-- and 0006), and the applications insert policy is restricted to status =
+-- 'pending' (fix 0007). Running this top-to-bottom produces exactly the state
+-- verified on the non-production project.
 --
--- The numbered files in ../migrations/ (0001 … 0006) remain the canonical,
+-- The numbered files in ../migrations/ (0001 … 0007) remain the canonical,
 -- individually-reversible record (see ../README.md) and define the rollback
 -- story (run the .down.sql files in reverse). To roll this bundle back, use those.
 --
@@ -80,7 +81,10 @@ create policy applications_insert_own
   on public.applications
   for insert
   to authenticated
-  with check (user_id = (select auth.uid()));
+  with check (
+    user_id = (select auth.uid())
+    and status = 'pending'      -- 0007: applicants may only create a pending row
+  );
 
 create policy applications_select_own
   on public.applications
