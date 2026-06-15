@@ -161,8 +161,8 @@ These mirror the binding docs — follow them, don't restate them:
 
 Migrations `0001`–`0006` have been applied to **both** the test database (`sdszcralogcrujtyghig`)
 and production (`jwogtqizqujwhbvpoziu`), and verified (test: full role matrix; production:
-read-only smoke check). **`0007` (from the independent code review) is in the repo and must be
-applied to both databases — test first, then production — and re-verified.** Tables: `profiles`,
+read-only smoke check). **`0007` (from the independent code review) has also been applied to
+both databases and re-verified.** Tables: `profiles`,
 `applications`, `admins`. No application code reads these yet — the Supabase clients, login, and
 the Apply write path arrive in S3; the approval queue (`/admin/approvals`) and the approval flip
 arrive in S4.
