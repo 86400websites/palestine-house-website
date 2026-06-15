@@ -1,59 +1,107 @@
-# Supabase SQL — apply by hand, in order
+# Database SQL — what it is and how to run it
 
-This folder holds the **versioned SQL** for the Palestine House database. There are no
-CLI migrations on this stack — every change is applied **by hand via the Supabase
-dashboard → SQL Editor**, in order, one file at a time. This README is the authoritative
-apply/rollback runbook.
+This folder holds **all the SQL for the Palestine House database**. We do **not** use
+automated migration tooling — every change is applied **by hand**, by pasting a file into
+the **Supabase dashboard → SQL Editor** and running it. This README is the plain-English
+runbook: read it first, and you'll know exactly what every file is, where it runs, and in
+what order.
 
-Read alongside the binding docs (don't restate them — follow them):
-
-- [`../../docs/WORKFLOW.md`](../../docs/WORKFLOW.md) §14 — the database change protocol.
-- [`../../docs/TECH-ARCHITECTURE.md`](../../docs/TECH-ARCHITECTURE.md) §7 — Supabase architecture (RLS default-deny, hardened `SECURITY DEFINER` rules).
-- [`../../docs/SECURITY-CHECKLIST.md`](../../docs/SECURITY-CHECKLIST.md) §5 (RLS) + §15 (Palestine House blocking invariants).
+> **New to this in a fresh session?** Read this whole file once. It is written so you don't
+> need any memory of earlier sessions to apply or roll back the database safely.
 
 ---
 
-## File naming convention
+## 1. The most important rule: test and production use the SAME migrations
+
+There is **no such thing** as a "test SQL file" and a separate "production SQL file" for the
+schema. The **same** migration files are applied to **both** databases — the **test
+(non-production) database first**, and then, only once it's verified, the **production
+database**. Keeping them identical is the whole safety model: if the two databases ever ran
+different SQL, they would drift apart and you'd hit surprise bugs later.
+
+What **does** differ between environments is only the **verification** scripts (the checks you
+run *after* applying), because one of them seeds throwaway test data and must never touch
+production. Those are clearly labelled `TEST_db_only` vs `PROD_safe_readonly`.
+
+The two databases (refs recorded in [`../../docs/PROJECT-STATUS.md`](../../docs/PROJECT-STATUS.md) §6):
+
+| Role | Project name | Ref |
+|---|---|---|
+| **Test** (non-production) | `palestine-house-test-database` | `sdszcralogcrujtyghig` |
+| **Production** (live) | `palestine-house-website` | `jwogtqizqujwhbvpoziu` |
+
+---
+
+## 2. Folder map
 
 ```
-NNNN_<name>.up.sql      forward change (create/alter)
-NNNN_<name>.down.sql    exact rollback of the matching up-file
+supabase/sql/
+├── README.md          ← this runbook
+├── migrations/        ← the actual schema changes. Apply to TEST first, then PROD,
+│                         in number order. The SAME files run on both databases.
+├── bundles/           ← optional one-paste "apply everything" scripts for a FRESH database
+└── verification/      ← checks you run AFTER applying. Clearly labelled by environment.
 ```
 
-- `NNNN` is a zero-padded sequence (`0001`, `0002`, …) that fixes apply order.
-- **Every `*.up.sql` has a matching `*.down.sql`.** The down-file reverses only its own up-file.
-- Files are **immutable once applied to production.** A correction is a *new* numbered pair, never an edit to an applied file.
-- Changes are **expand-only / backwards-compatible**: the currently deployed app code must work both before and after the SQL is applied (expand → migrate → contract).
+### `migrations/` — the schema, in order
 
-## Migration index
+Each change is a **pair**: an `*.up.sql` (makes the change) and a matching `*.down.sql`
+(undoes exactly that change). The four-digit prefix fixes the order.
 
-| Seq | File | Purpose | Sprint / step |
-|---|---|---|---|
-| 0001 | `0001_profiles` | `profiles` (incl. `is_approved`) + RLS default-deny + own-row read policy + `handle_new_user` trigger | S2 · 2a (step 2) |
-| 0002 | `0002_applications` | `applications` (mirrors the Apply form) + RLS default-deny + owner-scoped insert/read-own | S2 · 2a (step 3) |
-| 0003 | `0003_admins_helpers` | `admins` + RLS default-deny (no client read) + hardened `is_admin()` / `is_approved()` | S2 · 2a (step 4) |
-| 0004 | `0004_profile_read_rpc` | hardened `get_my_profile()` — caller-only approval status / minimal profile | S2 · 2a (step 5) |
-| 0005 | `0005_function_execute_hardening` | revoke `EXECUTE` from public **and anon** on all S2 functions (verification fix) | S2 · 2a (step 6) |
-| 0006 | `0006_handle_new_user_execute_lockdown` | revoke `EXECUTE` on `handle_new_user` from **authenticated** too (smoke-check fix) | S2 · 2a (step 7) |
+| # | File (`migrations/…`) | In plain English, this file… |
+|---|---|---|
+| 0001 | `0001_profiles.up.sql` | Creates the **`profiles`** table — one row per signed-up user, holding the **`is_approved`** approval flag. Turns on Row Level Security so a user can read **only their own** profile, and adds a trigger that automatically creates a profile row whenever a new account is created. `is_approved` can never be set by the user themselves. |
+| 0002 | `0002_applications.up.sql` | Creates the **`applications`** table — the partner application someone submits on `/apply` (name, email, city, organisation, why). Row Level Security lets a user **insert and read only their own** application — never anyone else's. |
+| 0003 | `0003_admins_helpers.up.sql` | Creates the **`admins`** table (who at HQ is an admin) — locked down so **no app user can read it at all**. Adds two safe helper functions: **`is_admin()`** and **`is_approved()`**, which tell the app whether the current user is an admin / is approved, without exposing the underlying tables. |
+| 0004 | `0004_profile_read_rpc.up.sql` | Adds **`get_my_profile()`** — a safe function that returns **only the current user's own** approval status + name. A not-yet-approved user can see their own status and nothing else. |
+| 0005 | `0005_function_execute_hardening.up.sql` | Security fix found during testing: signed-out visitors (`anon`) could still *call* the helper functions. This **removes that access** so only signed-in users can call them. |
+| 0006 | `0006_handle_new_user_execute_lockdown.up.sql` | Security fix found during the production check: the profile-creation trigger function was still callable by signed-in users (harmless, but unintended). This **locks it down** so no app role can call it directly. |
 
-> The 0001–0006 set is the S2 schema; this index is updated as each pair lands.
+Every `*.down.sql` reverses **only** its own `*.up.sql`.
 
-## Apply order (forward)
+### `bundles/` — apply everything at once (fresh database)
 
-Run the `*.up.sql` files in **ascending** sequence:
+| File | In plain English… |
+|---|---|
+| `S2_apply_all.sql` | Migrations **0001–0006 combined into one script**, already in their final, fixed form. Paste it once into a **fresh** database (this is what was used for production) instead of running six files by hand. It produces exactly the same result as running the migrations in order. |
 
-```
-0001_profiles.up.sql
-0002_applications.up.sql
-0003_admins_helpers.up.sql
-0004_profile_read_rpc.up.sql
-0005_function_execute_hardening.up.sql
-0006_handle_new_user_execute_lockdown.up.sql
-```
+### `verification/` — checks (run AFTER applying)
 
-## Rollback order (reverse)
+| File | Where to run it | In plain English… |
+|---|---|---|
+| `S2_verify_TEST_db_only.sql` | **Test DB only** | Full security proof. It **creates throwaway test users and rows** and checks the access rules from every angle (signed-out sees nothing, a user sees only their own data, no one can self-approve, etc.). Because it writes data, **never run it on production.** |
+| `S2_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check — looks but never writes. Confirms the tables, security, functions, trigger and policies all landed, and that signed-out users can't call the functions. Safe to run on the live database. |
 
-Run the `*.down.sql` files in **descending** sequence (mirror image of apply):
+---
+
+## 3. How to apply a change to a database
+
+> **Golden rule: always the test database first, production second** — and never run anything
+> on production until the test verification has fully passed.
+
+**Option A — apply the migrations one by one (the normal way):**
+
+1. Open the **test** project in Supabase → **SQL Editor**.
+2. Open `migrations/0001_…up.sql`, paste the whole file, **Run**. Confirm no errors.
+3. Repeat for each file **in ascending number order** (0001 → 0002 → … → 0006).
+4. Run the test verification (`verification/S2_verify_TEST_db_only.sql`) and confirm every
+   `EXPECT` matches.
+5. Only then repeat steps 1–3 on the **production** project, and finish with the read-only
+   `verification/S2_verify_PROD_safe_readonly.sql`.
+
+**Option B — apply the bundle (fresh database, fewer pastes):**
+
+1. On a **fresh** database, paste `bundles/S2_apply_all.sql` once and **Run**.
+2. Run the read-only `verification/S2_verify_PROD_safe_readonly.sql` to confirm.
+
+Record what you applied, to which database, and when, in the PR and in
+[`../../docs/PROJECT-STATUS.md`](../../docs/PROJECT-STATUS.md).
+
+---
+
+## 4. How to roll a change back
+
+Run the matching `*.down.sql` files **in reverse number order** (newest first):
 
 ```
 0006_handle_new_user_execute_lockdown.down.sql
@@ -64,72 +112,53 @@ Run the `*.down.sql` files in **descending** sequence (mirror image of apply):
 0001_profiles.down.sql
 ```
 
-## Consolidated apply (fresh database)
-
-For a clean one-pass apply to a fresh database (e.g. production), run
-[`apply_all_s2.sql`](./apply_all_s2.sql) instead of the separate fragments. It is the
-**final state** of 0001–0006 (the `0005`/`0006` execute-revokes folded into the function
-definitions), so it produces exactly the state verified on non-prod. The numbered
-files remain canonical and define the rollback story; the bundle is a convenience
-for applying, not a replacement. After it, run
-[`verify_s2_prod_smoke.sql`](./verify_s2_prod_smoke.sql) (read-only, seeds nothing).
+**A Vercel (code) rollback does NOT roll back the database.** If a bad deploy shipped a schema
+change, decide on purpose: keep it (only if it's backwards-compatible) or run the matching
+`*.down.sql`. Prefer fixing forward.
 
 ---
 
-## Golden rules (do not skip)
+## 5. The rules every change follows (don't skip)
 
-1. **Non-production first, always.** Apply and verify on the non-production project before
-   the production project. Production is applied only after the non-prod verification passes.
-2. **RLS default-deny from creation.** Every table enables Row Level Security in the same
-   file that creates it, before any data lands. No table is ever default-allow, even briefly.
-3. **Hardened `SECURITY DEFINER` only.** Pinned `search_path = ''`, fully-qualified objects,
-   authorization via `auth.uid()` (never trust arguments), narrow returns, and
-   `revoke execute … from public` then `grant execute … to authenticated` (or the intended role).
-4. **No secret-key path.** No application path uses the secret / `service_role` key for normal
-   user reads/writes — those go through the user session + RLS, or a granted definer RPC.
-5. **A Vercel rollback does NOT roll back the database.** If a bad deploy shipped schema,
-   decide explicitly: keep it (only if backwards-compatible) or run the matching `*.down.sql`.
-   Prefer forward-fix.
+1. **Test database first, production second.** Production is touched only after the test
+   verification passes.
+2. **Row Level Security on, default-deny, from creation.** Every table turns on RLS in the
+   same file that creates it, before any data exists. No table is ever wide-open, even briefly.
+3. **Safe functions only.** Every `SECURITY DEFINER` function pins `search_path = ''`, uses
+   fully-qualified names, decides access from `auth.uid()` (never from arguments it's handed),
+   returns only the columns needed, and has `EXECUTE` revoked from `public` + `anon` then
+   granted to `authenticated` only (lessons baked in by 0005 and 0006).
+4. **Never the secret key for user data.** No part of the app uses the Supabase secret /
+   `service_role` key for normal user reads/writes — those go through the user's own session
+   under RLS, or one of these granted functions.
+5. **Changes are additive / backwards-compatible.** The currently deployed site must work both
+   before and after a change (expand → migrate → contract).
 
-## Apply procedure (Supabase SQL Editor)
+These mirror the binding docs — follow them, don't restate them:
+[`../../docs/WORKFLOW.md`](../../docs/WORKFLOW.md) §14 (database change protocol),
+[`../../docs/TECH-ARCHITECTURE.md`](../../docs/TECH-ARCHITECTURE.md) §7 (Supabase architecture),
+[`../../docs/SECURITY-CHECKLIST.md`](../../docs/SECURITY-CHECKLIST.md) §5 + §15 (blocking invariants).
 
-For each environment (non-production, then production):
+---
 
-1. Open the Supabase project → **SQL Editor**.
-2. Open the next `*.up.sql` file in ascending order, paste its full contents, and run it.
-3. Confirm success (no errors) before moving to the next file.
-4. After the last file, run the verification below.
-5. Record what was applied, when, and to which project in the PR (and in
-   [`../../docs/PROJECT-STATUS.md`](../../docs/PROJECT-STATUS.md) at the sprint exit gate).
+## 6. Naming & how future sprints add to this folder
 
-## Verification (run on non-production before production)
+- **Migrations** keep a single, ever-increasing number across all sprints. S2 used `0001`–`0006`;
+  the next database sprint (S5, content schema) continues at `0007`, `0008`, … Never reuse or
+  renumber. Once a migration has been applied to production it is **immutable** — a correction
+  is a **new** numbered pair, never an edit to the old file (that's exactly why 0005 and 0006
+  exist as their own files rather than edits to 0003/0004).
+- **Bundles** and **verification** scripts are prefixed with the sprint (`S2_…`). Each sprint
+  adds its own; they don't replace earlier ones.
+- So in a fresh session: open this folder, read this README, look at `migrations/` for the full
+  schema history in order, and use the `S<n>_…` scripts for the sprint you're verifying.
 
-After applying, confirm the access boundary holds (full role-by-role matrix is recorded in
-the PR for S2 step 6):
+---
 
-- **anon** (signed-out): reads **zero rows** from every table; default-deny holds.
-- **authenticated, non-admin**: reads **only its own** `profiles` / `applications` row;
-  cannot read another user's rows and cannot read `admins`.
-- **helpers**: `is_approved()` and `is_admin()` return the correct boolean for the caller.
-- **denied read**: an attempt to read a table with no matching policy returns no rows / is
-  rejected — confirming default-deny rather than an accidental allow.
-- **privilege escalation blocked**: a user cannot self-set `is_approved` or insert into `admins`.
+## 7. Current state (S2)
 
-A ready-to-run script for the S2 set lives at [`verify_s2_identity_approval.sql`](./verify_s2_identity_approval.sql)
-— run it section by section on the non-production project and compare each result to its
-inline `EXPECT` comment. It is a **test helper, not a migration**: never part of the apply
-sequence, never run on production (it seeds throwaway users + rows).
-
-For **production**, run the read-only [`verify_s2_prod_smoke.sql`](./verify_s2_prod_smoke.sql)
-instead — it confirms tables/RLS/functions/policies landed and that `anon` has no `EXECUTE`
-on the S2 functions, **without seeding any data or users** into the live database.
-
-## Environments
-
-| Role | Project | Ref |
-|---|---|---|
-| Production | `palestine-house-website` | `jwogtqizqujwhbvpoziu` |
-| Non-production (test) | `palestine-house-test-database` | `sdszcralogcrujtyghig` |
-
-Production, Preview, and Development point at **different** Supabase projects — non-prod
-testing never touches the production database.
+Migrations `0001`–`0006` have been applied to **both** the test database (`sdszcralogcrujtyghig`)
+and production (`jwogtqizqujwhbvpoziu`), and verified (test: full role matrix; production:
+read-only smoke check). Tables: `profiles`, `applications`, `admins`. No application code reads
+these yet — the Supabase clients, login, and the Apply write path arrive in S3; the approval
+queue (`/admin/approvals`) and the approval flip arrive in S4.

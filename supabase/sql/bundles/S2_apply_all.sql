@@ -1,4 +1,4 @@
--- apply_all_s2.sql — S2 (Database phase 1: identity & approval) CONSOLIDATED.
+-- S2_apply_all.sql — S2 (Database phase 1: identity & approval) CONSOLIDATED.
 --
 -- A single-pass apply of all of S2 to a FRESH database (e.g. production), so it
 -- need not be run as separate fragments. This is the FINAL STATE of migrations
@@ -7,12 +7,13 @@
 -- the fixes that 0005 and 0006 applied after verification). Running this
 -- top-to-bottom produces exactly the state verified on the non-production project.
 --
--- The numbered files 0001_*.up.sql … 0005_*.up.sql remain the canonical,
--- individually-reversible record (see README.md) and define the rollback story
--- (run the .down.sql files in reverse). To roll this bundle back, use those.
+-- The numbered files in ../migrations/ (0001 … 0006) remain the canonical,
+-- individually-reversible record (see ../README.md) and define the rollback
+-- story (run the .down.sql files in reverse). To roll this bundle back, use those.
 --
 -- Apply ONLY after the non-production verification has passed. Run in the
--- Supabase SQL Editor, top to bottom, then run verify_s2_prod_smoke.sql.
+-- Supabase SQL Editor, top to bottom, then run
+-- ../verification/S2_verify_PROD_safe_readonly.sql.
 
 -- ===========================================================================
 -- profiles (0001) — identity + approval gate

@@ -1,8 +1,9 @@
--- verify_s2_prod_smoke.sql
--- Read-only post-apply smoke check for PRODUCTION. Seeds NO data and creates
--- NO users — safe to run on the live database. Run it right after
--- apply_all_s2.sql to confirm production matches the verified non-prod state.
--- Compare each result to its EXPECT comment.
+-- S2_verify_PROD_safe_readonly.sql
+-- READ-ONLY post-apply check. Seeds NO data and creates NO users, so it is SAFE
+-- to run on the production (live) database — or on any database. Run it right
+-- after applying ../bundles/S2_apply_all.sql (or the ../migrations/ set) to
+-- confirm the database matches the verified non-prod state. Compare each result
+-- to its EXPECT comment.
 
 -- 1) Tables exist + RLS enabled
 select relname, relrowsecurity

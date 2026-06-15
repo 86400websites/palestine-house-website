@@ -1,12 +1,12 @@
--- verify_s2_identity_approval.sql
--- S2 step 6 verification — run on the NON-PRODUCTION project FIRST
+-- S2_verify_TEST_db_only.sql
+-- S2 verification — RUN ONLY ON THE NON-PRODUCTION (TEST) DATABASE
 -- (palestine-house-test-database, https://sdszcralogcrujtyghig.supabase.co),
--- AFTER applying 0001 -> 0005 in order.
+-- AFTER applying every migration in ../migrations/ (0001 -> 0006) in order.
 --
--- This is a TEST HELPER, not a migration. Never run it as part of the apply
--- sequence and never on production. It seeds throwaway rows and proves the RLS
--- + approval boundary. Run it section by section in the SQL Editor and compare
--- each result to its "EXPECT" comment.
+-- This is a TEST HELPER, not a migration. It SEEDS throwaway users + rows, so
+-- NEVER run it on production. (For production, use the read-only
+-- ../verification/S2_verify_PROD_safe_readonly.sql instead.) Run it section by
+-- section in the SQL Editor and compare each result to its "EXPECT" comment.
 --
 -- PREREQUISITE: create two test users in the Dashboard
 --   (Authentication -> Users -> Add user, auto-confirm). The handle_new_user
