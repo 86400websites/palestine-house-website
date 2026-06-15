@@ -1,11 +1,11 @@
 -- apply_all_s2.sql — S2 (Database phase 1: identity & approval) CONSOLIDATED.
 --
 -- A single-pass apply of all of S2 to a FRESH database (e.g. production), so it
--- need not be run as five separate fragments. This is the FINAL STATE of
--- migrations 0001–0005: the four functions already carry their final hardened
--- grants (EXECUTE revoked from public AND anon — the fix that 0005 applied
--- after non-prod verification). Running this top-to-bottom produces exactly the
--- state that was verified on the non-production project.
+-- need not be run as separate fragments. This is the FINAL STATE of migrations
+-- 0001–0006: the functions already carry their final hardened grants (EXECUTE
+-- revoked from public + anon, and handle_new_user also from authenticated —
+-- the fixes that 0005 and 0006 applied after verification). Running this
+-- top-to-bottom produces exactly the state verified on the non-production project.
 --
 -- The numbered files 0001_*.up.sql … 0005_*.up.sql remain the canonical,
 -- individually-reversible record (see README.md) and define the rollback story
@@ -47,7 +47,7 @@ begin
 end;
 $$;
 
-revoke execute on function public.handle_new_user() from public, anon;
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
 create trigger on_auth_user_created
   after insert on auth.users

@@ -34,8 +34,9 @@ NNNN_<name>.down.sql    exact rollback of the matching up-file
 | 0003 | `0003_admins_helpers` | `admins` + RLS default-deny (no client read) + hardened `is_admin()` / `is_approved()` | S2 · 2a (step 4) |
 | 0004 | `0004_profile_read_rpc` | hardened `get_my_profile()` — caller-only approval status / minimal profile | S2 · 2a (step 5) |
 | 0005 | `0005_function_execute_hardening` | revoke `EXECUTE` from public **and anon** on all S2 functions (verification fix) | S2 · 2a (step 6) |
+| 0006 | `0006_handle_new_user_execute_lockdown` | revoke `EXECUTE` on `handle_new_user` from **authenticated** too (smoke-check fix) | S2 · 2a (step 7) |
 
-> The 0001–0005 set is added across S2 sub-steps 2–6; this index is updated as each pair lands.
+> The 0001–0006 set is the S2 schema; this index is updated as each pair lands.
 
 ## Apply order (forward)
 
@@ -47,6 +48,7 @@ Run the `*.up.sql` files in **ascending** sequence:
 0003_admins_helpers.up.sql
 0004_profile_read_rpc.up.sql
 0005_function_execute_hardening.up.sql
+0006_handle_new_user_execute_lockdown.up.sql
 ```
 
 ## Rollback order (reverse)
@@ -54,6 +56,7 @@ Run the `*.up.sql` files in **ascending** sequence:
 Run the `*.down.sql` files in **descending** sequence (mirror image of apply):
 
 ```
+0006_handle_new_user_execute_lockdown.down.sql
 0005_function_execute_hardening.down.sql
 0004_profile_read_rpc.down.sql
 0003_admins_helpers.down.sql
@@ -64,8 +67,8 @@ Run the `*.down.sql` files in **descending** sequence (mirror image of apply):
 ## Consolidated apply (fresh database)
 
 For a clean one-pass apply to a fresh database (e.g. production), run
-[`apply_all_s2.sql`](./apply_all_s2.sql) instead of the five fragments. It is the
-**final state** of 0001–0005 (the `0005` anon-revoke folded into the function
+[`apply_all_s2.sql`](./apply_all_s2.sql) instead of the separate fragments. It is the
+**final state** of 0001–0006 (the `0005`/`0006` execute-revokes folded into the function
 definitions), so it produces exactly the state verified on non-prod. The numbered
 files remain canonical and define the rollback story; the bundle is a convenience
 for applying, not a replacement. After it, run
