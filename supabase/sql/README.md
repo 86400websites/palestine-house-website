@@ -97,13 +97,19 @@ the PR for S2 step 6):
 - **helpers**: `is_approved()` and `is_admin()` return the correct boolean for the caller.
 - **denied read**: an attempt to read a table with no matching policy returns no rows / is
   rejected — confirming default-deny rather than an accidental allow.
+- **privilege escalation blocked**: a user cannot self-set `is_approved` or insert into `admins`.
+
+A ready-to-run script for the S2 set lives at [`verify_s2_identity_approval.sql`](./verify_s2_identity_approval.sql)
+— run it section by section on the non-production project and compare each result to its
+inline `EXPECT` comment. It is a **test helper, not a migration**: never part of the apply
+sequence, never run on production.
 
 ## Environments
 
 | Role | Project | Ref |
 |---|---|---|
 | Production | `palestine-house-website` | `jwogtqizqujwhbvpoziu` |
-| Non-production (test) | `palestine-house-test-database` | recorded in [`../../docs/PROJECT-STATUS.md`](../../docs/PROJECT-STATUS.md) §6 |
+| Non-production (test) | `palestine-house-test-database` | `sdszcralogcrujtyghig` |
 
 Production, Preview, and Development point at **different** Supabase projects — non-prod
 testing never touches the production database.
