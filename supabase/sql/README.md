@@ -61,6 +61,16 @@ Run the `*.down.sql` files in **descending** sequence (mirror image of apply):
 0001_profiles.down.sql
 ```
 
+## Consolidated apply (fresh database)
+
+For a clean one-pass apply to a fresh database (e.g. production), run
+[`apply_all_s2.sql`](./apply_all_s2.sql) instead of the five fragments. It is the
+**final state** of 0001–0005 (the `0005` anon-revoke folded into the function
+definitions), so it produces exactly the state verified on non-prod. The numbered
+files remain canonical and define the rollback story; the bundle is a convenience
+for applying, not a replacement. After it, run
+[`verify_s2_prod_smoke.sql`](./verify_s2_prod_smoke.sql) (read-only, seeds nothing).
+
 ---
 
 ## Golden rules (do not skip)
@@ -105,7 +115,11 @@ the PR for S2 step 6):
 A ready-to-run script for the S2 set lives at [`verify_s2_identity_approval.sql`](./verify_s2_identity_approval.sql)
 — run it section by section on the non-production project and compare each result to its
 inline `EXPECT` comment. It is a **test helper, not a migration**: never part of the apply
-sequence, never run on production.
+sequence, never run on production (it seeds throwaway users + rows).
+
+For **production**, run the read-only [`verify_s2_prod_smoke.sql`](./verify_s2_prod_smoke.sql)
+instead — it confirms tables/RLS/functions/policies landed and that `anon` has no `EXECUTE`
+on the S2 functions, **without seeding any data or users** into the live database.
 
 ## Environments
 
