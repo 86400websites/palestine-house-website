@@ -78,6 +78,33 @@ begin;
 rollback;
 -- EXPECT one row: who = A_UUID, my_profiles = 1, other_profiles = 0,
 --                 my_apps = 1, admins_visible = 0
+-- (my_apps = 1 only if section 1 was seeded for THIS A_UUID. The authoritative
+--  applications test is 3b below, which inserts as the user under RLS.)
+
+-- ---------------------------------------------------------------------------
+-- 3b) applications RLS: owner can insert + read its own row; a user cannot
+--     insert a row owned by someone else. This is the path Apply=signup uses
+--     in S3c, so it must hold.
+-- ---------------------------------------------------------------------------
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"A_UUID","role":"authenticated"}';
+  -- insert OWN application (user_id = caller) -> allowed by with check
+  insert into public.applications (user_id, name, email, city, why)
+  values (auth.uid(), 'Self Insert A', 'a2@example.test', 'Amman', 'insert-own test');
+  -- read own -> sees the row just inserted
+  select count(*) as my_apps_after_insert from public.applications;
+rollback;
+-- EXPECT: my_apps_after_insert >= 1 (insert-own allowed AND read-own works)
+
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"A_UUID","role":"authenticated"}';
+  -- insert a row owned by ANOTHER user -> blocked by with check
+  insert into public.applications (user_id, name, email, city, why)
+  values ('B_UUID', 'Cross Insert', 'x@example.test', 'Nablus', 'should fail');
+rollback;
+-- EXPECT: ERROR  new row violates row-level security policy for table "applications"
 
 -- ---------------------------------------------------------------------------
 -- 4) get_my_profile returns the caller's own row only
