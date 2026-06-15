@@ -33,8 +33,9 @@ NNNN_<name>.down.sql    exact rollback of the matching up-file
 | 0002 | `0002_applications` | `applications` (mirrors the Apply form) + RLS default-deny + owner-scoped insert/read-own | S2 · 2a (step 3) |
 | 0003 | `0003_admins_helpers` | `admins` + RLS default-deny (no client read) + hardened `is_admin()` / `is_approved()` | S2 · 2a (step 4) |
 | 0004 | `0004_profile_read_rpc` | hardened `get_my_profile()` — caller-only approval status / minimal profile | S2 · 2a (step 5) |
+| 0005 | `0005_function_execute_hardening` | revoke `EXECUTE` from public **and anon** on all S2 functions (verification fix) | S2 · 2a (step 6) |
 
-> The 0001–0004 set is added across S2 sub-steps 2–5; this index is updated as each pair lands.
+> The 0001–0005 set is added across S2 sub-steps 2–6; this index is updated as each pair lands.
 
 ## Apply order (forward)
 
@@ -45,6 +46,7 @@ Run the `*.up.sql` files in **ascending** sequence:
 0002_applications.up.sql
 0003_admins_helpers.up.sql
 0004_profile_read_rpc.up.sql
+0005_function_execute_hardening.up.sql
 ```
 
 ## Rollback order (reverse)
@@ -52,6 +54,7 @@ Run the `*.up.sql` files in **ascending** sequence:
 Run the `*.down.sql` files in **descending** sequence (mirror image of apply):
 
 ```
+0005_function_execute_hardening.down.sql
 0004_profile_read_rpc.down.sql
 0003_admins_helpers.down.sql
 0002_applications.down.sql

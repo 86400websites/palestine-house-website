@@ -1,7 +1,7 @@
 -- verify_s2_identity_approval.sql
 -- S2 step 6 verification — run on the NON-PRODUCTION project FIRST
 -- (palestine-house-test-database, https://sdszcralogcrujtyghig.supabase.co),
--- AFTER applying 0001 -> 0004 in order.
+-- AFTER applying 0001 -> 0005 in order.
 --
 -- This is a TEST HELPER, not a migration. Never run it as part of the apply
 -- sequence and never on production. It seeds throwaway rows and proves the RLS
@@ -62,19 +62,22 @@ rollback;
 
 -- ---------------------------------------------------------------------------
 -- 3) authenticated User A sees ONLY its own profile + application
---    (If any of these returns "permission denied" instead of a count, the
+--    (If anything returns "permission denied" instead of a count, the
 --    authenticated role lacks table grants -> tell me, we add explicit GRANTs.)
+--    One row so the SQL Editor (which shows only the LAST result of a block)
+--    displays every check at once.
 -- ---------------------------------------------------------------------------
 begin;
   set local role authenticated;
   set local request.jwt.claims = '{"sub":"A_UUID","role":"authenticated"}';
-  select auth.uid() as who;                                       -- EXPECT: A_UUID
-  select count(*) as my_profiles from public.profiles;            -- EXPECT: 1
-  select count(*) as other_profile from public.profiles
-    where id = 'B_UUID';                                          -- EXPECT: 0
-  select count(*) as my_apps from public.applications;            -- EXPECT: 1
-  select count(*) as admins_visible from public.admins;           -- EXPECT: 0
+  select auth.uid()                                                   as who,
+         (select count(*) from public.profiles)                      as my_profiles,
+         (select count(*) from public.profiles where id <> auth.uid()) as other_profiles,
+         (select count(*) from public.applications)                  as my_apps,
+         (select count(*) from public.admins)                        as admins_visible;
 rollback;
+-- EXPECT one row: who = A_UUID, my_profiles = 1, other_profiles = 0,
+--                 my_apps = 1, admins_visible = 0
 
 -- ---------------------------------------------------------------------------
 -- 4) get_my_profile returns the caller's own row only
@@ -104,13 +107,15 @@ rollback;
 -- EXPECT: b_admin = true (b_approved = false unless you approved B)
 
 -- ---------------------------------------------------------------------------
--- 6) anon cannot EXECUTE the helpers (revoke-from-public proven)
+-- 6) anon cannot EXECUTE the helpers (revoke from public + anon proven)
 -- ---------------------------------------------------------------------------
 begin;
   set local role anon;
   select public.is_admin();
 rollback;
 -- EXPECT: ERROR  permission denied for function is_admin
+-- NOTE: before 0005, anon returned `false` (the verification finding). After
+-- applying 0005_function_execute_hardening this MUST be a permission-denied error.
 
 -- ---------------------------------------------------------------------------
 -- 7) privilege escalation blocked: a user cannot self-approve or self-admin
@@ -118,9 +123,14 @@ rollback;
 begin;
   set local role authenticated;
   set local request.jwt.claims = '{"sub":"A_UUID","role":"authenticated"}';
-  update public.profiles set is_approved = true where id = 'A_UUID';
+  with up as (
+    update public.profiles set is_approved = true
+    where id = 'A_UUID'
+    returning 1
+  )
+  select count(*) as rows_updated from up;
 rollback;
--- EXPECT: UPDATE 0  (no update policy -> RLS denies; A stays unapproved)
+-- EXPECT: rows_updated = 0  (no update policy -> RLS blocks the self-approve)
 
 begin;
   set local role authenticated;
