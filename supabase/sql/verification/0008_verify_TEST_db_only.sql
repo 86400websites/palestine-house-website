@@ -1,17 +1,23 @@
 -- 0008_verify_TEST_db_only.sql
--- FUNCTIONAL proof for migration 0008, on the TEST database only. It creates
--- two throwaway auth users to fire the on_auth_user_created trigger, checks the
--- resulting profile rows, and then ROLLS BACK — so it persists nothing. Even
--- so, run it ONLY on the test database (sdszcralogcrujtyghig), never prod.
+-- FUNCTIONAL proof for migration 0008, on the TEST database only
+-- (sdszcralogcrujtyghig) — never production. It creates two throwaway auth
+-- users to fire the on_auth_user_created trigger, checks the resulting profile
+-- rows, then DELETES them explicitly.
 --
--- If the auth.users insert errors on your Supabase version (auth schema
--- specifics), don't worry: the read-only 0008_verify_PROD_safe_readonly.sql
--- proves the redefinition + lockdown, and the real end-to-end proof is signing
--- up through /apply on Preview and checking profiles.full_name.
+-- NOTE: the Supabase SQL Editor does not reliably honour a hand-written
+-- `begin … rollback`, so this script does NOT depend on rollback to clean up —
+-- it deletes the test rows directly (profiles cascade from auth.users). The
+-- leading delete also makes the whole script safely RE-RUNNABLE: it clears any
+-- rows left by an earlier run before re-testing. End state: zero test rows.
 
-begin;
+-- 0) Idempotent pre-clean: remove anything a previous run may have left behind.
+delete from auth.users
+where id in (
+  '00000000-0000-0000-0000-0000000008a1',
+  '00000000-0000-0000-0000-0000000008b2'
+);
 
--- Case 1: a real name with surrounding spaces -> trimmed onto the profile.
+-- 1) Case A — a real name with surrounding spaces -> trimmed onto the profile.
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
   created_at, updated_at, raw_app_meta_data, raw_user_meta_data
@@ -24,7 +30,7 @@ insert into auth.users (
   jsonb_build_object('full_name', '  Layla Q  ')
 );
 
--- Case 2: a blank name -> NULL (no stray-space "name" lands on the profile).
+-- 2) Case B — a blank name -> NULL (no stray-space "name" lands on the profile).
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
   created_at, updated_at, raw_app_meta_data, raw_user_meta_data
@@ -37,7 +43,7 @@ insert into auth.users (
   jsonb_build_object('full_name', '   ')
 );
 
--- The trigger should have created one profile per user, with full_name mapped.
+-- 3) The trigger should have created one profile per user, full_name mapped.
 select id, full_name, is_approved
 from public.profiles
 where id in (
@@ -49,9 +55,14 @@ order by id;
 --   ...0008a1 | Layla Q | false   (name trimmed; is_approved still defaults false)
 --   ...0008b2 | (null)  | false   (blank metadata -> NULL, not a space)
 
-rollback;
+-- 4) Clean up (profiles rows cascade from auth.users on delete).
+delete from auth.users
+where id in (
+  '00000000-0000-0000-0000-0000000008a1',
+  '00000000-0000-0000-0000-0000000008b2'
+);
 
--- Safety net: confirm the rollback left nothing behind.
+-- 5) Confirm nothing is left behind.
 select count(*) as leftover_rows
 from public.profiles
 where id in (

@@ -74,7 +74,7 @@ Every `*.down.sql` reverses **only** its own `*.up.sql`.
 | `S2_verify_TEST_db_only.sql` | **Test DB** (intended) | Full security proof, checked from every angle (signed-out sees nothing, a user sees only their own data, no one can self-approve, status can't be forged, etc.). Every check runs inside `begin … rollback`, so it makes **no permanent changes** — but it's still meant for the test database. |
 | `S2_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check — looks but never writes. Confirms the tables, security, functions, trigger and policies all landed, and that signed-out users can't call the functions. Safe to run on the live database. |
 | `0008_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check for migration 0008 — confirms the trigger function was redefined to map `full_name`, is still SECURITY DEFINER + locked down, and that the S2 tables/policies did **not** regress. Safe on the live database; run it on both after applying 0008. |
-| `0008_verify_TEST_db_only.sql` | **Test DB only** | **Functional** proof for 0008: creates two throwaway users in `begin … rollback` (persists nothing) to confirm the trigger copies a trimmed name and turns a blank name into NULL. Test database only. |
+| `0008_verify_TEST_db_only.sql` | **Test DB only** | **Functional** proof for 0008: creates two throwaway users to confirm the trigger copies a trimmed name and turns a blank name into NULL, then **deletes them explicitly** (the Supabase SQL Editor does not reliably honour a hand-written `begin … rollback`, so cleanup is by `delete`, not rollback). Re-runnable and self-cleaning — ends with zero test rows. Test database only. |
 
 ---
 
