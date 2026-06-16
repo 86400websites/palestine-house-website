@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeOrigin, safeNextPath } from "@/lib/safe-redirect";
@@ -83,13 +84,17 @@ export async function updatePasswordAction(
     return { error: "Those passwords don’t match.", done: false };
   }
 
+  const cookieStore = await cookies();
+  const fromRecovery = cookieStore.get("ph-recovery")?.value === "1";
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) {
-    // No recovery session — the reset link was missing or expired. Send them
-    // to request a fresh one rather than failing opaquely.
+  if (!user || !fromRecovery) {
+    // Must have arrived via a recovery link (/auth/confirm sets the marker). A
+    // normal authenticated session — or a missing/expired marker — cannot reset
+    // the password here; send them to request a fresh link.
     redirect("/forgot-password");
   }
 
@@ -98,8 +103,9 @@ export async function updatePasswordAction(
     return { error: "Pick a slightly stronger password.", done: false };
   }
 
-  // Clear the recovery session so "Done. You can sign in now." is literally
-  // true — the user re-authenticates with the new password.
+  // Consume the recovery marker and clear the session so "Done. You can sign in
+  // now." is literally true — the user re-authenticates with the new password.
+  cookieStore.delete("ph-recovery");
   await supabase.auth.signOut();
   return { error: null, done: true };
 }
@@ -152,26 +158,68 @@ export async function applyAction(
   const { name, email, password, city, organisation, why } = parsed.data;
 
   const supabase = await createClient();
-  const { data, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { full_name: name } },
-  });
 
-  if (signUpError || !data.user) {
-    const already = /already/i.test(signUpError?.message ?? "");
+  // Resolve the applicant's user id. If already authenticated (e.g. a retry
+  // after a partial first attempt left them signed in), reuse it. Otherwise
+  // sign up; if the email already exists, fall back to signing in with the
+  // supplied credentials so a stranded prior attempt (account created,
+  // application not) can recover instead of dead-ending on "already registered".
+  let userId: string | null = null;
+  const {
+    data: { user: current },
+  } = await supabase.auth.getUser();
+  if (current) {
+    userId = current.id;
+  } else {
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } },
+    });
+    if (signUpData?.user && !signUpError) {
+      userId = signUpData.user.id;
+    } else if (/already/i.test(signUpError?.message ?? "")) {
+      const { data: signInData } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      userId = signInData?.user?.id ?? null;
+      if (!userId) {
+        return {
+          ok: false,
+          error: "That email already has an account — try signing in instead.",
+        };
+      }
+    } else {
+      return {
+        ok: false,
+        error: "Something went wrong creating your account. Please try again.",
+      };
+    }
+  }
+
+  if (!userId) {
     return {
       ok: false,
-      error: already
-        ? "That email already has an account — try signing in instead."
-        : "Something went wrong creating your account. Please try again.",
+      error: "Something went wrong creating your account. Please try again.",
     };
   }
 
-  // The just-authenticated user writes its own application (status defaults to
+  // One application per user. If this user already has one (an idempotent
+  // retry), treat the submit as success — their application is in.
+  const { data: existingApps } = await supabase
+    .from("applications")
+    .select("id")
+    .eq("user_id", userId)
+    .limit(1);
+  if (existingApps && existingApps.length > 0) {
+    return { ok: true, error: null };
+  }
+
+  // The authenticated user writes its own application (status defaults to
   // 'pending' per the column + RLS check).
   const { error: insertError } = await supabase.from("applications").insert({
-    user_id: data.user.id,
+    user_id: userId,
     name,
     email,
     city,
@@ -180,9 +228,7 @@ export async function applyAction(
   });
 
   if (insertError) {
-    // Account exists but the application row didn't land — surface a retry-safe
-    // message and log server-side for follow-up.
-    console.error("applications insert failed after signup:", insertError.message);
+    console.error("applications insert failed:", insertError.message);
     return {
       ok: false,
       error: "Something went wrong sending your application. Please try again.",
