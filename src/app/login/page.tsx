@@ -13,13 +13,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
   return (
     <section className="auth-section">
       <div className="ph-container auth-inner">
         <Reveal className="auth-card has-art">
           <div className="auth-card-main">
-            <LoginForm />
+            <LoginForm next={next} />
           </div>
           <div className="auth-art" aria-hidden="true">
             <Image

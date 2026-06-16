@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { signOutAction } from "@/lib/auth/actions";
 import { Logo } from "@/components/layout/logo";
 import { Artwork } from "@/components/shared/artwork";
 import { Button } from "@/components/ui/button";
@@ -129,6 +130,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = React.useState<NavKey | null>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [authed, setAuthed] = React.useState<boolean | null>(null);
   const panel = open ? MEGA_MENUS[open] : undefined;
 
   /* Close the mega panel on Escape (keyboard parity with mouseleave). */
@@ -140,6 +142,26 @@ export function SiteHeader() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  /* Reflect auth state in the locked chrome (Sign in ↔ Sign out) WITHOUT
+     making any page dynamic: a same-origin probe (CSP connect-src 'self'
+     allows /api/*, not supabase.co). Re-checked on navigation so it updates
+     right after the sign-in / sign-out redirects. Defaults to "Sign in" until
+     known, so anonymous visitors (the common case) never see a swap. */
+  React.useEffect(() => {
+    let active = true;
+    fetch("/api/auth/session", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { authed: false }))
+      .then((d: { authed?: boolean }) => {
+        if (active) setAuthed(!!d.authed);
+      })
+      .catch(() => {
+        if (active) setAuthed(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   return (
     <header className="phx-header" onMouseLeave={() => setOpen(null)}>
@@ -191,9 +213,17 @@ export function SiteHeader() {
         </nav>
 
         <div className="phx-actions">
-          <Link className="phx-signin" href="/login">
-            Sign in
-          </Link>
+          {authed ? (
+            <form action={signOutAction} className="phx-signout-form">
+              <button type="submit" className="phx-signin phx-signout">
+                Sign out
+              </button>
+            </form>
+          ) : (
+            <Link className="phx-signin" href="/login">
+              Sign in
+            </Link>
+          )}
           <Button asChild size="sm">
             <Link href="/apply" aria-label="Apply to bring a House">
               Apply
@@ -211,24 +241,41 @@ export function SiteHeader() {
               <SheetContent side="top" className="gap-0 px-6 pb-6">
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <nav aria-label="Main, mobile" className="pt-10">
-                  {NAV_LINKS.map((l) => (
-                    <Link
-                      key={l.key}
-                      className="phx-mobile-link"
-                      href={l.href}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <span className="phx-mobile-label">{l.label}</span>
-                      <span className="phx-mobile-sub">{l.tipShort}</span>
-                    </Link>
-                  ))}
-                  <Link
-                    className="phx-mobile-link"
-                    href="/login"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <span className="phx-mobile-label">Sign in</span>
-                  </Link>
+                  <div className="phx-mobile-links">
+                    {NAV_LINKS.map((l) => (
+                      <Link
+                        key={l.key}
+                        className="phx-mobile-link"
+                        href={l.href}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <span className="phx-mobile-label">{l.label}</span>
+                        <span className="phx-mobile-sub">{l.tipShort}</span>
+                      </Link>
+                    ))}
+                    {authed ? (
+                      <form
+                        action={signOutAction}
+                        className="phx-signout-form"
+                      >
+                        <button
+                          type="submit"
+                          className="phx-mobile-link phx-signout"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <span className="phx-mobile-label">Sign out</span>
+                        </button>
+                      </form>
+                    ) : (
+                      <Link
+                        className="phx-mobile-link"
+                        href="/login"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <span className="phx-mobile-label">Sign in</span>
+                      </Link>
+                    )}
+                  </div>
                   <div className="pt-4">
                     <Button asChild className="w-full">
                       <Link href="/apply" onClick={() => setMobileOpen(false)}>

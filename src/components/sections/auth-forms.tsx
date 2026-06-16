@@ -2,17 +2,15 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { signInAction, type LoginState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-/* Auth UI shells (login.md / forgot-password.md / update-password.md).
-   Fields, labels, links, and client-side validation errors are approved copy,
-   verbatim. Submits no-op honestly — Supabase auth arrives in Sprint 3, when
-   the approved confirmations ("…a reset link is on its way", "Done. You can
-   sign in now.") ship with the real flows. */
-
-const NOT_LIVE = "Sign-in isn’t switched on just yet — check back soon.";
+/* Auth UI (login.md / forgot-password.md / update-password.md). Fields,
+   labels, links, and error copy are approved copy, verbatim. Login is live as
+   of Sprint 3 (sub-step 2) via a Server Action; forgot/update password are
+   wired in 3b — until then those two submit honestly no-op. */
 
 function AuthField({
   id,
@@ -41,39 +39,33 @@ function AuthField({
   );
 }
 
-export function LoginForm() {
-  const [email, setEmail] = React.useState("");
-  const [emailError, setEmailError] = React.useState<string | null>(null);
-  const [status, setStatus] = React.useState<string | null>(null);
+export function LoginForm({ next }: { next?: string }) {
+  const [state, formAction, pending] = React.useActionState<
+    LoginState,
+    FormData
+  >(signInAction, { error: null });
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!validEmail) {
-      setEmailError("Please enter a valid email.");
-      setStatus(null);
-      return;
-    }
-    setEmailError(null);
-    setStatus(NOT_LIVE);
-  };
+  /* The email-format error renders under the field; the neutral auth error
+     ("…doesn't match") renders as a form-level note. */
+  const isEmailError = state.error === "Please enter a valid email.";
 
   return (
     <>
       <h1>Welcome back.</h1>
-      <form className="auth-form" onSubmit={submit} noValidate>
+      <form className="auth-form" action={formAction} noValidate>
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <AuthField
           id="l-email"
+          name="email"
           label="Email"
           type="email"
           autoComplete="email"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={emailError}
+          error={isEmailError ? state.error : null}
         />
         <AuthField
           id="l-password"
+          name="password"
           label="Password"
           type="password"
           autoComplete="current-password"
@@ -84,12 +76,12 @@ export function LoginForm() {
             Forgot your password?
           </Link>
         </div>
-        {status ? (
-          <p className="auth-note" role="status">
-            {status}
+        {state.error && !isEmailError ? (
+          <p className="auth-note" role="alert">
+            {state.error}
           </p>
         ) : null}
-        <Button size="lg" type="submit">
+        <Button size="lg" type="submit" disabled={pending}>
           Sign in
         </Button>
       </form>
