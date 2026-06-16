@@ -57,6 +57,7 @@ Each change is a **pair**: an `*.up.sql` (makes the change) and a matching `*.do
 | 0005 | `0005_function_execute_hardening.up.sql` | Security fix found during testing: signed-out visitors (`anon`) could still *call* the helper functions. This **removes that access** so only signed-in users can call them. |
 | 0006 | `0006_handle_new_user_execute_lockdown.up.sql` | Security fix found during the production check: the profile-creation trigger function was still callable by signed-in users (harmless, but unintended). This **locks it down** so no app role can call it directly. |
 | 0007 | `0007_applications_insert_pending_only.up.sql` | Security fix found during the independent code review: a user could create their own application **pre-set to `approved`**. This restricts the insert policy so a user can only ever create their application in the **`pending`** state — only the HQ admin path changes status later. |
+| 0008 | `0008_handle_new_user_full_name.up.sql` | S3 (3c): the profile-creation trigger now also copies the applicant's **name** from their sign-up metadata into `profiles.full_name` (trimmed; blank becomes NULL), so the dashboard can greet them by name. The function stays locked down exactly as before. Expand-only — older rows simply keep their NULL name. |
 
 Every `*.down.sql` reverses **only** its own `*.up.sql`.
 
@@ -72,6 +73,8 @@ Every `*.down.sql` reverses **only** its own `*.up.sql`.
 |---|---|---|
 | `S2_verify_TEST_db_only.sql` | **Test DB** (intended) | Full security proof, checked from every angle (signed-out sees nothing, a user sees only their own data, no one can self-approve, status can't be forged, etc.). Every check runs inside `begin … rollback`, so it makes **no permanent changes** — but it's still meant for the test database. |
 | `S2_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check — looks but never writes. Confirms the tables, security, functions, trigger and policies all landed, and that signed-out users can't call the functions. Safe to run on the live database. |
+| `0008_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check for migration 0008 — confirms the trigger function was redefined to map `full_name`, is still SECURITY DEFINER + locked down, and that the S2 tables/policies did **not** regress. Safe on the live database; run it on both after applying 0008. |
+| `0008_verify_TEST_db_only.sql` | **Test DB only** | **Functional** proof for 0008: creates two throwaway users in `begin … rollback` (persists nothing) to confirm the trigger copies a trimmed name and turns a blank name into NULL. Test database only. |
 
 ---
 
@@ -157,12 +160,16 @@ These mirror the binding docs — follow them, don't restate them:
 
 ---
 
-## 7. Current state (S2)
+## 7. Current state (S3)
 
-Migrations `0001`–`0006` have been applied to **both** the test database (`sdszcralogcrujtyghig`)
-and production (`jwogtqizqujwhbvpoziu`), and verified (test: full role matrix; production:
-read-only smoke check). **`0007` (from the independent code review) has also been applied to
-both databases and re-verified.** Tables: `profiles`,
-`applications`, `admins`. No application code reads these yet — the Supabase clients, login, and
-the Apply write path arrive in S3; the approval queue (`/admin/approvals`) and the approval flip
-arrive in S4.
+Migrations `0001`–`0007` were applied to **both** the test database (`sdszcralogcrujtyghig`)
+and production (`jwogtqizqujwhbvpoziu`) in S2, and verified (test: full role matrix; production:
+read-only smoke check). Tables: `profiles`, `applications`, `admins`.
+
+**S3 adds `0008`** — the profile-creation trigger now copies the applicant's name from sign-up
+metadata into `profiles.full_name`. Apply it to the **test** database first, run
+`verification/0008_verify_TEST_db_only.sql` (functional) and
+`verification/0008_verify_PROD_safe_readonly.sql` (read-only), then apply to **production** and
+run the read-only check there. S3 also wires the application code that uses this schema (Supabase
+clients, login/logout, password reset, and the Apply write path); the approval queue
+(`/admin/approvals`) and the approval flip arrive in S4.
