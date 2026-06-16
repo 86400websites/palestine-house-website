@@ -14,14 +14,14 @@
 - [x] `/bring-ph` Bring a House (absorbs How It Works: stage triptych + Day 30/60/108 gates timeline, "who brings what," three rules)
 - [x] `/our-support` Our Support
 - [ ] `/live` Live Programming — *listing built with approved empty states (Stage 0); real session data, watch view, and live filters in S7*  **[public hero feature]**
-- [ ] `/apply` — *form UI built (Stage 0, single "Your name" field per D5, honest no-op); live submit = sign-up → pending account + application record (zod + rate limit + Turnstile) in S3c*
+- [x] `/apply` — *live (S3c): sign-up → pending account + application record (zod-validated); single "Your name" field per D5 + an owner-approved Password field (§4). Rate-limit + Turnstile come in **S9** — see `PROJECT-STATUS.md` §7*
 - [x] `/about`, `/contact` (form UI built; sends via Resend in S8b), `/focus-areas` (secondary route, linked from page bodies), `/privacy`, `/terms` (placeholder legal copy, counsel before launch)
 - [ ] Lead magnets: the two public booklets (*The House Promise*, *Operating Model & Governance*) — *capture forms built (Stage 0, honest no-op); Mailchimp tags `lead-booklet-a` / `lead-booklet-b` in S8a*
 - [x] SEO: per-route metadata, `sitemap.ts`, `robots.ts`, OG image, JSON-LD (Organization, WebSite)
 
 ### Auth & access
-- [ ] `/login`, `/forgot-password`, `/update-password` (no separate signup — retired, merged into Apply)
-- [ ] Supabase `@supabase/ssr` browser + server clients, `middleware.ts` session refresh, same-origin validated redirects
+- [x] `/login`, `/forgot-password`, `/update-password` (no separate signup — retired, merged into Apply) — *live S3a/3b; `/auth/confirm` exchanges the reset code→session*
+- [x] Supabase `@supabase/ssr` browser + server clients, `src/middleware.ts` session refresh, same-origin validated redirects (`safe-redirect.ts`) — *S3a; route protection enforcement is S4*
 - [ ] Approval gate: `profiles.is_approved`, pending-state dashboard, server-side enforcement in every workspace RPC
 - [ ] `/admin/approvals` — HQ approval queue (server-checked `admins` table)  **[MVP-critical]**
 
@@ -82,7 +82,7 @@ Goal: a complete, polished, working public website running locally. All forms re
 |---|---|---|---|
 | **S1 — Design consistency pass** | 1a tokens/type audit · 1b motion + reduced-motion · 1c responsive 320px+ audit · 1d accessibility AA (contrast, focus, skip link, keyboard tooltip) | Whole public shell consistent with `DESIGN.md`; AA verified; zero visual drift between pages | Stage 1 |
 | ✅ **S2 — Database phase 1: identity & approval** *(done 2026-06-15, merge pending)* | 2a `profiles` (+`is_approved`), `applications`, `admins` + RLS + RPCs · 2b apply to non-prod, test anon/authed, then prod | Versioned up + `.down.sql` + policies in PR; default-deny verified | Stage 1 |
-| **S3 — Auth complete** | 3a Supabase clients + `middleware.ts` + login/logout · 3b forgot/update password (same-origin redirects; Preview emails → Preview) · 3c **Apply live** = sign-up + pending account + application record (zod; first-name handling per resolved flag 5d) | All auth flows pass on local + Preview; `SUPABASE-VERCEL-SETUP.md` checklists green | S2 |
+| ✅ **S3 — Auth complete** *(built 2026-06-16; owner Preview + merge pending)* | 3a Supabase clients + `src/middleware.ts` + login/logout · 3b forgot/update password + `/auth/confirm` (same-origin redirects; Preview emails → Preview) · 3c **Apply live** = sign-up + pending account + application record (zod; `full_name` via the `0008` trigger; + owner-approved Password field, §4) | All auth flows pass on local + Preview; `SUPABASE-VERCEL-SETUP.md` checklists green | S2 |
 | **S4 — Approval gate + admin** | 4a gated shell + sidebar + `/dashboard` pending state · 4b `/admin/approvals` queue (server-checked `admins`) · 4c server-side `is_approved` enforcement on every gated route/RPC + approval notification email (Resend) | 🔴 `SECURITY-CHECKLIST.md` §15 fully verified; pending user sees only pending state; approval unlocks without re-login | S3 |
 | **S5 — Database phase 2: content schema** | 5a `elements` + content ingestion (30 topics from `/docs/page-copy/06-elements`) · 5b `checklist_items` + `checklist_progress` (200+ items, 3 gates) · 5c `programming_sessions` (anon-safe public read) · 5d `resources` metadata + private Storage bucket + 267 templates upload · 5e `academy_modules` | Each phase: non-prod first, RLS verified anon vs pending vs approved | S4 |
 | **S6 — Private platform pages** | 6a `/dashboard` full (current-stage snapshot rule) · 6b `/plan` + `/operate` · 6c `/build` checklist tracker (saved progress, 3 gates) · 6d element page component + 30 instances · 6e `/resources` hub + signed-URL downloads · 6f `/academy` · 6g `/tools` placeholder + `/account` + `/support` | Private-page mockups already in `/docs/page-designs/member-workspace/` (admin in `/docs/page-designs/admin/`) | S5 |

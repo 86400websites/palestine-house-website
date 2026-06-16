@@ -10,7 +10,7 @@ import { LoginForm } from "@/components/sections/auth-forms";
 export const metadata: Metadata = {
   title: "Sign in",
   description: "Sign in to Palestine House.",
-  robots: { index: false, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export default async function LoginPage({

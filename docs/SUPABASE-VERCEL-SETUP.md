@@ -6,11 +6,11 @@
 |---|---|
 | `[PROJECT_NAME]` | `palestine-house` |
 | `[BRAND_NAME]` | Palestine House |
-| `[PRODUCTION_DOMAIN]` | **TBD** — decide before Stage 1 launch; until then the site lives on the Vercel default domain |
-| `[VERCEL_PROJECT_NAME]` | `palestine-house` (create at Stage 1) |
-| `[VERCEL_TEAM_SLUG]` | **TBD** — read from the Vercel dashboard at Stage 1 |
-| `[SUPABASE_PROJECT_REF]` (production) | **TBD** — created in Sprint 2 |
-| `[SUPABASE_PROJECT_REF]` (non-production) | **TBD** — separate project for Preview/local; created in Sprint 2 |
+| `[PRODUCTION_DOMAIN]` | `palestine-house-website.vercel.app` — the Vercel domain (per resolved decision D3); a custom domain comes later |
+| `[VERCEL_PROJECT_NAME]` | `palestine-house-website` |
+| `[VERCEL_TEAM_SLUG]` | `86400-s-projects` (Preview wildcard: `https://*-86400-s-projects.vercel.app/**`) |
+| `[SUPABASE_PROJECT_REF]` (production) | `jwogtqizqujwhbvpoziu` (`palestine-house-website`) |
+| `[SUPABASE_PROJECT_REF]` (non-production) | `sdszcralogcrujtyghig` (`palestine-house-test-database`; Preview + local point here) |
 
 This site **uses auth + DB** (approval-gated partner platform), so the full Supabase setup below applies. Auth routes to cover in the redirect rules: `/login`, `/forgot-password`, `/update-password`, `/apply` (sign-up), `/dashboard` (post-login landing). `SUPABASE_SECRET_KEY` is expected to be needed only for trusted admin/server paths (e.g. approval operations) — prefer hardened `SECURITY DEFINER` RPCs first. Record the final values here (names/refs only, never keys) when each is created, and mirror them in `PROJECT-STATUS.md`.
 
