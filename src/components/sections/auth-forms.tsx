@@ -2,15 +2,22 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { signInAction, type LoginState } from "@/lib/auth/actions";
+import {
+  signInAction,
+  requestPasswordResetAction,
+  updatePasswordAction,
+  type LoginState,
+  type ForgotState,
+  type UpdateState,
+} from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 /* Auth UI (login.md / forgot-password.md / update-password.md). Fields,
-   labels, links, and error copy are approved copy, verbatim. Login is live as
-   of Sprint 3 (sub-step 2) via a Server Action; forgot/update password are
-   wired in 3b — until then those two submit honestly no-op. */
+   labels, links, confirmations, and error copy are approved copy, verbatim.
+   All three flows are live via Server Actions (Sprint 3): login (3a-ii),
+   forgot + update password (3b). */
 
 function AuthField({
   id,
@@ -93,34 +100,31 @@ export function LoginForm({ next }: { next?: string }) {
 }
 
 export function ForgotPasswordForm() {
-  const [status, setStatus] = React.useState<string | null>(null);
+  const [state, formAction, pending] = React.useActionState<
+    ForgotState,
+    FormData
+  >(requestPasswordResetAction, { sent: false });
 
   return (
     <>
       <h1>Let’s get you back in.</h1>
       <p className="auth-sub">Enter your email and we’ll send a reset link.</p>
-      <form
-        className="auth-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setStatus(
-            "Password reset isn’t switched on just yet — check back soon.",
-          );
-        }}
-      >
+      <form className="auth-form" action={formAction}>
         <AuthField
           id="f-email"
+          name="email"
           label="Email"
           type="email"
           autoComplete="email"
           required
         />
-        {status ? (
+        {state.sent ? (
           <p className="auth-note" role="status">
-            {status}
+            If that email’s registered, a reset link is on its way. Check your
+            inbox.
           </p>
         ) : null}
-        <Button size="lg" type="submit">
+        <Button size="lg" type="submit" disabled={pending}>
           Send reset link
         </Button>
       </form>
@@ -132,55 +136,57 @@ export function ForgotPasswordForm() {
 }
 
 export function UpdatePasswordForm() {
-  const [pw, setPw] = React.useState("");
-  const [confirm, setConfirm] = React.useState("");
-  const [pwError, setPwError] = React.useState<string | null>(null);
-  const [confirmError, setConfirmError] = React.useState<string | null>(null);
-  const [status, setStatus] = React.useState<string | null>(null);
+  const [state, formAction, pending] = React.useActionState<
+    UpdateState,
+    FormData
+  >(updatePasswordAction, { error: null, done: false });
+  const doneRef = React.useRef<HTMLDivElement>(null);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const weak = pw.length < 8;
-    const mismatch = pw !== confirm;
-    setPwError(weak ? "Pick a slightly stronger password." : null);
-    setConfirmError(!weak && mismatch ? "Those passwords don’t match." : null);
-    setStatus(
-      !weak && !mismatch
-        ? "Password updates aren’t switched on just yet — check back soon."
-        : null,
+  /* One server `error` string, placed under the field it concerns. */
+  const isWeak = state.error === "Pick a slightly stronger password.";
+  const isMismatch = state.error === "Those passwords don’t match.";
+
+  /* On success the form is replaced — move focus to the confirmation so
+     keyboard/AT users land on it. */
+  React.useEffect(() => {
+    if (state.done) doneRef.current?.focus();
+  }, [state.done]);
+
+  if (state.done) {
+    return (
+      <div role="status" ref={doneRef} tabIndex={-1}>
+        <h1>Set a new password.</h1>
+        <p className="auth-note">Done. You can sign in now.</p>
+        <p className="auth-foot">
+          <Link href="/login">Back to sign in</Link>
+        </p>
+      </div>
     );
-  };
+  }
 
   return (
     <>
       <h1>Set a new password.</h1>
-      <form className="auth-form" onSubmit={submit} noValidate>
+      <form className="auth-form" action={formAction} noValidate>
         <AuthField
           id="u-pw"
+          name="password"
           label="New password"
           type="password"
           autoComplete="new-password"
           required
-          value={pw}
-          onChange={(e) => setPw(e.target.value)}
-          error={pwError}
+          error={isWeak ? state.error : null}
         />
         <AuthField
           id="u-confirm"
+          name="confirm"
           label="Confirm new password"
           type="password"
           autoComplete="new-password"
           required
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          error={confirmError}
+          error={isMismatch ? state.error : null}
         />
-        {status ? (
-          <p className="auth-note" role="status">
-            {status}
-          </p>
-        ) : null}
-        <Button size="lg" type="submit">
+        <Button size="lg" type="submit" disabled={pending}>
           Update password
         </Button>
       </form>
