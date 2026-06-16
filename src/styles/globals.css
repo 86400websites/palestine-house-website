@@ -558,6 +558,18 @@
 .phx-signin:hover {
   color: var(--brand-primary-hover);
 }
+/* Sign-out reuses the Sign-in look but is a <button> (posts a Server Action);
+   the form is layout-transparent so the button sits exactly where the link
+   did, in both the desktop actions row and the mobile sheet. */
+.phx-signout-form {
+  display: contents;
+}
+.phx-signout {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
 .phx-menu-btn {
   display: none;
 }
@@ -568,7 +580,9 @@
   padding: var(--space-3) 0;
   border-bottom: var(--border-width) solid var(--border);
 }
-.phx-mobile-link:last-of-type {
+/* :last-child (not :last-of-type) so the divider rule is robust whether the
+   final item is the Sign-in link (<a>) or the Sign-out control (<button>). */
+.phx-mobile-link:last-child {
   border-bottom: none;
 }
 .phx-mobile-label {
