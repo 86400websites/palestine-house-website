@@ -173,29 +173,31 @@ export function ApprovalsQueue({ rows }: { rows: ApplicationRow[] }) {
             </div>
 
             {selected.status === "pending" ? (
-              <form action={formAction} className="adm-detail-actions">
-                <input type="hidden" name="id" value={selected.id} />
-                <Button
-                  type="submit"
-                  name="decision"
-                  value="approved"
-                  size="sm"
-                  disabled={pending}
-                >
-                  Approve
-                </Button>
-                <Button
-                  type="submit"
-                  name="decision"
-                  value="declined"
-                  variant="outline"
-                  size="sm"
-                  disabled={pending}
-                  style={{ color: "var(--status-error)" }}
-                >
-                  Decline
-                </Button>
-              </form>
+              /* Each decision is its own form with the decision in a hidden
+                 input, so it is always present in the form data (not reliant on
+                 the submit button being captured as the form's submitter). */
+              <div className="adm-detail-actions">
+                <form action={formAction}>
+                  <input type="hidden" name="id" value={selected.id} />
+                  <input type="hidden" name="decision" value="approved" />
+                  <Button type="submit" size="sm" disabled={pending}>
+                    Approve
+                  </Button>
+                </form>
+                <form action={formAction}>
+                  <input type="hidden" name="id" value={selected.id} />
+                  <input type="hidden" name="decision" value="declined" />
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    size="sm"
+                    disabled={pending}
+                    style={{ color: "var(--status-error)" }}
+                  >
+                    Decline
+                  </Button>
+                </form>
+              </div>
             ) : (
               <div className="adm-detail-actions">
                 <span

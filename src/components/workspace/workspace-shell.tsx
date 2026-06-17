@@ -265,7 +265,14 @@ export function WorkspaceShell({
             </button>
           </div>
           {menuOpen && (
-            <nav className="ws-menu" aria-label="Account">
+            /* Stop clicks inside the menu from reaching the window
+               close-listener, which would unmount this form before the
+               sign-out submit fires. */
+            <nav
+              className="ws-menu"
+              aria-label="Account"
+              onClick={(e) => e.stopPropagation()}
+            >
               <form action={signOutAction}>
                 <button type="submit" className="ws-menu-signout">
                   <ArrowRight size={16} aria-hidden="true" />
