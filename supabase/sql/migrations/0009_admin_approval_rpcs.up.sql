@@ -20,6 +20,12 @@
 
 -- 1) Status vocabulary: pending | approved | declined.
 --    The S2 inline check (0002) is auto-named applications_status_check.
+--    Defensive: no row should ever be 'rejected' (inserts are forced 'pending'
+--    by 0007 and the only status writer is admin_set_application_status, below,
+--    restricted to approved/declined), but migrate any such row first so the new
+--    CHECK can never fail on apply. A no-op wherever that invariant holds.
+update public.applications set status = 'declined' where status = 'rejected';
+
 alter table public.applications
   drop constraint if exists applications_status_check;
 

@@ -8,6 +8,10 @@
 drop function if exists public.admin_set_application_status(uuid, text);
 drop function if exists public.admin_list_applications();
 
+-- 'declined' rows exist once HQ has declined any application; map them back to
+-- the S2 'rejected' value first so restoring the old CHECK cannot fail.
+update public.applications set status = 'rejected' where status = 'declined';
+
 alter table public.applications
   drop constraint if exists applications_status_check;
 

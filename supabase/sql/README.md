@@ -58,7 +58,8 @@ Each change is a **pair**: an `*.up.sql` (makes the change) and a matching `*.do
 | 0006 | `0006_handle_new_user_execute_lockdown.up.sql` | Security fix found during the production check: the profile-creation trigger function was still callable by signed-in users (harmless, but unintended). This **locks it down** so no app role can call it directly. |
 | 0007 | `0007_applications_insert_pending_only.up.sql` | Security fix found during the independent code review: a user could create their own application **pre-set to `approved`**. This restricts the insert policy so a user can only ever create their application in the **`pending`** state — only the HQ admin path changes status later. |
 | 0008 | `0008_handle_new_user_full_name.up.sql` | S3 (3c): the profile-creation trigger now also copies the applicant's **name** from their sign-up metadata into `profiles.full_name` (trimmed; blank becomes NULL), so the dashboard can greet them by name. The function stays locked down exactly as before. Expand-only — older rows simply keep their NULL name. |
-| 0009 | `0009_admin_approval_rpcs.up.sql` | S4 (4a): adds the two **admin-only** approval RPCs — **`admin_list_applications()`** (an admin reads the whole queue) and **`admin_set_application_status()`** (an admin approves or declines an application, flipping that applicant's **`profiles.is_approved`** to match — approved→true, declined→false). Both are hardened exactly like the S2 helpers (admin authorization is checked **inside** the function). Also renames the decline state from the S2 placeholder **`rejected`** to **`declined`** to match the approvals screen — safe because no existing row used `rejected`. |
+| 0009 | `0009_admin_approval_rpcs.up.sql` | S4 (4a): adds the two **admin-only** approval RPCs — **`admin_list_applications()`** (an admin reads the whole queue) and **`admin_set_application_status()`** (an admin approves or declines an application, flipping that applicant's **`profiles.is_approved`** to match — approved→true, declined→false). Both are hardened exactly like the S2 helpers (admin authorization is checked **inside** the function). Also renames the decline state from the S2 placeholder **`rejected`** to **`declined`** to match the approvals screen — safe because no existing row used `rejected` (both up + down also migrate any stray row between the two values first, so the constraint swap and its rollback can never fail). |
+| 0010 | `0010_admin_set_status_profile_guard.up.sql` | S4 follow-up (independent review): hardens **`admin_set_application_status()`** so it **refuses** (and rolls back) if the applicant has no `profiles` row — preventing an application from reading `approved` while the real gate stays locked. A defensive guard for a state the `0001` trigger already prevents; the function stays SECURITY DEFINER + locked down. |
 
 Every `*.down.sql` reverses **only** its own `*.up.sql`.
 
@@ -78,6 +79,7 @@ Every `*.down.sql` reverses **only** its own `*.up.sql`.
 | `0008_verify_TEST_db_only.sql` | **Test DB only** | **Functional** proof for 0008: creates two throwaway users to confirm the trigger copies a trimmed name and turns a blank name into NULL, then **deletes them explicitly** (the Supabase SQL Editor does not reliably honour a hand-written `begin … rollback`, so cleanup is by `delete`, not rollback). Re-runnable and self-cleaning — ends with zero test rows. Test database only. |
 | `S4_verify_TEST_db_only.sql` | **Test DB only** | Role-simulated proof for 0009: an admin sees the whole queue and a non-admin sees none; a non-admin cannot flip approval; an invalid status is refused; approve/decline set the status **and** mirror `is_approved`. The mutating checks run in `begin … rollback`; a final idempotent block resets the test applicant to `pending` for the UI test. Uses the GATE 0 seed accounts (admin + a non-admin applicant). Test database only. |
 | `S4_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check for 0009 — confirms both admin RPCs exist, are SECURITY DEFINER with a pinned `search_path`, that `anon` cannot execute them, the status check is `pending\|approved\|declined`, and `admins` is still RLS-on with no policy. Safe on the live database; run on both after applying 0009. |
+| `0010_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check for 0010 — confirms `admin_set_application_status()` is still SECURITY DEFINER + pinned `search_path`, was redefined **with** the profile-row guard, and keeps `anon`-revoked / `authenticated`-granted EXECUTE. Safe on the live database; run on both after applying 0010, then re-run the approve/decline sections of `S4_verify_TEST_db_only.sql` on TEST to confirm no regression. |
 
 ---
 
@@ -152,8 +154,8 @@ These mirror the binding docs — follow them, don't restate them:
 ## 6. Naming & how future sprints add to this folder
 
 - **Migrations** keep a single, ever-increasing number across all sprints. S2 used `0001`–`0007`,
-  S3 added `0008`, S4 adds `0009`; the next database sprint (S5, content schema) continues at
-  `0010`, `0011`, … Never reuse or renumber. Once a migration has been applied to production it is **immutable** — a correction
+  S3 added `0008`, S4 adds `0009`–`0010`; the next database sprint (S5, content schema) continues
+  at `0011`, `0012`, … Never reuse or renumber. Once a migration has been applied to production it is **immutable** — a correction
   is a **new** numbered pair, never an edit to the old file (that's exactly why 0005, 0006 and
   0007 exist as their own files rather than edits to 0003/0004/0002).
 - **Bundles** and **verification** scripts are prefixed with the sprint (`S2_…`). Each sprint
@@ -173,6 +175,13 @@ These mirror the binding docs — follow them, don't restate them:
 (role-simulated; fill in the seed UUIDs), and finally apply to **production** and run
 `verification/S4_verify_PROD_safe_readonly.sql`. S4 also wires the app code that uses these RPCs
 (the gated workspace shell + pending `/dashboard`, and `/admin/approvals`).
+
+**S4 also adds `0010`** (post-review hardening of `admin_set_application_status` — it now refuses
+to half-apply if the applicant has no profile row). Apply it to the **test** database first, run
+`verification/0010_verify_PROD_safe_readonly.sql` and re-run the approve/decline sections of
+`S4_verify_TEST_db_only.sql` (regression), then apply to **production** and run the read-only check
+there. `0009` itself needs **no re-apply** — its up/down only gained no-op `rejected`↔`declined`
+guards so the constraint swap and its rollback can never fail; the live DBs already match.
 
 ### Earlier state (S3)
 
