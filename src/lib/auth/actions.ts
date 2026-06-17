@@ -22,7 +22,9 @@ export async function signInAction(
 ): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const next = safeNextPath(formData.get("next")?.toString());
+  // Post-login lands on the gated dashboard (pending or approved state) unless
+  // a safe ?next= was supplied (e.g. the gate redirect from /admin/approvals).
+  const next = safeNextPath(formData.get("next")?.toString(), "/dashboard");
 
   if (!EMAIL_RE.test(email)) {
     return { error: "Please enter a valid email." };

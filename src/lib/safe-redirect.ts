@@ -81,15 +81,20 @@ export async function getSafeOrigin(): Promise<string> {
 
 /* Coerce a user-supplied next target to a safe, relative, same-origin path.
    Rejects absolute URLs (http://evil.com), protocol-relative (//evil.com), and
-   backslash forms (/\evil.com, which some browsers normalise to //evil.com). */
-export function safeNextPath(next: string | null | undefined): string {
+   backslash forms (/\evil.com, which some browsers normalise to //evil.com).
+   `fallback` (a developer-controlled literal, never user input) is returned for
+   a missing/unsafe value — e.g. "/dashboard" for post-login. */
+export function safeNextPath(
+  next: string | null | undefined,
+  fallback: string = "/",
+): string {
   if (
     !next ||
     !next.startsWith("/") ||
     next.startsWith("//") ||
     next.includes("\\")
   ) {
-    return "/";
+    return fallback;
   }
   return next;
 }
