@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Spectral } from "next/font/google";
 import { Providers } from "@/app/providers";
+import { SiteChrome } from "@/components/layout/site-chrome";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
@@ -72,17 +73,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Providers>
-          <div className="ph-page">
-            <a className="ph-skip-link" href="#main-content">
-              Skip to content
-            </a>
-            <SiteHeader />
-            {/* tabIndex moves focus (not just scroll) when the skip link fires */}
-            <main id="main-content" tabIndex={-1}>
-              {children}
-            </main>
-            <SiteFooter />
-          </div>
+          {/* Public chrome on marketing/auth routes; gated routes
+              (/dashboard, /admin) bring their own shell — see SiteChrome. */}
+          <SiteChrome header={<SiteHeader />} footer={<SiteFooter />}>
+            {children}
+          </SiteChrome>
         </Providers>
       </body>
     </html>
