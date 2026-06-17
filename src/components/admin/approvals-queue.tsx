@@ -207,7 +207,7 @@ export function ApprovalsQueue({ rows }: { rows: ApplicationRow[] }) {
                   }}
                 >
                   {selected.status === "approved"
-                    ? "Platform unlocked (is_approved = true)."
+                    ? "Platform unlocked."
                     : "Not approved — no access."}
                 </span>
               </div>
