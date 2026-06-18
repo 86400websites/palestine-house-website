@@ -24,6 +24,8 @@
 - [x] Supabase `@supabase/ssr` browser + server clients, `src/middleware.ts` session refresh, same-origin validated redirects (`safe-redirect.ts`) — *S3a; route protection enforcement is S4*
 - [x] Approval gate: `profiles.is_approved`, pending-state dashboard, server-side session gate on the gated route group (content RPCs inherit the pattern in S5/S6) — *S4*
 - [x] `/admin/approvals` — HQ approval queue (server-checked `admins` table) — *S4*  **[MVP-critical]**
+- [x] **Session-aware Apply CTA** — the public header's green Apply button becomes **My Dashboard** (→ `/dashboard`) once signed in (any state); logged-out keeps Apply. Same-origin session probe, public pages stay static, CSP unchanged — *S6 Step 3.5 (owner-requested UX)*
+- [x] **Apply → dashboard redirect** — a successful application signs the partner in (instant session, email confirmation OFF) and lands them on the `/dashboard` pending "under review" state, with no separate sign-in — *S6 Step 3.5 (owner-requested UX)*
 
 ### Partner platform (gated)
 - [x] Gated shell: persistent left sidebar + pending/locked state — *S4 (S6 destinations inert until built)*
