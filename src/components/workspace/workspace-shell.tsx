@@ -80,7 +80,9 @@ const GROUPS: SidebarGroup[] = [
   },
   {
     label: "You",
-    items: [{ key: "account", label: "Account", Icon: User, always: true }],
+    items: [
+      { key: "account", label: "Account", Icon: User, href: "/account", always: true },
+    ],
   },
 ];
 

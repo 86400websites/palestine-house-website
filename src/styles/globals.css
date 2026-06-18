@@ -1973,6 +1973,99 @@
   max-width: var(--measure);
 }
 
+/* ---------- Account (S6 6g) ---------- */
+.acct-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.acct-section h2 {
+  font: var(--weight-medium) var(--text-lg)/1.3 var(--font-display);
+  margin: 0;
+  color: var(--foreground);
+}
+.acct-desc {
+  font: var(--weight-regular) var(--text-sm)/1.6 var(--font-body);
+  color: var(--muted-foreground);
+  margin: 0;
+  max-width: 46ch;
+}
+.acct-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 360px;
+}
+.acct-field-label {
+  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
+  color: var(--foreground);
+}
+.acct-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  font: var(--weight-regular) var(--text-base)/1.5 var(--font-body);
+  color: var(--foreground);
+}
+.acct-input:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Email opt-in switch (native checkbox, visually a toggle) */
+.acct-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+.acct-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.acct-switch-track {
+  flex-shrink: 0;
+  width: 40px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--stone-300);
+  position: relative;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+.acct-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.acct-switch input:checked + .acct-switch-track {
+  background: var(--green-600);
+}
+.acct-switch input:checked + .acct-switch-track .acct-switch-knob {
+  transform: translateX(16px);
+}
+.acct-switch input:focus-visible + .acct-switch-track {
+  box-shadow: var(--shadow-focus);
+}
+.acct-switch-text {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--foreground);
+}
+
 .ws-scrim {
   position: fixed;
   inset: 0;
