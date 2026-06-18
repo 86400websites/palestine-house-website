@@ -41,6 +41,10 @@ type SidebarItem = {
   external?: boolean;
   /** Reachable before approval. */
   always?: boolean;
+  /** A second nav entry pointing at a route another item owns — it links, but
+   *  never claims the active state ("Operate & Program" -> /operate, which
+   *  "Managing & Operating" owns per the mockup). */
+  alias?: boolean;
 };
 
 type SidebarGroup = { label?: string; items: SidebarItem[] };
@@ -56,13 +60,13 @@ const GROUPS: SidebarGroup[] = [
     items: [
       { key: "plan", label: "Plan & Prepare", Icon: Bookmark, href: "/plan" },
       { key: "build", label: "Design & Build", Icon: CheckCircle2, href: "/build" },
-      { key: "operate", label: "Operate & Program", Icon: Clock },
+      { key: "operate", label: "Operate & Program", Icon: Clock, href: "/operate", alias: true },
     ],
   },
   {
     label: "Your House",
     items: [
-      { key: "managing", label: "Managing & Operating", Icon: Menu },
+      { key: "managing", label: "Managing & Operating", Icon: Menu, href: "/operate" },
       { key: "live", label: "Live Programming", Icon: Calendar, href: "/live", external: true, always: true },
     ],
   },
@@ -111,7 +115,7 @@ function SidebarLink({
 
   // Built route → real link.
   if (item.href) {
-    const isActive = pathname === item.href;
+    const isActive = !item.alias && pathname === item.href;
     return (
       <Link
         className={`ws-item${isActive ? " is-active" : ""}`}
