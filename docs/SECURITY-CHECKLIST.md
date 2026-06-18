@@ -41,6 +41,8 @@ A single place to verify that a change — and the site as a whole — doesn't l
 - [ ] Any new secret-key path **refreshes the threat model** and adds an explicit authorization check before release
 - [ ] Remember: the secret key **bypasses RLS** — treat its use as a privilege boundary, not a convenience
 
+> Using the Supabase MCP to inspect or change the database? Follow [`SUPABASE-MCP-SAFETY.md`](./SUPABASE-MCP-SAFETY.md) — `supabase-test` is read/write, `supabase-prod-readonly` is read-only, and neither connection ever uses the secret key.
+
 ## 5. Row Level Security (RLS) checklist
 
 - [ ] 🔴 RLS is enabled on **every** user-reachable table, **default-deny**, before any user data lands

@@ -95,6 +95,7 @@ If the on-disk reality disagrees with this list, **trust the code** (especially 
 - Server-only secrets (Supabase secret key, `MAILCHIMP_API_KEY`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, `UPSTASH_REDIS_REST_TOKEN`, `SENTRY_AUTH_TOKEN`) are read server-side only.
 - Never commit `.env.local`. New env var → note it (name only) for the owner to add in Vercel; don't invent values.
 - Route Handlers: zod-validate inputs; don't leak stack traces or upstream error bodies.
+- **Supabase MCP:** if you use the Supabase MCP to inspect or change the database, follow [`SUPABASE-MCP-SAFETY.md`](./docs/SUPABASE-MCP-SAFETY.md) (the MCP rulebook) — `supabase-test` is read/write, `supabase-prod-readonly` is read-only; never write to production through any channel.
 
 ### Database rules
 

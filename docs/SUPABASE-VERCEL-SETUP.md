@@ -14,7 +14,7 @@
 
 This site **uses auth + DB** (approval-gated partner platform), so the full Supabase setup below applies. Auth routes to cover in the redirect rules: `/login`, `/forgot-password`, `/update-password`, `/apply` (sign-up), `/dashboard` (post-login landing). `SUPABASE_SECRET_KEY` is expected to be needed only for trusted admin/server paths (e.g. approval operations) — prefer hardened `SECURITY DEFINER` RPCs first. Record the final values here (names/refs only, never keys) when each is created, and mirror them in `PROJECT-STATUS.md`.
 
-> Reusable setup guide for connecting a new website to **Supabase** (auth + database) and **Vercel** (hosting) safely. Companion to [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md) (the env-var model and Supabase architecture), [`WORKFLOW.md`](./WORKFLOW.md) (the deploy loop), and [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md). Replace every `[PLACEHOLDER]` with the real value for the project.
+> Reusable setup guide for connecting a new website to **Supabase** (auth + database) and **Vercel** (hosting) safely. Companion to [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md) (the env-var model and Supabase architecture), [`WORKFLOW.md`](./WORKFLOW.md) (the deploy loop), [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md), and [`SUPABASE-MCP-SAFETY.md`](./SUPABASE-MCP-SAFETY.md) (the MCP read/write vs read-only rules). Replace every `[PLACEHOLDER]` with the real value for the project.
 
 ## Purpose
 

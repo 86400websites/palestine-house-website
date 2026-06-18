@@ -247,7 +247,7 @@ If production is broken, pick the right tool:
 
 ## 14. Supabase & environment-variable safety
 
-Use this whenever a change touches auth, the database, or any env var. For the full env-var matrix, Supabase client setup, and auth redirect URLs, see [`SUPABASE-VERCEL-SETUP.md`](./SUPABASE-VERCEL-SETUP.md); for the pre-merge/launch security gate, see [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md).
+Use this whenever a change touches auth, the database, or any env var. For the full env-var matrix, Supabase client setup, and auth redirect URLs, see [`SUPABASE-VERCEL-SETUP.md`](./SUPABASE-VERCEL-SETUP.md); for the pre-merge/launch security gate, see [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md); and for using the Supabase MCP safely (test read/write vs prod read-only), see [`SUPABASE-MCP-SAFETY.md`](./SUPABASE-MCP-SAFETY.md).
 
 **Env-var rules**
 
