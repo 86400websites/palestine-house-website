@@ -215,7 +215,9 @@ export async function applyAction(
     .eq("user_id", userId)
     .limit(1);
   if (existingApps && existingApps.length > 0) {
-    return { ok: true, error: null };
+    // Already applied (idempotent retry) — they have a session; take them
+    // straight to the dashboard to see their status (S6 Step 3.5).
+    redirect("/dashboard");
   }
 
   // The authenticated user writes its own application (status defaults to
@@ -237,5 +239,9 @@ export async function applyAction(
     };
   }
 
-  return { ok: true, error: null };
+  // Account + application created and the user is signed in (instant session,
+  // email confirmation OFF) — land them on the dashboard's pending "under
+  // review" state instead of asking them to sign in (S6 Step 3.5). The apply
+  // form's confirmation branch is kept as a defensive fallback only.
+  redirect("/dashboard");
 }

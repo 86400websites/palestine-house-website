@@ -7,7 +7,7 @@ Only clean temporary reference material after the final sprint confirms it is no
 
 ## Gated content exposure (repo is public — owner decision 2026-06-12)
 
-The repo is public, so these folders are world-readable until handled — **deadline: S5 content ingestion, hard stop before launch (S10):**
+The repo is public, so these folders are world-readable until handled — **hard stop before launch (the new S7; reshuffled 2026-06-18 — was S10):**
 - `docs/page-copy/06-elements/` — the 30 gated topic pages (ingested into Supabase at S5a; remove or relocate after).
 - `docs/source-assets/resources/` — booklets, focus areas, templates, videos (uploaded to private Storage at S5d; remove or relocate after).
 - Alternative at any point: flip the repo private (loses Free-plan branch-protection enforcement) or move this content to a private side repo.

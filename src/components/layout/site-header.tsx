@@ -143,11 +143,12 @@ export function SiteHeader() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  /* Reflect auth state in the locked chrome (Sign in ↔ Sign out) WITHOUT
-     making any page dynamic: a same-origin probe (CSP connect-src 'self'
-     allows /api/*, not supabase.co). Re-checked on navigation so it updates
-     right after the sign-in / sign-out redirects. Defaults to "Sign in" until
-     known, so anonymous visitors (the common case) never see a swap. */
+  /* Reflect auth state in the locked chrome (Sign in ↔ Sign out, and the green
+     Apply CTA ↔ My Dashboard) WITHOUT making any page dynamic: a same-origin
+     probe (CSP connect-src 'self' allows /api/*, not supabase.co). Re-checked
+     on navigation so it updates right after the sign-in / sign-out redirects.
+     Defaults to "Sign in" / "Apply" until known, so anonymous visitors (the
+     common case) never see a swap. */
   React.useEffect(() => {
     let active = true;
     fetch("/api/auth/session", { cache: "no-store" })
@@ -224,9 +225,16 @@ export function SiteHeader() {
               Sign in
             </Link>
           )}
+          {/* Once signed in (any state), the conversion CTA becomes the way
+              back into the platform — a pending partner reaches /dashboard to
+              see status, an approved one to work. Logged-out keeps Apply.
+              Defaults to Apply until the probe resolves (anonymous = common). */}
           <Button asChild size="sm">
-            <Link href="/apply" aria-label="Apply to bring a House">
-              Apply
+            <Link
+              href={authed ? "/dashboard" : "/apply"}
+              aria-label={authed ? "Go to your dashboard" : "Apply to bring a House"}
+            >
+              {authed ? "My Dashboard" : "Apply"}
             </Link>
           </Button>
 
@@ -278,8 +286,11 @@ export function SiteHeader() {
                   </div>
                   <div className="pt-4">
                     <Button asChild className="w-full">
-                      <Link href="/apply" onClick={() => setMobileOpen(false)}>
-                        Apply to bring a House
+                      <Link
+                        href={authed ? "/dashboard" : "/apply"}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {authed ? "My Dashboard" : "Apply to bring a House"}
                       </Link>
                     </Button>
                   </div>

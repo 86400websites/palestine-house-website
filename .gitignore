@@ -5,8 +5,8 @@ node_modules/
 .next/
 out/
 
-# production
-build/
+# production (root-only — must not match the src/app/(workspace)/build route or src/lib/build)
+/build/
 
 # vercel
 .vercel/

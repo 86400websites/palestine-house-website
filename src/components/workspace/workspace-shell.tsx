@@ -41,6 +41,10 @@ type SidebarItem = {
   external?: boolean;
   /** Reachable before approval. */
   always?: boolean;
+  /** A second nav entry pointing at a route another item owns — it links, but
+   *  never claims the active state ("Operate & Program" -> /operate, which
+   *  "Managing & Operating" owns per the mockup). */
+  alias?: boolean;
 };
 
 type SidebarGroup = { label?: string; items: SidebarItem[] };
@@ -54,29 +58,31 @@ const GROUPS: SidebarGroup[] = [
   {
     label: "Stages",
     items: [
-      { key: "plan", label: "Plan & Prepare", Icon: Bookmark },
-      { key: "build", label: "Design & Build", Icon: CheckCircle2 },
-      { key: "operate", label: "Operate & Program", Icon: Clock },
+      { key: "plan", label: "Plan & Prepare", Icon: Bookmark, href: "/plan" },
+      { key: "build", label: "Design & Build", Icon: CheckCircle2, href: "/build" },
+      { key: "operate", label: "Operate & Program", Icon: Clock, href: "/operate", alias: true },
     ],
   },
   {
     label: "Your House",
     items: [
-      { key: "managing", label: "Managing & Operating", Icon: Menu },
+      { key: "managing", label: "Managing & Operating", Icon: Menu, href: "/operate" },
       { key: "live", label: "Live Programming", Icon: Calendar, href: "/live", external: true, always: true },
     ],
   },
   {
     label: "Library",
     items: [
-      { key: "academy", label: "Academy", Icon: Play },
-      { key: "resources", label: "Resources", Icon: Download },
-      { key: "tools", label: "House Applications", Icon: SlidersHorizontal },
+      { key: "academy", label: "Academy", Icon: Play, href: "/academy" },
+      { key: "resources", label: "Resources", Icon: Download, href: "/resources" },
+      { key: "tools", label: "House Applications", Icon: SlidersHorizontal, href: "/tools" },
     ],
   },
   {
     label: "You",
-    items: [{ key: "account", label: "Account", Icon: User, always: true }],
+    items: [
+      { key: "account", label: "Account", Icon: User, href: "/account", always: true },
+    ],
   },
 ];
 
@@ -111,7 +117,7 @@ function SidebarLink({
 
   // Built route → real link.
   if (item.href) {
-    const isActive = pathname === item.href;
+    const isActive = !item.alias && pathname === item.href;
     return (
       <Link
         className={`ws-item${isActive ? " is-active" : ""}`}
@@ -224,13 +230,16 @@ export function WorkspaceShell({
           ))}
         </nav>
         <div className="ws-side-foot">
-          {/* Support page arrives in S6 — inert until then. */}
-          <span className="ws-item is-locked" aria-disabled={true} title="Coming soon">
+          <Link
+            className={`ws-item${pathname === "/support" ? " is-active" : ""}`}
+            href="/support"
+            aria-current={pathname === "/support" ? "page" : undefined}
+          >
             <span className="ws-item-icon">
               <Info size={17} />
             </span>
             <span className="ws-item-label">Support</span>
-          </span>
+          </Link>
         </div>
       </aside>
 

@@ -127,7 +127,7 @@ Commit messages (short, imperative): `Build Experience page live strip`, `Add ap
 
 ## Hosting note
 
-If a change affects build output, scripts, security headers, routing, or env handling, keep `vercel.json` (once added) and `next.config.ts` consistent — and call it out. `next.config.ts` must ship security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) — added in Sprint 0.1; the CSP allow-list is extended only for the YouTube embed origin (resolved decision D1, S7).
+If a change affects build output, scripts, security headers, routing, or env handling, keep `vercel.json` (once added) and `next.config.ts` consistent — and call it out. `next.config.ts` must ship security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) — added in Sprint 0.1; the CSP allow-list is extended only for the YouTube embed origin (resolved decision D1, S8 — post-launch; reshuffled 2026-06-18).
 
 ## Local development
 
