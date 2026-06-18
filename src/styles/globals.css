@@ -1439,6 +1439,179 @@
   color: var(--ink-700);
 }
 
+/* ---------- Build page (S6 6c) ---------- */
+/* Focus-area code chip (A–J) — shared workspace primitive from workspace.css. */
+.topic-code {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  background: var(--paper-200);
+  font: var(--weight-semibold) var(--text-xs)/1 var(--font-body);
+  color: var(--ink-700);
+}
+.bld-areas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.bld-area {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  overflow: hidden;
+}
+.bld-area-head {
+  appearance: none;
+  border: none;
+  background: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--tap-target);
+  padding: var(--space-4) var(--space-5);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.bld-area-head:hover {
+  background: var(--paper-100);
+}
+.bld-area-title {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  font: var(--weight-medium) var(--text-base)/1.3 var(--font-body);
+  color: var(--foreground);
+}
+.bld-area-count {
+  font: var(--weight-regular) var(--text-sm)/1 var(--font-body);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.bld-meter {
+  width: 88px;
+  height: 5px;
+  border-radius: var(--radius-sm);
+  background: var(--paper-200);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.bld-meter span {
+  display: block;
+  height: 100%;
+  background: var(--brand-primary);
+  border-radius: var(--radius-sm);
+}
+.bld-area-body {
+  padding: var(--space-2) var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.bld-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+.bld-item.is-complete {
+  background: var(--green-50);
+}
+.bld-item.is-blocked {
+  border-color: var(--status-error-bg);
+  background: var(--status-error-bg);
+}
+.bld-item-body {
+  flex: 1;
+  min-width: 0;
+}
+.bld-item-label {
+  font: var(--text-body);
+  color: var(--foreground);
+  margin: 0;
+}
+.bld-item.is-complete .bld-item-label {
+  color: var(--muted-foreground);
+}
+.bld-item-doc {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--subtle-foreground);
+  margin: var(--space-1) 0 0;
+}
+.bld-item-note {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--status-error);
+  margin: var(--space-1) 0 0;
+}
+.bld-item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+.bld-item-actions form {
+  display: inline-flex;
+}
+.bld-item-link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
+  color: var(--brand-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.bld-item-link:hover {
+  color: var(--brand-primary-hover);
+}
+.bld-item-link:disabled {
+  color: var(--stone-400);
+  cursor: not-allowed;
+}
+.bld-item-link.is-inert {
+  color: var(--stone-400);
+  cursor: default;
+}
+.bld-block-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  max-width: var(--measure);
+}
+.bld-block-hint {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--muted-foreground);
+}
+.bld-block-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--foreground);
+  resize: vertical;
+}
+.bld-block-input:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: var(--shadow-focus);
+}
+
 .ws-scrim {
   position: fixed;
   inset: 0;

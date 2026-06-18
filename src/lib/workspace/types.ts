@@ -55,3 +55,41 @@ export type AcademyRow = {
   youtube_url: string | null;
   sort_order: number;
 };
+
+/* /build checklist tracker (S6 6c). Statuses match the checklist_progress
+   CHECK constraint + set_checklist_progress (underscore form, NOT the mockup's
+   hyphen form). */
+export type ProgressStatus =
+  | "not_started"
+  | "in_progress"
+  | "complete"
+  | "blocked";
+
+export type ProgressRow = {
+  checklist_item_id: string;
+  status: ProgressStatus;
+  blocked_note: string | null;
+};
+
+export type BuildItemVM = {
+  id: string; // checklist_items.id — the key for set_checklist_progress
+  text: string; // item_text (DB-sourced, never edited)
+  slug: string | null; // element slug for "Open this topic" (null -> inert)
+  requiredDocument: string | null;
+  status: ProgressStatus;
+  note: string | null; // blocked_note, only when status === "blocked"
+};
+
+export type BuildAreaVM = {
+  code: string; // "A".."J"
+  name: string; // focus_area_name
+  items: number;
+  done: number; // status === "complete"
+  vmItems: BuildItemVM[];
+};
+
+export type BuildModel = {
+  areas: BuildAreaVM[];
+  totalItems: number;
+  doneItems: number;
+};
