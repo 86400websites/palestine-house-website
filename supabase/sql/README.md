@@ -60,6 +60,12 @@ Each change is a **pair**: an `*.up.sql` (makes the change) and a matching `*.do
 | 0008 | `0008_handle_new_user_full_name.up.sql` | S3 (3c): the profile-creation trigger now also copies the applicant's **name** from their sign-up metadata into `profiles.full_name` (trimmed; blank becomes NULL), so the dashboard can greet them by name. The function stays locked down exactly as before. Expand-only — older rows simply keep their NULL name. |
 | 0009 | `0009_admin_approval_rpcs.up.sql` | S4 (4a): adds the two **admin-only** approval RPCs — **`admin_list_applications()`** (an admin reads the whole queue) and **`admin_set_application_status()`** (an admin approves or declines an application, flipping that applicant's **`profiles.is_approved`** to match — approved→true, declined→false). Both are hardened exactly like the S2 helpers (admin authorization is checked **inside** the function). Also renames the decline state from the S2 placeholder **`rejected`** to **`declined`** to match the approvals screen — safe because no existing row used `rejected` (both up + down also migrate any stray row between the two values first, so the constraint swap and its rollback can never fail). |
 | 0010 | `0010_admin_set_status_profile_guard.up.sql` | S4 follow-up (independent review): hardens **`admin_set_application_status()`** so it **refuses** (and rolls back) if the applicant has no `profiles` row — preventing an application from reading `approved` while the real gate stays locked. A defensive guard for a state the `0001` trigger already prevents; the function stays SECURITY DEFINER + locked down. |
+| 0011 | `0011_elements.up.sql` | S5 (5a): creates **`elements`** — one row per topic (A1..J3): focus area, title, one-line, and the per-tab markdown bodies (Overview, Simple Guide, Watch Out For). RLS default-deny with **no client policy** (like `admins`); approved partners read it only through the hardened `get_elements()` / `get_element(slug)` RPCs, each of which checks `is_approved()` **inside** (a pending/anon caller gets zero rows). |
+| 0012 | `0012_checklist.up.sql` | S5 (5b): creates **`checklist_items`** (the gated launch-checklist catalog — element-linked, grouped, optional gate) and **`checklist_progress`** (the **only per-user write in the app** — owner-scoped saved progress). Items read via `get_checklist()`; progress is read-own (RLS SELECT) and written only through `set_checklist_progress()`, which forces ownership to `auth.uid()` and locks `status` to the allowed set (the S2 mutable-column lesson). Natural key `(element_id, item_text)` so re-ingestion is an upsert that never changes ids. |
+| 0013 | `0013_programming_sessions.up.sql` | S5 (5c): creates **`programming_sessions`** — owner-scoped partner writes (insert/update require approval **and** ownership). The public listing comes ONLY from **`public_programming_sessions()`**, a hardened projection of the anon-safe columns (no `created_by`/PII) — the **only** function in the whole schema granted to `anon`. |
+| 0014 | `0014_resources.up.sql` | S5 (5d): creates **`resources`** (metadata for the 267 templates + 2 booklets) read via `get_resources()` (narrow return — no raw storage paths), plus the two Storage buckets: **`resources`** (PRIVATE — the templates) and **`booklets`** (PUBLIC — the two lead-magnet PDFs). No `storage.objects` policy → default-deny; template downloads are server-issued signed URLs (S6e). |
+| 0015 | `0015_academy_modules.up.sql` | S5 (5e): creates **`academy_modules`** — one optional video module per topic (1:1 with an element), with a nullable `youtube_url` (null → the "video's coming" empty state) and the script body. Read only via the `is_approved()`-gated `get_academy_modules()` RPC. |
+| 0016 | `0016_s5_review_hardening.up.sql` | S5 post-review (independent Codex review of the branch): three hardening fixes — a **new** pair because 0012/0013/0014 are immutable. (1) **`checklist_progress`** owner SELECT policy now also requires `is_approved()` — a user whose approval is revoked can no longer read its saved progress directly (the gate must hold on every gated **read**, not just writes). (2) **`programming_sessions`** DELETE now requires `is_approved()` too (insert/update already did) — a non-approved owner can't delete sessions. (3) defensively re-asserts the Storage bucket flags (`resources` private, `booklets` public), since 0014's `on conflict do nothing` would not correct a pre-existing mis-flagged bucket. |
 
 Every `*.down.sql` reverses **only** its own `*.up.sql`.
 
@@ -80,6 +86,8 @@ Every `*.down.sql` reverses **only** its own `*.up.sql`.
 | `S4_verify_TEST_db_only.sql` | **Test DB only** | Role-simulated proof for 0009: an admin sees the whole queue and a non-admin sees none; a non-admin cannot flip approval; an invalid status is refused; approve/decline set the status **and** mirror `is_approved`. The mutating checks run in `begin … rollback`; a final idempotent block resets the test applicant to `pending` for the UI test. Uses the GATE 0 seed accounts (admin + a non-admin applicant). Test database only. |
 | `S4_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check for 0009 — confirms both admin RPCs exist, are SECURITY DEFINER with a pinned `search_path`, that `anon` cannot execute them, the status check is `pending\|approved\|declined`, and `admins` is still RLS-on with no policy. Safe on the live database; run on both after applying 0009. |
 | `0010_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check for 0010 — confirms `admin_set_application_status()` is still SECURITY DEFINER + pinned `search_path`, was redefined **with** the profile-row guard, and keeps `anon`-revoked / `authenticated`-granted EXECUTE. Safe on the live database; run on both after applying 0010, then re-run the approve/decline sections of `S4_verify_TEST_db_only.sql` on TEST to confirm no regression. |
+| `S5_verify_TEST_db_only.sql` | **Test DB only** | Role-simulated proof for the S5 content schema (0011–0015): seeds **one throwaway row per table**, then confirms anon can call **only** `public_programming_sessions()` (every gated RPC denied `42501`), a **pending** user gets zero gated rows and can't write progress, an **approved** user reads all content and writes/reads only its **own** `checklist_progress` (a forged `status` is rejected `22023`; a second approved user can't see or update it), and the private bucket is unreadable. Self-cleaning by explicit `delete` (not rollback — the SQL Editor ignores hand-written `begin…rollback`); ends with the seed removed. Fill in three test UUIDs first. Test database only. |
+| `S5_verify_PROD_safe_readonly.sql` | **Any DB, incl. production** | **Read-only** check for 0011–0015: confirms all six tables exist + RLS on, the client-policy counts (0 except `checklist_progress`=1 / `programming_sessions`=4), all seven RPCs are SECURITY DEFINER + pinned `search_path`, `anon` can execute **only** `public_programming_sessions()`, the `resources` bucket is private + `booklets` public, `storage.objects` is RLS-on with no policy, and (after ingestion) the row + storage-object counts match the source (30 / 728 / 30 / 267+2). Safe on the live database; run on both after applying 0011–0015. |
 
 ---
 
@@ -154,8 +162,8 @@ These mirror the binding docs — follow them, don't restate them:
 ## 6. Naming & how future sprints add to this folder
 
 - **Migrations** keep a single, ever-increasing number across all sprints. S2 used `0001`–`0007`,
-  S3 added `0008`, S4 adds `0009`–`0010`; the next database sprint (S5, content schema) continues
-  at `0011`, `0012`, … Never reuse or renumber. Once a migration has been applied to production it is **immutable** — a correction
+  S3 added `0008`, S4 added `0009`–`0010`, S5 (content schema) added `0011`–`0015` plus `0016`
+  (post-review hardening); the next database sprint continues at `0017`. Never reuse or renumber. Once a migration has been applied to production it is **immutable** — a correction
   is a **new** numbered pair, never an edit to the old file (that's exactly why 0005, 0006 and
   0007 exist as their own files rather than edits to 0003/0004/0002).
 - **Bundles** and **verification** scripts are prefixed with the sprint (`S2_…`). Each sprint
@@ -165,7 +173,34 @@ These mirror the binding docs — follow them, don't restate them:
 
 ---
 
-## 7. Current state (S4)
+## 7. Current state (S5)
+
+**S5 adds `0011`–`0015`** — the content data layer: `elements` (5a) · `checklist_items` + owner-scoped
+`checklist_progress` (5b) · `programming_sessions` with the anon-safe `public_programming_sessions()`
+projection (5c) · `resources` metadata + the private `resources` / public `booklets` Storage buckets
+(5d) · `academy_modules` (5e). Every table is RLS default-deny and is read only through an
+`is_approved()`-gated `SECURITY DEFINER` RPC; the **only** anon-callable function is
+`public_programming_sessions()`. Apply `0011`→`0015` in order on the **test** database first, run
+`verification/S5_verify_TEST_db_only.sql` (the role matrix — fill in three test UUIDs), then apply on
+**production** and run the read-only `verification/S5_verify_PROD_safe_readonly.sql` on both. Applied +
+verified on test (`sdszcralogcrujtyghig`) and production (`jwogtqizqujwhbvpoziu`) on 2026-06-18.
+**`0016` (post-review hardening, independent Codex review)** gates the `checklist_progress` owner SELECT
+and the `programming_sessions` DELETE on `is_approved()` and re-asserts the bucket flags — applied +
+verified on **test**; **apply it to production after `0015`** and re-run `S5_verify_PROD_safe_readonly.sql`
+(its section 2b shows the policy predicates now include `is_approved()`).
+
+The content itself is loaded by a one-time, idempotent **ingestion script** — `scripts/ingest-content.ts`
+(NOT app code) — which parses the `.docx` source under `docs/source-assets/resources/` + the
+`docs/page-copy/06-elements/_index.md` map, upserts the rows on content-stable natural keys (so re-runs
+never change ids or disturb `checklist_progress`), and uploads the 267 templates + 2 booklets to the
+buckets. It is a sanctioned **admin op**: it reads `SUPABASE_INGEST_URL` / `SUPABASE_INGEST_SECRET_KEY`
+(or `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SECRET_KEY`) from `.env.local`, **defaults to TEST and refuses
+any other project unless `--i-understand-not-test` is passed deliberately** — the app never uses the
+secret key. Preview with `pnpm tsx scripts/ingest-content.ts --dry-run`, then run it against TEST; the
+human runs it against PROD deliberately. Counts on both DBs: **30 elements · 728 checklist_items · 30
+academy_modules · 267 templates + 2 booklets · 267+2 storage objects.**
+
+### Earlier state (S4)
 
 **S4 adds `0009`** — the two admin-only approval RPCs (`admin_list_applications()` +
 `admin_set_application_status()`) and the `rejected` → `declined` status rename. Apply it to the

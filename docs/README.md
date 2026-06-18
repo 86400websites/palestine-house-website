@@ -15,7 +15,7 @@ The operating manual for building **palestinehouse** — the public face of Pale
 
 Any fresh AI session starts by reading **`PROJECT-STATUS.md`** (where we are) and **`ROADMAP.md`** (what's next), then the relevant docs below.
 
-## The ten core files
+## The eleven core files
 
 | # | File | What it answers |
 |---|---|---|
@@ -29,6 +29,7 @@ Any fresh AI session starts by reading **`PROJECT-STATUS.md`** (where we are) an
 | 8 | **`CLAUDE.md`** | *Rules for Claude Code* in this repo. |
 | 9 | **`AGENTS.md`** | *Rules for other agents* — review priorities, gating checks, what they may and may not change. |
 | 10 | **`DESIGN.md`** | *How it looks and moves.* The Palestine House visual system (heritage green, warm paper, Spectral + Inter, restrained editorial motion). |
+| 11 | **`SUPABASE-MCP-SAFETY.md`** | *Rules for using the Supabase MCP* — `supabase-test` is read/write, `supabase-prod-readonly` is read-only; Claude proves on test, the human ships to production. |
 
 Plus the **`/docs` content layer** (locked inputs, never invented by agents):
 
