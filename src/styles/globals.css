@@ -1130,6 +1130,14 @@
 .ws-breadcrumb-sep {
   color: var(--stone-400);
 }
+.ws-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+.ws-breadcrumb a:hover {
+  color: var(--ink-700);
+  text-decoration: underline;
+}
 
 .ws-element-head {
   margin-top: var(--space-6);
@@ -1317,6 +1325,56 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+/* Topic row (read-only catalog list: /plan, later /operate) */
+.topic-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--tap-target);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+.topic-row:hover {
+  background: var(--paper-100);
+  border-color: var(--border-strong);
+}
+/* .topic-code (the A–J chip) is the shared primitive already defined in the
+   Build section below — reused here, not re-declared. */
+.topic-row-body {
+  flex: 1;
+  min-width: 0;
+}
+.topic-row-title {
+  font: var(--weight-medium) var(--text-base)/1.35 var(--font-body);
+  color: var(--foreground);
+  margin: 0;
+}
+.topic-row-line {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--muted-foreground);
+  margin: 2px 0 0;
+  text-wrap: pretty;
+}
+.topic-row-meta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font: var(--weight-regular) var(--text-xs)/1 var(--font-body);
+  color: var(--subtle-foreground);
+  white-space: nowrap;
+}
+.topic-row-chev {
+  color: var(--stone-400);
+  display: inline-flex;
+  flex-shrink: 0;
 }
 
 .ws-checkgroup {
@@ -1727,6 +1785,13 @@
   }
   .ws-menu {
     right: var(--space-4);
+  }
+}
+@media (max-width: 560px) {
+  /* The "Overview · Simple Guide" meta is the first thing to drop when a
+     topic row gets tight (mockup: workspace.css). */
+  .topic-row-meta {
+    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMyProfile } from "@/lib/auth/profile";
 import {
@@ -105,9 +106,10 @@ export default async function ElementPage({ params }: Params) {
 
   return (
     <article>
-      {/* Breadcrumb labels are inert until /plan ships (Step 4) — no dead links. */}
+      {/* "Plan & Prepare" is the orientation entry point for the topics; the
+          focus-area crumb stays a label (no per-focus-area route). */}
       <nav className="ws-breadcrumb" aria-label="Breadcrumb">
-        <span>Plan &amp; Prepare</span>
+        <Link href="/plan">Plan &amp; Prepare</Link>
         <span className="ws-breadcrumb-sep" aria-hidden="true">
           /
         </span>

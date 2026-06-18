@@ -54,7 +54,7 @@ const GROUPS: SidebarGroup[] = [
   {
     label: "Stages",
     items: [
-      { key: "plan", label: "Plan & Prepare", Icon: Bookmark },
+      { key: "plan", label: "Plan & Prepare", Icon: Bookmark, href: "/plan" },
       { key: "build", label: "Design & Build", Icon: CheckCircle2, href: "/build" },
       { key: "operate", label: "Operate & Program", Icon: Clock },
     ],
