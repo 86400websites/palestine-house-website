@@ -230,13 +230,16 @@ export function WorkspaceShell({
           ))}
         </nav>
         <div className="ws-side-foot">
-          {/* Support page arrives in S6 — inert until then. */}
-          <span className="ws-item is-locked" aria-disabled={true} title="Coming soon">
+          <Link
+            className={`ws-item${pathname === "/support" ? " is-active" : ""}`}
+            href="/support"
+            aria-current={pathname === "/support" ? "page" : undefined}
+          >
             <span className="ws-item-icon">
               <Info size={17} />
             </span>
             <span className="ws-item-label">Support</span>
-          </span>
+          </Link>
         </div>
       </aside>
 
