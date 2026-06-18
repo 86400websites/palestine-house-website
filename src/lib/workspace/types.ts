@@ -93,3 +93,15 @@ export type BuildModel = {
   totalItems: number;
   doneItems: number;
 };
+
+/* /dashboard mid-journey snapshot (S6 6a). Derived from BuildModel — no gate
+   data (D-S6-b): stage + overall Design & Build % + the next few incomplete
+   focus areas. */
+export type ProgressStage = "plan" | "build" | "operate";
+
+export type ProgressSnapshot = {
+  stage: ProgressStage;
+  started: boolean; // any item moved off "not_started"
+  pct: number; // overall Design & Build completion (0 when no items)
+  nextAreas: { code: string; name: string; done: number; items: number }[];
+};

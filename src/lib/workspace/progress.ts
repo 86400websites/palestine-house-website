@@ -6,6 +6,8 @@ import type {
   ElementListItem,
   ProgressRow,
   ProgressStatus,
+  ProgressStage,
+  ProgressSnapshot,
   BuildAreaVM,
   BuildModel,
 } from "./types";
@@ -75,4 +77,28 @@ export function deriveBuildModel(
   const totalItems = areas.reduce((n, a) => n + a.items, 0);
   const doneItems = areas.reduce((n, a) => n + a.done, 0);
   return { areas, totalItems, doneItems };
+}
+
+/* Compact snapshot for /dashboard (S6 6a) — pure transform over BuildModel.
+   stage: operate only when there is work and it is all complete; build once any
+   item has moved off "not_started"; otherwise plan. No gate data (D-S6-b). */
+export function deriveProgressSnapshot(model: BuildModel): ProgressSnapshot {
+  const { areas, totalItems, doneItems } = model;
+
+  const started = areas.some((a) =>
+    a.vmItems.some((it) => it.status !== "not_started"),
+  );
+  const stage: ProgressStage =
+    totalItems > 0 && doneItems === totalItems
+      ? "operate"
+      : started
+        ? "build"
+        : "plan";
+  const pct = totalItems === 0 ? 0 : Math.round((doneItems / totalItems) * 100);
+  const nextAreas = areas
+    .filter((a) => a.done < a.items)
+    .slice(0, 3)
+    .map((a) => ({ code: a.code, name: a.name, done: a.done, items: a.items }));
+
+  return { stage, started, pct, nextAreas };
 }

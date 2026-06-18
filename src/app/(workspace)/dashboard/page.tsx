@@ -1,15 +1,32 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Calendar, Clock, Info } from "lucide-react";
+import { Calendar, ChevronRight, Clock, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getMyProfile } from "@/lib/auth/profile";
+import { getMyProfile, firstNameOf } from "@/lib/auth/profile";
+import { getChecklist, getElements } from "@/lib/workspace/content";
+import {
+  getChecklistProgress,
+  deriveBuildModel,
+  deriveProgressSnapshot,
+} from "@/lib/workspace/progress";
+import type { ProgressStage } from "@/lib/workspace/types";
 
 /* /dashboard (docs/page-copy/03-member-workspace/dashboard.md) — answers one
-   question: where am I, what's next? Never a wall. S4 ships two states:
-   - pending: "under review" while HQ decides;
-   - newly approved: the empty-state welcome.
-   The full snapshot (stage %, gates, next steps) needs the content schema and
-   lands in S6. Approval comes from get_my_profile() (cached, shared with the
-   layout) — read live, so it flips without a re-login. */
+   question: where am I, what's next? Never a wall. Three states:
+   - pending: "under review" while HQ decides (S4);
+   - newly approved (nothing started): the empty-state welcome (S4);
+   - mid-journey (Design & Build started): the snapshot — current stage +
+     Design & Build % + the next few focus areas (S6 6a). Gates are NOT shown
+     (gate data all-null, Gate 2 label unapproved — D-S6-b). Approval + progress
+     are read live (cached), so it flips without a re-login. */
+
+export const metadata: Metadata = { title: "Welcome" };
+
+const STAGE_LABEL: Record<ProgressStage, string> = {
+  plan: "Plan & Prepare",
+  build: "Design & Build",
+  operate: "Operate & Program",
+};
 
 export default async function DashboardPage() {
   const profile = await getMyProfile();
@@ -43,18 +60,104 @@ export default async function DashboardPage() {
     );
   }
 
+  const [checklist, elements, progress] = await Promise.all([
+    getChecklist(),
+    getElements(),
+    getChecklistProgress(),
+  ]);
+  const snapshot = deriveProgressSnapshot(
+    deriveBuildModel(checklist, elements, progress),
+  );
+
+  if (!snapshot.started) {
+    return (
+      <div>
+        <h1 className="ws-h1">You’re approved — welcome.</h1>
+        <p className="ws-lead">
+          Start in Plan &amp; Prepare: understand the model and your city before
+          you build a thing.
+        </p>
+        <div className="ws-cta-row">
+          <Button asChild>
+            <Link href="/focus-areas">Explore the focus areas</Link>
+          </Button>
+        </div>
+        <p className="ws-help ws-help--mt-lg">
+          <span className="ws-help-icon">
+            <Info size={17} />
+          </span>
+          <span>
+            Stuck? <strong>Support</strong> is one click away.
+          </span>
+        </p>
+        <p className="ws-help ws-help--mt-sm">
+          <span className="ws-help-icon">
+            <Calendar size={17} />
+          </span>
+          <span>
+            <em>Take a break — catch a live event or a recording</em> →{" "}
+            <Link href="/live">Live Programming</Link>.
+          </span>
+        </p>
+      </div>
+    );
+  }
+
+  // Mid-journey snapshot (S6 6a). Gate column suppressed (D-S6-b).
+  const firstName = firstNameOf(profile?.full_name);
   return (
     <div>
-      <h1 className="ws-h1">You’re approved — welcome.</h1>
-      <p className="ws-lead">
-        Start in Plan &amp; Prepare: understand the model and your city before
-        you build a thing.
-      </p>
-      <div className="ws-cta-row">
+      <h1 className="ws-h1">
+        {firstName ? `Welcome back, ${firstName}.` : "Welcome back."} Here’s your
+        next move.
+      </h1>
+
+      <div className="dash-grid" style={{ marginTop: "var(--space-8)" }}>
+        <section className="ws-card">
+          <p className="ph-eyebrow">Progress snapshot</p>
+          <div className="dash-stats">
+            <div className="ws-stat">
+              <span className="ws-stat-label">Current stage</span>
+              <span className="ws-stat-value">{STAGE_LABEL[snapshot.stage]}</span>
+            </div>
+            <div className="ws-stat">
+              <span className="ws-stat-label">Design &amp; Build</span>
+              <span className="ws-stat-value">{snapshot.pct}%</span>
+            </div>
+          </div>
+        </section>
+
+        {snapshot.nextAreas.length > 0 && (
+          <section className="ws-card">
+            <p className="ph-eyebrow">Next steps</p>
+            <div className="dash-next" style={{ marginTop: "var(--space-4)" }}>
+              {snapshot.nextAreas.map((area, i) => (
+                <Link className="dash-next-row" href="/build" key={area.code}>
+                  <span className="dash-next-num">{i + 1}</span>
+                  <span style={{ flex: 1 }}>
+                    {area.name} — {area.done} of {area.items} done
+                  </span>
+                  <span
+                    style={{ display: "inline-flex", color: "var(--stone-400)" }}
+                  >
+                    <ChevronRight size={16} aria-hidden="true" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      <div className="ws-cta-row" style={{ marginTop: "var(--space-8)" }}>
         <Button asChild>
-          <Link href="/focus-areas">Explore the focus areas</Link>
+          <Link href="/build">Resume where you left off</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href="/build">Continue in Design &amp; Build</Link>
         </Button>
       </div>
+
       <p className="ws-help ws-help--mt-lg">
         <span className="ws-help-icon">
           <Info size={17} />
