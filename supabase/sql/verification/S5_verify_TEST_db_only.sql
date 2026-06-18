@@ -41,6 +41,11 @@ insert into public.academy_modules (element_id, title, one_line, youtube_url, bo
 select id,'__matrix_seed__ module','seed', null,'script',0 from public.elements where slug='a1';
 insert into public.programming_sessions (created_by, title, summary, mode, status, starts_at)
 values ('APPROVED_A_UUID','__matrix_seed__ session','summary','workshop','live', now());
+-- progress + session owned by the PENDING user — to prove the post-0016 read/delete gate
+insert into public.checklist_progress (user_id, checklist_item_id, status)
+select 'PENDING_UUID', id, 'complete' from public.checklist_items where item_text='__matrix_seed__ item 1';
+insert into public.programming_sessions (created_by, title, summary, mode, status, starts_at)
+values ('PENDING_UUID','__matrix_seed__ pending session','s','workshop','scheduled', now());
 
 -- ---------------------------------------------------------------------------
 -- 2) Role matrix (anon / pending / approved A / approved B), denial-catching
@@ -104,6 +109,20 @@ begin
   exception when others then obs:='ERR '||sqlstate; ok:=false; end;
   perform set_config('role','none',true);
   scenario:='pending'; expected:='resolves only own profile (1 row)'; observed:=obs; pass:=ok; return next;
+
+  -- pending: cannot read its OWN checklist_progress (gated by is_approved after 0016)
+  perform set_config('request.jwt.claims', json_build_object('sub',pend,'role','authenticated')::text, true); perform set_config('role','authenticated',true);
+  begin select count(*) into n from public.checklist_progress; obs:='rows='||n; ok:=(n=0);
+  exception when others then obs:='ERR '||sqlstate; ok:=false; end;
+  perform set_config('role','none',true);
+  scenario:='pending'; expected:='cannot read own checklist_progress (0) [0016]'; observed:=obs; pass:=ok; return next;
+
+  -- pending: cannot delete its OWN session (gated by is_approved after 0016)
+  perform set_config('request.jwt.claims', json_build_object('sub',pend,'role','authenticated')::text, true); perform set_config('role','authenticated',true);
+  begin delete from public.programming_sessions where title='__matrix_seed__ pending session'; get diagnostics n = row_count; obs:='deleted='||n; ok:=(n=0);
+  exception when others then obs:='DENIED '||sqlstate; ok:=true; end;
+  perform set_config('role','none',true);
+  scenario:='pending'; expected:='cannot delete own session (0) [0016]'; observed:=obs; pass:=ok; return next;
 
   -- APPROVED A: reads content; writes/reads only OWN progress; forged status rejected
   foreach ast in array array['get_elements()','get_element(''a1'')','get_checklist()','get_resources()','get_academy_modules()'] loop

@@ -27,6 +27,16 @@ order by tablename;
 -- (own select/insert/update/delete); elements, checklist_items, resources and
 -- academy_modules do NOT appear at all (0 policies — read only via their RPCs).
 
+-- 2b) The owner-scoped policy predicates actually carry the approval gate (post-0016)
+select tablename, policyname, cmd, qual, with_check
+from pg_policies
+where schemaname = 'public'
+  and tablename in ('checklist_progress','programming_sessions')
+order by tablename, cmd;
+-- EXPECT (after 0016): checklist_progress SELECT qual includes is_approved();
+-- programming_sessions INSERT with_check, UPDATE with_check, and DELETE qual all
+-- include is_approved() (i.e. created_by/user_id = auth.uid() AND is_approved()).
+
 -- 3) All seven S5 RPCs exist, SECURITY DEFINER with a pinned empty search_path
 select proname, prosecdef, proconfig
 from pg_proc

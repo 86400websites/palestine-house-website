@@ -65,6 +65,7 @@ Each change is a **pair**: an `*.up.sql` (makes the change) and a matching `*.do
 | 0013 | `0013_programming_sessions.up.sql` | S5 (5c): creates **`programming_sessions`** — owner-scoped partner writes (insert/update require approval **and** ownership). The public listing comes ONLY from **`public_programming_sessions()`**, a hardened projection of the anon-safe columns (no `created_by`/PII) — the **only** function in the whole schema granted to `anon`. |
 | 0014 | `0014_resources.up.sql` | S5 (5d): creates **`resources`** (metadata for the 267 templates + 2 booklets) read via `get_resources()` (narrow return — no raw storage paths), plus the two Storage buckets: **`resources`** (PRIVATE — the templates) and **`booklets`** (PUBLIC — the two lead-magnet PDFs). No `storage.objects` policy → default-deny; template downloads are server-issued signed URLs (S6e). |
 | 0015 | `0015_academy_modules.up.sql` | S5 (5e): creates **`academy_modules`** — one optional video module per topic (1:1 with an element), with a nullable `youtube_url` (null → the "video's coming" empty state) and the script body. Read only via the `is_approved()`-gated `get_academy_modules()` RPC. |
+| 0016 | `0016_s5_review_hardening.up.sql` | S5 post-review (independent Codex review of the branch): three hardening fixes — a **new** pair because 0012/0013/0014 are immutable. (1) **`checklist_progress`** owner SELECT policy now also requires `is_approved()` — a user whose approval is revoked can no longer read its saved progress directly (the gate must hold on every gated **read**, not just writes). (2) **`programming_sessions`** DELETE now requires `is_approved()` too (insert/update already did) — a non-approved owner can't delete sessions. (3) defensively re-asserts the Storage bucket flags (`resources` private, `booklets` public), since 0014's `on conflict do nothing` would not correct a pre-existing mis-flagged bucket. |
 
 Every `*.down.sql` reverses **only** its own `*.up.sql`.
 
@@ -161,8 +162,8 @@ These mirror the binding docs — follow them, don't restate them:
 ## 6. Naming & how future sprints add to this folder
 
 - **Migrations** keep a single, ever-increasing number across all sprints. S2 used `0001`–`0007`,
-  S3 added `0008`, S4 added `0009`–`0010`, S5 (content schema) added `0011`–`0015`; the next
-  database sprint continues at `0016`. Never reuse or renumber. Once a migration has been applied to production it is **immutable** — a correction
+  S3 added `0008`, S4 added `0009`–`0010`, S5 (content schema) added `0011`–`0015` plus `0016`
+  (post-review hardening); the next database sprint continues at `0017`. Never reuse or renumber. Once a migration has been applied to production it is **immutable** — a correction
   is a **new** numbered pair, never an edit to the old file (that's exactly why 0005, 0006 and
   0007 exist as their own files rather than edits to 0003/0004/0002).
 - **Bundles** and **verification** scripts are prefixed with the sprint (`S2_…`). Each sprint
@@ -183,6 +184,10 @@ projection (5c) · `resources` metadata + the private `resources` / public `book
 `verification/S5_verify_TEST_db_only.sql` (the role matrix — fill in three test UUIDs), then apply on
 **production** and run the read-only `verification/S5_verify_PROD_safe_readonly.sql` on both. Applied +
 verified on test (`sdszcralogcrujtyghig`) and production (`jwogtqizqujwhbvpoziu`) on 2026-06-18.
+**`0016` (post-review hardening, independent Codex review)** gates the `checklist_progress` owner SELECT
+and the `programming_sessions` DELETE on `is_approved()` and re-asserts the bucket flags — applied +
+verified on **test**; **apply it to production after `0015`** and re-run `S5_verify_PROD_safe_readonly.sql`
+(its section 2b shows the policy predicates now include `is_approved()`).
 
 The content itself is loaded by a one-time, idempotent **ingestion script** — `scripts/ingest-content.ts`
 (NOT app code) — which parses the `.docx` source under `docs/source-assets/resources/` + the

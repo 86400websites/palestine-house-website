@@ -531,10 +531,14 @@ async function ingest(model: Model): Promise<void> {
   // DELIBERATELY by the human (WORKFLOW §14 / SUPABASE-MCP-SAFETY) and must pass
   // --i-understand-not-test, so a mis-pointed .env.local can never write prod by accident.
   const TEST_REF = "sdszcralogcrujtyghig";
-  if (!host.includes(TEST_REF) && !process.argv.includes("--i-understand-not-test")) {
+  const parsed = new URL(url);
+  // Exact-host match over https (NOT a substring include) so a look-alike host such as
+  // `${TEST_REF}.evil.example` can never pass the guard and receive the secret/writes.
+  const isTestTarget = parsed.protocol === "https:" && parsed.hostname === `${TEST_REF}.supabase.co`;
+  if (!isTestTarget && !process.argv.includes("--i-understand-not-test")) {
     throw new Error(
-      `Refusing to ingest into non-TEST host "${host}". This script targets the TEST project ` +
-        `(${TEST_REF}). To run it against another project, pass --i-understand-not-test deliberately.`,
+      `Refusing to ingest into non-TEST target "${host}". This script targets the TEST project ` +
+        `(https://${TEST_REF}.supabase.co). To run it against another project, pass --i-understand-not-test deliberately.`,
     );
   }
 
