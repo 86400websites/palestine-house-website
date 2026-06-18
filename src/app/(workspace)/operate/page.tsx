@@ -100,10 +100,8 @@ export default async function OperatePage() {
             </Link>
           </Button>
         )}
-        {/* "Pull a template" opens /resources, which ships in Step 6 — inert
-            until then so it is never a dead link. */}
-        <Button variant="secondary" disabled>
-          Pull a template
+        <Button asChild variant="secondary">
+          <Link href="/resources">Pull a template</Link>
         </Button>
       </div>
 
