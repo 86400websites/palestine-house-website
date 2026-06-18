@@ -79,6 +79,9 @@ export default async function DashboardPage() {
         </p>
         <div className="ws-cta-row">
           <Button asChild>
+            <Link href="/plan">Start in Plan &amp; Prepare</Link>
+          </Button>
+          <Button asChild variant="secondary">
             <Link href="/focus-areas">Explore the focus areas</Link>
           </Button>
         </div>

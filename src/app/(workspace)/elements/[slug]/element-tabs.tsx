@@ -250,7 +250,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
                 <Play size={26} aria-hidden="true" />
               </span>
               <p style={{ margin: 0 }}>
-                Video&rsquo;s coming — the full guide is above.
+                Video&rsquo;s coming — the full guide is in Simple Guide.
               </p>
               <Button variant="secondary" size="sm" onClick={() => setTab("guide")}>
                 Open Simple Guide
@@ -265,7 +265,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
             </p>
             {data.templates.length === 0 ? (
               <p className="ws-intro">
-                No templates linked to this topic yet.
+                Templates for this topic will appear here.
               </p>
             ) : (
               <div className="ws-rows">

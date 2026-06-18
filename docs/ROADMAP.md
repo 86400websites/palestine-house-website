@@ -29,18 +29,18 @@
 
 ### Partner platform (gated)
 - [x] Gated shell: persistent left sidebar + pending/locked state — *S4 (S6 destinations inert until built)*
-- [ ] `/dashboard` Welcome as a Partner (orientation by stage; "current stage" snapshot — Design & Build % hidden until Build starts)
-- [ ] `/plan` Plan & Prepare (reference) · `/operate` Operate & Program / Managing & Operating (one page, two entry points)
-- [ ] `/build` Design & Build — launch checklist: 200+ items, 3 gates, **saved per-user progress** (the only per-user interactivity)
-- [ ] `/elements/[slug]` — tabbed canonical element page component × 30 (A1–J3), MDX bodies
-- [ ] `/resources` + `/resources/[category]` — guides, 267 templates, tools; private Storage bucket + server-issued signed URLs
-- [ ] `/academy` + `/academy/[slug]` — optional video reference library (no progress, no quizzes, no certificate)
-- [ ] `/live` partner tools — create/schedule sessions, attach stream, go live, host recordings → populate the public listing
-- [ ] `/tools` House Applications — coming-soon placeholder
-- [ ] `/account`, `/support`
+- [x] `/dashboard` Welcome as a Partner (orientation by stage; "current stage" snapshot — Design & Build % hidden until Build starts) — *S6 6a*
+- [x] `/plan` Plan & Prepare (reference) · `/operate` Operate & Program / Managing & Operating (one page, two entry points) — *S6 6b*
+- [x] `/build` Design & Build — launch checklist: 200+ items, 3 gates, **saved per-user progress** (the only per-user interactivity) — *S6 6c (gate banners suppressed until HQ supplies the mapping + Gate 2 label, D-S6-b)*
+- [x] `/elements/[slug]` — tabbed canonical element page component × 30 (A1–J3), MDX bodies — *S6 6d (DB markdown, sanitized server-side)*
+- [x] `/resources` + `/resources/[category]` — guides, 267 templates, tools; private Storage bucket + server-issued signed URLs — *S6 6e (migration 0017)*
+- [x] `/academy` + `/academy/[slug]` — optional video reference library (no progress, no quizzes, no certificate) — *S6 6f: `/academy` library shipped; `/academy/[slug]` not built at MVP (each topic's Video tab + card link covers it, §3)*
+- [ ] `/live` partner tools — create/schedule sessions, attach stream, go live, host recordings → populate the public listing — *S8 (post-launch)*
+- [x] `/tools` House Applications — coming-soon placeholder — *S6 6g*
+- [x] `/account`, `/support` — *S6 6g (migrations 0018/0019; `/account` Delete hidden D-S6-c; `/support` email deferred — requests stored)*
 
 ### Platform plumbing
-- [ ] Database: `profiles`, `applications`, `admins`, `elements`, `checklist_items`, `checklist_progress`, `programming_sessions`, `resources`, `academy_modules` — RLS default-deny, hardened `SECURITY DEFINER` RPCs, anon-safe public projections
+- [x] Database: `profiles`, `applications`, `admins`, `elements`, `checklist_items`, `checklist_progress`, `programming_sessions`, `resources`, `academy_modules` — RLS default-deny, hardened `SECURITY DEFINER` RPCs, anon-safe public projections — *S2/S5; S6 adds the download/account/support writes (migrations 0017–0019). Test ✓; prod apply of 0016–0019 pending owner*
 - [ ] Email: Mailchimp (lead magnets, newsletter, apply tagging) + Resend (contact, transactional/approval notifications), verified sending domain
 - [ ] Hardening: Upstash rate limiting, Turnstile, security headers + CSP (embed origin only), fail-closed production forms
 - [ ] CI (typecheck, lint, build, gitleaks) + branch protection + Vercel Preview/Production
