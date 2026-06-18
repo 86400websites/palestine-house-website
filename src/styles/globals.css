@@ -1886,6 +1886,93 @@
   max-width: 18ch;
 }
 
+/* ---------- Academy (S6 6f) ---------- */
+.vid-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--space-4);
+}
+.vid-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  transition: box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.vid-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.vid-thumb {
+  aspect-ratio: 16 / 9;
+  background:
+    radial-gradient(120% 90% at 18% 0%, rgba(26, 107, 74, 0.1), transparent 55%),
+    var(--paper-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--stone-400);
+  position: relative;
+}
+.vid-runtime {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  font: var(--weight-medium) var(--text-xs)/1 var(--font-body);
+  color: var(--ink-700);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.45rem;
+  border-radius: var(--radius-sm);
+}
+.vid-body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+.vid-title {
+  font: var(--weight-medium) var(--text-base)/1.35 var(--font-display);
+  color: var(--foreground);
+  margin: 0;
+}
+.vid-line {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--muted-foreground);
+  margin: 0;
+  flex: 1;
+  text-wrap: pretty;
+}
+.vid-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
+  color: var(--brand-primary);
+}
+.vid-cta.is-muted {
+  color: var(--subtle-foreground);
+}
+.vid-area-code {
+  color: var(--subtle-foreground);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  margin-right: var(--space-3);
+  letter-spacing: 0.04em;
+}
+.vid-note {
+  font: var(--weight-regular) var(--text-sm)/1.6 var(--font-body);
+  color: var(--subtle-foreground);
+  margin: var(--space-12) 0 0;
+  max-width: var(--measure);
+}
+
 .ws-scrim {
   position: fixed;
   inset: 0;

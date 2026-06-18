@@ -73,9 +73,9 @@ const GROUPS: SidebarGroup[] = [
   {
     label: "Library",
     items: [
-      { key: "academy", label: "Academy", Icon: Play },
+      { key: "academy", label: "Academy", Icon: Play, href: "/academy" },
       { key: "resources", label: "Resources", Icon: Download, href: "/resources" },
-      { key: "tools", label: "House Applications", Icon: SlidersHorizontal },
+      { key: "tools", label: "House Applications", Icon: SlidersHorizontal, href: "/tools" },
     ],
   },
   {
