@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date merged** | _Pending_ — build complete 2026-06-19; branch `claude/sprint-s7-final-review-launch` open, awaiting owner merge + prod deploy → then mark **Launched** |
-| **Branch / PR** | `claude/sprint-s7-final-review-launch` / PR pending (owner opens/merges) |
+| **Date merged** | **2026-06-19** (merge `6b56d2d`); site 🚀 **LAUNCHED** — production deploy verified live at the public layer (copy/§4, og:locale, metadata routes, canonical, headers); auth flows = owner click-through |
+| **Branch / PR** | `claude/sprint-s7-final-review-launch` / **PR #29** |
 | **Goal** | Take the merged, feature-complete site to a verified, zero-known-bug production launch on the existing Vercel domain — exhaustive QA + content/SEO verification + launch polish, no feature work. |
 
 ## What shipped
@@ -55,7 +55,7 @@ Execution note: run under **ultracode** — each verification/review sub-step wa
 
 ## Checks & results
 
-typecheck ✅ · lint ✅ · build ✅ (37 routes; gated `ƒ`, public `○`; CSP/headers untouched) · secret scan of full diff ✅ clean · `.env.local` untracked ✅ · adversarial fix-verify (11 agents) → all resolved, gate invariants hold, **zero regressions** ✅ · exit-gate full-diff review (security/gate/build clean) ✅ · Preview/Production smoke-test ⬜ (owner, after merge — checklist in `s7-qa-findings.md`).
+typecheck ✅ · lint ✅ · build ✅ (37 routes; gated `ƒ`, public `○`; CSP/headers untouched) · secret scan of full diff ✅ clean · `.env.local` untracked ✅ · adversarial fix-verify (11 agents) → all resolved, gate invariants hold, **zero regressions** ✅ · exit-gate full-diff review (security/gate/build clean) ✅ · independent **Codex review = approve, zero blocking** ✅ (one low build-tracker UI-state finding fixed) · local production smoke-test ✅ (caught + fixed a Home `og:locale` regression) · **production deploy verified live** at the public layer ✅ · authed-flow click-through ⬜ (owner — steps 3–7 in `s7-qa-findings.md`).
 
 ## Deviations & learnings
 
