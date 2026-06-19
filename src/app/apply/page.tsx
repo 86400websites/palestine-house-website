@@ -43,7 +43,19 @@ export default async function ApplyPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (user) {
-    redirect("/dashboard");
+    // Already applied → dashboard. But a stranded session (signed up, then the
+    // application insert failed) has no application row; let those users reach
+    // the form so applyAction's idempotent recovery can finish, rather than
+    // trapping them on the pending dashboard with nothing in HQ's queue
+    // (S7 exit-gate fix).
+    const { data: apps } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1);
+    if (apps && apps.length > 0) {
+      redirect("/dashboard");
+    }
   }
 
   return (

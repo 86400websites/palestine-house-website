@@ -116,6 +116,8 @@ All defects resolved except S7-10 (locked copy, kept verbatim — see its entry)
 
 **Booklet mapping — CLEAN.** Both public booklets map correctly: "The House Promise" → `booklets/Booklet_A_The_House_Promise.pdf`, "Operating Model & Governance" → `booklets/Booklet_B_Operating_Model_Governance.pdf` (public Storage bucket, re-asserted public in 0016; source files present). Referenced in /resources (public-URL download via the server action) and the footer lead-form (text-only, Mailchimp wiring deferred to S8/S9 — acceptable). No broken/placeholder links.
 
+> ⚠️ **C1 was REVERSED at the Step 8 exit gate.** The Step-4 café-card change below was WRONG: it contradicted **locked decision §4** (PROJECT-STATUS, 2026-06-12, S1), where the owner deliberately set this card to **"A café where the recipes are here to stay."** — the live, shipped line. The content-verify agents flagged it only because `home.md` **on this clone is stale** (§4 records the change as propagated to `home.md`, but this copy still shows the old grandmother's-recipe line). `page.tsx` has been **restored to the owner's locked line**; the `home.md`↔§4 sync gap is flagged for the owner to reconcile. C2 stands.
+
 **Drift fixed (2):**
 - `[x]` **C1 (high)** — Home hero café card `src/app/page.tsx:37` was reworded ("A café where the recipes are here to stay.") off the locked copy. Restored verbatim: "A café where the za'atar is someone's grandmother's recipe." (cards 2 & 3 already matched). 3 agents independently flagged it.
 - `[x]` **C2 (low)** — `/elements` help line `element-tabs.tsx` rendered "Build / Operate" plain; canonical bolds **Build** / **Operate**. Wrapped both in `<strong>` to match.
@@ -152,6 +154,30 @@ All icons sourced from the existing brand **arch mark** (the green `#1A6B4A` poi
 - `[x]` **Home metadata** — `src/app/page.tsx` explicit `metadata` (description = tagline, `canonical: "/"`, OG title/description); title still resolves to "Palestine House" via the root default.
 - `[x]` **Root loading.tsx** — `src/app/loading.tsx`: calm centered arch mark with a gentle pulse, `prefers-reduced-motion` respected, sr-only "Loading…". (Marketing pages are static/instant; mainly seen entering the gated workspace.)
 - `[x]` **Organization `logo` JSON-LD** — `src/app/layout.tsx` Organization node now has `logo: ${SITE_URL}/icon.svg` (the deferred SEO enhancement, now that the icon exists).
+
+## Step 8 — Exit gate (full-diff review + go-live)
+
+**Full-diff adversarial review** (5 agents: security/gate · correctness · copy/design · build/config → verify) over the whole S7 diff vs `main`.
+
+- **Security / approval gate — CLEAN (0).** Apply oracle removal correct (no path leaves a user wrongly signed-in; userId guarded); login/apply redirects open-redirect-safe (`safeNextPath`, not swallowed); `/update-password` page check is presentation-only with the authoritative marker+session gate intact in the action; `GATED_PREFIXES` covers all 11 workspace routes + `/admin` with safe boundary matching, presentation-only (server gate untouched); `youtube_url` sanitized at the single source; no secret crosses a client boundary.
+- **Correctness — 1 low, fixed.** `EG-1` `/apply` authed-redirect removed the GET recovery path for a *stranded* user (instant session created at signup, then the application insert failed → session but no application row). Fixed: the redirect is now **conditional on having an application row** — a stranded user still reaches the form so `applyAction`'s idempotent recovery can finish (`src/app/apply/page.tsx`). Re-verified.
+- **Copy / design — CLEAN (0)**, plus the **§4 café-card correction** above (the review agents validated against stale `home.md`; §4 is authoritative → restored "here to stay").
+- **Build / config / CSP — CLEAN (0).** AVIF/WebP same-origin (no CSP change); the new metadata routes auto-link and are CSP-covered; `apply`/`update-password` correctly dynamic; headers untouched.
+
+Net exit-gate result: **0 security/gate issues, 1 low correctness item fixed, copy reconciled with the locked decision.**
+
+## Production smoke-test (run after merge + Vercel deploy, on https://palestine-house-website.vercel.app)
+
+Owner to run after the PR merges and the production deploy is green. Anon + the three auth states, desktop + 320px:
+
+1. **Public + chrome:** load `/` → no console errors; favicon shows; header/footer render; nav + footer links resolve; `/model /experience /bring-ph /our-support /live /about /contact /focus-areas /privacy /terms` all load. Confirm `/privacy` + `/terms` read "Contact us." (no `[contact email]`). Confirm the Home café card reads **"A café where the recipes are here to stay."**
+2. **SEO:** `/sitemap.xml` and `/robots.txt` return correct URLs against the production domain; `/manifest.webmanifest`, `/icon.svg`, `/apple-icon` load; OG image at `/opengraph-image`; view-source shows the Organization+WebSite JSON-LD and `og:locale en_US`.
+3. **Apply → sign-up:** submit `/apply` with a fresh email → lands on `/dashboard` pending ("under review"); the application appears in `/admin/approvals`. Re-submitting a duplicate email shows the neutral "already has an account" message (no auto-login). Visiting `/login` or `/apply` while signed in redirects to `/dashboard`.
+4. **Pending state:** as the pending user, the sidebar is locked; `/build`,`/elements/...`,`/resources`,`/academy` show the under-review notice (never gated content); `/support` shows the notice **with a working `/contact` link**; the top-bar badge reads "Awaiting approval".
+5. **Approve (as admin) → approved:** approve the user in `/admin/approvals`; on the user's next navigation the platform unlocks (no re-login); `/dashboard` snapshot, `/build` tracker saves progress, `/elements/[slug]` tabs render, `/resources` **template download works via signed URL** (raw path never in the page source), booklets download; top-bar badge reads "Approved".
+6. **Account / password:** `/account` saves display-name + email opt-in; "Change password" → `/forgot-password` (reset email flow). A direct visit to `/update-password` (no recovery link) shows the "Send a reset link" prompt, not a silent failure.
+7. **Admin gate:** a signed-in non-admin hitting `/admin` or `/admin/approvals` gets a 404.
+8. **Headers (live):** `curl -I` the production URL shows CSP, HSTS, X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy.
 
 ## Dismissed (verified false-positive / out-of-scope — no fix)
 
