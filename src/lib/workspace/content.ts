@@ -48,9 +48,29 @@ export const getResources = cache(async (): Promise<ResourceRow[]> => {
   return data as ResourceRow[];
 });
 
+/* DB-sourced youtube_url is rendered into an <a href> (academy cards + the
+   element Video tab). React does not strip javascript:/data: URLs and the CSP's
+   'unsafe-inline' script-src does not block javascript: navigation, so validate
+   the scheme at the data layer — mirroring the http/https/mailto allow-list
+   markdown.ts already enforces for body links. Anything that isn't http(s)
+   becomes null; both consumers already fall back to the "video coming" empty
+   state on null (S7 fix). */
+function safeHttpUrl(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const u = new URL(value);
+    return u.protocol === "https:" || u.protocol === "http:" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export const getAcademyModules = cache(async (): Promise<AcademyRow[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_academy_modules");
   if (error || !data) return [];
-  return data as AcademyRow[];
+  return (data as AcademyRow[]).map((r) => ({
+    ...r,
+    youtube_url: safeHttpUrl(r.youtube_url),
+  }));
 });

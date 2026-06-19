@@ -181,7 +181,12 @@ export function WorkspaceShell({
     };
   }, [menuOpen]);
 
-  const stageLabel = approved ? "Plan & Prepare" : "Awaiting approval";
+  /* Approval status, not a journey stage: the chrome can't cheaply know the
+     real stage (that lives on /dashboard via deriveProgressSnapshot), and the
+     old hardcoded "Plan & Prepare" contradicted an approved partner's actual
+     Design & Build / Operate progress. Show the truthful status instead (S7
+     fix). */
+  const statusLabel = approved ? "Approved" : "Awaiting approval";
   const initial = (firstName?.trim()?.[0] ?? "P").toUpperCase();
 
   return (
@@ -256,7 +261,7 @@ export function WorkspaceShell({
           <div className="ws-topbar-right">
             <span className="ws-stage">
               <span className="ws-stage-dot" aria-hidden="true" />
-              Stage · {stageLabel}
+              {statusLabel}
             </span>
             <button
               type="button"

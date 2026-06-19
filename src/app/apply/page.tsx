@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Artwork } from "@/components/shared/artwork";
 import { TatreezDivider } from "@/components/shared/tatreez-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { ApplyForm } from "@/components/sections/apply-form";
+import { createClient } from "@/lib/supabase/server";
 
 /* Apply (/apply) — the single application; apply = sign-up. Copy verbatim
    from docs/page-copy/01-public-pages/apply-partner.md; layout from
-   docs/page-designs/public/Apply.app.jsx (approved mockup). */
+   docs/page-designs/public/Apply.app.jsx (approved mockup). An already-signed-in
+   visitor is sent to their dashboard rather than the application form (their
+   account already exists) — S7 fix. */
 
 export const metadata: Metadata = {
   title: "Apply to bring a House",
@@ -33,7 +37,27 @@ const APPLY_STEPS = [
   },
 ] as const;
 
-export default function ApplyPage() {
+export default async function ApplyPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    // Already applied → dashboard. But a stranded session (signed up, then the
+    // application insert failed) has no application row; let those users reach
+    // the form so applyAction's idempotent recovery can finish, rather than
+    // trapping them on the pending dashboard with nothing in HQ's queue
+    // (S7 exit-gate fix).
+    const { data: apps } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1);
+    if (apps && apps.length > 0) {
+      redirect("/dashboard");
+    }
+  }
+
   return (
     <>
       {/* 1 — Hero */}

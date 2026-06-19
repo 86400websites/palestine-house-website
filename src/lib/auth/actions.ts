@@ -162,10 +162,14 @@ export async function applyAction(
   const supabase = await createClient();
 
   // Resolve the applicant's user id. If already authenticated (e.g. a retry
-  // after a partial first attempt left them signed in), reuse it. Otherwise
-  // sign up; if the email already exists, fall back to signing in with the
-  // supplied credentials so a stranded prior attempt (account created,
-  // application not) can recover instead of dead-ending on "already registered".
+  // after a partial first attempt left them signed in), reuse that session and
+  // let the existing-application check below recover a stranded prior attempt.
+  // Otherwise sign up. We deliberately do NOT sign in with the supplied
+  // credentials when the email already exists: that would turn this anonymous
+  // form into an unthrottled login oracle whose response differs by password
+  // correctness (account-existence disclosure). Return the same neutral
+  // "already has an account" message regardless, and send them to sign in (S7
+  // fix).
   let userId: string | null = null;
   const {
     data: { user: current },
@@ -181,17 +185,10 @@ export async function applyAction(
     if (signUpData?.user && !signUpError) {
       userId = signUpData.user.id;
     } else if (/already/i.test(signUpError?.message ?? "")) {
-      const { data: signInData } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      userId = signInData?.user?.id ?? null;
-      if (!userId) {
-        return {
-          ok: false,
-          error: "That email already has an account — try signing in instead.",
-        };
-      }
+      return {
+        ok: false,
+        error: "That email already has an account — try signing in instead.",
+      };
     } else {
       return {
         ok: false,

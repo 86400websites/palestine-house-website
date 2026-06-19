@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Support" };
 
 export default async function SupportPage() {
   const profile = await getMyProfile();
-  if (!profile?.is_approved) return <PendingState />;
+  if (!profile?.is_approved) return <PendingState contactFallback />;
 
   return <SupportForm />;
 }

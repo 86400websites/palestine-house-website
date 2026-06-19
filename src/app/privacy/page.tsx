@@ -52,8 +52,7 @@ const PRIV_SECTIONS = [
     title: "Contact",
     body: (
       <p>
-        Questions about your data? <Link href="/contact">Contact us</Link> at
-        [contact email].
+        Questions about your data? <Link href="/contact">Contact us</Link>.
       </p>
     ),
   },

@@ -6,10 +6,14 @@ import { Button } from "@/components/ui/button";
 import { setMyAccountAction, type AccountState } from "@/lib/account/actions";
 
 /* The interactive bits of /account (S6 6g): display-name + email-opt-in saved
-   together via set_my_account, and the "Change password" link to the existing
-   /update-password flow. Inputs are uncontrolled (defaultValue/defaultChecked)
-   + read from FormData. The Delete account section is intentionally hidden at
-   launch (D-S6-c) — deletion requests route through /support meanwhile. */
+   together via set_my_account, and the "Change password" link to the password
+   reset flow. /update-password only accepts a session that arrived via a
+   recovery email (it requires the ph-recovery marker /auth/confirm sets), so a
+   normal in-app session is sent through /forgot-password — which emails a reset
+   link — rather than to a form that would silently dead-end (S7 fix). Inputs are
+   uncontrolled (defaultValue/defaultChecked) + read from FormData. The Delete
+   account section is intentionally hidden at launch (D-S6-c) — deletion requests
+   route through /support meanwhile. */
 
 const INITIAL: AccountState = { ok: false, message: null };
 
@@ -86,7 +90,7 @@ export function AccountForm({
         <h2>Password</h2>
         <div>
           <Button asChild variant="secondary" size="sm">
-            <Link href="/update-password">Change password</Link>
+            <Link href="/forgot-password">Change password</Link>
           </Button>
         </div>
       </section>

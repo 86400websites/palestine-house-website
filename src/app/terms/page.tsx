@@ -65,7 +65,7 @@ const TERMS_SECTIONS = [
     title: "Contact",
     body: (
       <p>
-        Questions? <Link href="/contact">Contact us</Link> at [contact email].
+        Questions? <Link href="/contact">Contact us</Link>.
       </p>
     ),
   },

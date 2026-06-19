@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Spectral } from "next/font/google";
 import { Providers } from "@/app/providers";
 import { SiteChrome } from "@/components/layout/site-chrome";
@@ -37,11 +37,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    locale: "en",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
   },
+};
+
+/* Mobile browser chrome colour (S7 Step 6) — matches the manifest theme_color. */
+export const viewport: Viewport = {
+  themeColor: "#1A6B4A",
 };
 
 /* JSON-LD: Organization + WebSite (TECH-ARCHITECTURE §14). */
@@ -53,6 +58,7 @@ const jsonLd = {
       name: SITE_NAME,
       url: SITE_URL,
       description: SITE_TAGLINE,
+      logo: `${SITE_URL}/icon.svg`,
     },
     {
       "@type": "WebSite",
@@ -73,8 +79,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Providers>
-          {/* Public chrome on marketing/auth routes; gated routes
-              (/dashboard, /admin) bring their own shell — see SiteChrome. */}
+          {/* Public chrome on marketing/auth routes; gated routes (the
+              (workspace) group + /admin) bring their own shell — see SiteChrome
+              (GATED_PREFIXES). */}
           <SiteChrome header={<SiteHeader />} footer={<SiteFooter />}>
             {children}
           </SiteChrome>

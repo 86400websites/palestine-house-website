@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Download } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
@@ -5,9 +6,22 @@ import { PageDivider } from "@/components/shared/page-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/sections/lead-form";
+import { SITE_TAGLINE } from "@/lib/site";
 
 /* Home (/) — copy verbatim from docs/page-copy/01-public-pages/home.md;
    layout from docs/page-designs/public/Home.app.jsx (approved mockup). */
+
+/* The root layout's title.default already resolves the home title to
+   "Palestine House". Set only description + canonical here; do NOT override
+   openGraph — a page-level openGraph object replaces (not deep-merges) the
+   root's, which would drop og:type/og:site_name/og:locale. Inheriting it and
+   letting Next derive og:title/og:description from this page is both complete
+   and correct (matches every other page) — S7 Step 6 polish, fixed at the
+   smoke-test. */
+export const metadata: Metadata = {
+  description: SITE_TAGLINE,
+  alternates: { canonical: "/" },
+};
 
 const HOME_STAGES = [
   {
