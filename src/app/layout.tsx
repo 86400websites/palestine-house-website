@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Spectral } from "next/font/google";
 import { Providers } from "@/app/providers";
 import { SiteChrome } from "@/components/layout/site-chrome";
@@ -44,6 +44,11 @@ export const metadata: Metadata = {
   },
 };
 
+/* Mobile browser chrome colour (S7 Step 6) — matches the manifest theme_color. */
+export const viewport: Viewport = {
+  themeColor: "#1A6B4A",
+};
+
 /* JSON-LD: Organization + WebSite (TECH-ARCHITECTURE §14). */
 const jsonLd = {
   "@context": "https://schema.org",
@@ -53,6 +58,7 @@ const jsonLd = {
       name: SITE_NAME,
       url: SITE_URL,
       description: SITE_TAGLINE,
+      logo: `${SITE_URL}/icon.svg`,
     },
     {
       "@type": "WebSite",

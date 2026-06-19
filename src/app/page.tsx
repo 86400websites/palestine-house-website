@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Download } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
@@ -5,9 +6,22 @@ import { PageDivider } from "@/components/shared/page-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/sections/lead-form";
+import { SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
 /* Home (/) — copy verbatim from docs/page-copy/01-public-pages/home.md;
    layout from docs/page-designs/public/Home.app.jsx (approved mockup). */
+
+/* The root layout's title.default already resolves the home title to
+   "Palestine House"; make the route's description, canonical, and OG explicit
+   rather than only inheriting the root defaults (S7 Step 6 polish). */
+export const metadata: Metadata = {
+  description: SITE_TAGLINE,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: SITE_NAME,
+    description: SITE_TAGLINE,
+  },
+};
 
 const HOME_STAGES = [
   {

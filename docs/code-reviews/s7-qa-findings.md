@@ -141,6 +141,18 @@ All defects resolved except S7-10 (locked copy, kept verbatim — see its entry)
 
 **Accepted / skipped:** `sameAs` JSON-LD (no official social URLs supplied yet); `WebSite` `SearchAction` (correctly omitted — no search route exists); robots `Disallow` for gated trees (optional crawl-budget nicety — routes are already `noindex` + redirect).
 
+## Step 6 — Launch polish
+
+All icons sourced from the existing brand **arch mark** (the green `#1A6B4A` pointed-arch SVG already in `Logo`/`opengraph-image`) — no asset generation needed.
+
+- `[x]` **Favicon** — `src/app/icon.svg`: the arch mark in paper `#F6F1E8` on a heritage-green rounded square. Auto-linked by Next.
+- `[x]` **Apple touch icon** — `src/app/apple-icon.tsx`: 180×180 PNG via `ImageResponse` (same pattern as the OG image), arch mark on green.
+- `[x]` **Web manifest** — `src/app/manifest.ts`: name/short_name/description, `display: standalone`, `theme_color #1A6B4A`, `background_color #FAF8F3`, SVG icon.
+- `[x]` **Mobile chrome colour** — `src/app/layout.tsx` `export const viewport = { themeColor: "#1A6B4A" }`.
+- `[x]` **Home metadata** — `src/app/page.tsx` explicit `metadata` (description = tagline, `canonical: "/"`, OG title/description); title still resolves to "Palestine House" via the root default.
+- `[x]` **Root loading.tsx** — `src/app/loading.tsx`: calm centered arch mark with a gentle pulse, `prefers-reduced-motion` respected, sr-only "Loading…". (Marketing pages are static/instant; mainly seen entering the gated workspace.)
+- `[x]` **Organization `logo` JSON-LD** — `src/app/layout.tsx` Organization node now has `logo: ${SITE_URL}/icon.svg` (the deferred SEO enhancement, now that the icon exists).
+
 ## Dismissed (verified false-positive / out-of-scope — no fix)
 
 - **D1 — middleware "fails open" without Supabase env** (`src/lib/supabase/middleware.ts:12-14`) → **false-positive.** Documented "integrations no-op when unconfigured" convention; gating is authoritative and **fails closed** at `(workspace)/layout.tsx` (`getUser()` + redirect) and `server.ts`'s non-null env assertions. Optional post-launch hardening: a production-only boot assertion that env vars exist. Not a launch defect.
