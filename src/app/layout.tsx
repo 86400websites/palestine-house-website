@@ -73,8 +73,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Providers>
-          {/* Public chrome on marketing/auth routes; gated routes
-              (/dashboard, /admin) bring their own shell — see SiteChrome. */}
+          {/* Public chrome on marketing/auth routes; gated routes (the
+              (workspace) group + /admin) bring their own shell — see SiteChrome
+              (GATED_PREFIXES). */}
           <SiteChrome header={<SiteHeader />} footer={<SiteFooter />}>
             {children}
           </SiteChrome>
