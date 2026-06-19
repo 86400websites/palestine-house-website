@@ -231,12 +231,14 @@ function BuildItem({
   pending: boolean;
 }) {
   const [blocking, setBlocking] = React.useState(false);
-  // Once an item is committed as blocked the "Blocked?" toggle disappears, so a
-  // stale blocking=true can't be cleared by the user; reset it when the status
-  // changes so a later round-trip (e.g. reopen) doesn't spontaneously re-expand
-  // an empty note form (S7 fix).
+  // The "Blocked?" note form is a transient affordance — close it on ANY status
+  // change. Status only changes when the user submits an action, so this never
+  // interrupts the type-a-note-then-Mark-blocked flow, but it does close the
+  // empty form if the user opens it and then marks the item complete/in progress
+  // instead, or after a blocked→complete→reopen round-trip (S7 fix; broadened
+  // from blocked-only per the Codex review).
   React.useEffect(() => {
-    if (item.status === "blocked") setBlocking(false);
+    setBlocking(false);
   }, [item.status]);
   const cls = `bld-item${item.status === "complete" ? " is-complete" : ""}${
     item.status === "blocked" ? " is-blocked" : ""

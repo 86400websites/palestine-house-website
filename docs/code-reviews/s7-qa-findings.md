@@ -166,6 +166,11 @@ All icons sourced from the existing brand **arch mark** (the green `#1A6B4A` poi
 
 Net exit-gate result: **0 security/gate issues, 1 low correctness item fixed, copy reconciled with the locked decision.**
 
+### Post-exit-gate — smoke-test + independent Codex review
+
+- **Local production smoke-test** (S7 build served locally; the live Vercel URL still runs pre-S7 code). Green: all public routes, copy (café §4 line, no `[contact email]`), the six SEO/metadata routes + content-types, security headers, 404. **Caught + fixed one SEO regression:** the Step-6 Home `metadata.openGraph` override **replaced** (not deep-merged) the root's, dropping `og:type` / `og:site_name` / `og:locale=en_US` on the home page — fixed by removing the override so Home inherits the root OG and derives og:title/description (re-verified all present). Also untracked an accidental `.pnpm-store` cache commit (swept in by `git add -A`) + gitignored it. The **auth-gated flows can't run locally** (this clone's `.env.local` has no Supabase vars — the gate fails *closed*, no content leak); owner verifies them on the deploy via the smoke-test below.
+- **Independent Codex review → `approve`, zero blocking.** Approval gates, admin checks, redirect safety, recovery-cookie enforcement, CSP/header shape, and Supabase key boundaries all intact in the S7 diff. One **non-blocking LOW**, now **fixed**: `build-tracker.tsx` reset the `blocking` note-form state only when the new status was `"blocked"`, so opening "Blocked?" then marking the item complete/in-progress left the empty form expanded — broadened to reset on **any** `item.status` change. Codex's local typecheck/lint/build passed (after the same OneDrive `.next` cache ENOENT, then a clean rebuild).
+
 ## Production smoke-test (run after merge + Vercel deploy, on https://palestine-house-website.vercel.app)
 
 Owner to run after the PR merges and the production deploy is green. Anon + the three auth states, desktop + 320px:
