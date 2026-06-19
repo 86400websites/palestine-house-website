@@ -299,7 +299,8 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
             <strong>
               Focus Area {data.focusAreaCode} — {data.focusAreaName}
             </strong>
-            . See it in context in Build / Operate.
+            . See it in context in <strong>Build</strong> /{" "}
+            <strong>Operate</strong>.
           </span>
         </p>
       </div>

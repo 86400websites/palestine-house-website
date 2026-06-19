@@ -108,6 +108,25 @@ All defects resolved except S7-10 (locked copy, kept verbatim — see its entry)
 
 ---
 
+## Step 4 (7b) — Content verification
+
+11-agent fan-out: 9 copy-audit groups (every public/auth/workspace/admin page + global chrome + element template) vs locked `docs/page-copy/`, plus a proof-number sweep and a booklet-mapping check.
+
+**Proof numbers — CLEAN.** Every occurrence of the five fixed proof points reads exactly right (10 focus areas · 30 topics · 200+ checklist items · 267 templates · 3 gates) across Home, /focus-areas, /our-support, /academy, /operate, header, etc. No wrong count anywhere (no "29 topics", "250 templates", "two gates").
+
+**Booklet mapping — CLEAN.** Both public booklets map correctly: "The House Promise" → `booklets/Booklet_A_The_House_Promise.pdf`, "Operating Model & Governance" → `booklets/Booklet_B_Operating_Model_Governance.pdf` (public Storage bucket, re-asserted public in 0016; source files present). Referenced in /resources (public-URL download via the server action) and the footer lead-form (text-only, Mailchimp wiring deferred to S8/S9 — acceptable). No broken/placeholder links.
+
+**Drift fixed (2):**
+- `[x]` **C1 (high)** — Home hero café card `src/app/page.tsx:37` was reworded ("A café where the recipes are here to stay.") off the locked copy. Restored verbatim: "A café where the za'atar is someone's grandmother's recipe." (cards 2 & 3 already matched). 3 agents independently flagged it.
+- `[x]` **C2 (low)** — `/elements` help line `element-tabs.tsx` rendered "Build / Operate" plain; canonical bolds **Build** / **Operate**. Wrapped both in `<strong>` to match.
+
+**Accepted / documented (verified not actionable as copy fixes):**
+- `[~]` Smart-vs-straight quotes on a handful of auth/apply/our-support strings — the **code renders the correct smart-quote house style**; the `.md` files use straight quotes. Changing the code would be wrong; not touched.
+- `[~]` `/plan` topic-row description is a design adaptation (the "(Overview + Simple Guide up front)" part renders as the per-topic meta row + an "Open this topic" link); the substantive line "the standard and the thinking behind it" is preserved.
+- `[~]` `/build` "Get the template" item CTA — templates are reachable via "Open this topic" → Templates tab; an inline per-item CTA is a feature (out of scope). "Start Focus Area" empty-state button — tied to S7-10's load-failure-only path.
+- `[~]` `/account` Delete section absent — D-S6-c (intentionally hidden at launch). `/elements` "Checklist: [x] of [n] done." shows a static count — per-element saved progress is deferred to `/build` (documented S6 Step 2).
+- `[~]` `/resources` booklet descriptions capitalized as standalone sentences; `/focus-areas` proof-strip uses embellished labels ("real templates", "gates, each HQ-reviewed") with correct numbers — formatting/design, not number drift.
+
 ## Dismissed (verified false-positive / out-of-scope — no fix)
 
 - **D1 — middleware "fails open" without Supabase env** (`src/lib/supabase/middleware.ts:12-14`) → **false-positive.** Documented "integrations no-op when unconfigured" convention; gating is authoritative and **fails closed** at `(workspace)/layout.tsx` (`getUser()` + redirect) and `server.ts`'s non-null env assertions. Optional post-launch hardening: a production-only boot assertion that env vars exist. Not a launch defect.
