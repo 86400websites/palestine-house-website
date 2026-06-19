@@ -127,6 +127,20 @@ All defects resolved except S7-10 (locked copy, kept verbatim — see its entry)
 - `[~]` `/account` Delete section absent — D-S6-c (intentionally hidden at launch). `/elements` "Checklist: [x] of [n] done." shows a static count — per-element saved progress is deferred to `/build` (documented S6 Step 2).
 - `[~]` `/resources` booklet descriptions capitalized as standalone sentences; `/focus-areas` proof-strip uses embellished labels ("real templates", "gates, each HQ-reviewed") with correct numbers — formatting/design, not number drift.
 
+## Step 5 (7c) — SEO + structured data + performance
+
+4-agent fan-out (metadata coverage · sitemap/robots · JSON-LD + OG · performance/images). The existing SEO infra is in strong shape and verified launch-ready.
+
+**Verified clean:** `sitemap.ts` includes every indexable public route and excludes all auth/`(workspace)`/admin + dynamic routes (base from `NEXT_PUBLIC_SITE_URL`, sane priorities); `robots.ts` allows public, references `${SITE_URL}/sitemap.xml`, no whole-site Disallow; every route has metadata with correct `noindex` on auth/workspace/admin and indexable public/legal; JSON-LD (Organization + WebSite) is valid schema.org with no injection bug; `opengraph-image.tsx` correct (1200×630, alt, image/png); canonical idiom correct; zero raw `<img>` (all `next/image` with `priority`+`sizes` on LCP heroes, below-fold lazy); `next/font` `display:swap`; framer-motion kept out of first-load JS via `LazyMotion`; bundle sizes reasonable; no render-blocking.
+
+**Fixed (2):**
+- `[x]` **SEO-1 (bug, low)** — `src/app/layout.tsx` `openGraph.locale: "en"` → `"en_US"` (OG spec wants `language_TERRITORY`; bare "en" is flagged by validators / falls back).
+- `[x]` **SEO-2 (perf/CWV)** — `next.config.ts` now sets `images.formats: ["image/avif","image/webp"]` — ~20-30% smaller for the illustrated art on the image-heavy marketing pages; config-only, served same-origin (no CSP change).
+
+**Deferred to Step 6** (they depend on / belong with the polish pass): Home `metadata` export, favicon/app-icons, web manifest, root `loading.tsx`, and the Organization `logo` JSON-LD field (will point at the Step-6 app icon).
+
+**Accepted / skipped:** `sameAs` JSON-LD (no official social URLs supplied yet); `WebSite` `SearchAction` (correctly omitted — no search route exists); robots `Disallow` for gated trees (optional crawl-budget nicety — routes are already `noindex` + redirect).
+
 ## Dismissed (verified false-positive / out-of-scope — no fix)
 
 - **D1 — middleware "fails open" without Supabase env** (`src/lib/supabase/middleware.ts:12-14`) → **false-positive.** Documented "integrations no-op when unconfigured" convention; gating is authoritative and **fails closed** at `(workspace)/layout.tsx` (`getUser()` + redirect) and `server.ts`'s non-null env assertions. Optional post-launch hardening: a production-only boot assertion that env vars exist. Not a launch defect.

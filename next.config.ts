@@ -38,6 +38,13 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  images: {
+    /* AVIF first, WebP fallback — ~20-30% smaller for the illustrated PNG art,
+       a CWV/LCP win on the image-heavy marketing pages. Optimised images are
+       served same-origin via /_next/image, so img-src 'self' covers them (no
+       CSP change). */
+    formats: ["image/avif", "image/webp"],
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
