@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Building2 } from "lucide-react";
 import { getMyProfile } from "@/lib/auth/profile";
 import {
   getElement,
@@ -138,7 +139,9 @@ export default async function ElementPage({ params }: Params) {
             (matches the public artwork's white background); until then a
             branded mark anchors the band. */}
         <div className="ws-topichero-art" aria-hidden="true">
-          <span className="ws-topichero-mark">{el.code}</span>
+          <span className="ws-topichero-mark">
+            <Building2 size={56} strokeWidth={1.5} />
+          </span>
         </div>
       </header>
 

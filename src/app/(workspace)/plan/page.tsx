@@ -113,7 +113,7 @@ export default async function PlanPage() {
           >
             Each topic opens with the standard and the thinking behind it —{" "}
             <Link className="ws-link" href={`/elements/${g.topics[0].slug}`}>
-              Open this topic
+              Read the full guide
             </Link>
             .
           </p>

@@ -302,10 +302,10 @@ function BuildItem({
           )}
           {item.slug ? (
             <Link className="bld-item-link" href={`/elements/${item.slug}`}>
-              Open this topic
+              Read the full guide
             </Link>
           ) : (
-            <span className="bld-item-link is-inert">Open this topic</span>
+            <span className="bld-item-link is-inert">Read the full guide</span>
           )}
         </div>
 

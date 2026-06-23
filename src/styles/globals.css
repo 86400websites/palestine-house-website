@@ -1200,7 +1200,7 @@
   box-shadow: var(--shadow-sm);
 }
 .ws-topichero-mark {
-  font: var(--weight-semibold) 3rem/1 var(--font-display);
+  display: inline-flex;
   color: var(--green-700);
 }
 @media (max-width: 720px) {
@@ -1345,6 +1345,50 @@
   color: var(--muted-foreground);
   max-width: var(--measure);
   margin: 0 0 var(--space-4);
+}
+
+/* Section banner — icon + title + intro at the head of each content tab (S8 8i.2).
+   The icon panel is also the slot for a per-section illustration later. */
+.ws-section-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.ws-section-banner-art {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--brand-primary-tint);
+  color: var(--green-700);
+}
+.ws-section-banner-title {
+  font: var(--weight-medium) var(--text-xl)/1.2 var(--font-display);
+  color: var(--foreground);
+  margin: 0;
+}
+.ws-section-banner-intro {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--muted-foreground);
+  margin: var(--space-1) 0 0;
+  max-width: var(--measure);
+}
+
+/* Reading card — wraps long Markdown bodies so they don't read as a wall. */
+.ws-readingcard {
+  padding: var(--space-7) var(--space-8);
+  background: var(--surface-card);
+  border: 1px solid var(--line-200);
+  border-radius: var(--radius-lg);
+}
+@media (max-width: 720px) {
+  .ws-readingcard {
+    padding: var(--space-6) var(--space-5);
+  }
 }
 
 /* Rendered Markdown bodies (Overview / Simple Guide / Watch Out For) */
