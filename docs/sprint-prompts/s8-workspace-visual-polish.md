@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **RAN — build complete** on `claude/sprint-s8-workspace-visual-polish` (2026-06-24); typecheck/lint/build green (37 routes). Built far beyond the original 8a–8h scope on live owner feedback (see Deviations). Independent Codex review = **approve** (the one finding was fixed). Pending owner Vercel-Preview sign-off + merge. Post-merge: add the PR # + merge date. |
+| **Status** | **RAN — build complete** on `claude/sprint-s8-workspace-visual-polish` (2026-06-24); typecheck/lint/build green (37 routes). Built far beyond the original 8a–8h scope on live owner feedback (see Deviations). Independent Codex review = **approve**. **MERGED to `main` — PR #32, 2026-06-24** (merge `50f3557`); merged `main` typecheck/lint/build green (37 routes). |
 | **Branch / PR** | `claude/sprint-s8-workspace-visual-polish` (create from latest `main`) / PR TBD |
 | **Goal** | Lift all ~12 gated/workspace pages to the **public-shell premium bar** — premium, stunning, digestible, delightful, idiot-proof, not overwhelming — by faithfully applying the site's already-approved patterns + design-system tokens. **Finish, not redesign. No new design language, no new mockups, behaviour 100% untouched.** |
 
