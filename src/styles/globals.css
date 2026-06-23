@@ -1378,6 +1378,9 @@
   background: var(--brand-primary-tint);
   color: var(--green-700);
 }
+.ws-section-banner-text {
+  min-width: 0;
+}
 .ws-section-banner-title {
   font: var(--weight-medium) var(--text-xl)/1.2 var(--font-display);
   color: var(--foreground);
@@ -1946,13 +1949,13 @@
   color: var(--white);
 }
 .bld-item-link:disabled {
-  color: var(--stone-400);
+  color: var(--stone-500);
   border-color: var(--border);
   background: var(--paper-100);
   cursor: not-allowed;
 }
 .bld-item-link.is-inert {
-  color: var(--stone-400);
+  color: var(--stone-500);
   border-color: var(--border);
   background: var(--background);
   cursor: default;
