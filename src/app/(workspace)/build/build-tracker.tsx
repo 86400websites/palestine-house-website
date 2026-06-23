@@ -162,7 +162,7 @@ function BuildArea({
   const pct = area.items > 0 ? Math.round((area.done / area.items) * 100) : 0;
   const complete = area.items > 0 && area.done === area.items;
   return (
-    <section className="bld-area">
+    <section className={`bld-area${complete ? " is-complete" : ""}`}>
       <button
         type="button"
         className="bld-area-head"
@@ -175,15 +175,7 @@ function BuildArea({
         <span className="bld-area-title">
           {area.name}
           {complete && (
-            <span
-              style={{
-                marginLeft: "var(--space-3)",
-                color: "var(--green-700)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
+            <span className="bld-area-done">
               <CheckCircle2 size={14} aria-hidden="true" /> Complete
             </span>
           )}

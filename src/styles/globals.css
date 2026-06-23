@@ -1642,12 +1642,47 @@
   height: 100%;
   background: var(--brand-primary);
   border-radius: var(--radius-sm);
+  transform-origin: left center;
+  transition: width var(--duration) var(--ease-out);
+  animation: bld-fill var(--duration) var(--ease-out) both;
+}
+@keyframes bld-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 .bld-area-body {
   padding: var(--space-2) var(--space-5) var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  animation: bld-body-in var(--duration) var(--ease-out) both;
+}
+@keyframes bld-body-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Completed focus area — clearer affordance (S8 8d): green chip + inline badge. */
+.bld-area.is-complete .topic-code {
+  background: var(--brand-primary-tint);
+  color: var(--green-700);
+}
+.bld-area-done {
+  margin-left: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--green-700);
+  font: var(--weight-medium) var(--text-xs)/1 var(--font-body);
 }
 .bld-item {
   display: flex;
