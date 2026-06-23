@@ -1227,6 +1227,15 @@
 
 .ws-tabpanel {
   margin-top: var(--space-6);
+  animation: ws-panel-in var(--duration) var(--ease-out) both;
+}
+@keyframes ws-panel-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Tab intro line */

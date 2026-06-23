@@ -141,6 +141,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
       <div
         className="ws-tabpanel"
         role="tabpanel"
+        key={tab}
         id={`panel-${tab}`}
         aria-labelledby={`tab-${tab}`}
       >
@@ -227,10 +228,10 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         {tab === "video" &&
           (data.video?.youtubeUrl ? (
             <div className="ws-empty">
-              <span style={{ display: "inline-flex", color: "var(--stone-400)" }}>
-                <Play size={26} aria-hidden="true" />
+              <span className="ws-empty-icon">
+                <Play size={22} aria-hidden="true" />
               </span>
-              <p style={{ margin: 0 }}>
+              <p className="ws-empty-text">
                 Watch this topic&rsquo;s Academy video
                 {data.video.length ? ` (${data.video.length})` : ""}.
               </p>
@@ -246,10 +247,10 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
             </div>
           ) : (
             <div className="ws-empty">
-              <span style={{ display: "inline-flex", color: "var(--stone-400)" }}>
-                <Play size={26} aria-hidden="true" />
+              <span className="ws-empty-icon">
+                <Play size={22} aria-hidden="true" />
               </span>
-              <p style={{ margin: 0 }}>
+              <p className="ws-empty-text">
                 Video&rsquo;s coming — the full guide is in Simple Guide.
               </p>
               <Button variant="secondary" size="sm" onClick={() => setTab("guide")}>
