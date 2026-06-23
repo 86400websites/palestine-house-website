@@ -191,3 +191,17 @@ Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal 
 - Don't over-animate — restraint *is* the brand.
 - Don't finalize layouts against placeholder artwork at the wrong aspect ratio.
 - Don't redesign the locked header/footer or the shared session card — one component, reused.
+
+## 14. Workspace premium layer (S8 — locked design input)
+
+**Why this exists.** The MVP shipped the gated/workspace pages structurally faithful to the `member-workspace/` mockups but *visually plain* — a notch below the live public shell (a senior-design review confirmed it reads like a clean admin panel rather than "a serious cultural institution"). S8 closes that gap. **This is finish, not a redesign, and it introduces no new design language:** it applies the public shell's *already-approved* patterns to the workspace's sound structure, entirely within the §3/§8 tokens. The `member-workspace/` mockups stay the **structural** reference; the public shell (`src/app/live/page.tsx`, `src/components/shared/`, the public `globals.css` classes) is the **premium** reference. **`/live` is the benchmark — do not edit it.** Behavior is untouched (see the S8 prompt). Decision: `PROJECT-STATUS.md` §4 **D-S8-a**.
+
+The kit (build once as shared workspace primitives in step 8a, then apply per page):
+
+1. **Calm entrance motion.** Wire the existing `Reveal` / `FadeIn` / `Stagger` (`src/components/motion/reveal.tsx`) into workspace sections — currently used by *zero* gated pages, the single biggest premium lever. Entrance-only fade + 16–24px translate-up, stagger 60–100ms, **always** behind `prefers-reduced-motion` (§8). **First confirm `LazyMotion`/`domAnimation` wraps the workspace tree** (these use `m`) — add it to the workspace shell if the public chrome owns it today.
+2. **Rhythm + visual breaks.** Use `TatreezDivider` between major sections and alternate warm washes (`--paper-150/200`, `surface-hero`) so pages stop reading as one undifferentiated column of cards.
+3. **Elevated empty / loading states.** One reusable warm empty-state (icon or `PH-EMPTY-*` mark slot + paper wash + a restrained accent) replacing plain text boxes; add `loading.tsx` where a route fetches.
+4. **Card-lift + warm borders.** Interactive cards/rows get a ≤2px hover lift + `--shadow-md` — warm border **or** soft shadow, never both heavy (consistent with §6).
+5. **Dashboard hero.** Make the snapshot the page anchor: a stat grid with lucide icons + a more present progress bar. The "Current gate" stat stays **suppressed** (D-S6-b RESOLVED — the 3 `/build` gates are off by design; never render gate UI or invent gate data).
+
+**Guardrails (same as the rest of this doc):** locked header/footer/sidebar *structure* + nav grouping unchanged; **copy verbatim** + **proof numbers 10 · 30 · 200+ · 267 · 3**; approval-gate server checks untouched; AA + `prefers-reduced-motion` + colour-plus-text/icon status grammar held; **color lives in artwork, not chrome**; **no new dependencies**; reuse existing `.ws-*/.bld-*/.dash-*/.res-*/.vid-*/.acct-*` classes — extend, never rebuild. Ready-to-run prompt: `docs/sprint-prompts/s8-workspace-visual-polish.md`.
