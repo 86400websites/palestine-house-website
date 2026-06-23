@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Calendar, ChevronRight, Clock, Info } from "lucide-react";
+import { Calendar, ChevronRight, Clock, Compass, Info, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Reveal, FadeIn } from "@/components/motion/reveal";
 import { getMyProfile, firstNameOf } from "@/lib/auth/profile";
 import { getChecklist, getElements } from "@/lib/workspace/content";
 import {
@@ -36,18 +37,20 @@ export default async function DashboardPage() {
     return (
       <div>
         <h1 className="ws-h1">Welcome.</h1>
-        <div className="ws-notice">
-          <span className="ws-notice-icon">
-            <Clock size={22} />
-          </span>
-          <div>
-            <h2 className="ws-notice-h">Request received — under review.</h2>
-            <p className="ws-notice-p">
-              Every application is reviewed by HQ. Everything here unlocks the
-              moment yours is approved.
-            </p>
+        <FadeIn>
+          <div className="ws-notice">
+            <span className="ws-notice-icon">
+              <Clock size={22} />
+            </span>
+            <div>
+              <h2 className="ws-notice-h">Request received — under review.</h2>
+              <p className="ws-notice-p">
+                Every application is reviewed by HQ. Everything here unlocks the
+                moment yours is approved.
+              </p>
+            </div>
           </div>
-        </div>
+        </FadeIn>
         <p className="ws-help ws-help--mt">
           <span className="ws-help-icon">
             <Info size={17} />
@@ -73,18 +76,20 @@ export default async function DashboardPage() {
     return (
       <div>
         <h1 className="ws-h1">You’re approved — welcome.</h1>
-        <p className="ws-lead">
-          Start in Plan &amp; Prepare: understand the model and your city before
-          you build a thing.
-        </p>
-        <div className="ws-cta-row">
-          <Button asChild>
-            <Link href="/plan">Start in Plan &amp; Prepare</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link href="/focus-areas">Explore the focus areas</Link>
-          </Button>
-        </div>
+        <Reveal>
+          <p className="ws-lead">
+            Start in Plan &amp; Prepare: understand the model and your city before
+            you build a thing.
+          </p>
+          <div className="ws-cta-row">
+            <Button asChild>
+              <Link href="/plan">Start in Plan &amp; Prepare</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link href="/focus-areas">Explore the focus areas</Link>
+            </Button>
+          </div>
+        </Reveal>
         <p className="ws-help ws-help--mt-lg">
           <span className="ws-help-icon">
             <Info size={17} />
@@ -116,22 +121,42 @@ export default async function DashboardPage() {
       </h1>
 
       <div className="dash-grid" style={{ marginTop: "var(--space-8)" }}>
-        <section className="ws-card">
+        <Reveal className="ws-card">
           <p className="ph-eyebrow">Progress snapshot</p>
           <div className="dash-stats">
             <div className="ws-stat">
-              <span className="ws-stat-label">Current stage</span>
+              <span className="ws-stat-label">
+                <span className="ws-stat-ico">
+                  <Compass size={14} aria-hidden="true" />
+                </span>
+                Current stage
+              </span>
               <span className="ws-stat-value">{STAGE_LABEL[snapshot.stage]}</span>
             </div>
             <div className="ws-stat">
-              <span className="ws-stat-label">Design &amp; Build</span>
+              <span className="ws-stat-label">
+                <span className="ws-stat-ico">
+                  <TrendingUp size={14} aria-hidden="true" />
+                </span>
+                Design &amp; Build
+              </span>
               <span className="ws-stat-value">{snapshot.pct}%</span>
             </div>
           </div>
-        </section>
+          <div
+            className="dash-progress"
+            role="progressbar"
+            aria-valuenow={snapshot.pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Design and Build progress"
+          >
+            <span style={{ width: `${snapshot.pct}%` }} />
+          </div>
+        </Reveal>
 
         {snapshot.nextAreas.length > 0 && (
-          <section className="ws-card">
+          <Reveal className="ws-card" delay={0.08}>
             <p className="ph-eyebrow">Next steps</p>
             <div className="dash-next" style={{ marginTop: "var(--space-4)" }}>
               {snapshot.nextAreas.map((area, i) => (
@@ -148,18 +173,20 @@ export default async function DashboardPage() {
                 </Link>
               ))}
             </div>
-          </section>
+          </Reveal>
         )}
       </div>
 
-      <div className="ws-cta-row" style={{ marginTop: "var(--space-8)" }}>
-        <Button asChild>
-          <Link href="/build">Resume where you left off</Link>
-        </Button>
-        <Button asChild variant="secondary">
-          <Link href="/build">Continue in Design &amp; Build</Link>
-        </Button>
-      </div>
+      <Reveal delay={0.16}>
+        <div className="ws-cta-row" style={{ marginTop: "var(--space-8)" }}>
+          <Button asChild>
+            <Link href="/build">Resume where you left off</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/build">Continue in Design &amp; Build</Link>
+          </Button>
+        </div>
+      </Reveal>
 
       <p className="ws-help ws-help--mt-lg">
         <span className="ws-help-icon">
