@@ -11,6 +11,7 @@ import {
   Info,
   Minus,
   RotateCcw,
+  StickyNote,
 } from "lucide-react";
 import {
   setChecklistProgressAction,
@@ -297,7 +298,7 @@ function BuildItem({
               aria-expanded={blocking}
               onClick={() => setBlocking((b) => !b)}
             >
-              <Minus size={14} aria-hidden="true" /> Blocked?
+              <StickyNote size={14} aria-hidden="true" /> Add notes
             </button>
           )}
           {item.slug ? (
