@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Stagger } from "@/components/motion/reveal";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getElements } from "@/lib/workspace/content";
 import { PendingState } from "@/components/workspace/pending-state";
@@ -73,33 +74,35 @@ export default async function PlanPage() {
       {groups.map((g) => (
         <section key={g.name} style={{ marginTop: "var(--space-12)" }}>
           <h2 className="ws-section-h">{g.name}</h2>
-          <div className="ws-rows" style={{ marginTop: "var(--space-4)" }}>
-            {g.topics.map((t) => (
-              <Link
-                className="topic-row"
-                href={`/elements/${t.slug}`}
-                key={t.code}
-              >
-                <span className="topic-code">{t.code}</span>
-                <span className="topic-row-body">
-                  <span className="topic-row-title" style={{ display: "block" }}>
-                    {t.title}
-                  </span>
-                  {t.one_line && (
-                    <span
-                      className="topic-row-line"
-                      style={{ display: "block" }}
-                    >
-                      {t.one_line}
+          <div style={{ marginTop: "var(--space-4)" }}>
+            <Stagger className="ws-rows">
+              {g.topics.map((t) => (
+                <Link
+                  className="topic-row ws-lift"
+                  href={`/elements/${t.slug}`}
+                  key={t.code}
+                >
+                  <span className="topic-code">{t.code}</span>
+                  <span className="topic-row-body">
+                    <span className="topic-row-title" style={{ display: "block" }}>
+                      {t.title}
                     </span>
-                  )}
-                </span>
-                <span className="topic-row-meta">Overview · Simple Guide</span>
-                <span className="topic-row-chev">
-                  <ChevronRight size={16} aria-hidden="true" />
-                </span>
-              </Link>
-            ))}
+                    {t.one_line && (
+                      <span
+                        className="topic-row-line"
+                        style={{ display: "block" }}
+                      >
+                        {t.one_line}
+                      </span>
+                    )}
+                  </span>
+                  <span className="topic-row-meta">Overview · Simple Guide</span>
+                  <span className="topic-row-chev">
+                    <ChevronRight size={16} aria-hidden="true" />
+                  </span>
+                </Link>
+              ))}
+            </Stagger>
           </div>
           <p
             style={{

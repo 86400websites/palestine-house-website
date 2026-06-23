@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Stagger } from "@/components/motion/reveal";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getElements } from "@/lib/workspace/content";
 import { PendingState } from "@/components/workspace/pending-state";
@@ -107,55 +108,41 @@ export default async function OperatePage() {
 
       {groups.map((g) => (
         <section key={g.name} style={{ marginTop: "var(--space-12)" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              justifyContent: "space-between",
-              gap: "var(--space-4)",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className="ws-section-head">
             <h2 className="ws-section-h">{g.name}</h2>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "var(--space-2)",
-                font: "var(--weight-regular) var(--text-sm)/1 var(--font-body)",
-                color: "var(--subtle-foreground)",
-              }}
-            >
+            <span className="ws-section-meta">
               <Clock size={14} aria-hidden="true" /> {g.routine}
             </span>
           </div>
-          <div className="ws-rows" style={{ marginTop: "var(--space-4)" }}>
-            {g.topics.map((t) => (
-              <Link
-                className="topic-row"
-                href={`/elements/${t.slug}`}
-                key={t.code}
-              >
-                <span className="topic-code">{t.code}</span>
-                <span className="topic-row-body">
-                  <span className="topic-row-title" style={{ display: "block" }}>
-                    {t.title}
-                  </span>
-                  {t.one_line && (
-                    <span
-                      className="topic-row-line"
-                      style={{ display: "block" }}
-                    >
-                      {t.one_line}
+          <div style={{ marginTop: "var(--space-4)" }}>
+            <Stagger className="ws-rows">
+              {g.topics.map((t) => (
+                <Link
+                  className="topic-row ws-lift"
+                  href={`/elements/${t.slug}`}
+                  key={t.code}
+                >
+                  <span className="topic-code">{t.code}</span>
+                  <span className="topic-row-body">
+                    <span className="topic-row-title" style={{ display: "block" }}>
+                      {t.title}
                     </span>
-                  )}
-                </span>
-                <span className="topic-row-meta">Checklist · Templates</span>
-                <span className="topic-row-chev">
-                  <ChevronRight size={16} aria-hidden="true" />
-                </span>
-              </Link>
-            ))}
+                    {t.one_line && (
+                      <span
+                        className="topic-row-line"
+                        style={{ display: "block" }}
+                      >
+                        {t.one_line}
+                      </span>
+                    )}
+                  </span>
+                  <span className="topic-row-meta">Checklist · Templates</span>
+                  <span className="topic-row-chev">
+                    <ChevronRight size={16} aria-hidden="true" />
+                  </span>
+                </Link>
+              ))}
+            </Stagger>
           </div>
         </section>
       ))}
