@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **PREPARED — ready to run** (planned 2026-06-23; not yet started). This is the *forward* prompt, not a post-merge record — run it next session, then convert to a full record with `/sprint-prompt save` after the PR merges. |
+| **Status** | **RAN — build complete** on `claude/sprint-s8-workspace-visual-polish` (2026-06-24); typecheck/lint/build green (37 routes). Built far beyond the original 8a–8h scope on live owner feedback (see Deviations). Pending owner Vercel-Preview sign-off + a Codex re-confirm (one finding already fixed) + merge. Post-merge: add the PR # + merge date. |
 | **Branch / PR** | `claude/sprint-s8-workspace-visual-polish` (create from latest `main`) / PR TBD |
 | **Goal** | Lift all ~12 gated/workspace pages to the **public-shell premium bar** — premium, stunning, digestible, delightful, idiot-proof, not overwhelming — by faithfully applying the site's already-approved patterns + design-system tokens. **Finish, not redesign. No new design language, no new mockups, behaviour 100% untouched.** |
 
@@ -91,10 +91,22 @@ Report at the end: summary · files changed · commands + results · risks/follo
 5. **Dashboard hero** — stat grid + lucide icons + present progress bar (gate stat stays suppressed; milestone gates retired site-wide — D-S8-c).
 
 ## Checks & results
-_To be filled after the sprint runs (typecheck/lint/build · screenshot-vs-mockup at 320px+desktop+reduced-motion · behaviour-unchanged re-clicks · diff shows zero copy/proof-number/gate changes)._
+- `pnpm run typecheck` ✅ · `pnpm run lint` ✅ · `pnpm run build` ✅ (37 routes) — re-run green after **every** gated sub-step (8a–8k + the owner-feedback rounds + the Codex fix). A fresh clone first needed `pnpm install --frozen-lockfile`; one flaky Windows build-worker crash on the very first build, green on retry.
+- **Reviews:** a multi-lens adversarial review workflow after the topic-page work (behaviour + security **clean**; fixed an inert-button AA-contrast nit; ratified the relabels) + an independent **Codex** review of the full branch → *request changes* on one item (the workspace header could flash / on a failed session-probe permanently show the public Apply CTA) — **fixed in `195e4a3`** (the layout passes `initialAuthed`); no blocking gating/security issues, downloads still go through the approval-gated path.
+- **Behaviour byte-identical:** no server gate / RPC / Server Action / checklist save / signed-URL download / form / filter / sign-out logic changed — markup / className / CSS only. The only copy changes are the owner-approved relabels (D-S8-b) + the gate-retirement copy (D-S8-c), reconciled in canonical page-copy + governance docs in lockstep.
+- ⚠️ **Visual verification deferred to the owner's Vercel Preview:** the gated workspace can't be rendered in a local headless run (needs an authed + approved session with data), so screenshot-vs-mockup at 320px / desktop / reduced-motion was **not** done here — verified instead via build + per-step diff review.
 
 ## Deviations & learnings
-_To be filled after merge._
+- **Scope grew well past 8a–8h on live owner feedback.** Added: a full **topic/element-page redesign** (dark-green hero band with a white image-slot, tab icons, per-section banners + reading cards, **square-checkbox** checklist, **inline template downloads** — fixing a real bug where templates couldn't be downloaded from the element page — and a prominent dark-green "Next topic" card); a **Build-item layout fix** (status pill moved inline → no mobile blank gutter, action links → real buttons); **8j** public navigation header above the workspace; **8k** retirement of the milestone **gates** concept site-wide.
+- **Decisions recorded:** **D-S8-b** (CTA clarity relabels — "Open this topic"→"Read the full guide", "Download templates"→"View templates", "Blocked?"→"Add notes", templates intro) and **D-S8-c** (retire the "3 gates" proof number + the Day 30/60/108 "go/no-go gates / three checkpoints" framing; proof stat → **"120-day launch"**). Canonical page-copy was synced in lockstep so a future verbatim-copy audit won't revert the UI.
+- **Pre-run validation earned its keep:** it caught two stale assumptions in this very prompt before building — `LazyMotion` already wraps the workspace (verify, don't add) and there is no `.res-card` class (extend the real `.res-*`).
+- **"gate" is overloaded:** the milestone gate (removed) vs the **approval/access gate** and the CI **"exit gate"** (both kept untouched). The removal was scoped carefully to avoid touching security.
+- **Premium via tokens held:** everything reused already-approved patterns/tokens (Reveal/Stagger, TatreezDivider, warm washes, card-lift, the `.ws-*` kit) — no new design language, no new dependencies. The lone new class is `.ws-pagehead` (plus presentation helpers like `.ws-topichero`/`.ws-nexttopic`/`.ws-section-banner`).
 
 ## Follow-ups
-_To be filled after merge._
+- **Owner Vercel-Preview pass** (approved test account, mobile + desktop): the gated workspace pages — especially the topic page (hero/tabs/reading-cards), the Build tracker on mobile, and the public-header-above-workspace sticky stacking + the **mobile two-menu** (public hamburger + workspace hamburger — confirm it's acceptable or ask to simplify).
+- **Re-run Codex** on `195e4a3` to confirm it flips to *approve* after the header fix.
+- **Per-topic illustrations:** the hero white panel + the per-section banner icon panels are built as image **slots** — drop in real white-background illustrations later with no layout change (wire an asset-path convention when ready).
+- **Cosmetic de-gate leftovers (non-user-facing):** `checklist_items.gate` is dead schema (optional later versioned migration); a few internal identifiers keep old names (`BRING_GATES` const, `.bring-gates`/`.sup-gates-link` classes, the `#checkpoints` anchor).
+- **Reference copy:** the 30 `06-elements/*.md` "Templates" intro lines still read "Download from Resources." (the canonical elements page + the rendered UI are updated; sweep the per-element reference copies later).
+- **Post-merge:** add the PR # + merge date here and flip PROJECT-STATUS §2 S8 → ✅; then S9 (Live Programming).
