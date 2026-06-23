@@ -38,7 +38,7 @@ export default async function WorkspaceLayout({
      gated routes), so there is exactly one header. */
   return (
     <div className="ws-frame">
-      <SiteHeader />
+      <SiteHeader initialAuthed />
       <WorkspaceShell
         approved={profile?.is_approved ?? false}
         firstName={firstNameOf(profile?.full_name)}

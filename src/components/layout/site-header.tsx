@@ -126,11 +126,14 @@ const MEGA_MENUS: Partial<
   },
 };
 
-export function SiteHeader() {
+export function SiteHeader({ initialAuthed }: { initialAuthed?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = React.useState<NavKey | null>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [authed, setAuthed] = React.useState<boolean | null>(null);
+  // In the gated workspace the server already knows the visitor is signed in and
+  // passes initialAuthed, so the public Apply CTA is never flashed or leaked there
+  // (and a failed session probe can't downgrade it). Public pages default to null.
+  const [authed, setAuthed] = React.useState<boolean | null>(initialAuthed ?? null);
   const panel = open ? MEGA_MENUS[open] : undefined;
 
   /* Close the mega panel on Escape (keyboard parity with mouseleave). */
@@ -150,6 +153,9 @@ export function SiteHeader() {
      Defaults to "Sign in" / "Apply" until known, so anonymous visitors (the
      common case) never see a swap. */
   React.useEffect(() => {
+    // Workspace: the server already vouched for the session — never probe or
+    // downgrade (a failed probe must not surface the public Apply CTA here).
+    if (initialAuthed) return;
     let active = true;
     fetch("/api/auth/session", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : { authed: false }))
@@ -162,7 +168,7 @@ export function SiteHeader() {
     return () => {
       active = false;
     };
-  }, [pathname]);
+  }, [pathname, initialAuthed]);
 
   return (
     <header className="phx-header" onMouseLeave={() => setOpen(null)}>
