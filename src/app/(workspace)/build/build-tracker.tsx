@@ -238,9 +238,11 @@ function BuildItem({
 
   return (
     <div className={cls}>
-      <StatusPill status={item.status} />
       <div className="bld-item-body">
-        <p className="bld-item-label">{item.text}</p>
+        <div className="bld-item-head">
+          <StatusPill status={item.status} />
+          <p className="bld-item-label">{item.text}</p>
+        </div>
         {item.requiredDocument && (
           <p className="bld-item-doc">Document: {item.requiredDocument}</p>
         )}
@@ -255,7 +257,7 @@ function BuildItem({
               <input type="hidden" name="status" value="complete" />
               <button
                 type="submit"
-                className="bld-item-link"
+                className="bld-item-link is-primary"
                 disabled={pending}
               >
                 <Check size={14} aria-hidden="true" /> Mark complete

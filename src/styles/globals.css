@@ -1695,25 +1695,37 @@
 }
 .bld-item {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-5);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--background);
 }
 .bld-item.is-complete {
   background: var(--green-50);
+  border-color: var(--brand-primary-tint);
 }
 .bld-item.is-blocked {
   border-color: var(--status-error-bg);
   background: var(--status-error-bg);
 }
 .bld-item-body {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   min-width: 0;
 }
+/* Status pill + label share a wrapping head row, so the pill sits inline above
+   the content — no blank left gutter on mobile (S8 owner feedback). */
+.bld-item-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
 .bld-item-label {
+  flex: 1 1 12rem;
   font: var(--text-body);
   color: var(--foreground);
   margin: 0;
@@ -1724,45 +1736,68 @@
 .bld-item-doc {
   font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
   color: var(--subtle-foreground);
-  margin: var(--space-1) 0 0;
+  margin: 0;
 }
 .bld-item-note {
   font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
   color: var(--status-error);
-  margin: var(--space-1) 0 0;
+  margin: 0;
 }
 .bld-item-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   flex-wrap: wrap;
-  margin-top: var(--space-2);
 }
 .bld-item-actions form {
   display: inline-flex;
 }
+/* Item actions read as real buttons — outline by default, the key action filled
+   (S8 owner feedback). */
 .bld-item-link {
   appearance: none;
-  background: none;
-  border: none;
-  padding: var(--space-2) 0;
-  cursor: pointer;
-  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
-  color: var(--brand-primary);
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--background);
+  cursor: pointer;
+  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
+  color: var(--ink-700);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 .bld-item-link:hover {
-  color: var(--brand-primary-hover);
+  background: var(--paper-100);
+  border-color: var(--ink-700);
+  color: var(--ink-900);
+}
+.bld-item-link.is-primary {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: var(--white);
+}
+.bld-item-link.is-primary:hover {
+  background: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
+  color: var(--white);
 }
 .bld-item-link:disabled {
   color: var(--stone-400);
+  border-color: var(--border);
+  background: var(--paper-100);
   cursor: not-allowed;
 }
 .bld-item-link.is-inert {
   color: var(--stone-400);
+  border-color: var(--border);
+  background: var(--background);
   cursor: default;
 }
 .bld-block-form {
