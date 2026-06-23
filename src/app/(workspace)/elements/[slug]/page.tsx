@@ -122,11 +122,25 @@ export default async function ElementPage({ params }: Params) {
         <span aria-current="page">{el.title}</span>
       </nav>
 
-      <div className="ws-element-head">
-        <p className="ph-eyebrow">Topic {el.code}</p>
-        <h1 className="ws-h1">{el.title}</h1>
-        {el.one_line && <p className="ws-lead">{el.one_line}</p>}
-      </div>
+      <header className="ws-topichero">
+        <div className="ws-topichero-body">
+          <div className="ws-pagehead">
+            <p className="ph-eyebrow">Topic {el.code}</p>
+            <h1 className="ws-h1">{el.title}</h1>
+            {el.one_line && <p className="ws-lead">{el.one_line}</p>}
+          </div>
+          <p className="ws-topichero-area">
+            <span className="topic-code">{el.focus_area_code}</span>
+            Focus Area {el.focus_area_code} — {el.focus_area_name}
+          </p>
+        </div>
+        {/* White art panel — a per-topic illustration can drop in here later
+            (matches the public artwork's white background); until then a
+            branded mark anchors the band. */}
+        <div className="ws-topichero-art" aria-hidden="true">
+          <span className="ws-topichero-mark">{el.code}</span>
+        </div>
+      </header>
 
       <ElementTabs data={data} />
     </article>

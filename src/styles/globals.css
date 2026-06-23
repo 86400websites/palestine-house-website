@@ -1162,6 +1162,107 @@
   margin-top: var(--space-6);
 }
 
+/* Topic hero band (S8 8i) — warm wash, title + intro + focus-area chip, with a
+   white art panel that a per-topic illustration can drop into later with no
+   layout change. Reuses the .ws-pagehead rhythm for eyebrow -> h1 -> lead. */
+.ws-topichero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+  padding: var(--space-7) var(--space-8);
+  background: var(--surface-hero);
+  border: 1px solid var(--line-200);
+  border-radius: var(--radius-lg);
+}
+.ws-topichero-body {
+  flex: 1;
+  min-width: 0;
+}
+.ws-topichero-area {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 0;
+  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
+  color: var(--subtle-foreground);
+}
+.ws-topichero-art {
+  flex-shrink: 0;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  border: 1px solid var(--line-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.ws-topichero-mark {
+  font: var(--weight-semibold) 3rem/1 var(--font-display);
+  color: var(--green-700);
+}
+@media (max-width: 720px) {
+  .ws-topichero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-6);
+  }
+  .ws-topichero-art {
+    display: none;
+  }
+}
+
+/* Prominent "Next topic" continue card at the foot of the topic page (S8 8i). */
+.ws-nexttopic {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  text-decoration: none;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.ws-nexttopic:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.ws-nexttopic-body {
+  flex: 1;
+  min-width: 0;
+}
+.ws-nexttopic-eyebrow {
+  display: block;
+  font: var(--weight-semibold) var(--text-xs)/1 var(--font-body);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--brand-accent);
+}
+.ws-nexttopic-title {
+  display: block;
+  margin-top: var(--space-2);
+  font: var(--weight-medium) var(--text-lg)/1.3 var(--font-display);
+  color: var(--foreground);
+}
+.ws-nexttopic-arrow {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--brand-primary);
+  color: var(--white);
+}
+
 /* Top action bar */
 .ws-actionbar {
   display: flex;

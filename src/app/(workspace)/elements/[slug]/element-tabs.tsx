@@ -2,8 +2,20 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Circle, Download, FileText, Info, Play } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BookOpen,
+  Circle,
+  Compass,
+  Download,
+  FileText,
+  Info,
+  ListChecks,
+  Play,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DownloadButton } from "@/app/(workspace)/resources/resource-library";
 
 /* Client tab shell for the element page. It owns ONLY the tab state + panel
    switching and the secondary actions; all body content is server-rendered +
@@ -32,12 +44,12 @@ export type ElementTabsData = {
 };
 
 const TABS = [
-  { value: "overview", label: "Overview" },
-  { value: "guide", label: "Simple Guide" },
-  { value: "checklist", label: "Checklist" },
-  { value: "watch", label: "Watch Out For" },
-  { value: "video", label: "Video" },
-  { value: "templates", label: "Templates" },
+  { value: "overview", label: "Overview", Icon: BookOpen },
+  { value: "guide", label: "Simple Guide", Icon: Compass },
+  { value: "checklist", label: "Checklist", Icon: ListChecks },
+  { value: "watch", label: "Watch Out For", Icon: AlertTriangle },
+  { value: "video", label: "Video", Icon: Play },
+  { value: "templates", label: "Templates", Icon: FileText },
 ] as const;
 
 type TabValue = (typeof TABS)[number]["value"];
@@ -93,13 +105,6 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         >
           <Download size={16} aria-hidden="true" /> Download templates
         </Button>
-        {data.nextSlug && (
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/elements/${data.nextSlug}`}>
-              Next topic <ArrowRight size={16} aria-hidden="true" />
-            </Link>
-          </Button>
-        )}
         <span className="ws-actionbar-meta">
           {data.checklistCount} checklist{" "}
           {data.checklistCount === 1 ? "item" : "items"}
@@ -115,6 +120,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         {TABS.map((t, index) => {
           const count = badge(t.value);
           const active = tab === t.value;
+          const { Icon } = t;
           return (
             <button
               key={t.value}
@@ -131,6 +137,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
               onClick={() => setTab(t.value)}
               onKeyDown={(e) => onTabKeyDown(e, index)}
             >
+              <Icon size={15} aria-hidden="true" />
               {t.label}
               {count !== null && <span className="ws-tab-badge">{count}</span>}
             </button>
@@ -262,7 +269,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         {tab === "templates" && (
           <>
             <p className="ws-intro">
-              Ready-to-use documents for this topic. Download from Resources.
+              Ready-to-use documents for this topic — download any you need.
             </p>
             {data.templates.length === 0 ? (
               <p className="ws-intro">
@@ -282,6 +289,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
                         {t.version ? ` · ${t.version}` : ""}
                       </p>
                     </div>
+                    <DownloadButton resourceId={t.id} />
                   </div>
                 ))}
               </div>
@@ -305,6 +313,18 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
           </span>
         </p>
       </div>
+
+      {data.nextSlug && (
+        <Link className="ws-nexttopic" href={`/elements/${data.nextSlug}`}>
+          <span className="ws-nexttopic-body">
+            <span className="ws-nexttopic-eyebrow">Next topic</span>
+            <span className="ws-nexttopic-title">{data.nextTitle}</span>
+          </span>
+          <span className="ws-nexttopic-arrow" aria-hidden="true">
+            <ArrowRight size={20} />
+          </span>
+        </Link>
+      )}
     </>
   );
 }
