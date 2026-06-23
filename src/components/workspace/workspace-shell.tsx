@@ -203,7 +203,7 @@ export function WorkspaceShell({
         aria-label="Workspace"
       >
         <div className="ws-side-head">
-          <Logo href="/dashboard" size={22} />
+          <Logo href="/" size={22} />
         </div>
         <nav className="ws-nav" aria-label="Workspace navigation">
           {!approved && (

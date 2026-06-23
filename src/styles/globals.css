@@ -773,19 +773,16 @@
    bar until the workspace search route ships. Used by src/app/(workspace).
 =========================================================================== */
 .ws {
-  /* The public header (72px) rides above the workspace (S8 8j); the sidebar +
-     topbar stick just below it. Collapses to 0 on mobile (header scrolls away). */
-  --ph-header-h: 72px;
   display: grid;
   grid-template-columns: 264px minmax(0, 1fr);
-  min-height: calc(100vh - var(--ph-header-h));
+  min-height: 100vh;
   background: var(--background);
 }
 
 .ws-sidebar {
   position: sticky;
-  top: var(--ph-header-h);
-  height: calc(100vh - var(--ph-header-h));
+  top: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--paper-100);
@@ -906,7 +903,7 @@
 }
 .ws-topbar {
   position: sticky;
-  top: var(--ph-header-h);
+  top: 0;
   z-index: 30;
   display: flex;
   align-items: center;
@@ -2456,14 +2453,8 @@
   z-index: 45;
 }
 @media (max-width: 880px) {
-  /* On mobile the public header scrolls away (only the workspace topbar stays
-     sticky), so the header offset collapses to 0. (S8 8j) */
   .ws {
-    --ph-header-h: 0px;
     grid-template-columns: 1fr;
-  }
-  .ws-frame .phx-header {
-    position: static;
   }
   .ws-sidebar {
     position: fixed;
