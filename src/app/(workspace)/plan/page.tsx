@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Stagger } from "@/components/motion/reveal";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getElements } from "@/lib/workspace/content";
 import { PendingState } from "@/components/workspace/pending-state";
@@ -10,7 +11,7 @@ import type { ElementListItem } from "@/lib/workspace/types";
 /* /plan — Plan & Prepare (docs/page-copy/03-member-workspace/plan.md). The
    read-and-consult orientation stage: a foundation-framed VIEW over the same
    30 elements as /build and /operate — NO tracker, no saved progress here (the
-   120-day checklist toward the 3 gates lives only in /build). Gated before any
+   120-day launch checklist lives only in /build). Gated before any
    fetch: a pending session sees the under-review notice, never content.
 
    The group -> topic-code curation is the locked grouping from the approved
@@ -73,33 +74,35 @@ export default async function PlanPage() {
       {groups.map((g) => (
         <section key={g.name} style={{ marginTop: "var(--space-12)" }}>
           <h2 className="ws-section-h">{g.name}</h2>
-          <div className="ws-rows" style={{ marginTop: "var(--space-4)" }}>
-            {g.topics.map((t) => (
-              <Link
-                className="topic-row"
-                href={`/elements/${t.slug}`}
-                key={t.code}
-              >
-                <span className="topic-code">{t.code}</span>
-                <span className="topic-row-body">
-                  <span className="topic-row-title" style={{ display: "block" }}>
-                    {t.title}
-                  </span>
-                  {t.one_line && (
-                    <span
-                      className="topic-row-line"
-                      style={{ display: "block" }}
-                    >
-                      {t.one_line}
+          <div style={{ marginTop: "var(--space-4)" }}>
+            <Stagger className="ws-rows">
+              {g.topics.map((t) => (
+                <Link
+                  className="topic-row ws-lift"
+                  href={`/elements/${t.slug}`}
+                  key={t.code}
+                >
+                  <span className="topic-code">{t.code}</span>
+                  <span className="topic-row-body">
+                    <span className="topic-row-title" style={{ display: "block" }}>
+                      {t.title}
                     </span>
-                  )}
-                </span>
-                <span className="topic-row-meta">Overview · Simple Guide</span>
-                <span className="topic-row-chev">
-                  <ChevronRight size={16} aria-hidden="true" />
-                </span>
-              </Link>
-            ))}
+                    {t.one_line && (
+                      <span
+                        className="topic-row-line"
+                        style={{ display: "block" }}
+                      >
+                        {t.one_line}
+                      </span>
+                    )}
+                  </span>
+                  <span className="topic-row-meta">Overview · Simple Guide</span>
+                  <span className="topic-row-chev">
+                    <ChevronRight size={16} aria-hidden="true" />
+                  </span>
+                </Link>
+              ))}
+            </Stagger>
           </div>
           <p
             style={{
@@ -110,7 +113,7 @@ export default async function PlanPage() {
           >
             Each topic opens with the standard and the thinking behind it —{" "}
             <Link className="ws-link" href={`/elements/${g.topics[0].slug}`}>
-              Open this topic
+              Read the full guide
             </Link>
             .
           </p>

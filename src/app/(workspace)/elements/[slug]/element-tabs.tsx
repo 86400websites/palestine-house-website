@@ -2,8 +2,21 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Circle, Download, FileText, Info, Play } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BookOpen,
+  Compass,
+  Download,
+  FileText,
+  Info,
+  ListChecks,
+  Play,
+  Square,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DownloadButton } from "@/app/(workspace)/resources/resource-library";
 
 /* Client tab shell for the element page. It owns ONLY the tab state + panel
    switching and the secondary actions; all body content is server-rendered +
@@ -32,12 +45,12 @@ export type ElementTabsData = {
 };
 
 const TABS = [
-  { value: "overview", label: "Overview" },
-  { value: "guide", label: "Simple Guide" },
-  { value: "checklist", label: "Checklist" },
-  { value: "watch", label: "Watch Out For" },
-  { value: "video", label: "Video" },
-  { value: "templates", label: "Templates" },
+  { value: "overview", label: "Overview", Icon: BookOpen },
+  { value: "guide", label: "Simple Guide", Icon: Compass },
+  { value: "checklist", label: "Checklist", Icon: ListChecks },
+  { value: "watch", label: "Watch Out For", Icon: AlertTriangle },
+  { value: "video", label: "Video", Icon: Play },
+  { value: "templates", label: "Templates", Icon: FileText },
 ] as const;
 
 type TabValue = (typeof TABS)[number]["value"];
@@ -51,6 +64,31 @@ const TEMPLATE_TYPE_LABEL: Record<string, string> = {
   guide: "Guide",
   booklet: "Booklet",
 };
+
+/* Section banner — opens each content tab with an icon + title + intro. The
+   icon panel doubles as the slot for a per-section illustration later (same
+   across all 30 topics). */
+function SectionBanner({
+  Icon,
+  title,
+  intro,
+}: {
+  Icon: LucideIcon;
+  title: string;
+  intro: string;
+}) {
+  return (
+    <div className="ws-section-banner">
+      <span className="ws-section-banner-art" aria-hidden="true">
+        <Icon size={26} />
+      </span>
+      <div className="ws-section-banner-text">
+        <h2 className="ws-section-banner-title">{title}</h2>
+        <p className="ws-section-banner-intro">{intro}</p>
+      </div>
+    </div>
+  );
+}
 
 export function ElementTabs({ data }: { data: ElementTabsData }) {
   const [tab, setTab] = React.useState<TabValue>("overview");
@@ -91,15 +129,8 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
           size="sm"
           onClick={() => setTab("templates")}
         >
-          <Download size={16} aria-hidden="true" /> Download templates
+          <Download size={16} aria-hidden="true" /> View templates
         </Button>
-        {data.nextSlug && (
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/elements/${data.nextSlug}`}>
-              Next topic <ArrowRight size={16} aria-hidden="true" />
-            </Link>
-          </Button>
-        )}
         <span className="ws-actionbar-meta">
           {data.checklistCount} checklist{" "}
           {data.checklistCount === 1 ? "item" : "items"}
@@ -115,6 +146,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         {TABS.map((t, index) => {
           const count = badge(t.value);
           const active = tab === t.value;
+          const { Icon } = t;
           return (
             <button
               key={t.value}
@@ -131,6 +163,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
               onClick={() => setTab(t.value)}
               onKeyDown={(e) => onTabKeyDown(e, index)}
             >
+              <Icon size={15} aria-hidden="true" />
               {t.label}
               {count !== null && <span className="ws-tab-badge">{count}</span>}
             </button>
@@ -141,33 +174,49 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
       <div
         className="ws-tabpanel"
         role="tabpanel"
+        key={tab}
         id={`panel-${tab}`}
         aria-labelledby={`tab-${tab}`}
       >
         {tab === "overview" && (
-          <div
-            className="ws-prose"
-            dangerouslySetInnerHTML={{ __html: data.overviewHtml }}
-          />
+          <>
+            <SectionBanner
+              Icon={BookOpen}
+              title="Overview"
+              intro="What this is, and why it matters."
+            />
+            <div className="ws-readingcard">
+              <div
+                className="ws-prose"
+                dangerouslySetInnerHTML={{ __html: data.overviewHtml }}
+              />
+            </div>
+          </>
         )}
 
         {tab === "guide" && (
           <>
-            <p className="ws-intro">
-              A plain walk-through of how to put this into practice.
-            </p>
-            <div
-              className="ws-prose"
-              dangerouslySetInnerHTML={{ __html: data.simpleGuideHtml }}
+            <SectionBanner
+              Icon={Compass}
+              title="Simple Guide"
+              intro="A plain walk-through of how to put this into practice."
             />
+            <div className="ws-readingcard">
+              <div
+                className="ws-prose"
+                dangerouslySetInnerHTML={{ __html: data.simpleGuideHtml }}
+              />
+            </div>
           </>
         )}
 
         {tab === "checklist" && (
           <>
-            <p className="ws-intro">
-              The operational items that feed your Design &amp; Build tracker.
-            </p>
+            <SectionBanner
+              Icon={ListChecks}
+              title="Checklist"
+              intro="The operational items that feed your Design & Build tracker."
+            />
             {data.checklistGroups.length === 0 ? (
               <p className="ws-intro">No checklist items for this topic yet.</p>
             ) : (
@@ -180,7 +229,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
                     {group.items.map((item) => (
                       <div className="ws-checkrow" key={item.id}>
                         <span className="ws-checkrow-box" aria-hidden="true">
-                          <Circle size={18} />
+                          <Square size={18} />
                         </span>
                         <div className="ws-checkrow-body">
                           <p className="ws-checkrow-text">{item.text}</p>
@@ -199,38 +248,48 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
           </>
         )}
 
-        {tab === "watch" &&
-          (data.watchOutHtml ? (
-            <div
-              className="ws-prose"
-              dangerouslySetInnerHTML={{ __html: data.watchOutHtml }}
+        {tab === "watch" && (
+          <>
+            <SectionBanner
+              Icon={AlertTriangle}
+              title="Watch Out For"
+              intro="Common mistakes and red flags to avoid."
             />
-          ) : (
-            <div className="ws-placeholder" role="note">
-              <span
-                style={{
-                  display: "inline-flex",
-                  flexShrink: 0,
-                  marginTop: 1,
-                  color: "var(--status-warning)",
-                }}
-              >
-                <Info size={18} aria-hidden="true" />
-              </span>
-              <span>
-                We&rsquo;re still writing this one. For now, the Simple Guide and
-                Checklist cover what you need.
-              </span>
-            </div>
-          ))}
+            {data.watchOutHtml ? (
+              <div className="ws-readingcard">
+                <div
+                  className="ws-prose"
+                  dangerouslySetInnerHTML={{ __html: data.watchOutHtml }}
+                />
+              </div>
+            ) : (
+              <div className="ws-placeholder" role="note">
+                <span
+                  style={{
+                    display: "inline-flex",
+                    flexShrink: 0,
+                    marginTop: 1,
+                    color: "var(--status-warning)",
+                  }}
+                >
+                  <Info size={18} aria-hidden="true" />
+                </span>
+                <span>
+                  We&rsquo;re still writing this one. For now, the Simple Guide
+                  and Checklist cover what you need.
+                </span>
+              </div>
+            )}
+          </>
+        )}
 
         {tab === "video" &&
           (data.video?.youtubeUrl ? (
             <div className="ws-empty">
-              <span style={{ display: "inline-flex", color: "var(--stone-400)" }}>
-                <Play size={26} aria-hidden="true" />
+              <span className="ws-empty-icon">
+                <Play size={22} aria-hidden="true" />
               </span>
-              <p style={{ margin: 0 }}>
+              <p className="ws-empty-text">
                 Watch this topic&rsquo;s Academy video
                 {data.video.length ? ` (${data.video.length})` : ""}.
               </p>
@@ -246,10 +305,10 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
             </div>
           ) : (
             <div className="ws-empty">
-              <span style={{ display: "inline-flex", color: "var(--stone-400)" }}>
-                <Play size={26} aria-hidden="true" />
+              <span className="ws-empty-icon">
+                <Play size={22} aria-hidden="true" />
               </span>
-              <p style={{ margin: 0 }}>
+              <p className="ws-empty-text">
                 Video&rsquo;s coming — the full guide is in Simple Guide.
               </p>
               <Button variant="secondary" size="sm" onClick={() => setTab("guide")}>
@@ -260,9 +319,11 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
 
         {tab === "templates" && (
           <>
-            <p className="ws-intro">
-              Ready-to-use documents for this topic. Download from Resources.
-            </p>
+            <SectionBanner
+              Icon={FileText}
+              title="Templates"
+              intro="Ready-to-use documents for this topic — download any you need."
+            />
             {data.templates.length === 0 ? (
               <p className="ws-intro">
                 Templates for this topic will appear here.
@@ -281,6 +342,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
                         {t.version ? ` · ${t.version}` : ""}
                       </p>
                     </div>
+                    <DownloadButton resourceId={t.id} />
                   </div>
                 ))}
               </div>
@@ -304,6 +366,18 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
           </span>
         </p>
       </div>
+
+      {data.nextSlug && (
+        <Link className="ws-nexttopic" href={`/elements/${data.nextSlug}`}>
+          <span className="ws-nexttopic-body">
+            <span className="ws-nexttopic-eyebrow">Next topic</span>
+            <span className="ws-nexttopic-title">{data.nextTitle}</span>
+          </span>
+          <span className="ws-nexttopic-arrow" aria-hidden="true">
+            <ArrowRight size={20} />
+          </span>
+        </Link>
+      )}
     </>
   );
 }

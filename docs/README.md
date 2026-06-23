@@ -2,7 +2,7 @@
 
 The operating manual for building **palestinehouse** — the public face of Palestine House and the private, approval-gated reference platform for its partners — with a disciplined, safe, AI-assisted workflow, in **stages and sprints, never all at once**.
 
-**What we're building (one paragraph):** a thin, premium public shell (Home · The Model · Experience · Bring a House · Our Support · Live Programming, single CTA: **Apply**) in front of a private partner reference platform unlocked by HQ approval (`/apply` = sign-up → pending account → `/admin/approvals` → unlock). The platform is a trusted reference organised by stage (Plan & Prepare · Design & Build · Operate & Program) — **not a course** (no quizzes, no certificate) and not an ops tool. Proof numbers are fixed: **10 focus areas · 30 topics · 200+ checklist items · 267 templates · 3 gates.**
+**What we're building (one paragraph):** a thin, premium public shell (Home · The Model · Experience · Bring a House · Our Support · Live Programming, single CTA: **Apply**) in front of a private partner reference platform unlocked by HQ approval (`/apply` = sign-up → pending account → `/admin/approvals` → unlock). The platform is a trusted reference organised by stage (Plan & Prepare · Design & Build · Operate & Program) — **not a course** (no quizzes, no certificate) and not an ops tool. Proof numbers are fixed: **10 focus areas · 30 topics · 200+ checklist items · 267 templates · a 120-day launch.**
 
 ---
 
@@ -95,7 +95,7 @@ The full version with exit gates is `ROADMAP.md`. *(Steps 1–4 and the CI/Verce
 - ❌ Don't commit directly to `main`, force-push, or merge without green CI **and** a tested Preview.
 - ❌ Don't bundle sprints or unrelated changes into one branch.
 - ❌ Don't expose gated content publicly, add a second signup path beside `/apply`, or add quizzes/certificates — the model is locked.
-- ❌ Don't rewrite approved copy, redesign the locked header/footer, or invent proof numbers (**10 · 30 · 200+ · 267 · 3**).
+- ❌ Don't rewrite approved copy, redesign the locked header/footer, or invent proof numbers (**10 · 30 · 200+ · 267 · 120-day launch**).
 - ❌ Don't add dependencies you don't need, or make unrelated refactors.
 - ❌ Don't skip Git hooks or CI (`--no-verify`) without an explicit, recorded reason.
 

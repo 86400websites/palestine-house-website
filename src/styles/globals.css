@@ -1036,6 +1036,25 @@
   color: var(--link-hover);
 }
 
+/* Shared page-head rhythm (eyebrow -> h1 -> lead) — S8 8a foundation. Wrap a
+   page's <p.ph-eyebrow> + <h1.ws-h1> + <p.ws-lead> in
+   <header className="ws-pagehead"> so every head shares one rhythm and drops
+   the per-page inline marginTop. .ws-lead keeps its own top margin. */
+.ws-pagehead > .ws-h1 { margin: 0; }
+.ws-pagehead > .ph-eyebrow + .ws-h1 { margin-top: var(--space-2); }
+
+/* Card-lift utility — ≤2px hover lift + soft shadow for interactive cards/rows
+   (DESIGN.md §14). Opt-in; warm border OR soft shadow, never both heavy. The
+   `.ws *` reduced-motion rule already neutralizes the transition. */
+.ws-lift {
+  transition: transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.ws-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
 .ws-h1 {
   font: var(--weight-semibold) var(--text-2xl)/var(--leading-tight)
     var(--font-display);
@@ -1143,6 +1162,119 @@
   margin-top: var(--space-6);
 }
 
+/* Topic hero band (S8 8i) — warm wash, title + intro + focus-area chip, with a
+   white art panel that a per-topic illustration can drop into later with no
+   layout change. Reuses the .ws-pagehead rhythm for eyebrow -> h1 -> lead. */
+.ws-topichero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+  padding: var(--space-7) var(--space-8);
+  background: var(--green-700);
+  border: 1px solid var(--green-700);
+  border-radius: var(--radius-lg);
+}
+/* Dark-green premium surface — white text (owner choice, S8 8i). */
+.ws-topichero .ph-eyebrow {
+  color: var(--green-100);
+}
+.ws-topichero .ws-h1 {
+  color: var(--white);
+}
+.ws-topichero .ws-lead {
+  color: rgba(255, 255, 255, 0.86);
+}
+.ws-topichero-body {
+  flex: 1;
+  min-width: 0;
+}
+.ws-topichero-area {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 0;
+  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
+  color: rgba(255, 255, 255, 0.75);
+}
+.ws-topichero-art {
+  flex-shrink: 0;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  border: 1px solid var(--line-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.ws-topichero-mark {
+  display: inline-flex;
+  color: var(--green-700);
+}
+@media (max-width: 720px) {
+  .ws-topichero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-6);
+  }
+  .ws-topichero-art {
+    display: none;
+  }
+}
+
+/* Prominent "Next topic" continue card at the foot of the topic page (S8 8i). */
+.ws-nexttopic {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--green-700);
+  border-radius: var(--radius-md);
+  background: var(--green-700);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.ws-nexttopic:hover {
+  background: var(--green-600);
+  border-color: var(--green-600);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.ws-nexttopic-body {
+  flex: 1;
+  min-width: 0;
+}
+.ws-nexttopic-eyebrow {
+  display: block;
+  font: var(--weight-semibold) var(--text-xs)/1 var(--font-body);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--green-100);
+}
+.ws-nexttopic-title {
+  display: block;
+  margin-top: var(--space-2);
+  font: var(--weight-medium) var(--text-lg)/1.3 var(--font-display);
+  color: var(--white);
+}
+.ws-nexttopic-arrow {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--white);
+  color: var(--green-700);
+}
+
 /* Top action bar */
 .ws-actionbar {
   display: flex;
@@ -1208,6 +1340,15 @@
 
 .ws-tabpanel {
   margin-top: var(--space-6);
+  animation: ws-panel-in var(--duration) var(--ease-out) both;
+}
+@keyframes ws-panel-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Tab intro line */
@@ -1216,6 +1357,53 @@
   color: var(--muted-foreground);
   max-width: var(--measure);
   margin: 0 0 var(--space-4);
+}
+
+/* Section banner — icon + title + intro at the head of each content tab (S8 8i.2).
+   The icon panel is also the slot for a per-section illustration later. */
+.ws-section-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.ws-section-banner-art {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--brand-primary-tint);
+  color: var(--green-700);
+}
+.ws-section-banner-text {
+  min-width: 0;
+}
+.ws-section-banner-title {
+  font: var(--weight-medium) var(--text-xl)/1.2 var(--font-display);
+  color: var(--foreground);
+  margin: 0;
+}
+.ws-section-banner-intro {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--muted-foreground);
+  margin: var(--space-1) 0 0;
+  max-width: var(--measure);
+}
+
+/* Reading card — wraps long Markdown bodies so they don't read as a wall. */
+.ws-readingcard {
+  padding: var(--space-7) var(--space-8);
+  background: var(--surface-card);
+  border: 1px solid var(--line-200);
+  border-radius: var(--radius-lg);
+}
+@media (max-width: 720px) {
+  .ws-readingcard {
+    padding: var(--space-6) var(--space-5);
+  }
 }
 
 /* Rendered Markdown bodies (Overview / Simple Guide / Watch Out For) */
@@ -1469,6 +1657,37 @@
   margin: 0;
 }
 
+/* Section header with a right-aligned meta — Operate's routine cadence (S8 8c). */
+.ws-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.ws-section-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--weight-regular) var(--text-sm)/1 var(--font-body);
+  color: var(--subtle-foreground);
+  white-space: nowrap;
+}
+
+/* Plan/Operate topic rows opt into the card-lift (S8 8c): a ≤2px hover lift +
+   soft shadow with a hairline border (not a heavy border too). The base
+   .ws-lift supplies transform + shadow on hover; this keeps the border hairline
+   and widens the transition. prefers-reduced-motion is neutralized by `.ws *`. */
+.topic-row.ws-lift {
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.topic-row.ws-lift:hover {
+  border-color: var(--border);
+}
+
 /* Empty state */
 .ws-empty {
   display: flex;
@@ -1482,6 +1701,34 @@
   background: var(--surface-card);
   color: var(--muted-foreground);
   font: var(--weight-regular) var(--text-base)/1.6 var(--font-body);
+}
+/* Optional warm-empty slots (S8 8a) — give the empty state a premium treatment
+   when supplied (icon mark + title + text + actions). The bare `.ws-empty` base
+   above is unchanged, so existing usages keep working. */
+.ws-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--brand-primary-tint);
+  color: var(--green-700);
+}
+.ws-empty-title {
+  font: var(--weight-medium) var(--text-lg)/1.3 var(--font-display);
+  color: var(--foreground);
+  margin: 0;
+}
+.ws-empty-text {
+  margin: 0;
+  max-width: 46ch;
+}
+.ws-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 /* Placeholder treatment (clearly marked — never invented content) */
@@ -1564,34 +1811,81 @@
   height: 100%;
   background: var(--brand-primary);
   border-radius: var(--radius-sm);
+  transform-origin: left center;
+  transition: width var(--duration) var(--ease-out);
+  animation: bld-fill var(--duration) var(--ease-out) both;
+}
+@keyframes bld-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 .bld-area-body {
   padding: var(--space-2) var(--space-5) var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  animation: bld-body-in var(--duration) var(--ease-out) both;
+}
+@keyframes bld-body-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Completed focus area — clearer affordance (S8 8d): green chip + inline badge. */
+.bld-area.is-complete .topic-code {
+  background: var(--brand-primary-tint);
+  color: var(--green-700);
+}
+.bld-area-done {
+  margin-left: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--green-700);
+  font: var(--weight-medium) var(--text-xs)/1 var(--font-body);
 }
 .bld-item {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-5);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--background);
 }
 .bld-item.is-complete {
   background: var(--green-50);
+  border-color: var(--brand-primary-tint);
 }
 .bld-item.is-blocked {
   border-color: var(--status-error-bg);
   background: var(--status-error-bg);
 }
 .bld-item-body {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   min-width: 0;
 }
+/* Status pill + label share a wrapping head row, so the pill sits inline above
+   the content — no blank left gutter on mobile (S8 owner feedback). */
+.bld-item-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
 .bld-item-label {
+  flex: 1 1 12rem;
   font: var(--text-body);
   color: var(--foreground);
   margin: 0;
@@ -1602,45 +1896,68 @@
 .bld-item-doc {
   font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
   color: var(--subtle-foreground);
-  margin: var(--space-1) 0 0;
+  margin: 0;
 }
 .bld-item-note {
   font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
   color: var(--status-error);
-  margin: var(--space-1) 0 0;
+  margin: 0;
 }
 .bld-item-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   flex-wrap: wrap;
-  margin-top: var(--space-2);
 }
 .bld-item-actions form {
   display: inline-flex;
 }
+/* Item actions read as real buttons — outline by default, the key action filled
+   (S8 owner feedback). */
 .bld-item-link {
   appearance: none;
-  background: none;
-  border: none;
-  padding: var(--space-2) 0;
-  cursor: pointer;
-  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
-  color: var(--brand-primary);
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--background);
+  cursor: pointer;
+  font: var(--weight-medium) var(--text-sm)/1 var(--font-body);
+  color: var(--ink-700);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 .bld-item-link:hover {
-  color: var(--brand-primary-hover);
+  background: var(--paper-100);
+  border-color: var(--ink-700);
+  color: var(--ink-900);
+}
+.bld-item-link.is-primary {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: var(--white);
+}
+.bld-item-link.is-primary:hover {
+  background: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
+  color: var(--white);
 }
 .bld-item-link:disabled {
-  color: var(--stone-400);
+  color: var(--stone-500);
+  border-color: var(--border);
+  background: var(--paper-100);
   cursor: not-allowed;
 }
 .bld-item-link.is-inert {
-  color: var(--stone-400);
+  color: var(--stone-500);
+  border-color: var(--border);
+  background: var(--background);
   cursor: default;
 }
 .bld-block-form {
@@ -1695,6 +2012,9 @@
   gap: var(--space-1);
 }
 .ws-stat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font: var(--weight-medium) var(--text-xs)/1.3 var(--font-body);
   letter-spacing: 0.04em;
   color: var(--subtle-foreground);
@@ -1739,6 +2059,25 @@
   align-items: center;
   justify-content: center;
   font: var(--weight-semibold) var(--text-xs)/1 var(--font-body);
+}
+
+/* Stat icon + a more present Design & Build progress bar (S8 8b). */
+.ws-stat-ico {
+  display: inline-flex;
+  color: var(--green-700);
+}
+.dash-progress {
+  margin-top: var(--space-5);
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--paper-200);
+  overflow: hidden;
+}
+.dash-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--brand-primary);
 }
 
 /* ---------- Resources hub + category (S6 6e) ---------- */
@@ -1884,6 +2223,30 @@
   font: var(--weight-regular) var(--text-xs)/1.4 var(--font-body);
   color: var(--status-error);
   max-width: 18ch;
+}
+
+/* Focus-area cards opt into the card-lift; keep the border hairline (S8 8f). */
+.res-area.ws-lift {
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.res-area.ws-lift:hover {
+  border-color: var(--border);
+}
+
+/* Stagger-wrapped grids: the Reveal wrapper fills its grid cell and the card
+   fills the wrapper, so cards stay equal-height (S8 8f). */
+.res-booklets > *,
+.res-areas > *,
+.vid-grid > * {
+  display: flex;
+}
+.res-booklets > * > .res-booklet,
+.res-areas > * > .res-area,
+.vid-grid > * > .vid-card {
+  flex: 1;
 }
 
 /* ---------- Academy (S6 6f) ---------- */

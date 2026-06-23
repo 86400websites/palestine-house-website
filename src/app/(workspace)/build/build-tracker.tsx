@@ -11,6 +11,7 @@ import {
   Info,
   Minus,
   RotateCcw,
+  StickyNote,
 } from "lucide-react";
 import {
   setChecklistProgressAction,
@@ -27,9 +28,8 @@ import type {
    action is its OWN <form action={formAction}> with hidden inputs (the S4
    unmount-mid-submit fix), and useActionState lives above the rows. Saving runs
    set_checklist_progress server-side then revalidates — no client Supabase, no
-   optimistic state to roll back. Gates are intentionally NOT rendered: all
-   checklist_items.gate are null and Gate 2's label is unapproved (D-S6-b), so
-   the focus-area grouping is the whole view until HQ supplies the mapping. */
+   optimistic state to roll back. The milestone gates concept was retired
+   site-wide (D-S8-c); the tracker groups by the 10 focus areas + saved progress. */
 
 const INITIAL: ChecklistProgressState = { ok: false, message: null };
 
@@ -162,7 +162,7 @@ function BuildArea({
   const pct = area.items > 0 ? Math.round((area.done / area.items) * 100) : 0;
   const complete = area.items > 0 && area.done === area.items;
   return (
-    <section className="bld-area">
+    <section className={`bld-area${complete ? " is-complete" : ""}`}>
       <button
         type="button"
         className="bld-area-head"
@@ -175,15 +175,7 @@ function BuildArea({
         <span className="bld-area-title">
           {area.name}
           {complete && (
-            <span
-              style={{
-                marginLeft: "var(--space-3)",
-                color: "var(--green-700)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
+            <span className="bld-area-done">
               <CheckCircle2 size={14} aria-hidden="true" /> Complete
             </span>
           )}
@@ -246,9 +238,11 @@ function BuildItem({
 
   return (
     <div className={cls}>
-      <StatusPill status={item.status} />
       <div className="bld-item-body">
-        <p className="bld-item-label">{item.text}</p>
+        <div className="bld-item-head">
+          <StatusPill status={item.status} />
+          <p className="bld-item-label">{item.text}</p>
+        </div>
         {item.requiredDocument && (
           <p className="bld-item-doc">Document: {item.requiredDocument}</p>
         )}
@@ -263,7 +257,7 @@ function BuildItem({
               <input type="hidden" name="status" value="complete" />
               <button
                 type="submit"
-                className="bld-item-link"
+                className="bld-item-link is-primary"
                 disabled={pending}
               >
                 <Check size={14} aria-hidden="true" /> Mark complete
@@ -303,15 +297,15 @@ function BuildItem({
               aria-expanded={blocking}
               onClick={() => setBlocking((b) => !b)}
             >
-              <Minus size={14} aria-hidden="true" /> Blocked?
+              <StickyNote size={14} aria-hidden="true" /> Add notes
             </button>
           )}
           {item.slug ? (
             <Link className="bld-item-link" href={`/elements/${item.slug}`}>
-              Open this topic
+              Read the full guide
             </Link>
           ) : (
-            <span className="bld-item-link is-inert">Open this topic</span>
+            <span className="bld-item-link is-inert">Read the full guide</span>
           )}
         </div>
 

@@ -43,7 +43,7 @@ Run top to bottom. For each item give **PASS / FAIL / N/A** + the evidence (comm
 
 ### 4. Copy & design — only if UI / strings changed
 - Any new or changed user-facing string is verbatim from `docs/page-copy/` or follows `docs/page-copy/00-global/brand-voice.md`.
-- Proof numbers intact (**10 · 30 · 200+ · 267 · 3**); never a certificate. Locked header/footer chrome unchanged.
+- Proof numbers intact (**10 · 30 · 200+ · 267 · 120-day launch**); never a certificate. Locked header/footer chrome unchanged.
 
 ### 5. Security invariants — only those the diff touches (SECURITY-CHECKLIST §15)
 For each invariant the change could affect, confirm it holds and cite the file:

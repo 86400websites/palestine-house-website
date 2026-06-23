@@ -4,6 +4,7 @@ import { Play } from "lucide-react";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getAcademyModules, getElements } from "@/lib/workspace/content";
 import { PendingState } from "@/components/workspace/pending-state";
+import { Stagger } from "@/components/motion/reveal";
 import type { AcademyRow } from "@/lib/workspace/types";
 
 /* /academy — the optional video library (docs/page-copy/03-member-workspace/academy.md).
@@ -81,15 +82,15 @@ export default async function AcademyPage() {
 
   return (
     <div>
-      <p className="ph-eyebrow">Academy</p>
-      <h1 className="ws-h1" style={{ marginTop: "var(--space-2)" }}>
-        Watch, when it helps.
-      </h1>
-      <p className="ws-lead">
-        Short videos that walk through the same topics as the playbook — for when
-        you&rsquo;d rather watch than read. Dip in anywhere. There&rsquo;s nothing
-        to complete.
-      </p>
+      <header className="ws-pagehead">
+        <p className="ph-eyebrow">Academy</p>
+        <h1 className="ws-h1">Watch, when it helps.</h1>
+        <p className="ws-lead">
+          Short videos that walk through the same topics as the playbook — for
+          when you&rsquo;d rather watch than read. Dip in anywhere. There&rsquo;s
+          nothing to complete.
+        </p>
+      </header>
 
       <section style={{ marginTop: "var(--space-10)" }}>
         <h2 className="ws-section-h" style={{ fontSize: "var(--text-lg)" }}>
@@ -116,10 +117,12 @@ export default async function AcademyPage() {
             <span className="vid-area-code">{code}</span>
             {areaName.get(code)}
           </h2>
-          <div className="vid-grid" style={{ marginTop: "var(--space-4)" }}>
-            {byArea.get(code)!.map((m) => (
-              <AcademyCard module={m} key={m.id} />
-            ))}
+          <div style={{ marginTop: "var(--space-4)" }}>
+            <Stagger className="vid-grid">
+              {byArea.get(code)!.map((m) => (
+                <AcademyCard module={m} key={m.id} />
+              ))}
+            </Stagger>
           </div>
         </section>
       ))}

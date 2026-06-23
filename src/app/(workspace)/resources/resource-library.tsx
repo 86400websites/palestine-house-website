@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getResourceDownloadUrl } from "@/lib/resources/actions";
 import type { ResourceVM } from "@/lib/resources/view";
@@ -107,7 +107,10 @@ export function ResourceLibrary({
         </div>
       ) : (
         <div className="ws-empty" style={{ marginTop: "var(--space-5)" }}>
-          <p style={{ margin: 0 }}>Nothing matches that filter.</p>
+          <span className="ws-empty-icon">
+            <SearchX size={22} aria-hidden="true" />
+          </span>
+          <p className="ws-empty-text">Nothing matches that filter.</p>
         </div>
       )}
     </div>

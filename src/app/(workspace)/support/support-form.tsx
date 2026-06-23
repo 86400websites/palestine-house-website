@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FadeIn } from "@/components/motion/reveal";
 import {
   submitSupportRequestAction,
   type SupportState,
@@ -33,23 +34,30 @@ export function SupportForm() {
           maxWidth: 560,
           margin: "0 auto",
           paddingTop: "var(--space-12)",
-          textAlign: "center",
         }}
       >
-        <span className="sup-confirm-icon" aria-hidden="true">
-          <Check size={24} />
-        </span>
-        <h1
-          className="ws-h1"
-          style={{ marginTop: "var(--space-5)", fontSize: "var(--text-xl)" }}
-        >
-          Got it — we&rsquo;ll be in touch.
-        </h1>
-        <div style={{ marginTop: "var(--space-6)" }}>
-          <Button variant="secondary" size="sm" onClick={() => setSent(false)}>
-            Send another request
-          </Button>
-        </div>
+        <FadeIn>
+          <div className="ws-card" style={{ textAlign: "center" }}>
+            <span className="sup-confirm-icon" aria-hidden="true">
+              <Check size={24} />
+            </span>
+            <h1
+              className="ws-h1"
+              style={{ marginTop: "var(--space-5)", fontSize: "var(--text-xl)" }}
+            >
+              Got it — we&rsquo;ll be in touch.
+            </h1>
+            <div style={{ marginTop: "var(--space-6)" }}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setSent(false)}
+              >
+                Send another request
+              </Button>
+            </div>
+          </div>
+        </FadeIn>
       </div>
     );
   }
@@ -64,6 +72,7 @@ export function SupportForm() {
 
       <form
         action={formAction}
+        className="ws-card"
         style={{
           display: "flex",
           flexDirection: "column",

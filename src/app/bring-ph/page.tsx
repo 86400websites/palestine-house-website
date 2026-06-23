@@ -15,7 +15,7 @@ import { LeadForm } from "@/components/sections/lead-form";
 export const metadata: Metadata = {
   title: "Bring a House",
   description:
-    "Why bring Palestine House to your city, and what it honestly takes — the partnership, the three stages, the three gates, and the three rules.",
+    "Why bring Palestine House to your city, and what it honestly takes — the partnership, the three stages, the 120-day launch, and the three rules.",
 };
 
 const BRING_YOU = [
@@ -235,13 +235,13 @@ export default function BringAHousePage() {
 
       <PageDivider />
 
-      {/* 5 — Three checkpoints: the gates timeline */}
+      {/* 5 — The 120-day launch: milestone timeline */}
       <section className="ph-section-lg" id="checkpoints">
         <div className="ph-container">
           <Reveal className="sec-head">
-            <p className="ph-eyebrow">Three checkpoints</p>
+            <p className="ph-eyebrow">The 120-day launch</p>
             <h2>No guesswork about whether you’re ready.</h2>
-            <p className="ph-lead">Three gates mark the way.</p>
+            <p className="ph-lead">A clear path, milestone by milestone.</p>
           </Reveal>
           <Reveal>
             <ol className="bring-gates">

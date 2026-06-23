@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ListChecks } from "lucide-react";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getChecklist, getElements } from "@/lib/workspace/content";
 import {
@@ -11,9 +12,8 @@ import { BuildTracker } from "./build-tracker";
 /* /build — Design & Build, the launch checklist tracker (S6 6c). The only
    per-user-interactive page: approved partners save per-item progress via
    set_checklist_progress (the BuildTracker client shell). Gated before any
-   fetch (pending -> PendingState). Gates are NOT rendered — gate data is all
-   null and Gate 2's label is unapproved (D-S6-b); the focus-area grouping is
-   the view until HQ supplies the gate->item mapping. */
+   fetch (pending -> PendingState). The milestone gates concept was retired
+   site-wide (D-S8-c); the /build tracker groups by the 10 focus areas. */
 
 export const metadata: Metadata = { title: "Design & Build" };
 
@@ -38,16 +38,11 @@ export default async function BuildPage() {
 
       {model.totalItems === 0 ? (
         <div className="ws-empty" style={{ marginTop: "var(--space-10)" }}>
-          <p
-            style={{
-              font: "var(--weight-semibold) var(--text-lg)/1.3 var(--font-display)",
-              color: "var(--foreground)",
-              margin: 0,
-            }}
-          >
-            Nothing checked off yet.
-          </p>
-          <p style={{ margin: 0 }}>
+          <span className="ws-empty-icon">
+            <ListChecks size={22} aria-hidden="true" />
+          </span>
+          <p className="ws-empty-title">Nothing checked off yet.</p>
+          <p className="ws-empty-text">
             Start with your first focus area — or let us point you to the right
             first step.
           </p>

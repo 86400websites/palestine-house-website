@@ -9,7 +9,7 @@
 - A **public shell** — calm, premium, editorial marketing pages whose single conversion is the green **Apply** button ("Apply to bring a House" · *Every application is reviewed by HQ.*). Public routes: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/live`, `/apply`, `/about`, `/contact`, `/focus-areas`, legal, auth.
 - A **private partner reference platform** — approval-gated (`profiles.is_approved`). Apply = sign-up: one form creates a pending account + application; HQ approval via `/admin/approvals` unlocks the platform. Gated routes: `/dashboard`, `/plan`, `/build`, `/operate`, `/elements/[slug]` (×30), `/live` partner tools, `/resources`, `/tools` (coming soon), `/academy`, `/account`, `/support`.
 
-**It is a reference, not a course** — no quizzes, no certificate, no daily-ops tooling. The only per-user interactivity is saved checklist progress in Stages › Design & Build. **Proof numbers are fixed: 10 focus areas · 30 topics · 200+ checklist items · 267 templates · 3 gates.**
+**It is a reference, not a course** — no quizzes, no certificate, no daily-ops tooling. The only per-user interactivity is saved checklist progress in Stages › Design & Build. **Proof numbers are fixed: 10 focus areas · 30 topics · 200+ checklist items · 267 templates · a 120-day launch.**
 
 GitHub is the source of truth. Vercel hosts Production and Preview. Claude Code is the primary build engine, working **one sprint at a time** from `ROADMAP.md`.
 

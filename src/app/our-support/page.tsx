@@ -186,8 +186,8 @@ export default function OurSupportPage() {
             <h2>Support from first decision to open doors.</h2>
             <p className="ph-lead">
               The platform walks you through the launch in order, across three
-              stages and a 120-day plan, with three checkpoints that confirm
-              you’re ready before you move on.
+              stages and a 120-day plan, so you always know what’s next and when
+              you’re ready to move on.
             </p>
           </Reveal>
           <Reveal className="sup-stages">
@@ -203,7 +203,7 @@ export default function OurSupportPage() {
               <span className="sup-stage">Operate &amp; Program</span>
             </div>
             <Link className="sup-gates-link" href="/bring-ph#checkpoints">
-              The three checkpoints, in detail →
+              The 120-day launch, in detail →
             </Link>
           </Reveal>
           <Reveal>
