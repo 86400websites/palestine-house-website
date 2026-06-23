@@ -37,13 +37,13 @@ Out of scope: /live and every public/auth/admin page; new features; /search; /ac
 
 Execute in gated sub-steps (one owner gate after each):
 1. (8a) Shared foundation — finish workspace-shell.tsx chrome to the locked workspace chrome in docs/page-designs/shared/ (active-rail/hover/locked items, topbar, avatar/status pill). MOTION PRECONDITION IS ALREADY MET — VERIFY, DO NOT ADD: a LazyMotion+domAnimation provider already wraps the whole app via src/app/providers.tsx, mounted in the ROOT layout (src/app/layout.tsx) above SiteChrome, so the (workspace) tree inherits it and Reveal/FadeIn/Stagger (which use `m`) already work in the workspace — do NOT add a second LazyMotion. The provider runs in `strict` mode, so use ONLY the existing m.*-based primitives (Reveal/FadeIn/Stagger); never introduce a full `motion.*` component (it will throw). Add a small shared `ws-pagehead` rhythm (eyebrow→h1→lead) to remove per-page inline marginTop — this is the ONE new class the sprint introduces. Establish the premium kit as reusable primitives (the Reveal/Stagger convention copied from /live; one reusable warm empty-state; a card-lift utility). STOP.
-2. (8b) Dashboard (all 3 states) — restore the mockup snapshot as the page hero: stat grid with lucide icons + a more present progress bar (KEEP the "Current gate" stat suppressed — D-S6-b); Stagger snapshot + next-steps + CTA row; entrance-fade the pending and newly-approved notice cards. STOP.
+2. (8b) Dashboard (all 3 states) — restore the mockup snapshot as the page hero: stat grid with lucide icons + a more present progress bar (KEEP the "Current gate" stat suppressed — D-S6-b; milestone gates retired site-wide — D-S8-c); Stagger snapshot + next-steps + CTA row; entrance-fade the pending and newly-approved notice cards. STOP.
 3. (8c) Plan + Operate — cardify/lift the .topic-row lists to the mockup feel (warm border OR soft shadow, ≤2px lift, never both), Stagger rows per group, align Operate's routine-cadence meta. Keep the curated group→code grouping + verbatim group names. STOP.
 4. (8d) Build tracker — eased .bld-meter fill (entrance only), status pill = colour+icon+label (AA), accordion-body reveal on open, completed-area affordance, .ws-empty polish. GATES STAY OFF. Confirm mark complete/in-progress/blocked/reopen behaviour is byte-identical. STOP.
 5. (8e) Element page — breadcrumb + Topic {code} eyebrow→h1→lead rhythm, action bar, .ws-tab active underline, single fade on panel mount (no height animation), apply the existing .ws-prose/.ws-checkrow/.ws-templaterow/.ws-placeholder/.ws-empty. All 6 tabs + signed-URL template download unchanged. STOP.
 6. (8f) Resources + Resources/[category] + Academy — featured booklet cards on surface-hero (cover/badge/download aligned) by extending the EXISTING Resources primitives (.res-booklet / .res-booklets / .res-area / .res-areas / .res-download) — there is NO .res-card class, do not invent one. Polish the .ws-tag rail + focus-area filter, .ws-empty no-match, Academy .vid-card ≤2px lift + thumb gradient + runtime chip + muted "Video coming" CTA, Stagger grids. Filters/type-toggle must still work. STOP.
 7. (8g) Account + Support + Tools — wrap the bare forms in card containers (.ws-card/.acct-section — support-form.tsx is currently a bare inline div); input/.acct-switch finish; polished confirmation/empty states; one entrance Reveal + TatreezDivider rhythm on /tools. /account delete stays hidden (D-S6-c). Account save + Support submit→confirmation→send-another behaviour unchanged. STOP.
-8. (8h) Sprint exit gate — full-diff review of the whole sprint; confirm NO copy string changed, proof numbers (10·30·200+·267·3) intact, NO behaviour/gate/RPC touched, a11y held (focus rings, prefers-reduced-motion, AA, colour+icon+label); update docs/PROJECT-STATUS.md (§1/§2 + change log) and tick S8 in docs/ROADMAP.md. STOP.
+8. (8h) Sprint exit gate — full-diff review of the whole sprint; confirm NO copy string changed, proof numbers (10·30·200+·267·120-day launch) intact, NO behaviour/gate/RPC touched, a11y held (focus rings, prefers-reduced-motion, AA, colour+icon+label); update docs/PROJECT-STATUS.md (§1/§2 + change log) and tick S8 in docs/ROADMAP.md. STOP.
 
 Per-step protocol (every sub-step, no exceptions):
 1. Read the exact locked input(s) for this sub-step BEFORE coding: the matching docs/page-designs/member-workspace/*.app.jsx mockup, DESIGN.md §14, and the current page file.
@@ -59,7 +59,7 @@ Locked inputs (never invent, never paraphrase):
 - Design brief: docs/DESIGN.md §14 (Workspace premium layer) + §3/§6/§8/§11 tokens & rules.
 - Structure: docs/page-designs/member-workspace/*.app.jsx (the per-page mockups).
 - Premium reference: src/app/live/page.tsx + src/components/shared/ + the public classes in src/styles/globals.css (do NOT edit /live).
-- Copy is verbatim from docs/page-copy/03-member-workspace/ + 06-elements/. Proof numbers fixed: 10 · 30 · 200+ · 267 · 3. Header/footer/sidebar chrome is locked — finish, never redesign.
+- Copy is verbatim from docs/page-copy/03-member-workspace/ + 06-elements/. Proof numbers fixed: 10 · 30 · 200+ · 267 · 120-day launch. Header/footer/sidebar chrome is locked — finish, never redesign.
 
 Before editing:
 1. Inspect the repo (package.json, next.config.ts, src/app/(workspace)/) and read every locked input above.
@@ -88,7 +88,7 @@ Report at the end: summary · files changed · commands + results · risks/follo
 2. **Rhythm** — `TatreezDivider` between sections + alternate `--paper-150/200`/`surface-hero` washes.
 3. **Elevated empty/loading states** — one reusable warm empty-state; add `loading.tsx` where a route fetches.
 4. **Card-lift** — ≤2px hover lift + `--shadow-md` (warm border OR soft shadow).
-5. **Dashboard hero** — stat grid + lucide icons + present progress bar (gate stat stays suppressed).
+5. **Dashboard hero** — stat grid + lucide icons + present progress bar (gate stat stays suppressed; milestone gates retired site-wide — D-S8-c).
 
 ## Checks & results
 _To be filled after the sprint runs (typecheck/lint/build · screenshot-vs-mockup at 320px+desktop+reduced-motion · behaviour-unchanged re-clicks · diff shows zero copy/proof-number/gate changes)._

@@ -17,8 +17,8 @@ import type { ProgressStage } from "@/lib/workspace/types";
    - pending: "under review" while HQ decides (S4);
    - newly approved (nothing started): the empty-state welcome (S4);
    - mid-journey (Design & Build started): the snapshot — current stage +
-     Design & Build % + the next few focus areas (S6 6a). Gates are NOT shown
-     (gate data all-null, Gate 2 label unapproved — D-S6-b). Approval + progress
+     Design & Build % + the next few focus areas (S6 6a; milestone gates retired
+     site-wide — D-S8-c). Approval + progress
      are read live (cached), so it flips without a re-login. */
 
 export const metadata: Metadata = { title: "Welcome" };
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
     );
   }
 
-  // Mid-journey snapshot (S6 6a). Gate column suppressed (D-S6-b).
+  // Mid-journey snapshot (S6 6a). Milestone gates retired site-wide (D-S8-c).
   const firstName = firstNameOf(profile?.full_name);
   return (
     <div>

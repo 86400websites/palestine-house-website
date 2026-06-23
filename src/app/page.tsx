@@ -33,7 +33,7 @@ const HOME_STAGES = [
   {
     id: "PH-HIW-02",
     name: "Design & Build",
-    text: "a 120-day launch plan, tracked to three clear go/no-go gates.",
+    text: "a clear 120-day launch plan, tracked task by task.",
     alt: "An illustration of hands building and preparing the House’s room, the same arched window behind them.",
   },
   {
@@ -70,7 +70,7 @@ const HOME_PROOF = [
   { n: "30", label: "topics" },
   { n: "200+", label: "checklist items" },
   { n: "267", label: "templates" },
-  { n: "3", label: "gates" },
+  { n: "120", label: "day launch" },
 ] as const;
 
 

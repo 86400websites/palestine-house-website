@@ -20,7 +20,7 @@ const FA_STATS = [
   { n: "30", label: "topics" },
   { n: "200+", label: "checklist items" },
   { n: "267", label: "real templates" },
-  { n: "3", label: "gates, each HQ-reviewed" },
+  { n: "120", label: "day launch" },
 ] as const;
 
 const FA_AREAS = [

@@ -28,9 +28,8 @@ import type {
    action is its OWN <form action={formAction}> with hidden inputs (the S4
    unmount-mid-submit fix), and useActionState lives above the rows. Saving runs
    set_checklist_progress server-side then revalidates — no client Supabase, no
-   optimistic state to roll back. Gates are intentionally NOT rendered: all
-   checklist_items.gate are null and Gate 2's label is unapproved (D-S6-b), so
-   the focus-area grouping is the whole view until HQ supplies the mapping. */
+   optimistic state to roll back. The milestone gates concept was retired
+   site-wide (D-S8-c); the tracker groups by the 10 focus areas + saved progress. */
 
 const INITIAL: ChecklistProgressState = { ok: false, message: null };
 

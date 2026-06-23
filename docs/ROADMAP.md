@@ -11,7 +11,7 @@
 - [x] `/` Home (full "Bring Palestine House to Your City" section)
 - [x] `/model` The Model
 - [x] `/experience` Experience — the decision page (hero artwork, day/night section, five programming threads, closing CTA, lead magnet) — *live strip in designed empty state until S9 wires `programming_sessions`*
-- [x] `/bring-ph` Bring a House (absorbs How It Works: stage triptych + Day 30/60/108 gates timeline, "who brings what," three rules)
+- [x] `/bring-ph` Bring a House (absorbs How It Works: stage triptych + Day 30/60/108 milestone timeline, "who brings what," three rules)
 - [x] `/our-support` Our Support
 - [ ] `/live` Live Programming — *listing built with approved empty states (Stage 0); real session data, watch view, and live filters in S9*  **[public hero feature]**
 - [x] `/apply` — *live (S3c): sign-up → pending account + application record (zod-validated); single "Your name" field per D5 + an owner-approved Password field (§4). Rate-limit + Turnstile come in **S12** (post-launch hardening) — see `PROJECT-STATUS.md` §7*
@@ -60,11 +60,11 @@ Goal: a complete, polished, working public website running locally. All forms re
 |---|---|---|
 | **0.1 Foundation** | Scaffold (Next.js 15, TS strict, pnpm, Tailwind v4, shadcn/ui, Framer Motion); copy the 10 core docs + `/docs` content layer in; port `/docs/page-designs/design-system/tokens/` + `shared/pages.css` primitives into `globals.css`; `next/font` Spectral + Inter; motion primitives; security headers in `next.config.ts`; locked chrome (header + Tooltip nav + footer + mobile Sheet); 404/error pages | Scaffold + repo + CI + Vercel Preview pre-completed (pre-sprints 0a–0d, PRs #1–#2); design system is in-repo |
 | **0.2 Home + Model** | `/` and `/model` from `/docs/page-designs/` + `/docs/page-copy/`, with final artwork from `/docs/page-designs/assets/art/` | |
-| **0.3 New marketing pages** | `/experience` (live strip in empty/fallback state), `/bring-ph` (triptych + gates timeline), `/our-support` | Densest pages — pace per `DESIGN.md` §12 |
+| **0.3 New marketing pages** | `/experience` (live strip in empty/fallback state), `/bring-ph` (triptych + milestone timeline), `/our-support` | Densest pages — pace per `DESIGN.md` §12 |
 | **0.4 Live + supporting pages** | `/live` public listing + watch view (static empty states), `/focus-areas`, `/about`, `/contact` (form UI, no-op) | |
 | **0.5 Apply + auth UI + legal + SEO** | `/apply` form UI (no-op submit with honest "not yet live" handling), `/login` `/forgot-password` `/update-password` UI shells, `/privacy` `/terms`, metadata + sitemap + robots + OG | |
 
-**Stage 0 exit gate:** typecheck/lint/build green · every public page matches its mockup at 320px → desktop · copy verbatim · proof numbers correct (10 · 30 · 200+ · 267 · 3) · reduced-motion respected · no console errors · headers/footer identical everywhere.
+**Stage 0 exit gate:** typecheck/lint/build green · every public page matches its mockup at 320px → desktop · copy verbatim · proof numbers correct (10 · 30 · 200+ · 267 · 120-day launch) · reduced-motion respected · no console errors · headers/footer identical everywhere.
 
 ### Stage 1 — Connect & launch the barebones site
 

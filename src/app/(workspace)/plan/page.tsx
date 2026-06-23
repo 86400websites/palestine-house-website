@@ -11,7 +11,7 @@ import type { ElementListItem } from "@/lib/workspace/types";
 /* /plan — Plan & Prepare (docs/page-copy/03-member-workspace/plan.md). The
    read-and-consult orientation stage: a foundation-framed VIEW over the same
    30 elements as /build and /operate — NO tracker, no saved progress here (the
-   120-day checklist toward the 3 gates lives only in /build). Gated before any
+   120-day launch checklist lives only in /build). Gated before any
    fetch: a pending session sees the under-review notice, never content.
 
    The group -> topic-code curation is the locked grouping from the approved

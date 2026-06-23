@@ -88,7 +88,7 @@ const MEGA_MENUS: Partial<
         head: "How it works",
         items: [
           { label: "Plan & Prepare", sub: "Learn before you build", href: "/bring-ph#what-it-takes" },
-          { label: "Design & Build", sub: "10 areas, 3 gates", href: "/bring-ph#what-it-takes" },
+          { label: "Design & Build", sub: "The 120-day launch", href: "/bring-ph#what-it-takes" },
           { label: "Operate & Program", sub: "Open, and keep it alive", href: "/bring-ph#what-it-takes" },
         ],
       },

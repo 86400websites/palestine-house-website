@@ -179,7 +179,7 @@ Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal 
 ## 12. Per-page art notes (public shell)
 
 - **Experience** is the most artwork-heavy page on the site (hero artwork, day/night vignette pair, five-pillar block-print thumbnails, live strip); every other page is calmer by comparison.
-- **Bring a House** is the densest public page (it absorbed How It Works) — pace it with generous whitespace; reuse the repointed stage triptych and gates timeline patterns; do not redesign them.
+- **Bring a House** is the densest public page (it absorbed How It Works) — pace it with generous whitespace; reuse the repointed stage triptych and milestone timeline patterns; do not redesign them.
 - **Home** voices the full line "Bring Palestine House to Your City" as a section heading; the nav label stays short.
 - **Live** is the public hero feature — editorial "what's on" treatment, warm and arch-framed, with graceful empty states ("Quiet right now — here's a recent night while the calendar fills.").
 
@@ -202,6 +202,6 @@ The kit (build once as shared workspace primitives in step 8a, then apply per pa
 2. **Rhythm + visual breaks.** Use `TatreezDivider` between major sections and alternate warm washes (`--paper-150/200`, `surface-hero`) so pages stop reading as one undifferentiated column of cards.
 3. **Elevated empty / loading states.** One reusable warm empty-state (icon or `PH-EMPTY-*` mark slot + paper wash + a restrained accent) replacing plain text boxes; add `loading.tsx` where a route fetches.
 4. **Card-lift + warm borders.** Interactive cards/rows get a ≤2px hover lift + `--shadow-md` — warm border **or** soft shadow, never both heavy (consistent with §6).
-5. **Dashboard hero.** Make the snapshot the page anchor: a stat grid with lucide icons + a more present progress bar. The "Current gate" stat stays **suppressed** (D-S6-b RESOLVED — the 3 `/build` gates are off by design; never render gate UI or invent gate data).
+5. **Dashboard hero.** Make the snapshot the page anchor: a stat grid with lucide icons + a more present progress bar, showing the current stage + the Design & Build % (milestone gates retired site-wide — D-S8-c; never render gate UI or invent gate data).
 
-**Guardrails (same as the rest of this doc):** locked header/footer/sidebar *structure* + nav grouping unchanged; **copy verbatim** + **proof numbers 10 · 30 · 200+ · 267 · 3**; approval-gate server checks untouched; AA + `prefers-reduced-motion` + colour-plus-text/icon status grammar held; **color lives in artwork, not chrome**; **no new dependencies**; reuse existing `.ws-*/.bld-*/.dash-*/.res-*/.vid-*/.acct-*` classes — extend, never rebuild. Ready-to-run prompt: `docs/sprint-prompts/s8-workspace-visual-polish.md`.
+**Guardrails (same as the rest of this doc):** locked header/footer/sidebar *structure* + nav grouping unchanged; **copy verbatim** + **proof numbers 10 · 30 · 200+ · 267 · 120-day launch**; approval-gate server checks untouched; AA + `prefers-reduced-motion` + colour-plus-text/icon status grammar held; **color lives in artwork, not chrome**; **no new dependencies**; reuse existing `.ws-*/.bld-*/.dash-*/.res-*/.vid-*/.acct-*` classes — extend, never rebuild. Ready-to-run prompt: `docs/sprint-prompts/s8-workspace-visual-polish.md`.
