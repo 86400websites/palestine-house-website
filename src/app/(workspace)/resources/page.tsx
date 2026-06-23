@@ -4,6 +4,7 @@ import { Bookmark, ChevronRight, Info } from "lucide-react";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getResources, getElements } from "@/lib/workspace/content";
 import { PendingState } from "@/components/workspace/pending-state";
+import { Stagger } from "@/components/motion/reveal";
 import { HUB_TYPE_CHIPS, toResourceVM } from "@/lib/resources/view";
 import { ResourceLibrary, DownloadButton } from "./resource-library";
 
@@ -71,56 +72,60 @@ export default async function ResourcesPage() {
 
   return (
     <div>
-      <p className="ph-eyebrow">Resources</p>
-      <h1 className="ws-h1" style={{ marginTop: "var(--space-2)" }}>
-        Everything, in one place.
-      </h1>
-      <p className="ws-lead">
-        Every guide, template, and tool you need to build and run a House —
-        sorted by focus area and type, ready to download.
-      </p>
+      <header className="ws-pagehead">
+        <p className="ph-eyebrow">Resources</p>
+        <h1 className="ws-h1">Everything, in one place.</h1>
+        <p className="ws-lead">
+          Every guide, template, and tool you need to build and run a House —
+          sorted by focus area and type, ready to download.
+        </p>
+      </header>
 
       {featured.length > 0 && (
-        <div className="res-booklets" style={{ marginTop: "var(--space-10)" }}>
-          {featured.map((b) => (
-            <div className="res-booklet" key={b.id}>
-              <span className="res-booklet-cover" aria-hidden="true">
-                <Bookmark size={22} />
-              </span>
-              <div className="res-booklet-body">
-                <div className="res-booklet-head">
-                  <h2 className="res-booklet-title">{b.title}</h2>
-                  <span className="res-booklet-badge">Booklet</span>
+        <div style={{ marginTop: "var(--space-10)" }}>
+          <Stagger className="res-booklets">
+            {featured.map((b) => (
+              <div className="res-booklet" key={b.id}>
+                <span className="res-booklet-cover" aria-hidden="true">
+                  <Bookmark size={22} />
+                </span>
+                <div className="res-booklet-body">
+                  <div className="res-booklet-head">
+                    <h2 className="res-booklet-title">{b.title}</h2>
+                    <span className="res-booklet-badge">Booklet</span>
+                  </div>
+                  <p className="res-booklet-desc">{b.desc}</p>
                 </div>
-                <p className="res-booklet-desc">{b.desc}</p>
+                <DownloadButton resourceId={b.id} />
               </div>
-              <DownloadButton resourceId={b.id} />
-            </div>
-          ))}
+            ))}
+          </Stagger>
         </div>
       )}
 
       <section style={{ marginTop: "var(--space-12)" }}>
         <h2 className="ws-section-h">Browse by focus area</h2>
-        <div className="res-areas" style={{ marginTop: "var(--space-4)" }}>
-          {areaCodes.map((code) => (
-            <Link
-              className="res-area"
-              href={`/resources/${code.toLowerCase()}`}
-              key={code}
-            >
-              <span className="topic-code">{code}</span>
-              <span className="res-area-body">
-                <span className="res-area-name">{areaName.get(code)}</span>
-                <span className="res-area-count">
-                  {countByArea.get(code) ?? 0} templates
+        <div style={{ marginTop: "var(--space-4)" }}>
+          <Stagger className="res-areas">
+            {areaCodes.map((code) => (
+              <Link
+                className="res-area ws-lift"
+                href={`/resources/${code.toLowerCase()}`}
+                key={code}
+              >
+                <span className="topic-code">{code}</span>
+                <span className="res-area-body">
+                  <span className="res-area-name">{areaName.get(code)}</span>
+                  <span className="res-area-count">
+                    {countByArea.get(code) ?? 0} templates
+                  </span>
                 </span>
-              </span>
-              <span className="topic-row-chev">
-                <ChevronRight size={16} aria-hidden="true" />
-              </span>
-            </Link>
-          ))}
+                <span className="topic-row-chev">
+                  <ChevronRight size={16} aria-hidden="true" />
+                </span>
+              </Link>
+            ))}
+          </Stagger>
         </div>
       </section>
 

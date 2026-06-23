@@ -2030,6 +2030,30 @@
   max-width: 18ch;
 }
 
+/* Focus-area cards opt into the card-lift; keep the border hairline (S8 8f). */
+.res-area.ws-lift {
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.res-area.ws-lift:hover {
+  border-color: var(--border);
+}
+
+/* Stagger-wrapped grids: the Reveal wrapper fills its grid cell and the card
+   fills the wrapper, so cards stay equal-height (S8 8f). */
+.res-booklets > *,
+.res-areas > *,
+.vid-grid > * {
+  display: flex;
+}
+.res-booklets > * > .res-booklet,
+.res-areas > * > .res-area,
+.vid-grid > * > .vid-card {
+  flex: 1;
+}
+
 /* ---------- Academy (S6 6f) ---------- */
 .vid-grid {
   display: grid;
