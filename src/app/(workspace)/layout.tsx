@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getMyProfile, firstNameOf } from "@/lib/auth/profile";
 import { WorkspaceShell } from "@/components/workspace/workspace-shell";
+import { SiteHeader } from "@/components/layout/site-header";
 
 /* Gated workspace layout (SECURITY-CHECKLIST §6/§15): the authoritative,
    server-side session gate for every page in this route group. An anonymous
@@ -31,12 +32,19 @@ export default async function WorkspaceLayout({
 
   const profile = await getMyProfile();
 
+  /* The locked public navigation rides above the workspace shell so partners can
+     jump back to the marketing pages from inside the dashboard. The header is
+     rendered here (not via the root SiteChrome, which returns bare children for
+     gated routes), so there is exactly one header. */
   return (
-    <WorkspaceShell
-      approved={profile?.is_approved ?? false}
-      firstName={firstNameOf(profile?.full_name)}
-    >
-      {children}
-    </WorkspaceShell>
+    <div className="ws-frame">
+      <SiteHeader />
+      <WorkspaceShell
+        approved={profile?.is_approved ?? false}
+        firstName={firstNameOf(profile?.full_name)}
+      >
+        {children}
+      </WorkspaceShell>
+    </div>
   );
 }
