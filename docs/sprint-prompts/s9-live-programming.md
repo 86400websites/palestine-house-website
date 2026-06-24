@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date** | Built 2026-06-24/25 · merged _pending_ |
-| **Branch / PR** | `claude/sprint-s9-live-programming` · PR _pending_ |
+| **Date** | Built 2026-06-24/25 · **merged 2026-06-25** |
+| **Branch / PR** | `claude/sprint-s9-live-programming` · **PR #34** (merge `2ebce03`) |
 | **Goal (one line)** | Wire `/live` + the Experience strip to real `programming_sessions` data through one shared `SessionCard`; add a `/live/[id]` youtube-nocookie watch view; let approved partners publish/edit/remove a YouTube link + metadata from a gated `/programming` tool. No streaming infra (D-S9-a); listing-only (D2). |
 
 ## What shipped
