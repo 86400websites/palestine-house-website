@@ -2435,6 +2435,18 @@
   flex-direction: column;
   gap: var(--space-2);
 }
+/* Two-up field pair (the S9 /programming publish form); collapses on phones so
+   the datetime-local control never overflows the card. */
+.programming-2col {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+@media (max-width: 560px) {
+  .programming-2col {
+    grid-template-columns: 1fr;
+  }
+}
 .sup-confirm-icon {
   display: inline-flex;
   width: 52px;

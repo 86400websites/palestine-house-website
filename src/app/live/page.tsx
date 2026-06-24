@@ -47,6 +47,10 @@ export default async function LivePage({
   const { live, upcoming, past } = groupSessions(
     filterByMode(await getLiveSessions(), filter),
   );
+  // A category filter that matches nothing: one filter-aware line reads better
+  // than three global empty states that imply the whole feed is empty.
+  const noneForFilter =
+    filter !== "All" && live.length + upcoming.length + past.length === 0;
 
   return (
     <>
@@ -86,7 +90,9 @@ export default async function LivePage({
               return (
                 <Link
                   key={f}
-                  href={f === "All" ? "/live" : `/live?mode=${f}`}
+                  href={
+                    f === "All" ? "/live" : `/live?mode=${encodeURIComponent(f)}`
+                  }
                   className={"live-filter-tag" + (isActive ? " is-active" : "")}
                   aria-current={isActive ? "page" : undefined}
                 >
@@ -98,6 +104,19 @@ export default async function LivePage({
         </div>
       </section>
 
+      {noneForFilter ? (
+        <section className="ph-section">
+          <div className="ph-container">
+            <Reveal>
+              <p className="live-empty" style={{ marginTop: 0 }}>
+                Nothing in {filter} right now —{" "}
+                <Link href="/live">see everything that’s on</Link>.
+              </p>
+            </Reveal>
+          </div>
+        </section>
+      ) : (
+        <>
       {/* Live now — section shows the grid only when something's on (copy rule);
           until then, the approved nothing-live line. */}
       <section className="ph-section">
@@ -173,6 +192,8 @@ export default async function LivePage({
           )}
         </div>
       </section>
+        </>
+      )}
     </>
   );
 }

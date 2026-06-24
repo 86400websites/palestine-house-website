@@ -184,7 +184,8 @@ export default async function ExperiencePage() {
         </div>
       </section>
 
-      {/* 4 — Live strip (designed empty state until S7 wires the feed) */}
+      {/* 4 — Live strip (wired to getLiveSessions() in S9 9d; falls back to the
+          approved empty state when nothing is on) */}
       <section className="ph-section-lg ph-section-dark" id="whats-on">
         <div className="ph-container">
           <Reveal className="exp-live-head">

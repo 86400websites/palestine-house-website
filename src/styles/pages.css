@@ -913,11 +913,19 @@
 .live-card-body h3 {
   margin-top: var(--space-3);
   font-size: var(--text-lg);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .live-card-body > p {
   margin-top: var(--space-2);
   font: var(--weight-regular) var(--text-sm) / 1.5 var(--font-body);
   color: var(--muted-foreground);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .live-card-foot {
   display: flex;

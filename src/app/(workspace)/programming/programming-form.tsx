@@ -66,13 +66,7 @@ export function ProgrammingForm({ initial }: { initial: LiveSession | null }) {
         />
       </label>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "var(--space-5)",
-        }}
-      >
+      <div className="programming-2col">
         <label className="sup-field">
           <span className="acct-field-label">Status</span>
           <select
@@ -123,13 +117,7 @@ export function ProgrammingForm({ initial }: { initial: LiveSession | null }) {
         </span>
       </label>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "var(--space-5)",
-        }}
-      >
+      <div className="programming-2col">
         <label className="sup-field">
           <span className="acct-field-label">Venue</span>
           <input

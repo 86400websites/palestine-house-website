@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { CalendarClock, Play, Radio } from "lucide-react";
+import { ArrowRight, CalendarClock, Play, Radio } from "lucide-react";
 import type { LiveSession, LiveStatus } from "@/lib/live/types";
 import { formatSessionWhen } from "@/lib/live/format";
+import { youTubeEmbedUrl } from "@/lib/live/youtube";
 
 /* The ONE shared session card (DESIGN §6) — used on /live (Upcoming + Past
    grids) and the Experience live strip; never a second implementation. It
@@ -35,6 +36,10 @@ export function StatusBadge({ status }: { status: LiveStatus }) {
 export function SessionCard({ session }: { session: LiveSession }) {
   const when = formatSessionWhen(session.starts_at);
   const meta = [session.venue, when].filter(Boolean).join(" · ");
+  // Only promise "Watch" when there's a playable video; an upcoming session
+  // without a link yet leads to its details, not a dead player.
+  const hasVideo =
+    youTubeEmbedUrl(session.recording_url ?? session.stream_url) !== null;
   return (
     <Link href={`/live/${session.id}`} className="live-card">
       <div className="live-card-body">
@@ -49,8 +54,17 @@ export function SessionCard({ session }: { session: LiveSession }) {
             {meta || "Time to be announced"}
           </span>
           <span className="live-card-go" aria-hidden="true">
-            <Play size={14} />
-            Watch
+            {hasVideo ? (
+              <>
+                <Play size={14} />
+                Watch
+              </>
+            ) : (
+              <>
+                Details
+                <ArrowRight size={14} />
+              </>
+            )}
           </span>
         </div>
       </div>
