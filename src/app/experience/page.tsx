@@ -7,12 +7,15 @@ import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/sections/lead-form";
+import { SessionCard } from "@/components/shared/session-card";
+import { getLiveSessions, groupSessions } from "@/lib/live/sessions";
 
 /* Experience (/experience) — the decision page. Copy verbatim from
    docs/page-copy/01-public-pages/experience.md; layout from
    docs/page-designs/public/Experience.app.jsx (approved mockup).
-   Live strip renders its designed empty state until S7 wires the
-   programming_sessions feed (ROADMAP 0.3). */
+   S9 9d wires the live strip to the SAME getLiveSessions() feed + the SAME
+   shared SessionCard as /live (≤3, prefer live→upcoming→past), keeping its
+   approved empty state when nothing is on. */
 
 export const metadata: Metadata = {
   title: "Experience",
@@ -53,7 +56,10 @@ const EXP_PILLARS = [
   },
 ] as const;
 
-export default function ExperiencePage() {
+export default async function ExperiencePage() {
+  const { live, upcoming, past } = groupSessions(await getLiveSessions());
+  const strip = [...live, ...upcoming, ...past].slice(0, 3);
+
   return (
     <>
       {/* 1 — Hero */}
@@ -197,11 +203,21 @@ export default function ExperiencePage() {
               </Link>
             </Button>
           </Reveal>
-          <Reveal>
-            <p className="live-empty">
-              Quiet right now — here’s a recent night while the calendar fills.
-            </p>
-          </Reveal>
+          {strip.length > 0 ? (
+            <Reveal>
+              <div className="live-grid">
+                {strip.map((s) => (
+                  <SessionCard key={s.id} session={s} />
+                ))}
+              </div>
+            </Reveal>
+          ) : (
+            <Reveal>
+              <p className="live-empty">
+                Quiet right now — here’s a recent night while the calendar fills.
+              </p>
+            </Reveal>
+          )}
         </div>
       </section>
 
