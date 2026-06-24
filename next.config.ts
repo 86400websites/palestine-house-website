@@ -3,11 +3,12 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV === "development";
 
 /* Tight allow-list (SECURITY-CHECKLIST / TECH-ARCHITECTURE §13). The only
-   planned extension is the YouTube embed origin for Live Programming —
-   added in Sprint 7, not before. Mailchimp/Resend/etc. run server-side via
-   Route Handlers, so connect-src/form-action stay 'self'. 'unsafe-inline'
-   for scripts/styles is the Next.js baseline without a nonce pipeline;
-   'unsafe-eval' is dev-only. */
+   planned extension is the YouTube embed origin for Live Programming — added in
+   Sprint 9 (frame-src, decision D1): the privacy-enhanced youtube-nocookie
+   player only, nothing else. Mailchimp/Resend/etc. run server-side via Route
+   Handlers, so connect-src/form-action stay 'self'. 'unsafe-inline' for
+   scripts/styles is the Next.js baseline without a nonce pipeline; 'unsafe-eval'
+   is dev-only. */
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
@@ -18,6 +19,9 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
+  // Live Programming watch view (/live/[id]) — the YouTube privacy-enhanced
+  // player only (S9 9c, D1). frame-ancestors below still forbids US being framed.
+  "frame-src 'self' https://www.youtube-nocookie.com",
   "frame-ancestors 'none'",
 ].join("; ");
 
