@@ -20,8 +20,10 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "form-action 'self'",
   // Live Programming watch view (/live/[id]) — the YouTube privacy-enhanced
-  // player only (S9 9c, D1). frame-ancestors below still forbids US being framed.
-  "frame-src 'self' https://www.youtube-nocookie.com",
+  // player only (S9 9c/9g, D1): no 'self', since the app embeds no same-origin
+  // frames (the watch embed is the only iframe). frame-ancestors below still
+  // forbids US being framed.
+  "frame-src https://www.youtube-nocookie.com",
   "frame-ancestors 'none'",
 ].join("; ");
 
