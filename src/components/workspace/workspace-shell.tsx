@@ -67,7 +67,7 @@ const GROUPS: SidebarGroup[] = [
     label: "Your House",
     items: [
       { key: "managing", label: "Managing & Operating", Icon: Menu, href: "/operate" },
-      { key: "live", label: "Live Programming", Icon: Calendar, href: "/live", external: true, always: true },
+      { key: "live", label: "Live Programming", Icon: Calendar, href: "/programming" },
     ],
   },
   {
