@@ -27,6 +27,13 @@ Built in 7 owner-gated sub-steps (push-per-step), each with an adversarial multi
 - **CSP** verified on a live response: YouTube-only `frame-src`; `DENY` framing of us intact.
 - Reviews: per-step adversarial workflows (9a–9f) + a holistic 4-lens exit-gate workflow, all clean after fixes.
 
+## Independent review (Codex)
+
+Run after 9g (AGENTS.md rules). **No blocking issues.** Two non-blocking mediums, both fixed at the authoritative boundary (`5657f04`):
+
+1. **CSP `frame-src` allowed `'self'`** → tightened to **youtube-nocookie only** (the watch embed is the app's only iframe; `frame-ancestors 'none'` + `X-Frame-Options: DENY` unchanged; header re-verified via curl).
+2. **The RPC stored the raw `p_youtube_url`** — an approved partner could call `publish_programming_session` directly via PostgREST and bypass the Server Action's link validation/cap. Migration **`0022`** re-creates the RPC to cap the URL at 500 chars and reject a non-YouTube host in-function (render path was already safe; non-YouTube links degrade gracefully). Verified on test: a vimeo link raises `invalid video link`; a youtube link publishes; EXECUTE stays anon=false/authenticated=true. **Pending prod apply.**
+
 ## Owner Preview test script
 
 Vercel Preview uses the **test** DB, seeded with 3 demo sessions (live / upcoming / past; all real, neutral public YouTube videos).
