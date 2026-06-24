@@ -1063,6 +1063,7 @@
   background: var(--background);
   color: var(--ink-700);
   border: var(--border-width) solid var(--border);
+  text-decoration: none;
 }
 .live-filter-tag.is-active {
   background: var(--brand-primary-tint);
