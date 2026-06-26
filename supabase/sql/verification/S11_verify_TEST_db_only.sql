@@ -149,5 +149,87 @@ order by proname;
 -- EXPECT: 5 rows, all security_definer = true, pinned_search_path = true.
 
 -- ===========================================================================
--- (sections 8+ — admin-management RPCs from 0024 — added in sub-step 11-4)
+-- 8) admin-management RPCs (0024). EXECUTE privileges.
 -- ===========================================================================
+select
+  has_function_privilege('anon','public.admin_list_admins()','execute')           as anon_list,
+  has_function_privilege('anon','public.admin_add_admin_by_email(text)','execute') as anon_add,
+  has_function_privilege('anon','public.admin_remove_admin(uuid)','execute')       as anon_remove,
+  has_function_privilege('authenticated','public.admin_list_admins()','execute')           as auth_list,
+  has_function_privilege('authenticated','public.admin_add_admin_by_email(text)','execute') as auth_add,
+  has_function_privilege('authenticated','public.admin_remove_admin(uuid)','execute')       as auth_remove;
+-- EXPECT: every anon_* = false, every auth_* = true.
+
+-- ===========================================================================
+-- 9) an ADMIN sees the roster; a NON-ADMIN sees zero rows.
+-- ===========================================================================
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"ADMIN_UUID","role":"authenticated"}';
+  select count(*) as admin_sees from public.admin_list_admins();
+rollback;
+-- EXPECT: admin_sees = the number of admins (>= 1).
+
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"NONADMIN_UUID","role":"authenticated"}';
+  select count(*) as nonadmin_sees from public.admin_list_admins();
+rollback;
+-- EXPECT: nonadmin_sees = 0.
+
+-- ===========================================================================
+-- 10) a NON-ADMIN cannot add or remove admins (42501).
+-- ===========================================================================
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"NONADMIN_UUID","role":"authenticated"}';
+  select public.admin_add_admin_by_email('testpartner@86400.studio');
+rollback;
+-- EXPECT: ERROR  not authorized   (42501)
+
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"NONADMIN_UUID","role":"authenticated"}';
+  select public.admin_remove_admin('ADMIN_UUID');
+rollback;
+-- EXPECT: ERROR  not authorized   (42501)
+
+-- ===========================================================================
+-- 11) add-by-email is idempotent and validates the email (admin, rolled back).
+-- ===========================================================================
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"ADMIN_UUID","role":"authenticated"}';
+  select
+    public.admin_add_admin_by_email('testpartner@86400.studio') as first_add,
+    public.admin_add_admin_by_email('testpartner@86400.studio') as second_add;
+rollback;
+-- EXPECT: first_add = true (added), second_add = false (already an admin).
+
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"ADMIN_UUID","role":"authenticated"}';
+  select public.admin_add_admin_by_email('nobody@nowhere.invalid');
+rollback;
+-- EXPECT: ERROR  user not found   (P0002)
+
+-- ===========================================================================
+-- 12) lockout guards: an admin cannot remove themselves. (The last-admin guard
+--     is defensive: given the self-guard, the sole admin is always the caller,
+--     so it is unreachable except as self-removal, already blocked here.)
+-- ===========================================================================
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"ADMIN_UUID","role":"authenticated"}';
+  select public.admin_remove_admin('ADMIN_UUID');
+rollback;
+-- EXPECT: ERROR  cannot remove yourself   (22023)
+
+-- A positive remove works for a non-self admin (add testpartner, then remove it).
+begin;
+  set local role authenticated;
+  set local request.jwt.claims = '{"sub":"ADMIN_UUID","role":"authenticated"}';
+  select public.admin_add_admin_by_email('testpartner@86400.studio');
+  select public.admin_remove_admin('NONADMIN_UUID') as removed_true;
+rollback;
+-- EXPECT: removed_true = true.
