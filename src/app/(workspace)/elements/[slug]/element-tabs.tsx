@@ -37,7 +37,11 @@ export type ElementTabsData = {
   checklistCount: number;
   templates: { id: string; title: string; type: string; version: string | null }[];
   templatesCount: number;
-  video: { length: string | null; youtubeUrl: string | null } | null;
+  video: {
+    length: string | null;
+    youtubeUrl: string | null;
+    sample: boolean;
+  } | null;
   focusAreaCode: string;
   focusAreaName: string;
   nextSlug: string | null;
@@ -298,8 +302,9 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
                 <Play size={22} aria-hidden="true" />
               </span>
               <p className="ws-empty-text">
-                Watch this topic&rsquo;s Academy video
-                {data.video.length ? ` (${data.video.length})` : ""}.
+                {data.video.sample
+                  ? "A sample clip while this topic’s own video is produced — the full guide is in Simple Guide."
+                  : `Watch this topic’s video${data.video.length ? ` (${data.video.length})` : ""}.`}
               </p>
               <Button asChild variant="secondary" size="sm">
                 <a
@@ -307,7 +312,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Watch on YouTube
+                  {data.video.sample ? "Watch the sample" : "Watch on YouTube"}
                 </a>
               </Button>
             </div>

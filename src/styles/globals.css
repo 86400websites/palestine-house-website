@@ -2258,9 +2258,10 @@
 .vid-card {
   display: flex;
   flex-direction: column;
-  background: var(--surface-card);
+  background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   text-decoration: none;
   transition: box-shadow var(--duration-fast) var(--ease-out),
@@ -2273,13 +2274,40 @@
 .vid-thumb {
   aspect-ratio: 16 / 9;
   background:
-    radial-gradient(120% 90% at 18% 0%, rgba(26, 107, 74, 0.1), transparent 55%),
+    radial-gradient(130% 130% at 50% 0%, rgba(26, 107, 74, 0.18), transparent 62%),
     var(--paper-200);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--stone-400);
   position: relative;
+}
+.vid-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  padding-left: 3px; /* optical-centre the play glyph in the circle */
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.vid-card:hover .vid-play {
+  transform: scale(1.06);
+}
+.vid-tag {
+  position: absolute;
+  left: var(--space-2);
+  top: var(--space-2);
+  font: var(--weight-semibold) var(--text-xs)/1 var(--font-body);
+  color: var(--ink-700);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.45rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
 }
 .vid-runtime {
   position: absolute;
