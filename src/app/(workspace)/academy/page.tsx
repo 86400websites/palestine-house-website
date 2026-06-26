@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Play } from "lucide-react";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getAcademyModules, getElements } from "@/lib/workspace/content";
-import { sampleVideoUrl } from "@/lib/workspace/sample-videos";
 import { PendingState } from "@/components/workspace/pending-state";
 import { Stagger } from "@/components/motion/reveal";
 import type { AcademyRow } from "@/lib/workspace/types";
+import { AcademyCard } from "./academy-card";
 
 /* /academy — the optional video library (docs/page-copy/03-member-workspace/academy.md).
    Labelled "Videos" in the sidebar (S10). A reference, never a course: no
@@ -17,40 +16,6 @@ import type { AcademyRow } from "@/lib/workspace/types";
    embed, so no CSP change). */
 
 export const metadata: Metadata = { title: "Videos" };
-
-function AcademyCard({ module: m }: { module: AcademyRow }) {
-  // A real youtube_url wins; otherwise fall back to a clearly-marked sample.
-  const isSample = !m.youtube_url;
-  const url = m.youtube_url ?? sampleVideoUrl(m.element_code);
-
-  return (
-    <a
-      className="vid-card"
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <span className="vid-thumb" aria-hidden="true">
-        <span className="vid-play">
-          <Play size={20} />
-        </span>
-        {isSample ? (
-          <span className="vid-tag">Sample</span>
-        ) : (
-          m.length && <span className="vid-runtime">{m.length}</span>
-        )}
-      </span>
-      <span className="vid-body">
-        <span className="vid-title">{m.title}</span>
-        {m.one_line && <span className="vid-line">{m.one_line}</span>}
-        <span className="vid-cta">
-          <Play size={14} aria-hidden="true" />{" "}
-          {isSample ? "Watch the sample" : "Open this video"}
-        </span>
-      </span>
-    </a>
-  );
-}
 
 export default async function AcademyPage() {
   const profile = await getMyProfile();

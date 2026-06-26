@@ -2295,6 +2295,11 @@
 }
 .vid-thumb {
   aspect-ratio: 16 / 9;
+  width: 100%;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   background:
     radial-gradient(130% 130% at 50% 0%, rgba(26, 107, 74, 0.18), transparent 62%),
     var(--paper-200);
@@ -2302,6 +2307,28 @@
   align-items: center;
   justify-content: center;
   position: relative;
+}
+.vid-thumb:disabled {
+  cursor: default;
+}
+/* In-site video player (16:9). .vid-frame sits inside a .vid-card (the card
+   clips its corners); .ws-videoframe is the standalone element-tab player. */
+.vid-frame,
+.ws-videoframe {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  background: var(--ink-900);
+}
+.ws-videoframe {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.vid-frame iframe,
+.ws-videoframe iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
 }
 .vid-play {
   display: inline-flex;

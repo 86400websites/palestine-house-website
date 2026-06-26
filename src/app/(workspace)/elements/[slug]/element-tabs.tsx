@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DownloadButton } from "@/app/(workspace)/resources/resource-library";
+import { youTubeEmbedUrl } from "@/lib/live/youtube";
 
 /* Client tab shell for the element page. It owns ONLY the tab state + panel
    switching and the secondary actions; all body content is server-rendered +
@@ -134,6 +135,10 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
     setTab(TABS[next].value);
     tabRefs.current[next]?.focus();
   }
+
+  // Privacy-enhanced embed rebuilt from a validated 11-char id (the only origin
+  // the CSP frame-src allows) — the video plays inside the page (S10 10-8).
+  const videoEmbed = youTubeEmbedUrl(data.video?.youtubeUrl);
 
   const badge = (v: TabValue): number | null =>
     v === "checklist"
@@ -309,25 +314,24 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         )}
 
         {tab === "video" &&
-          (data.video?.youtubeUrl ? (
-            <div className="ws-empty">
-              <span className="ws-empty-icon">
-                <Play size={22} aria-hidden="true" />
-              </span>
-              <p className="ws-empty-text">
-                {data.video.sample
-                  ? "A sample clip while this topic’s own video is produced — the full guide is in Simple Guide."
-                  : `Watch this topic’s video${data.video.length ? ` (${data.video.length})` : ""}.`}
-              </p>
-              <Button asChild variant="secondary" size="sm">
-                <a
-                  href={data.video.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {data.video.sample ? "Watch the sample" : "Watch on YouTube"}
-                </a>
-              </Button>
+          (videoEmbed ? (
+            <div>
+              <div className="ws-videoframe">
+                <iframe
+                  src={videoEmbed}
+                  title="Topic video"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allow="encrypted-media; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              {data.video?.sample && (
+                <p className="ws-intro" style={{ marginTop: "var(--space-3)" }}>
+                  A sample clip while this topic&rsquo;s own video is produced —
+                  the full guide is in Simple Guide.
+                </p>
+              )}
             </div>
           ) : (
             <div className="ws-empty">
