@@ -25,6 +25,8 @@ const GATED_PREFIXES = [
   "/dashboard",
   "/plan",
   "/operate",
+  "/program",
+  "/programming",
   "/build",
   "/elements",
   "/resources",
