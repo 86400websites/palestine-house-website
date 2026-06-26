@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import {
+  BookOpen,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -10,6 +11,7 @@ import {
   Clock,
   Info,
   Minus,
+  Play,
   RotateCcw,
   StickyNote,
 } from "lucide-react";
@@ -250,19 +252,25 @@ function BuildItem({
           <p className="bld-item-note">{item.note}</p>
         )}
 
+        {/* Action order is owner-locked (S10 10-4): Read the full guide ·
+            Watch video · Mark in progress · Add notes · Mark complete. */}
         <div className="bld-item-actions">
-          {item.status !== "complete" && (
-            <form action={formAction}>
-              <input type="hidden" name="itemId" value={item.id} />
-              <input type="hidden" name="status" value="complete" />
-              <button
-                type="submit"
-                className="bld-item-link is-primary"
-                disabled={pending}
-              >
-                <Check size={14} aria-hidden="true" /> Mark complete
-              </button>
-            </form>
+          {item.slug ? (
+            <Link className="bld-item-link" href={`/elements/${item.slug}`}>
+              <BookOpen size={14} aria-hidden="true" /> Read the full guide
+            </Link>
+          ) : (
+            <span className="bld-item-link is-inert">Read the full guide</span>
+          )}
+          {item.slug ? (
+            <Link
+              className="bld-item-link"
+              href={`/elements/${item.slug}#video`}
+            >
+              <Play size={14} aria-hidden="true" /> Watch video
+            </Link>
+          ) : (
+            <span className="bld-item-link is-inert">Watch video</span>
           )}
           {item.status !== "in_progress" && item.status !== "complete" && (
             <form action={formAction}>
@@ -277,7 +285,29 @@ function BuildItem({
               </button>
             </form>
           )}
-          {item.status === "complete" && (
+          {item.status !== "blocked" && (
+            <button
+              type="button"
+              className="bld-item-link"
+              aria-expanded={blocking}
+              onClick={() => setBlocking((b) => !b)}
+            >
+              <StickyNote size={14} aria-hidden="true" /> Add notes
+            </button>
+          )}
+          {item.status !== "complete" ? (
+            <form action={formAction}>
+              <input type="hidden" name="itemId" value={item.id} />
+              <input type="hidden" name="status" value="complete" />
+              <button
+                type="submit"
+                className="bld-item-link is-primary"
+                disabled={pending}
+              >
+                <Check size={14} aria-hidden="true" /> Mark complete
+              </button>
+            </form>
+          ) : (
             <form action={formAction}>
               <input type="hidden" name="itemId" value={item.id} />
               <input type="hidden" name="status" value="not_started" />
@@ -289,23 +319,6 @@ function BuildItem({
                 <RotateCcw size={14} aria-hidden="true" /> Reopen
               </button>
             </form>
-          )}
-          {item.status !== "blocked" && (
-            <button
-              type="button"
-              className="bld-item-link"
-              aria-expanded={blocking}
-              onClick={() => setBlocking((b) => !b)}
-            >
-              <StickyNote size={14} aria-hidden="true" /> Add notes
-            </button>
-          )}
-          {item.slug ? (
-            <Link className="bld-item-link" href={`/elements/${item.slug}`}>
-              Read the full guide
-            </Link>
-          ) : (
-            <span className="bld-item-link is-inert">Read the full guide</span>
           )}
         </div>
 

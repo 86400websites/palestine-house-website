@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DownloadButton } from "@/app/(workspace)/resources/resource-library";
+import { youTubeEmbedUrl } from "@/lib/live/youtube";
 
 /* Client tab shell for the element page. It owns ONLY the tab state + panel
    switching and the secondary actions; all body content is server-rendered +
@@ -37,7 +38,11 @@ export type ElementTabsData = {
   checklistCount: number;
   templates: { id: string; title: string; type: string; version: string | null }[];
   templatesCount: number;
-  video: { length: string | null; youtubeUrl: string | null } | null;
+  video: {
+    length: string | null;
+    youtubeUrl: string | null;
+    sample: boolean;
+  } | null;
   focusAreaCode: string;
   focusAreaName: string;
   nextSlug: string | null;
@@ -93,6 +98,30 @@ function SectionBanner({
 export function ElementTabs({ data }: { data: ElementTabsData }) {
   const [tab, setTab] = React.useState<TabValue>("overview");
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+  const tablistRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Open a specific tab when linked with a matching hash (e.g. /elements/slug
+  // #video from the Build tracker's "Watch video"). Runs post-mount so the
+  // server + client both render "overview" first — no hydration mismatch.
+  React.useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (TABS.some((t) => t.value === hash)) setTab(hash as TabValue);
+  }, []);
+
+  // Keep the active tab visible in the mobile horizontal-scroll strip —
+  // horizontal only, so the page never jumps (covers the #video deep link +
+  // keyboard nav).
+  React.useEffect(() => {
+    const container = tablistRef.current;
+    const el = tabRefs.current[TABS.findIndex((t) => t.value === tab)];
+    if (!container || !el) return;
+    const target = el.offsetLeft - (container.clientWidth - el.clientWidth) / 2;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    container.scrollTo({
+      left: Math.max(0, target),
+      behavior: reduce ? "auto" : "smooth",
+    });
+  }, [tab]);
 
   // WAI-ARIA APG tablist keyboard support: arrows move + select, focus follows.
   function onTabKeyDown(
@@ -110,6 +139,10 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
     setTab(TABS[next].value);
     tabRefs.current[next]?.focus();
   }
+
+  // Privacy-enhanced embed rebuilt from a validated 11-char id (the only origin
+  // the CSP frame-src allows) — the video plays inside the page (S10 10-8).
+  const videoEmbed = youTubeEmbedUrl(data.video?.youtubeUrl);
 
   const badge = (v: TabValue): number | null =>
     v === "checklist"
@@ -141,6 +174,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         className="ws-tabs"
         role="tablist"
         aria-label="Topic sections"
+        ref={tablistRef}
         style={{ marginTop: "var(--space-8)" }}
       >
         {TABS.map((t, index) => {
@@ -284,24 +318,24 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         )}
 
         {tab === "video" &&
-          (data.video?.youtubeUrl ? (
-            <div className="ws-empty">
-              <span className="ws-empty-icon">
-                <Play size={22} aria-hidden="true" />
-              </span>
-              <p className="ws-empty-text">
-                Watch this topic&rsquo;s Academy video
-                {data.video.length ? ` (${data.video.length})` : ""}.
-              </p>
-              <Button asChild variant="secondary" size="sm">
-                <a
-                  href={data.video.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Watch on YouTube
-                </a>
-              </Button>
+          (videoEmbed ? (
+            <div>
+              <div className="ws-videoframe">
+                <iframe
+                  src={videoEmbed}
+                  title="Topic video"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allow="encrypted-media; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              {data.video?.sample && (
+                <p className="ws-intro" style={{ marginTop: "var(--space-3)" }}>
+                  A sample clip while this topic&rsquo;s own video is produced —
+                  the full guide is in Simple Guide.
+                </p>
+              )}
             </div>
           ) : (
             <div className="ws-empty">

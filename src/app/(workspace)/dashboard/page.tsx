@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Calendar, ChevronRight, Clock, Compass, Info, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Reveal, FadeIn } from "@/components/motion/reveal";
+import { ArrowRight, Bookmark, CheckCircle2, Clock, Users } from "lucide-react";
+import { FadeIn, Stagger } from "@/components/motion/reveal";
 import { getMyProfile, firstNameOf } from "@/lib/auth/profile";
 import { getChecklist, getElements } from "@/lib/workspace/content";
 import {
@@ -10,24 +9,17 @@ import {
   deriveBuildModel,
   deriveProgressSnapshot,
 } from "@/lib/workspace/progress";
-import type { ProgressStage } from "@/lib/workspace/types";
 
-/* /dashboard (docs/page-copy/03-member-workspace/dashboard.md) — answers one
-   question: where am I, what's next? Never a wall. Three states:
-   - pending: "under review" while HQ decides (S4);
-   - newly approved (nothing started): the empty-state welcome (S4);
-   - mid-journey (Design & Build started): the snapshot — current stage +
-     Design & Build % + the next few focus areas (S6 6a; milestone gates retired
-     site-wide — D-S8-c). Approval + progress
-     are read live (cached), so it flips without a re-login. */
+/* /dashboard (docs/page-copy/03-member-workspace/dashboard.md) — the Welcome
+   page. Two states:
+   - pending: the calm "under review" notice (S10 10-3);
+   - approved: a minimal premium dashboard of four nav cards (Plan · Build ·
+     Operate · Program) — each an icon (an image can drop into the art slot
+     later), a one-liner, and a link to that page, with the live Design & Build
+     % on the Build card (S10 10-10).
+   Approval is read live (cached), so it flips without a re-login. */
 
 export const metadata: Metadata = { title: "Welcome" };
-
-const STAGE_LABEL: Record<ProgressStage, string> = {
-  plan: "Plan & Prepare",
-  build: "Design & Build",
-  operate: "Operate & Program",
-};
 
 export default async function DashboardPage() {
   const profile = await getMyProfile();
@@ -43,22 +35,14 @@ export default async function DashboardPage() {
               <Clock size={22} />
             </span>
             <div>
-              <h2 className="ws-notice-h">Request received — under review.</h2>
+              <h2 className="ws-notice-h">Your application is under review.</h2>
               <p className="ws-notice-p">
-                Every application is reviewed by HQ. Everything here unlocks the
-                moment yours is approved.
+                HQ reads every one by hand. The moment yours is approved,
+                everything here opens up — check back any time.
               </p>
             </div>
           </div>
         </FadeIn>
-        <p className="ws-help ws-help--mt">
-          <span className="ws-help-icon">
-            <Info size={17} />
-          </span>
-          <span>
-            Stuck? <strong>Support</strong> is one click away.
-          </span>
-        </p>
       </div>
     );
   }
@@ -71,140 +55,86 @@ export default async function DashboardPage() {
   const snapshot = deriveProgressSnapshot(
     deriveBuildModel(checklist, elements, progress),
   );
-
-  if (!snapshot.started) {
-    return (
-      <div>
-        <h1 className="ws-h1">You’re approved — welcome.</h1>
-        <Reveal>
-          <p className="ws-lead">
-            Start in Plan &amp; Prepare: understand the model and your city before
-            you build a thing.
-          </p>
-          <div className="ws-cta-row">
-            <Button asChild>
-              <Link href="/plan">Start in Plan &amp; Prepare</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link href="/focus-areas">Explore the focus areas</Link>
-            </Button>
-          </div>
-        </Reveal>
-        <p className="ws-help ws-help--mt-lg">
-          <span className="ws-help-icon">
-            <Info size={17} />
-          </span>
-          <span>
-            Stuck? <strong>Support</strong> is one click away.
-          </span>
-        </p>
-        <p className="ws-help ws-help--mt-sm">
-          <span className="ws-help-icon">
-            <Calendar size={17} />
-          </span>
-          <span>
-            <em>Take a break — catch a live event or a recording</em> →{" "}
-            <Link href="/live">Live Programming</Link>.
-          </span>
-        </p>
-      </div>
-    );
-  }
-
-  // Mid-journey snapshot (S6 6a). Milestone gates retired site-wide (D-S8-c).
   const firstName = firstNameOf(profile?.full_name);
+
+  const cards = [
+    {
+      key: "plan",
+      title: "Plan",
+      Icon: Bookmark,
+      line: "Get the ground right before you build — the model, your city, your space.",
+      href: "/plan",
+      cta: "Open Plan",
+    },
+    {
+      key: "build",
+      title: "Build",
+      Icon: CheckCircle2,
+      line: "Your 120-day launch, tracked one focus area at a time.",
+      href: "/build",
+      cta: snapshot.started ? "Resume Build" : "Start Build",
+    },
+    {
+      key: "operate",
+      title: "Operate",
+      Icon: Clock,
+      line: "The day-to-day routines that keep an open House running.",
+      href: "/operate",
+      cta: "Open Operate",
+    },
+    {
+      key: "program",
+      title: "Program",
+      Icon: Users,
+      line: "Your cultural programming and the guests who walk in.",
+      href: "/program",
+      cta: "Open Program",
+    },
+  ];
+
   return (
     <div>
       <h1 className="ws-h1">
-        {firstName ? `Welcome back, ${firstName}.` : "Welcome back."} Here’s your
-        next move.
+        {firstName ? `Welcome, ${firstName}.` : "Welcome."}
       </h1>
-
-      <div className="dash-grid" style={{ marginTop: "var(--space-8)" }}>
-        <Reveal className="ws-card">
-          <p className="ph-eyebrow">Progress snapshot</p>
-          <div className="dash-stats">
-            <div className="ws-stat">
-              <span className="ws-stat-label">
-                <span className="ws-stat-ico">
-                  <Compass size={14} aria-hidden="true" />
-                </span>
-                Current stage
-              </span>
-              <span className="ws-stat-value">{STAGE_LABEL[snapshot.stage]}</span>
-            </div>
-            <div className="ws-stat">
-              <span className="ws-stat-label">
-                <span className="ws-stat-ico">
-                  <TrendingUp size={14} aria-hidden="true" />
-                </span>
-                Design &amp; Build
-              </span>
-              <span className="ws-stat-value">{snapshot.pct}%</span>
-            </div>
-          </div>
-          <div
-            className="dash-progress"
-            role="progressbar"
-            aria-valuenow={snapshot.pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Design and Build progress"
-          >
-            <span style={{ width: `${snapshot.pct}%` }} />
-          </div>
-        </Reveal>
-
-        {snapshot.nextAreas.length > 0 && (
-          <Reveal className="ws-card" delay={0.08}>
-            <p className="ph-eyebrow">Next steps</p>
-            <div className="dash-next" style={{ marginTop: "var(--space-4)" }}>
-              {snapshot.nextAreas.map((area, i) => (
-                <Link className="dash-next-row" href="/build" key={area.code}>
-                  <span className="dash-next-num">{i + 1}</span>
-                  <span style={{ flex: 1 }}>
-                    {area.name} — {area.done} of {area.items} done
-                  </span>
-                  <span
-                    style={{ display: "inline-flex", color: "var(--stone-400)" }}
-                  >
-                    <ChevronRight size={16} aria-hidden="true" />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </Reveal>
-        )}
-      </div>
-
-      <Reveal delay={0.16}>
-        <div className="ws-cta-row" style={{ marginTop: "var(--space-8)" }}>
-          <Button asChild>
-            <Link href="/build">Resume where you left off</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link href="/build">Continue in Design &amp; Build</Link>
-          </Button>
-        </div>
-      </Reveal>
-
-      <p className="ws-help ws-help--mt-lg">
-        <span className="ws-help-icon">
-          <Info size={17} />
-        </span>
-        <span>
-          Stuck? <strong>Support</strong> is one click away.
-        </span>
+      <p className="ws-lead">
+        Start in Plan, then move through Build, Operate, and Program.
       </p>
-      <p className="ws-help ws-help--mt-sm">
-        <span className="ws-help-icon">
-          <Calendar size={17} />
-        </span>
-        <span>
-          <em>Take a break — catch a live event or a recording</em> →{" "}
-          <Link href="/live">Live Programming</Link>.
-        </span>
-      </p>
+
+      <Stagger className="dash-cards">
+        {cards.map((c) => (
+          <Link key={c.key} className="dash-card" href={c.href}>
+            <span className="dash-card-art" aria-hidden="true">
+              <c.Icon size={24} />
+            </span>
+            <span className="dash-card-title">{c.title}</span>
+            <span className="dash-card-line">{c.line}</span>
+            {c.key === "build" && (
+              <span className="dash-card-progress">
+                <span
+                  className="dash-card-bar"
+                  role="progressbar"
+                  aria-valuenow={snapshot.pct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Design and Build progress"
+                >
+                  <span style={{ width: `${snapshot.pct}%` }} />
+                </span>
+                <span className="dash-card-meta">
+                  {snapshot.started
+                    ? `${snapshot.pct}% complete`
+                    : "Not started yet"}
+                </span>
+              </span>
+            )}
+            <span className="dash-card-cta">
+              {c.cta}
+              <ArrowRight size={16} aria-hidden="true" />
+            </span>
+          </Link>
+        ))}
+      </Stagger>
     </div>
   );
 }

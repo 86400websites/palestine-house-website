@@ -16,8 +16,8 @@ import {
   Lock,
   Menu,
   Play,
-  SlidersHorizontal,
   User,
+  Users,
 } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { signOutAction } from "@/lib/auth/actions";
@@ -26,10 +26,11 @@ import { signOutAction } from "@/lib/auth/actions";
    one sidebar + top bar reused on every gated page. Pre-approval, everything
    except the always-on items is Locked. The 30 topics never sit in the sidebar.
 
-   S4 reality: only /dashboard (and the public /live) are built. The remaining
-   destinations land in S6, so they render INERT here (present, muted, not
-   clickable) rather than as dead 404 links. The workspace search targets the
-   V1 /search route, so it is omitted until that ships. */
+   S10: the sidebar is the simplified flat menu — Welcome · Plan · Build ·
+   Operate · Program · Live Programming, then Resources (Videos · Tools &
+   Templates), then Account (+ Support in the footer). Every destination is
+   built; the workspace search targets the V1 /search route, so it is omitted
+   until it ships. */
 
 type SidebarItem = {
   key: string;
@@ -41,10 +42,6 @@ type SidebarItem = {
   external?: boolean;
   /** Reachable before approval. */
   always?: boolean;
-  /** A second nav entry pointing at a route another item owns — it links, but
-   *  never claims the active state ("Operate & Program" -> /operate, which
-   *  "Managing & Operating" owns per the mockup). */
-  alias?: boolean;
 };
 
 type SidebarGroup = { label?: string; items: SidebarItem[] };
@@ -53,33 +50,21 @@ const GROUPS: SidebarGroup[] = [
   {
     items: [
       { key: "dashboard", label: "Welcome", Icon: User, href: "/dashboard", always: true },
-    ],
-  },
-  {
-    label: "Stages",
-    items: [
-      { key: "plan", label: "Plan & Prepare", Icon: Bookmark, href: "/plan" },
-      { key: "build", label: "Design & Build", Icon: CheckCircle2, href: "/build" },
-      { key: "operate", label: "Operate & Program", Icon: Clock, href: "/operate", alias: true },
-    ],
-  },
-  {
-    label: "Your House",
-    items: [
-      { key: "managing", label: "Managing & Operating", Icon: Menu, href: "/operate" },
+      { key: "plan", label: "Plan", Icon: Bookmark, href: "/plan" },
+      { key: "build", label: "Build", Icon: CheckCircle2, href: "/build" },
+      { key: "operate", label: "Operate", Icon: Clock, href: "/operate" },
+      { key: "program", label: "Program", Icon: Users, href: "/program" },
       { key: "live", label: "Live Programming", Icon: Calendar, href: "/programming" },
     ],
   },
   {
-    label: "Library",
+    label: "Resources",
     items: [
-      { key: "academy", label: "Academy", Icon: Play, href: "/academy" },
-      { key: "resources", label: "Resources", Icon: Download, href: "/resources" },
-      { key: "tools", label: "House Applications", Icon: SlidersHorizontal, href: "/tools" },
+      { key: "academy", label: "Videos", Icon: Play, href: "/academy" },
+      { key: "resources", label: "Tools & Templates", Icon: Download, href: "/resources" },
     ],
   },
   {
-    label: "You",
     items: [
       { key: "account", label: "Account", Icon: User, href: "/account", always: true },
     ],
@@ -117,7 +102,7 @@ function SidebarLink({
 
   // Built route → real link.
   if (item.href) {
-    const isActive = !item.alias && pathname === item.href;
+    const isActive = pathname === item.href;
     return (
       <Link
         className={`ws-item${isActive ? " is-active" : ""}`}

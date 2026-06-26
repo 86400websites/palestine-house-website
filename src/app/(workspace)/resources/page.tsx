@@ -17,7 +17,7 @@ import { ResourceLibrary, DownloadButton } from "./resource-library";
    Downloads are minted on demand by the Server Action (DownloadButton) — raw
    storage paths never reach the client. */
 
-export const metadata: Metadata = { title: "Resources" };
+export const metadata: Metadata = { title: "Tools & Templates" };
 
 // The two featured booklets — display title + description verbatim from
 // resources.md (the DB titles read "Booklet A — …"); matched to the DB row by
@@ -73,7 +73,7 @@ export default async function ResourcesPage() {
   return (
     <div>
       <header className="ws-pagehead">
-        <p className="ph-eyebrow">Resources</p>
+        <p className="ph-eyebrow">Tools &amp; Templates</p>
         <h1 className="ws-h1">Everything, in one place.</h1>
         <p className="ws-lead">
           Every guide, template, and tool you need to build and run a House —

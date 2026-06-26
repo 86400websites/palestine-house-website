@@ -1,61 +1,21 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Play } from "lucide-react";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getAcademyModules, getElements } from "@/lib/workspace/content";
 import { PendingState } from "@/components/workspace/pending-state";
 import { Stagger } from "@/components/motion/reveal";
 import type { AcademyRow } from "@/lib/workspace/types";
+import { AcademyCard } from "./academy-card";
 
 /* /academy — the optional video library (docs/page-copy/03-member-workspace/academy.md).
-   A reference, never a course: no progress, quizzes, certificate, or "next
-   lesson". One card per topic, grouped by the ten focus areas. Gated before any
-   fetch. Today every module's youtube_url is null, so each card shows the
-   graceful "video coming" state and links to the topic's guide instead (the
-   Academy body reuses each topic's Simple Guide). When a video lands, the card
-   opens it on YouTube (a normal outbound link — no embed, so no CSP change). */
+   Labelled "Videos" in the sidebar (S10). A reference, never a course: no
+   progress, quizzes, certificate, or "next lesson". One card per topic, grouped
+   by the ten focus areas. Gated before any fetch. Real per-topic videos aren't
+   produced yet, so each card falls back to a clearly-marked neutral "Sample"
+   clip (src/lib/workspace/sample-videos.ts); a real academy_modules.youtube_url
+   takes priority. Cards open the video on YouTube (a normal outbound link — no
+   embed, so no CSP change). */
 
-export const metadata: Metadata = { title: "Academy" };
-
-function AcademyCard({ module: m }: { module: AcademyRow }) {
-  const inner = (
-    <>
-      <span className="vid-thumb" aria-hidden="true">
-        <Play size={30} />
-        {m.length && <span className="vid-runtime">{m.length}</span>}
-      </span>
-      <span className="vid-body">
-        <span className="vid-title">{m.title}</span>
-        {m.one_line && <span className="vid-line">{m.one_line}</span>}
-        {m.youtube_url ? (
-          <span className="vid-cta">
-            <Play size={14} aria-hidden="true" /> Open this video
-          </span>
-        ) : (
-          <span className="vid-cta is-muted">Video coming · read the guide</span>
-        )}
-      </span>
-    </>
-  );
-
-  if (m.youtube_url) {
-    return (
-      <a
-        className="vid-card"
-        href={m.youtube_url}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {inner}
-      </a>
-    );
-  }
-  return (
-    <Link className="vid-card" href={`/elements/${m.element_slug}`}>
-      {inner}
-    </Link>
-  );
-}
+export const metadata: Metadata = { title: "Videos" };
 
 export default async function AcademyPage() {
   const profile = await getMyProfile();
@@ -83,7 +43,7 @@ export default async function AcademyPage() {
   return (
     <div>
       <header className="ws-pagehead">
-        <p className="ph-eyebrow">Academy</p>
+        <p className="ph-eyebrow">Videos</p>
         <h1 className="ws-h1">Watch, when it helps.</h1>
         <p className="ws-lead">
           Short videos that walk through the same topics as the playbook — for
@@ -129,8 +89,9 @@ export default async function AcademyPage() {
 
       <p className="vid-note">
         <em>
-          Videos are being added topic by topic. The written guides and templates
-          are complete and ready in the meantime.
+          The clips marked &ldquo;Sample&rdquo; are placeholders while each
+          topic&rsquo;s own video is produced. The written guides and templates
+          are complete and ready now.
         </em>
       </p>
     </div>

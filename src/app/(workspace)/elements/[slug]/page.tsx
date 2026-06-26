@@ -11,6 +11,8 @@ import {
   getAcademyModules,
 } from "@/lib/workspace/content";
 import { renderMarkdown } from "@/lib/workspace/markdown";
+import { sampleVideoUrl } from "@/lib/workspace/sample-videos";
+import { youTubeEmbedUrl } from "@/lib/live/youtube";
 import { PendingState } from "@/components/workspace/pending-state";
 import { ElementTabs, type ElementTabsData } from "./element-tabs";
 
@@ -83,6 +85,9 @@ export default async function ElementPage({ params }: Params) {
     });
   }
 
+  const realVideoUrl = academy?.youtube_url ?? null;
+  const hasRealVideo = youTubeEmbedUrl(realVideoUrl) !== null;
+
   const data: ElementTabsData = {
     overviewHtml: renderMarkdown(el.overview_md),
     simpleGuideHtml: renderMarkdown(el.simple_guide_md),
@@ -96,9 +101,14 @@ export default async function ElementPage({ params }: Params) {
       version: t.version,
     })),
     templatesCount: templates.length,
-    video: academy
-      ? { length: academy.length, youtubeUrl: academy.youtube_url }
-      : null,
+    // A VALID real youtube_url wins; an absent OR malformed one falls back to a
+    // clearly-marked sample, so the Video tab (and the Build tracker's "Watch
+    // video") always lands on a working clip (S10 10-5/10-8).
+    video: {
+      length: academy?.length ?? null,
+      youtubeUrl: hasRealVideo ? realVideoUrl : sampleVideoUrl(el.code),
+      sample: !hasRealVideo,
+    },
     focusAreaCode: el.focus_area_code,
     focusAreaName: el.focus_area_name,
     nextSlug: next?.slug ?? null,
