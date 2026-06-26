@@ -29,5 +29,5 @@ export default async function AdminLayout({
     notFound();
   }
 
-  return <AdminShell active="approvals">{children}</AdminShell>;
+  return <AdminShell>{children}</AdminShell>;
 }
