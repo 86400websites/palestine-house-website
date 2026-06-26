@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeOrigin, safeNextPath } from "@/lib/safe-redirect";
+import { upsertContact } from "@/lib/mailchimp/client";
 
 /* Server Actions for auth (run server-side so the browser never calls
    supabase.co directly — CSP connect-src stays 'self'). Sign-in + sign-out
@@ -234,6 +235,20 @@ export async function applyAction(
       ok: false,
       error: "Something went wrong sending your application. Please try again.",
     };
+  }
+
+  // Best-effort marketing tag (S12 12-3). The account + application are already
+  // saved, so a Mailchimp failure must NEVER block sign-up. The helper already
+  // no-throws + no-ops when unconfigured; the guard is belt-and-suspenders so
+  // nothing here can reject the action before the redirect. Kept off the
+  // idempotent-retry path above (that applicant was tagged on their first apply).
+  try {
+    await upsertContact({ email, tags: ["applicant"] });
+  } catch (tagError) {
+    console.error(
+      "[mailchimp] apply tag failed (continuing):",
+      tagError instanceof Error ? tagError.message : tagError,
+    );
   }
 
   // Account + application created and the user is signed in (instant session,
