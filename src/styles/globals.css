@@ -2881,6 +2881,45 @@
   top: 76px;
 }
 
+/* Admin detail edit form (S11 11-6..11-9). */
+.adm-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.adm-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.adm-input,
+.adm-textarea,
+.adm-select {
+  width: 100%;
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--foreground);
+  background: var(--background);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+}
+.adm-textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 7rem;
+}
+.adm-form-msg {
+  font: var(--weight-medium) var(--text-sm)/1.4 var(--font-body);
+  margin: 0;
+}
+.adm-form-msg.is-ok {
+  color: var(--brand-primary);
+}
+.adm-form-msg.is-err {
+  color: var(--status-error);
+}
+
 .adm-toolbar {
   display: flex;
   align-items: center;
