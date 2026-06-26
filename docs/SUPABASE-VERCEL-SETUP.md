@@ -175,6 +175,41 @@ The classic failure mode: a password-reset or signup-confirmation email created 
 
 ---
 
+## Email integrations — Mailchimp + Resend (S12)
+
+The site wires **Mailchimp** (booklet lead magnets, newsletter, apply tagging) and **Resend** (contact + support + the approval/decline email) as honest no-op placeholders: each no-ops cleanly when its env vars are absent and switches on by adding the keys (and, for Resend, verifying the sending domain) — no code change. All six are **server-only** (never `NEXT_PUBLIC_`); the names already appear in the `.env.local` block and the Vercel matrix above. Format / where to find each:
+
+| Variable | Format / where to find it |
+|---|---|
+| `MAILCHIMP_API_KEY` | Mailchimp → Account → Extras → API keys. Server-only. |
+| `MAILCHIMP_SERVER_PREFIX` | The region suffix on the API key (the part after the `-`), e.g. `us1`, `us21`, `eu1`. |
+| `MAILCHIMP_AUDIENCE_ID` | Mailchimp → Audience → Settings → *Audience name and defaults* → Audience ID. |
+| `RESEND_API_KEY` | Resend → API Keys. Server-only. |
+| `RESEND_FROM_EMAIL` | The from address, on the **verified** sending domain (e.g. `hello@your-domain`). |
+| `RESEND_TO_EMAIL` | The inbox that receives contact + support messages. |
+
+Switch-on is env-vars-only: set these in Vercel (Production, plus Preview if you want to test there) and **redeploy**. No real-delivery test is required to ship the sprint — verify once the keys + domain exist.
+
+> **Public-write hardening (Upstash rate-limiting + Turnstile) on the lead-magnet and contact routes is deferred to S14** (a known, owner-accepted deferral — `PROJECT-STATUS.md` §5/§7). Until then these routes ship with zod-validation + fail-closed-in-Production only.
+
+### Resend sending-domain verification (SPF / DKIM / DMARC)
+
+`RESEND_FROM_EMAIL` must be on a domain Resend has verified, or sends fail (the helper logs the error and the public forms fail closed in Production). One-time setup, once the domain exists:
+
+1. Resend → **Domains** → **Add Domain** → enter the sending domain (the custom domain, or a subdomain such as `mail.your-domain`).
+2. Resend shows DNS records to add at your DNS provider:
+   - **SPF** — a `TXT` record authorising Resend to send for the domain.
+   - **DKIM** — `CNAME` (or `TXT`) record(s) that sign outgoing mail.
+   - **DMARC** — a `TXT` record at `_dmarc.<domain>` (start with `v=DMARC1; p=none;` to monitor, tighten later).
+3. Add each record exactly as shown; wait for DNS propagation.
+4. Back in Resend, click **Verify** until the domain shows **Verified**.
+5. Set `RESEND_FROM_EMAIL` to an address on that domain and **redeploy**.
+6. Send one test (the contact form, or an approve/decline) and confirm delivery + that replies route to the expected inbox.
+
+Until the domain is verified, leave the Resend env vars unset — the forms no-op cleanly in local/Preview and (for the public writes) fail closed in Production rather than silently dropping a submission.
+
+---
+
 ## Vercel Preview testing checklist
 
 Every PR gets a Preview deployment. Test it before merge:
