@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/resend/client";
 
 /* Support request submission (S6 6g). zod-validated (subject + message
    required, length-capped), then written through the submit_support_request
@@ -44,6 +45,27 @@ export async function submitSupportRequestAction(
   });
   if (error) {
     return { ok: false, message: "Something went wrong. Please try again." };
+  }
+
+  // Best-effort owner notification (S12 12-6). The request is already stored by
+  // the RPC (0019), so an email failure must NEVER change the outcome — it is
+  // logged and ignored. reply-to is the submitter's account email from the auth
+  // session (profiles does not store email); RESEND_TO_EMAIL is the destination.
+  const to = process.env.RESEND_TO_EMAIL;
+  if (to) {
+    try {
+      await sendEmail({
+        to,
+        replyTo: user.email,
+        subject: `Support request: ${parsed.data.subject}`,
+        text: `From: ${user.email ?? "unknown"}\nSubject: ${parsed.data.subject}\n\n${parsed.data.message}`,
+      });
+    } catch (mailError) {
+      console.error(
+        "[resend] support email failed (continuing):",
+        mailError instanceof Error ? mailError.message : mailError,
+      );
+    }
   }
 
   return { ok: true, message: "Got it — we’ll be in touch." };
