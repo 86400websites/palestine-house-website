@@ -8,63 +8,39 @@ import { getElements } from "@/lib/workspace/content";
 import { PendingState } from "@/components/workspace/pending-state";
 import type { ElementListItem } from "@/lib/workspace/types";
 
-/* /operate — Operate (the operations side;
-   docs/page-copy/03-member-workspace/operate.md). The operations subset of the
-   30 elements — Programming & Aswātna + Membership & Service moved to /program
-   (S10 10-9) — reframed as daily operating routines, read-only, NO tracker.
-   Gated before any fetch: a pending session sees the under-review notice, never
-   content.
+/* /program — Program (S10 10-9, owner direction D-S10-b). The guest-facing side
+   of the House: cultural programming + the Aswātna collaboration, and the
+   membership/service that shapes every visit. These two groups moved out of
+   /operate; the same elements, the same approved Operate curation + routine
+   cadences — never invented here. Gated before any fetch (pending -> notice).
+   Read-only, NO tracker. All 30 topics still appear once, split /program +
+   /operate. Topic titles + one-lines are resolved live from the DB elements. */
 
-   The group -> topic-code curation AND the per-group routine cadences are from
-   the approved Operate mockup (workspace-data.jsx -> WS_OPERATE_GROUPS); group
-   names are verbatim copy. Topic titles + one-lines are resolved live from the
-   DB elements — never restated here. */
+export const metadata: Metadata = { title: "Program" };
 
-export const metadata: Metadata = { title: "Operate" };
-
-// Operating groupings + recurring routines (the operations side). S10 (10-9,
-// owner direction D-S10-b) moved "Programming & Aswātna" + "Membership &
-// Service" out to /program; Operate keeps the five running-the-business groups.
-// All 30 topics still appear once, now split across /program + /operate. The
-// curation + cadences are from the approved Operate mockup (WS_OPERATE_GROUPS).
-const OPERATE_GROUPS: { name: string; routine: string; codes: string[] }[] = [
+const PROGRAM_GROUPS: { name: string; routine: string; codes: string[] }[] = [
   {
-    name: "Operations & F&B",
-    routine: "Open & close checklists, daily",
-    codes: ["C1", "C2", "C3", "F1", "F2", "F3"],
+    name: "Programming & Aswātna",
+    routine: "Run-of-show before every event",
+    codes: ["D1", "D2", "D3"],
   },
   {
-    name: "Marketing & Retail",
-    routine: "Weekly content and shop review",
-    codes: ["A3", "G1", "G2", "G3"],
-  },
-  {
-    name: "Finance & KPIs",
-    routine: "Monthly actuals-vs-forecast",
-    codes: ["H1", "H2", "H3"],
-  },
-  {
-    name: "Quality & Tech",
-    routine: "Quarterly standards review",
-    codes: ["B1", "B2", "I1", "I2", "J1", "J2"],
-  },
-  {
-    name: "Crisis & Sustainability",
-    routine: "Twice-yearly readiness drill",
-    codes: ["B3", "I3", "J3"],
+    name: "Membership & Service",
+    routine: "Shift briefing, every guest-facing shift",
+    codes: ["A1", "A2", "E1", "E2", "E3"],
   },
 ];
 
-export default async function OperatePage() {
+export default async function ProgramPage() {
   const profile = await getMyProfile();
   if (!profile?.is_approved) return <PendingState />;
 
   const elements = await getElements();
   const byCode = new Map(elements.map((e) => [e.code, e] as const));
 
-  // Resolve each group's codes to DB elements, dropping any that aren't found
-  // (defensive — all 30 are ingested, but the data layer fails closed to []).
-  const groups = OPERATE_GROUPS.map((g) => ({
+  // Resolve each group's codes to DB elements, dropping any not found
+  // (defensive — all are ingested, but the data layer fails closed to []).
+  const groups = PROGRAM_GROUPS.map((g) => ({
     name: g.name,
     routine: g.routine,
     topics: g.codes
@@ -72,31 +48,30 @@ export default async function OperatePage() {
       .filter((e): e is ElementListItem => Boolean(e)),
   })).filter((g) => g.topics.length > 0);
 
-  // "Open today's checklists" opens the first operating topic.
   const firstTopic = groups[0]?.topics[0] ?? null;
 
   return (
     <div>
-      <p className="ph-eyebrow">Stage 3 · Managing &amp; Operating</p>
+      <p className="ph-eyebrow">Program</p>
       <h1 className="ws-h1" style={{ marginTop: "var(--space-2)" }}>
-        Run your House.
+        Programming &amp; guests.
       </h1>
       <p className="ws-lead">
-        Open for business? The routines that keep the House running day to day —
-        operations and F&amp;B, marketing and retail, finance, quality, and crisis
-        readiness.
+        What the people who walk in actually experience — your cultural
+        programming and the Aswātna collaboration, plus the membership and
+        service that shape every visit.
       </p>
 
       <div className="ws-cta-row">
         {firstTopic && (
           <Button asChild>
             <Link href={`/elements/${firstTopic.slug}`}>
-              Open today&rsquo;s checklists
+              Open the first topic
             </Link>
           </Button>
         )}
         <Button asChild variant="secondary">
-          <Link href="/resources">Pull a template</Link>
+          <Link href="/operate">Go to Operate</Link>
         </Button>
       </div>
 
