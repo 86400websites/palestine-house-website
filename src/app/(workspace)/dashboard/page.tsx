@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Calendar, ChevronRight, Clock, Compass, Info, TrendingUp } from "lucide-react";
+import { ChevronRight, Clock, Compass, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal, FadeIn } from "@/components/motion/reveal";
 import { getMyProfile, firstNameOf } from "@/lib/auth/profile";
@@ -43,22 +43,14 @@ export default async function DashboardPage() {
               <Clock size={22} />
             </span>
             <div>
-              <h2 className="ws-notice-h">Request received — under review.</h2>
+              <h2 className="ws-notice-h">Your application is under review.</h2>
               <p className="ws-notice-p">
-                Every application is reviewed by HQ. Everything here unlocks the
-                moment yours is approved.
+                HQ reads every one by hand. The moment yours is approved,
+                everything here opens up — check back any time.
               </p>
             </div>
           </div>
         </FadeIn>
-        <p className="ws-help ws-help--mt">
-          <span className="ws-help-icon">
-            <Info size={17} />
-          </span>
-          <span>
-            Stuck? <strong>Support</strong> is one click away.
-          </span>
-        </p>
       </div>
     );
   }
@@ -75,38 +67,18 @@ export default async function DashboardPage() {
   if (!snapshot.started) {
     return (
       <div>
-        <h1 className="ws-h1">You’re approved — welcome.</h1>
+        <h1 className="ws-h1">You’re approved — welcome in.</h1>
         <Reveal>
           <p className="ws-lead">
-            Start in Plan &amp; Prepare: understand the model and your city before
-            you build a thing.
+            Start in Plan — it’s the ground to get right first: the model, your
+            city, your space. Then you build.
           </p>
           <div className="ws-cta-row">
             <Button asChild>
-              <Link href="/plan">Start in Plan &amp; Prepare</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link href="/focus-areas">Explore the focus areas</Link>
+              <Link href="/plan">Start in Plan</Link>
             </Button>
           </div>
         </Reveal>
-        <p className="ws-help ws-help--mt-lg">
-          <span className="ws-help-icon">
-            <Info size={17} />
-          </span>
-          <span>
-            Stuck? <strong>Support</strong> is one click away.
-          </span>
-        </p>
-        <p className="ws-help ws-help--mt-sm">
-          <span className="ws-help-icon">
-            <Calendar size={17} />
-          </span>
-          <span>
-            <em>Take a break — catch a live event or a recording</em> →{" "}
-            <Link href="/live">Live Programming</Link>.
-          </span>
-        </p>
       </div>
     );
   }
@@ -180,31 +152,10 @@ export default async function DashboardPage() {
       <Reveal delay={0.16}>
         <div className="ws-cta-row" style={{ marginTop: "var(--space-8)" }}>
           <Button asChild>
-            <Link href="/build">Resume where you left off</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link href="/build">Continue in Design &amp; Build</Link>
+            <Link href="/build">Resume in Design &amp; Build</Link>
           </Button>
         </div>
       </Reveal>
-
-      <p className="ws-help ws-help--mt-lg">
-        <span className="ws-help-icon">
-          <Info size={17} />
-        </span>
-        <span>
-          Stuck? <strong>Support</strong> is one click away.
-        </span>
-      </p>
-      <p className="ws-help ws-help--mt-sm">
-        <span className="ws-help-icon">
-          <Calendar size={17} />
-        </span>
-        <span>
-          <em>Take a break — catch a live event or a recording</em> →{" "}
-          <Link href="/live">Live Programming</Link>.
-        </span>
-      </p>
     </div>
   );
 }

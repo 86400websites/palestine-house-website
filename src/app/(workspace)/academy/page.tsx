@@ -15,7 +15,7 @@ import type { AcademyRow } from "@/lib/workspace/types";
    Academy body reuses each topic's Simple Guide). When a video lands, the card
    opens it on YouTube (a normal outbound link — no embed, so no CSP change). */
 
-export const metadata: Metadata = { title: "Academy" };
+export const metadata: Metadata = { title: "Videos" };
 
 function AcademyCard({ module: m }: { module: AcademyRow }) {
   const inner = (
@@ -83,7 +83,7 @@ export default async function AcademyPage() {
   return (
     <div>
       <header className="ws-pagehead">
-        <p className="ph-eyebrow">Academy</p>
+        <p className="ph-eyebrow">Videos</p>
         <h1 className="ws-h1">Watch, when it helps.</h1>
         <p className="ws-lead">
           Short videos that walk through the same topics as the playbook — for

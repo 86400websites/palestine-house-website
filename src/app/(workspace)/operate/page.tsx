@@ -92,8 +92,8 @@ export default async function OperatePage() {
         Run your House.
       </h1>
       <p className="ws-lead">
-        Open for business? Here are your daily routines — the same thirty
-        topics, now built for the everyday.
+        Open for business? Here are the same thirty topics as daily routines —
+        programming first, then the operations that keep the House running.
       </p>
 
       <div className="ws-cta-row">
