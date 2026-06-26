@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Bookmark, CheckCircle2, Clock, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Bookmark,
+  CheckCircle2,
+  Clock,
+  MessageCircle,
+  Users,
+} from "lucide-react";
 import { FadeIn, Stagger } from "@/components/motion/reveal";
+import { createClient } from "@/lib/supabase/server";
 import { getMyProfile, firstNameOf } from "@/lib/auth/profile";
 import { getChecklist, getElements } from "@/lib/workspace/content";
 import {
@@ -26,22 +34,58 @@ export default async function DashboardPage() {
   const approved = profile?.is_approved ?? false;
 
   if (!approved) {
+    // Distinguish a declined applicant from a pending one. The caller reads only
+    // their OWN application row (owner-scoped RLS); a declined account keeps
+    // is_approved = false just like a pending one, so the status drives the copy.
+    const supabase = await createClient();
+    const { data: app } = await supabase
+      .from("applications")
+      .select("status")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const declined = app?.status === "declined";
+
     return (
       <div>
         <h1 className="ws-h1">Welcome.</h1>
         <FadeIn>
-          <div className="ws-notice">
-            <span className="ws-notice-icon">
-              <Clock size={22} />
-            </span>
-            <div>
-              <h2 className="ws-notice-h">Your application is under review.</h2>
-              <p className="ws-notice-p">
-                HQ reads every one by hand. The moment yours is approved,
-                everything here opens up — check back any time.
-              </p>
+          {declined ? (
+            <div className="ws-notice">
+              <span className="ws-notice-icon">
+                <MessageCircle size={22} />
+              </span>
+              <div>
+                <h2 className="ws-notice-h">
+                  We’re not moving forward right now.
+                </h2>
+                <p className="ws-notice-p">
+                  After careful review, HQ isn’t taking your application further
+                  at this time. If you have questions, we’d like to hear from
+                  you —{" "}
+                  <Link className="ws-notice-link" href="/contact">
+                    contact us
+                  </Link>
+                  .
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="ws-notice">
+              <span className="ws-notice-icon">
+                <Clock size={22} />
+              </span>
+              <div>
+                <h2 className="ws-notice-h">
+                  Your application is under review.
+                </h2>
+                <p className="ws-notice-p">
+                  HQ reads every one by hand. The moment yours is approved,
+                  everything here opens up — check back any time.
+                </p>
+              </div>
+            </div>
+          )}
         </FadeIn>
       </div>
     );

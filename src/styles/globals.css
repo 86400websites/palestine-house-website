@@ -1127,6 +1127,15 @@
   margin: var(--space-2) 0 0;
   max-width: 52ch;
 }
+.ws-notice-link {
+  color: var(--green-700);
+  font-weight: var(--weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ws-notice-link:hover {
+  opacity: 0.8;
+}
 .ws-cta-row {
   display: flex;
   gap: var(--space-3);
