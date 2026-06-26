@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | 🔵 Build complete on branch — **pending owner Vercel-Preview + merge** (record saved 2026-06-26) |
-| **Branch / PR** | `claude/sprint-s10-private-pages-clarity` / open PR (not yet merged) |
+| **Date merged** | 2026-06-26 |
+| **Branch / PR** | `claude/sprint-s10-private-pages-clarity` / #37 (merge `922a979`) |
 | **Decision** | D-S10-b (owner direction, 2026-06-26) — replanned Stage 3; UI / copy / curation only |
 | **Goal** | Make the gated partner workspace simple, premium, and idiot-proof — without touching the DB, auth, RLS, the approval gate, the CSP, or any public page |
 
-> Sprint record, saved pre-merge at the owner's request. **What shipped** (incl. three owner mid-sprint changes), the original gated prompt, checks, deviations, and follow-ups are below. Flip the table to *Date merged* + the PR number once it lands. Scope + exit gate: `ROADMAP.md` §B (S10); decision: `PROJECT-STATUS.md` §4 (D-S10-b).
+> Sprint record. **What shipped** (incl. three owner mid-sprint changes + the post-Preview chrome fix), the original gated prompt, checks, deviations, and follow-ups are below. Merged + post-merge `/close` = GO; trackers reconciled on `docs/s10-close`. Scope + exit gate: `ROADMAP.md` §B (S10); decision: `PROJECT-STATUS.md` §4 (D-S10-b).
 
 ## What shipped (10 gated sub-steps + a post-Preview chrome fix)
 
