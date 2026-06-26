@@ -2,14 +2,14 @@
 
 | | |
 |---|---|
-| **Status** | ⬜ Ready to run (not started) |
-| **Branch** | `claude/sprint-s10-private-pages-clarity` (from latest `main`) |
-| **Decision** | D-S10-b (owner direction, 2026-06-26) — replanned Stage 3; this sprint is UI / copy / curation only |
-| **Goal** | Make the gated partner workspace simple, premium, and idiot-proof — without touching the DB, auth, RLS, the approval gate, or any public page |
+| **Status** | 🔵 Build complete on branch — **pending owner Vercel-Preview + merge** (record saved 2026-06-26) |
+| **Branch / PR** | `claude/sprint-s10-private-pages-clarity` / open PR (not yet merged) |
+| **Decision** | D-S10-b (owner direction, 2026-06-26) — replanned Stage 3; UI / copy / curation only |
+| **Goal** | Make the gated partner workspace simple, premium, and idiot-proof — without touching the DB, auth, RLS, the approval gate, the CSP, or any public page |
 
-> This is the **ready-to-run brief** (not a post-merge record). Paste the prompt below into a fresh Claude Code session to execute S10 in owner-gated sub-steps. Save the completed record (Mode B, `/sprint-prompt save`) **after** the PR merges. Scope + exit gate: `ROADMAP.md` §B (S10); plan rationale: `PROJECT-STATUS.md` §4 (D-S10-b).
+> Sprint record, saved pre-merge at the owner's request. **What shipped** (incl. three owner mid-sprint changes), the original gated prompt, checks, deviations, and follow-ups are below. Flip the table to *Date merged* + the PR number once it lands. Scope + exit gate: `ROADMAP.md` §B (S10); decision: `PROJECT-STATUS.md` §4 (D-S10-b).
 
-## Scope (7 gated sub-steps)
+## What shipped (10 gated sub-steps + a post-Preview chrome fix)
 
 1. **(10-1)** Simplify the workspace menu — flatten the `Stages / Your House / Library / You` group headers to **Welcome · Plan · Build · Operate · Live Programming · Resources › (Videos, Tools & Templates) · Account**; drop the duplicate **Program** and the coming-soon **House Applications** (`/tools`); relabel (Plan & Prepare→Plan, Design & Build→Build, Operate & Program→Operate, Academy→Videos); hrefs unchanged; mobile drawer + locked-for-pending behaviour unchanged.
 2. **(10-2)** Operate-vs-program content re-grouping — **proposal-first** (present a mapping table, wait for approval); recommended low-risk default = keep all 30 topics in Operate but make the "Programming & Aswātna" group a clearly-labelled **Programming** section; all 30 topics stay intact; no DB change.
@@ -17,9 +17,15 @@
 4. **(10-4)** Build-page CTAs → **Read the full guide · Watch video · Mark in progress · Add notes · Mark Complete**, with a new Watch-video action; existing checklist behaviour preserved.
 5. **(10-5)** Code-level sample videos (no DB change) + premium **white** video/element cards within existing tokens.
 6. **(10-6)** Mobile responsiveness — element/topic page first (tab-strip overflow, hero, action bar), then a 320–375px sweep of the other private pages.
-7. **(10-7)** Exit gate — full-diff review, fix all, verify clear + premium + balanced at 320px / desktop / reduced-motion, update `PROJECT-STATUS.md` + tick S10 in `ROADMAP.md`.
+7. **(10-7)** Exit gate — adversarial 4-lens review (workflow) = PASS; fixed the findings; updated `PROJECT-STATUS.md` + ticked S10 in `ROADMAP.md`.
+8. **(10-8)** *(owner mid-sprint change 1)* Videos play **in-site** — the element Video tab embeds the youtube-nocookie player and the Videos cards (new `academy-card.tsx` client component) swap the thumbnail for an autoplay embed on click; the outbound "Watch" button removed. Reuses the existing CSP frame-src — no CSP change.
+9. **(10-9)** *(owner mid-sprint change 3)* New **`/program`** page after Operate — Programming & Aswātna (D1/D2/D3) + Membership & Service (A1/A2/E1/E2/E3) moved out of Operate (Operate keeps the five operations groups; all 30 topics still appear once). Re-added **Program** to the sidebar. **Supersedes the 10-2 keep-all-in-Operate decision.**
+10. **(10-10)** *(owner mid-sprint change 2)* Welcome **rebuilt as four premium nav cards** (Plan/Build/Operate/Program — icon + one-liner + link, with the live Design & Build % on the Build card); pending users keep the calm "under review" state.
+- **Chrome fix (post-Preview):** `/program` + `/programming` added to `GATED_PREFIXES` (`site-chrome.tsx`) — both were rendering the public header over the workspace shell (double chrome); `/programming` was a latent gap since S9.
 
 ## Prompt used
+
+<details><summary>The gated implementation prompt (drove 10-1…10-7; the three owner mid-sprint changes 10-8/10-9/10-10 + the chrome fix were added as they arose)</summary>
 
 ```text
 You are my senior engineer for the Palestine House website, working in Claude Code.
@@ -88,6 +94,20 @@ When the sprint is complete, in the same branch: update docs/PROJECT-STATUS.md (
 Report at the end: summary · files changed · commands + results · risks/follow-ups · suggested commit message · sprint status. Push policy: commit + push after every gated sub-step (standing authorization, 2026-06-12) so I review in the open PR; never merge, never push beyond the task branch.
 ```
 
-## Optional independent review
+</details>
 
-S10 changes no DB / auth / RLS / secrets / approval gate — a full Codex security review is **not required**. The exit-gate self-review + the owner's 320px-and-desktop Vercel-Preview eyeball are sufficient. If a second pair of eyes is wanted, scope it to accessibility (keyboard/focus on the simplified nav + tab strip), mobile balance, and "no behaviour regression in the build tracker / pending gate" — not the heavy gating-security prompt used for DB/auth sprints.
+## Checks & results
+typecheck ✅ · lint ✅ · build ✅ (39 routes; `/program` added) · adversarial **4-lens exit-gate review (workflow) = PASS**, no blocking/high · UI / copy / curation only — no DB/auth/RLS/approval-gate/CSP/public-page change · approval gate + locked-for-pending behaviour unchanged · Owner Vercel-Preview eyeball at 320px + desktop = **pending** (the merge gate). A full Codex security review was **not required** (no security surface).
+
+## Deviations & learnings
+- **Three owner mid-sprint changes** (added after 10-6, as 10-8/10-9/10-10): videos play in-site (embed, not an outbound link); the Welcome page became four premium nav cards; a new `/program` page split two groups out of Operate. The **10-2 "keep all 30 in Operate" decision was superseded by 10-9** once the owner wanted a dedicated Program page (all 30 topics still appear exactly once, now across /program + /operate).
+- **In-site video reused the S9 `youTubeEmbedUrl` helper + the youtube-nocookie CSP origin**, so no CSP change was needed — S10 stayed free of any security surface.
+- **Double-chrome caught on Preview:** `GATED_PREFIXES` (`site-chrome.tsx`) was missing `/program` (new) **and** `/programming` (a latent gap since S9) → the public header rendered over the workspace shell. Fixed by adding both; the exact-or-`prefix/` match means `/program` does **not** cover `/programming`, so both are listed. **Learning: every new `(workspace)` route must be added to `GATED_PREFIXES`** until the planned (public) route-group refactor lands.
+- The exit-gate review also caught + we fixed: a malformed real-`youtube_url` dead card (now falls back to the Sample), a `prefers-reduced-motion` guard on the tab scroll, dead snapshot CSS, equal-height dashboard cards, the mobile tab focus-ring clip, and AA contrast on the Build %.
+- Page-copy canon (`03-member-workspace/*`, gitignored) kept in sync throughout, incl. the new `program.md`.
+
+## Follow-ups
+- **Owner (before merge):** Vercel-Preview eyeball (320px + desktop + reduced-motion) of the 4-card Welcome, the in-site players, the element-page mobile tabs, and `/program`; **verify or swap the placeholder Sample YouTube IDs** in `src/lib/workspace/sample-videos.ts`. Then merge → flip this record's table to *Date merged* + PR #.
+- `/tools` is now an **unlinked** coming-soon placeholder (dropped from the nav, route kept) — delete `src/app/(workspace)/tools/page.tsx` later if it's to be fully retired.
+- Per-topic real videos: set `academy_modules.youtube_url` (it wins over the Sample) or manage it in **S11** (admin content management); drop the placeholder Sample list then.
+- The dashboard card art slot + the element-page hero panel are ready for per-topic images (owner to supply).
