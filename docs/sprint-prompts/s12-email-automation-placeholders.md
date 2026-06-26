@@ -1,29 +1,32 @@
-# S12 — Email-automation placeholders + settings
+# Sprint S12 — Email-automation placeholders + settings
 
 | | |
 |---|---|
-| **Status** | ⬜ Ready to run (not started) |
-| **Branch** | `claude/sprint-s12-email-automation-placeholders` (from latest `main`) |
-| **Decision** | D-S10-b replan (owner direction, 2026-06-26) — Stage 3 resequenced; this sprint wires Mailchimp + Resend as honest no-op placeholders, switch-on by env vars + a verified domain alone |
-| **Goal** | Wire all the public/gated email touchpoints (booklet capture, newsletter, apply tagging, contact, support, approval/decline + declined→contact) to Mailchimp + Resend behind clean no-op placeholders, so the owner goes live by adding keys + verifying the sending domain only — no real-delivery test required this sprint |
+| **Date merged** | _Not yet merged_ — record saved at **build-complete (Codex-approved), pre-merge**, 2026-06-27. Update on merge. |
+| **Branch / PR** | `claude/sprint-s12-email-automation-placeholders` / _PR not yet opened_ — 14 commits `1d6a865…9659c57`, pushed. |
+| **Goal** | Wire Mailchimp + Resend across the six public/gated email touchpoints behind honest no-op placeholders, so the owner goes live by **adding keys + verifying the Resend sending domain alone** — no real-delivery test, no migration. |
 
-> This is the **ready-to-run brief** (not a post-merge record). Paste the prompt below into a fresh Claude Code session to run S12 in owner-gated sub-steps; save the completed record (Mode B, `/sprint-prompt save`) **after** the PR merges. **Re-validate against repo state before running** — the codebase will have moved on (S10 and S11 land before S12). Scope + exit gate: `ROADMAP.md` §B (S12 row); env names: `docs/SUPABASE-VERCEL-SETUP.md`; security envelope: `docs/SECURITY-CHECKLIST.md` §8 + `AGENTS.md`. **DEPENDS ON S3 (auth/apply) + S4 (approve/decline) — both must be merged before this runs.** *(ROADMAP lists the S12 dependency as S3 only; this brief additionally requires S4 because the deferred approval/decline email hooks `decideApplicationAction` + `admin_set_application_status` (S4) — both must be on `main`.)* **Rate-limiting + Turnstile are NOT in this sprint — they are S14.**
+## What shipped
 
-## Scope (11 gated sub-steps)
+Built in 11 owner-gated sub-steps (push-per-step into the open branch); every new user-facing string drafted + owner-approved at its gate; all four open scope questions answered via `AskUserQuestion` and all landed **zero-migration**.
 
-1. **(12-0) Setup + deps** — add the `resend` + `@mailchimp/mailchimp_marketing` packages (pnpm); confirm the S12 env var **names** already exist in `.env.example` + `docs/SUPABASE-VERCEL-SETUP.md` (no values, no `NEXT_PUBLIC_` prefix); confirm `.gitignore` still excludes `.env.local`. No code wiring yet.
-2. **(12-1) Mailchimp client helper** — `src/lib/mailchimp/client.ts`: server-only helper that instantiates the SDK **only when** `MAILCHIMP_API_KEY` + `MAILCHIMP_SERVER_PREFIX` + `MAILCHIMP_AUDIENCE_ID` are all present; typed `upsertContact({ email, tags })`; **no-ops cleanly** (returns a neutral not-configured result, never throws, never fakes a send) when any env var is absent. Log a one-line `not configured` notice in dev only.
-3. **(12-2) Lead-magnet booklet capture** — Route Handler `src/app/api/mailchimp/booklet-capture/route.ts` (POST, zod-validates email + booklet preference single/both [+ a newsletter opt-in flag, per the decision below]); tags `lead-booklet-a` and/or `lead-booklet-b` (+ `newsletter` when opted in). Wire `src/components/sections/lead-form.tsx` to POST to it; replace the honest "check back soon" no-op with the **owner-approved success copy** (draft + gate). No-ops to success when env absent; **fails closed in Production** if the key is required but missing.
-4. **(12-3) Apply tagging** — in `applyAction` (`src/lib/auth/actions.ts`), **after** the application row inserts and **before** the `/dashboard` redirect, call the Mailchimp helper to tag the applicant. **Graceful-degrade only** — a tag failure must never block sign-up: the account + application are already saved; log and continue. (Confirm the trigger timing at the gate — recommend tag on apply success, see decision.)
-5. **(12-4) Resend client helper** — `src/lib/resend/client.ts`: server-only helper that instantiates Resend **only when** `RESEND_API_KEY` + `RESEND_FROM_EMAIL` are present; typed `sendEmail({ to, subject, ... , replyTo? })`; **no-ops cleanly** (neutral not-configured result, never throws/fakes) when absent.
-6. **(12-5) Contact form → Resend** — Route Handler `src/app/api/resend/contact/route.ts` (POST, zod-validates name/email/subject/message); emails `RESEND_TO_EMAIL` from `RESEND_FROM_EMAIL`, `reply-to` = the submitter's email. Wire `src/components/sections/contact-form.tsx` to POST to it; replace the honest no-op micro-copy with the **owner-approved confirmation** (draft + gate). No-ops to success when env absent; **fails closed in Production** when required-but-missing. *(Optional `contacts` audit table is proposal-first — see decision; default = email only, no new migration.)*
-7. **(12-6) Support email** — in `submitSupportRequestAction` (`src/lib/support/actions.ts`), **after** the `submit_support_request` RPC succeeds, send the owner a Resend email (`to` = `RESEND_TO_EMAIL`, `reply-to` = the submitter's account email from the authenticated session — `supabase.auth.getUser()` → `user.email`; `profiles` does not store email). **Graceful-degrade** — the request is already stored (0019); an email failure is logged, the user still sees the existing "Got it — we'll be in touch." confirmation. Approval-gated path is unchanged.
-8. **(12-7) Approval / decline email** *(deferred from S4)* — in `decideApplicationAction` (`src/lib/admin/actions.ts`), **after** the `admin_set_application_status` RPC succeeds, send the applicant a Resend email: on `approved` → the owner-approved "you're approved, sign in" copy; on `declined` → the owner-approved "not moving forward, questions? contact us" copy with a link to public `/contact`. **CONFIRM the applicant-email read path at the gate** — `admin_set_application_status` returns **only a boolean** (the new approval state) and admin RLS on `applications` is owner-scoped, so the applicant email is **not** in hand inside the action; it must come from `admin_list_applications()` (find the row by id) **or** an extended/returns-email RPC. If an RPC change is needed it is a **versioned migration** (up + `.down.sql` + grants, TEST-first per `WORKFLOW.md` §14) — propose it first; do not assume the email is already available. **Graceful-degrade** — the status flip is authoritative; an email failure is logged, the admin toast is unchanged. Both bodies drafted per brand-voice + gated. `is_admin()` gate untouched.
-9. **(12-8) Declined → contact path** — in the gated dashboard pending branch (`src/app/(workspace)/dashboard/page.tsx`, the `!approved` branch ~line 36), distinguish a **declined** applicant (read `applications.status === 'declined'`) from a pending one and show the **owner-approved** "we're not moving forward right now — questions? Contact us" message linking to public `/contact`. No auth/gate/RLS change; the link target is the public contact page (no privileged info leaks). Draft + gate the copy.
-10. **(12-9) Env + domain docs** — confirm (don't re-add) the S12 env var **names** + format hints in `docs/SUPABASE-VERCEL-SETUP.md` (e.g. `MAILCHIMP_SERVER_PREFIX` = a region like `us1`/`eu1`); document the **Resend sending-domain SPF / DKIM / DMARC** verification checklist for the owner to run once the domain exists. Leave a short code comment at each public write noting rate-limiting + Turnstile are **deferred to S14** (the known gap). No real keys, no real domain anywhere.
-11. **(12-10) Exit gate** — full-diff review of the whole sprint (the two client helpers + all six email touchpoints): every integration no-ops cleanly with env vars absent (never fakes a send), keys are server-only (no `NEXT_PUBLIC_`), public writes stay zod-validated + fail-closed in Production, the approval/admin/support gates are untouched, no secrets in the diff, CSP unchanged. *(Note: `SECURITY-CHECKLIST.md` §15's rate-limit/Turnstile clause is a known, owner-accepted deferral to S14 — ROADMAP S14 row; `PROJECT-STATUS.md` §5/§7 — so for the new lead-magnet/contact routes the bar is zod + fail-closed-in-Production + the deferred-gap comment, NOT §15's rate-limit/Turnstile.)* `pnpm run typecheck && lint && build` green. Update `docs/PROJECT-STATUS.md` (§1/§2 + change log + §6 infra status) and tick **S12** in `docs/ROADMAP.md`. **Run the Codex independent review (below) — this sprint touches secrets + public writes.**
+- **12-0 — Setup + deps.** Added `resend@6.16.0` + `@mailchimp/mailchimp_marketing@3.0.80` (and only these). Completed the six server-only env **names** in `.env.example` (`RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID` added with format hints; all commented, no values, no `NEXT_PUBLIC_`). `.env.local` confirmed gitignored.
+- **12-1 — Mailchimp helper.** `src/lib/mailchimp/client.ts` (server-only): `upsertContact({ email, tags })` configures the SDK only when all three `MAILCHIMP_*` vars are present, idempotent `setListMember` (md5-lowercased-email hash) + `updateListMemberTags`; returns `{ configured:false }` and no-ops when absent — never throws, never fakes a send. Untyped SDK covered by a minimal local shim `src/types/mailchimp__mailchimp_marketing.d.ts` (not a third package).
+- **12-2 — Booklet capture.** `POST /api/mailchimp/booklet-capture` (zod `{ email, booklet:'a'|'b'|'both' }`) tags `lead-booklet-a/b`. Wired **both** `LeadForm` (sections) and `FooterLeadForm` (layout) — the brief named only the first. Owner-approved success copy ("Thanks — the booklet is on its way." / "…booklets are on their way."); locked layout/classes unchanged.
+- **12-3 — Apply tagging.** `applyAction` best-effort tags the applicant `['applicant']` after the insert, before `redirect()` (so `NEXT_REDIRECT` isn't swallowed). Graceful-degrade; never blocks sign-up.
+- **12-4 — Resend helper.** `src/lib/resend/client.ts` (server-only): `sendEmail({ to, subject, text, html?, replyTo? })`, configured only when `RESEND_API_KEY` + `RESEND_FROM_EMAIL` present; guards both the returned `{ error }` and a thrown network failure; no-ops cleanly otherwise.
+- **12-5 — Contact → Resend.** `POST /api/resend/contact` (zod `{ name, email, subject, message }`) emails `RESEND_TO_EMAIL` from `RESEND_FROM_EMAIL`, reply-to = submitter. **Email-only, no table/migration** (owner decision). Treats a missing `RESEND_TO_EMAIL` as not-configured. Form shows the approved verbatim "Thanks — your message is on its way."
+- **12-6 — Support email.** `submitSupportRequestAction` best-effort emails the owner after the RPC succeeds; reply-to = the auth-session `user.email` (`profiles` stores no email). Graceful-degrade; confirmation unchanged.
+- **12-7 — Approve/decline email.** `decideApplicationAction` reads the applicant via `admin_list_applications()` by id (the action holds only a boolean + id) and best-effort sends the owner-approved approved/declined body (declined → public `/contact`). Graceful-degrade; `is_admin()` gate untouched.
+- **12-8 — Declined → contact.** Dashboard `!approved` branch reads the caller's own `applications.status` (owner-scoped RLS) and renders the approved declined notice + `/contact` link; pending unchanged. New `.ws-notice-link` style.
+- **12-9 — Env + domain docs.** `SUPABASE-VERCEL-SETUP.md` gained an Email-integrations section (format hints + Resend SPF/DKIM/DMARC steps); S14 rate-limit/Turnstile deferral commented at each public write.
+- **12-10 — Exit gate.** Adversarial **6-lens multi-agent review** (secret-safety · server/client boundary · no-op/fail-closed · input-validation · gating-intact · correctness/build, each finding adversarially verified) = **PASS, 0 blocking**; one non-blocking Preview-env finding fixed (see Deviations). Updated `PROJECT-STATUS.md` §1/§2/§6/§8 + `ROADMAP.md` S12 row. Added `docs/EMAIL-SETUP-CHECKLIST.md` (owner switch-on guide).
+
+**Invariants held:** the `is_approved` approval gate + the `is_admin()` admin gate + the approval-gated `submit_support_request` are byte-identical (additive email code only); **no DB migration**; CSP unchanged (`connect-src 'self'` — both providers run server-side); all six provider keys server-only (no `NEXT_PUBLIC_`); no secrets in the diff; `.env.local` untracked.
 
 ## Prompt used
+
+<details><summary>Exact implementation prompt</summary>
 
 ```text
 You are my senior engineer for the Palestine House website, working in Claude Code.
@@ -105,64 +108,29 @@ Open scope questions to raise at the relevant gate (don't decide silently):
 - Failed-send posture per write (recommended: graceful-degrade for contact/support/approval where the data is captured + logged; fail-closed for the public lead-magnet/contact submissions in Production so nothing is silently dropped — confirm the exact line for each).
 ```
 
-## Independent review (required)
+</details>
 
-This sprint touches **secrets** (six provider API keys) and **public writes** (apply, contact, lead-magnet) — per `AGENTS.md` an independent Codex review is **required** before merge. Run it on the branch diff after 12-10, then fix any blocking finding and re-review.
+## Checks & results
 
-```text
-You are my independent code reviewer for the Palestine House website.
-Read AGENTS.md in the repo root — it defines your rules, priorities, and the
-blocking gating checks. Review the branch DIFF only (vs main), not the whole repo.
+typecheck ✅ · lint ✅ · build ✅ (46 routes; `/api/mailchimp/booklet-capture` + `/api/resend/contact` dynamic `ƒ`). Run after every sub-step.
 
-This is the S12 email-automation sprint (Mailchimp + Resend wired as no-op
-placeholders). Focus your review on:
-- Secret safety: no provider key (MAILCHIMP_API_KEY, MAILCHIMP_SERVER_PREFIX,
-  MAILCHIMP_AUDIENCE_ID, RESEND_API_KEY, RESEND_FROM_EMAIL, RESEND_TO_EMAIL)
-  behind a NEXT_PUBLIC_* name, hardcoded, committed, or read in client code;
-  no .env.local or secret value in the diff.
-- Server/client boundary: Mailchimp/Resend SDKs are called ONLY from Route
-  Handlers / Server Actions / server-only modules — never the browser.
-- No-op + fail-closed envelope: each integration no-ops cleanly (and never
-  FAKES a send) when its env vars are absent; the PUBLIC writes (apply, contact,
-  lead-magnet) fail closed in Production rather than silently dropping a
-  submission; support + approval/decline degrade gracefully (data stored/flipped,
-  email failure logged).
-- Input validation: every Route Handler zod-validates its body; params/headers
-  treated as untrusted; error responses leak no stack traces or upstream bodies.
-- Gating intact: the approval gate on submit_support_request and the is_admin()
-  gate on admin_set_application_status / decideApplicationAction are unchanged;
-  the declined→contact path links only to PUBLIC /contact (no privileged leak).
-- CSP/headers unchanged (connect-src 'self'); no new migration unless an
-  approved table/RPC ships with up + .down.sql + RLS default-deny / grants.
+- **Exit-gate review (workflow):** adversarial 6-lens (secret-safety · server/client boundary · no-op/fail-closed · input-validation · gating-intact · correctness/build) with each finding adversarially verified = **PASS, 0 blocking.** One non-blocking Preview-env finding fixed.
+- **Independent Codex review:** **Approve — zero blocking, no fix/re-review cycle.** Confirmed `.env.local` not in diff, provider vars server-only (no `NEXT_PUBLIC_`), SDK imports confined to server-only modules, public routes zod + fail-closed via `VERCEL_ENV`, admin/support gates intact, CSP/headers unchanged (`connect-src 'self'`).
+- **Manual delivery smoke:** intentionally **not** run — this sprint ships no-op placeholders; the owner verifies live once the keys + Resend domain exist (see `docs/EMAIL-SETUP-CHECKLIST.md`).
 
-NOTE: Upstash rate-limiting + Turnstile on public writes are a known,
-owner-accepted deferral to S14 (ROADMAP S14 row; PROJECT-STATUS §5/§7) — do NOT
-block on the SECURITY-CHECKLIST §15 rate-limit/Turnstile clause for the new
-lead-magnet/contact routes; for THIS sprint treat zod-validation +
-fail-closed-in-Production + the deferred-gap comment as the bar.
+## Deviations & learnings
 
-Report serious issues only — correctness, security/data safety, secret leaks,
-broken gating, App Router boundary mistakes, build/deploy/env risks. No style
-nits; do not critique approved copy or the locked design. Any failure of the
-AGENTS.md "Palestine House gating checks" (other than the noted S14 deferral) is
-blocking.
+- **Fail-closed must key on `VERCEL_ENV`, not `NODE_ENV`** (the one exit-gate fix). Vercel sets `NODE_ENV=production` for **both** Production and Preview builds, so a `NODE_ENV`-gated fail-closed would have made keyless PR Previews return 503 + a form error instead of the intended honest no-op. Single-sourced as `isProductionRuntime()` in `src/lib/env.ts` (used by both public routes + both helpers' dev-notices). **Reusable in S14** (the same distinction applies to rate-limit/Turnstile fail-closed posture).
+- **Two lead forms, not one.** The booklet capture is split into `LeadForm` (sections) **and** `FooterLeadForm` (layout); the brief named only the first. Wired both — otherwise the footer would keep silently no-op'ing.
+- **Local `.d.ts` shim instead of `@types`.** `@mailchimp/mailchimp_marketing` ships no types; rather than add a third package (the brief said "only these two"), added a minimal `src/types/mailchimp__mailchimp_marketing.d.ts` covering just the SDK surface used. `resend` ships its own types.
+- **No newsletter opt-in** (owner decision) → the brief's `newsletter?: boolean` field was dropped; the booklet route schema is `{ email, booklet }` and every form sends `booklet:'both'` (the `single` prop is only a button-label nicety). The owner judged a checkbox would add an element not in the locked mockup.
+- **All four scope decisions landed zero-migration:** tag on apply-success · contact email-only (no `contacts` table) · approval-email via the existing `admin_list_applications()` (no returns-email RPC). So **no migration this sprint** (next free was 0025, unused).
+- **`page-copy` absent from this clone** (gitignored — OneDrive is canon, and the owner clones fresh per sprint). Read the brand-voice / contact / dashboard / admin canon from the `AI Reference Materials\page-copy\` mirror; confirmed the contact confirmation verbatim ("Thanks — your message is on its way.").
+- **Process note:** the exit-gate review workflow first failed on a script typo (`confirmedReal` shorthand vs the declared `realConfirmed`) after all agents had run; resumed from the cached run ID, so only the fixed assembly re-ran (no agents re-spent).
 
-Return: Blocking issues · Non-blocking issues · Missing checks · exact
-file:line locations · suggested fix for each · merge recommendation
-(approve / request changes / blocking). Do not make changes, push, or merge.
-```
+## Follow-ups
 
-## Re-validate before running
-
-This brief was authored against `main` at the close of S9 (latest migration **0022**) with **S10 active and S11 not yet built**. Before pasting the prompt, re-confirm against live repo state — these will likely have moved:
-
-- **Dependencies merged:** S3 (auth/apply — `applyAction`) and S4 (approve/decline — `decideApplicationAction` + the `admin_set_application_status` RPC) are both on `main`. ROADMAP lists the S12 dependency cell as **S3 only**; this brief additionally requires **S4** because the deferred approval/decline email hooks `decideApplicationAction` + `admin_set_application_status` (S4) — both must be on `main`. **Also confirm S10 and S11 are merged** (they run before S12 in the D-S10-b sequence) so you branch from the right `main`.
-- **Live file paths + signatures** (re-read before editing each — S10/S11 may have refactored them):
-  - `src/components/sections/lead-form.tsx`, `src/components/sections/contact-form.tsx` (public no-op forms today; the in-file "Sprint 8a/8b" comments are stale — S8 became Visual Polish, the email wiring is S12).
-  - `src/lib/auth/actions.ts` (`applyAction` — insert then `redirect('/dashboard')`), `src/lib/support/actions.ts` (`submitSupportRequestAction` — after the `submit_support_request` RPC; the action already holds the auth user, so reply-to = `user.email`), `src/lib/admin/actions.ts` (`decideApplicationAction` — after the `admin_set_application_status` RPC; the action holds only the application `id`, NOT the applicant email).
-  - `src/app/(workspace)/dashboard/page.tsx` (the `!approved` branch — the declined→contact injection point).
-- **Existing RPCs/tables to hook (no new migration expected — but confirm the approval-email read path):** `admin_set_application_status` (0009, returns boolean only), `admin_list_applications` (0009, the only admin path that returns `applications.email`), `submit_support_request` (0019), `applications` (status `pending|approved|declined`, RLS owner-scoped), `support_requests`, `profiles` (`is_approved`; does NOT store email). The applicant email for the approval/decline email comes from `admin_list_applications()` or a new returns-email RPC — not directly from the action, and not from `profiles`.
-- **Latest migration number = 0022.** A `contacts` audit table (or a returns-email RPC), if the owner approves it, would be the **next free number — 0023 today**, but S11 ships migrations, so confirm the next free number against `supabase/sql/migrations/` at run time, and ship up + `.down.sql` + RLS default-deny / grants TEST-first per `WORKFLOW.md` §14.
-- **Env var names** are already in `.env.example` + `docs/SUPABASE-VERCEL-SETUP.md` (all six server-only, no `NEXT_PUBLIC_`); confirm none drifted before relying on them.
-- **CSP** (`next.config.ts`) needs **no change** — both providers run server-side (`connect-src 'self'`).
-- **Out of scope:** Upstash rate-limiting + Turnstile are **S14** — do not add them; leave the deferred-gap comments only. `SECURITY-CHECKLIST.md` §15's rate-limit/Turnstile clause is that S14 deferral (ROADMAP S14 row; `PROJECT-STATUS.md` §5/§7) — known and owner-accepted, not a blocker for this sprint's new public-write routes. No real-delivery verification this sprint — the owner verifies once the keys + the SPF/DKIM/DMARC-verified Resend domain exist.
+- **Switch-on (owner, env-vars-only):** add the six server-only `MAILCHIMP_*` / `RESEND_*` vars in Vercel + verify the Resend SPF/DKIM/DMARC sending domain, then redeploy. Step-by-step: **`docs/EMAIL-SETUP-CHECKLIST.md`** (and the technical matrix in `docs/SUPABASE-VERCEL-SETUP.md`).
+- **Booklet delivery needs a Mailchimp automation** (tag → send): the site only *tags* the contact; a Mailchimp journey keyed on `lead-booklet-a/b` actually emails the booklet. Flagged in the checklist.
+- **Merge path:** open the PR → Vercel-Preview check (forms should honestly no-op to success on the keyless Preview) → merge → `/close`, then flip this record's Date merged / PR.
+- **Deferred to S14:** Upstash rate-limiting + Turnstile on the public writes (deferred-gap comments in place at each route) — the `SECURITY-CHECKLIST.md` §15 clause for these routes is the accepted S14 deferral (`PROJECT-STATUS.md` §5/§7).
