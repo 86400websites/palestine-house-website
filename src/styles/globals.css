@@ -2909,6 +2909,10 @@
   resize: vertical;
   min-height: 7rem;
 }
+.adm-field-hint {
+  font: var(--weight-regular) var(--text-sm)/1.45 var(--font-body);
+  color: var(--subtle-foreground);
+}
 .adm-form-msg {
   font: var(--weight-medium) var(--text-sm)/1.4 var(--font-body);
   margin: 0;
