@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import mailchimp from "@mailchimp/mailchimp_marketing";
+import { isProductionRuntime } from "@/lib/env";
 
 /* Mailchimp Marketing helper (S12 12-1) — server-only.
 
@@ -46,9 +47,9 @@ export async function upsertContact({
 }): Promise<MailchimpResult> {
   const env = readEnv();
   if (!env) {
-    // Local/Preview default: no keys → honest no-op. Dev-only notice; silent in
-    // production so setup gaps are visible locally without log noise live.
-    if (process.env.NODE_ENV !== "production") {
+    // Local/Preview default: no keys → honest no-op. Notice shows in local +
+    // Preview (where setup is debugged); silent only in real production.
+    if (!isProductionRuntime()) {
       console.info("[mailchimp] not configured — skipping upsertContact");
     }
     return { configured: false };

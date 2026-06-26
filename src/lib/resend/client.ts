@@ -1,5 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
+import { isProductionRuntime } from "@/lib/env";
 
 /* Resend transactional-email helper (S12 12-4) — server-only.
 
@@ -45,9 +46,9 @@ export async function sendEmail({
 }): Promise<ResendResult> {
   const env = readEnv();
   if (!env) {
-    // Local/Preview default: no keys → honest no-op. Dev-only notice; silent in
-    // production so setup gaps are visible locally without log noise live.
-    if (process.env.NODE_ENV !== "production") {
+    // Local/Preview default: no keys → honest no-op. Notice shows in local +
+    // Preview (where setup is debugged); silent only in real production.
+    if (!isProductionRuntime()) {
       console.info("[resend] not configured — skipping sendEmail");
     }
     return { configured: false };

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { upsertContact } from "@/lib/mailchimp/client";
+import { isProductionRuntime } from "@/lib/env";
 
 /* Lead-magnet booklet capture (S12 12-2) — public POST.
 
@@ -45,9 +46,11 @@ export async function POST(req: Request) {
   const result = await upsertContact({ email, tags: [...TAGS[booklet]] });
 
   if (!result.configured) {
-    // Local/Preview: honest no-op success. Production: a required key is missing
-    // → fail closed rather than silently drop the address.
-    if (process.env.NODE_ENV === "production") {
+    // Local/Preview: honest no-op success. Real production: a required key is
+    // missing → fail closed rather than silently drop the address. Keyed on the
+    // deployment target (VERCEL_ENV), since NODE_ENV is "production" on Preview
+    // builds too.
+    if (isProductionRuntime()) {
       return NextResponse.json({ ok: false }, { status: 503 });
     }
     return NextResponse.json({ ok: true });

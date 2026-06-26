@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendEmail } from "@/lib/resend/client";
+import { isProductionRuntime } from "@/lib/env";
 
 /* Contact form → Resend (S12 12-5) — public POST.
 
@@ -54,9 +55,11 @@ export async function POST(req: Request) {
     : ({ configured: false } as const);
 
   if (!result.configured) {
-    // Local/Preview: honest no-op success. Production: required config missing →
-    // fail closed rather than silently drop the message.
-    if (process.env.NODE_ENV === "production") {
+    // Local/Preview: honest no-op success. Real production: required config
+    // missing → fail closed rather than silently drop the message. Keyed on the
+    // deployment target (VERCEL_ENV), since NODE_ENV is "production" on Preview
+    // builds too.
+    if (isProductionRuntime()) {
       return NextResponse.json({ ok: false }, { status: 503 });
     }
     return NextResponse.json({ ok: true });
