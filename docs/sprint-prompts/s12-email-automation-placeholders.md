@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date merged** | _Not yet merged_ — record saved at **build-complete (Codex-approved), pre-merge**, 2026-06-27. Update on merge. |
-| **Branch / PR** | `claude/sprint-s12-email-automation-placeholders` / _PR not yet opened_ — 14 commits `1d6a865…9659c57`, pushed. |
+| **Date merged** | 2026-06-27 — PR #41 (merge `405643b`); post-merge `/close` = **GO**. |
+| **Branch / PR** | `claude/sprint-s12-email-automation-placeholders` (deleted post-merge) / **#41** (merge `405643b`) |
 | **Goal** | Wire Mailchimp + Resend across the six public/gated email touchpoints behind honest no-op placeholders, so the owner goes live by **adding keys + verifying the Resend sending domain alone** — no real-delivery test, no migration. |
 
 ## What shipped
