@@ -79,7 +79,9 @@ grant execute on function public.admin_add_admin_by_email(text) to authenticated
 
 -- Remove an admin, with lockout guards: refuses to remove yourself or the last
 -- remaining admin (clear neutral message). Returns false when the target was not
--- an admin (neutral no-op).
+-- an admin (neutral no-op). Concurrent removals are serialized with a table lock
+-- so two admins removing each other at once can't race the last-admin guard into
+-- an empty table.
 create or replace function public.admin_remove_admin(p_user_id uuid)
 returns boolean
 language plpgsql
@@ -92,11 +94,18 @@ begin
   if not public.is_admin() then
     raise exception 'not authorized' using errcode = '42501';
   end if;
+  -- Serialize membership removals BEFORE reading the count. Two admins removing
+  -- each other concurrently would otherwise both read count = 2, both pass the
+  -- last-admin guard, and both delete -> an empty admins table (lockout, a
+  -- TOCTOU race). SHARE ROW EXCLUSIVE conflicts with itself, so a second
+  -- concurrent admin_remove_admin waits for the first to commit and then
+  -- re-reads an accurate count. Plain SELECTs (is_admin/is_approved) take
+  -- ACCESS SHARE and are NOT blocked.
+  lock table public.admins in share row exclusive mode;
   if p_user_id = (select auth.uid()) then
     raise exception 'cannot remove yourself' using errcode = '22023';
   end if;
-  -- Belt-and-suspenders: never delete the only admin. (Given the self-guard
-  -- above, the sole admin is always the caller, so this is defensive.)
+  -- Never delete the last remaining admin (race-safe under the lock above).
   if exists (select 1 from public.admins a where a.user_id = p_user_id)
      and (select count(*) from public.admins) <= 1 then
     raise exception 'cannot remove the last admin' using errcode = '22023';

@@ -83,3 +83,10 @@ from pg_proc
 where pronamespace='public'::regnamespace
   and proname in ('get_elements','get_element','get_academy_modules','get_resources','get_resource_download');
 -- EXPECT: both true (5 functions, all SECURITY DEFINER + pinned).
+
+-- 7) admin_remove_admin serializes concurrent removals (lockout race fix) — the
+--    last-admin guard reads the count under a SHARE ROW EXCLUSIVE table lock so
+--    two admins removing each other at once can't empty the admins table.
+select pg_get_functiondef('public.admin_remove_admin(uuid)'::regprocedure)
+       ilike '%share row exclusive%' as remove_admin_has_serialization_lock;
+-- EXPECT: true

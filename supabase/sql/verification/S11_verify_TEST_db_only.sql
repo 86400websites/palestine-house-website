@@ -233,3 +233,10 @@ begin;
   select public.admin_remove_admin('NONADMIN_UUID') as removed_true;
 rollback;
 -- EXPECT: removed_true = true.
+
+-- 12b) admin_remove_admin serializes concurrent removals so the last-admin guard
+--      can't be raced into an empty admins table (TOCTOU). A true concurrency
+--      test needs two sessions; this asserts the serialization lock is present.
+select pg_get_functiondef('public.admin_remove_admin(uuid)'::regprocedure)
+       ilike '%share row exclusive%' as remove_admin_has_serialization_lock;
+-- EXPECT: remove_admin_has_serialization_lock = true
