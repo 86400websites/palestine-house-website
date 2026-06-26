@@ -97,6 +97,7 @@ function SectionBanner({
 export function ElementTabs({ data }: { data: ElementTabsData }) {
   const [tab, setTab] = React.useState<TabValue>("overview");
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+  const tablistRef = React.useRef<HTMLDivElement | null>(null);
 
   // Open a specific tab when linked with a matching hash (e.g. /elements/slug
   // #video from the Build tracker's "Watch video"). Runs post-mount so the
@@ -105,6 +106,17 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
     const hash = window.location.hash.slice(1);
     if (TABS.some((t) => t.value === hash)) setTab(hash as TabValue);
   }, []);
+
+  // Keep the active tab visible in the mobile horizontal-scroll strip —
+  // horizontal only, so the page never jumps (covers the #video deep link +
+  // keyboard nav).
+  React.useEffect(() => {
+    const container = tablistRef.current;
+    const el = tabRefs.current[TABS.findIndex((t) => t.value === tab)];
+    if (!container || !el) return;
+    const target = el.offsetLeft - (container.clientWidth - el.clientWidth) / 2;
+    container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [tab]);
 
   // WAI-ARIA APG tablist keyboard support: arrows move + select, focus follows.
   function onTabKeyDown(
@@ -153,6 +165,7 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
         className="ws-tabs"
         role="tablist"
         aria-label="Topic sections"
+        ref={tablistRef}
         style={{ marginTop: "var(--space-8)" }}
       >
         {TABS.map((t, index) => {

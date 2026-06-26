@@ -1337,6 +1337,28 @@
   font: var(--weight-medium) var(--text-xs)/1.5 var(--font-body);
   color: var(--ink-700);
 }
+/* Mobile: the six-tab strip scrolls horizontally as a tidy single row instead
+   of wrapping into ragged rows; the action-bar meta drops its right-push (S10
+   10-6). element-tabs keeps the active tab scrolled into view. */
+@media (max-width: 640px) {
+  .ws-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ws-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .ws-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: var(--space-3) var(--space-2);
+  }
+  .ws-actionbar-meta {
+    margin-left: 0;
+  }
+}
 
 .ws-tabpanel {
   margin-top: var(--space-6);
