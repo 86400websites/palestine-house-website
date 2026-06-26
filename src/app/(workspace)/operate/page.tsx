@@ -23,7 +23,10 @@ export const metadata: Metadata = { title: "Operate & Program" };
 
 // Operating groupings + recurring routines, verbatim from the approved Operate
 // mockup (WS_OPERATE_GROUPS). All 30 topics appear once across the groups — a
-// locked curation decision, not invented here.
+// locked curation decision, not invented here. S10 (10-2) reviewed the
+// operate-vs-program split and intentionally kept all 30 here: focus area D
+// (Programming & Aswātna — D1/D2/D3) already leads the page, so program reads
+// distinct from the operating routines below it (owner decision, D-S10-b).
 const OPERATE_GROUPS: { name: string; routine: string; codes: string[] }[] = [
   {
     name: "Programming & Aswātna",
