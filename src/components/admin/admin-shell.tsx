@@ -1,19 +1,16 @@
 import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
 import { signOutAction } from "@/lib/auth/actions";
+import { AdminNav } from "@/components/admin/admin-nav";
 
 /* Internal HQ admin chrome (docs/page-designs/shared/admin-chrome.jsx) —
-   function over polish, no artwork. Only Approvals is in scope for MVP
-   (Content + Partner interest are post-MVP), so the nav carries one
-   destination. Gating lives in the admin layout. */
-
-const NAV = [{ key: "approvals", label: "Approvals", href: "/admin/approvals" }];
+   function over polish, no artwork. The nav (Approvals · Content) is
+   route-aware (AdminNav), so the active destination is derived from the path,
+   not a prop. Gating lives in the admin layout. */
 
 export function AdminShell({
-  active,
   children,
 }: {
-  active: string;
   children: React.ReactNode;
 }) {
   return (
@@ -26,18 +23,7 @@ export function AdminShell({
           <Logo href="/dashboard" size={20} />
           <span className="adm-badge">HQ Admin</span>
         </div>
-        <nav className="adm-nav" aria-label="Admin">
-          {NAV.map((n) => (
-            <Link
-              key={n.key}
-              href={n.href}
-              className={active === n.key ? "is-active" : undefined}
-              aria-current={active === n.key ? "page" : undefined}
-            >
-              {n.label}
-            </Link>
-          ))}
-        </nav>
+        <AdminNav />
         <div className="adm-topbar-right">
           <Link href="/dashboard">Partner workspace</Link>
           <form action={signOutAction}>
