@@ -116,7 +116,11 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
     const el = tabRefs.current[TABS.findIndex((t) => t.value === tab)];
     if (!container || !el) return;
     const target = el.offsetLeft - (container.clientWidth - el.clientWidth) / 2;
-    container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    container.scrollTo({
+      left: Math.max(0, target),
+      behavior: reduce ? "auto" : "smooth",
+    });
   }, [tab]);
 
   // WAI-ARIA APG tablist keyboard support: arrows move + select, focus follows.

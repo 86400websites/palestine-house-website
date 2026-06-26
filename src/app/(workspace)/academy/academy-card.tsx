@@ -13,8 +13,11 @@ import type { AcademyRow } from "@/lib/workspace/types";
 
 export function AcademyCard({ module: m }: { module: AcademyRow }) {
   const [playing, setPlaying] = React.useState(false);
-  const isSample = !m.youtube_url;
-  const embed = youTubeEmbedUrl(m.youtube_url ?? sampleVideoUrl(m.element_code));
+  // A valid real youtube_url wins; an absent OR malformed one falls back to a
+  // clearly-marked sample, so a typo'd real URL never becomes a dead card.
+  const realEmbed = youTubeEmbedUrl(m.youtube_url);
+  const isSample = !realEmbed;
+  const embed = realEmbed ?? youTubeEmbedUrl(sampleVideoUrl(m.element_code));
 
   return (
     <div className="vid-card">

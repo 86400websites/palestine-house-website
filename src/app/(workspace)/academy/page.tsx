@@ -89,9 +89,9 @@ export default async function AcademyPage() {
 
       <p className="vid-note">
         <em>
-          The clips marked “Sample” are placeholders while each topic’s own video
-          is produced. The written guides and templates are complete and ready
-          now.
+          The clips marked &ldquo;Sample&rdquo; are placeholders while each
+          topic&rsquo;s own video is produced. The written guides and templates
+          are complete and ready now.
         </em>
       </p>
     </div>
