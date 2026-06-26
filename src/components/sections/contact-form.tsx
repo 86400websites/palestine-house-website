@@ -7,20 +7,41 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-/* Contact form (contact.md). Renders fully but no-ops cleanly — Resend
-   wiring arrives in Sprint 8b. Until then submitting tells the truth; the
-   approved confirmation ("Thanks — your message is on its way.") ships with
-   the real send in S8. */
+/* Contact form (contact.md). Posts to the server-side Resend route (S12 12-5) —
+   the provider is never called from the browser. On success the approved
+   confirmation ("Thanks — your message is on its way."); on failure the standard
+   retry line; never a faked send. */
 export function ContactForm() {
-  const [sent, setSent] = React.useState(false);
+  const [status, setStatus] = React.useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const busy = status === "sending" || status === "sent";
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy) return;
+    const data = new FormData(e.currentTarget);
+    const body = {
+      name: data.get("name")?.toString() ?? "",
+      email: data.get("email")?.toString() ?? "",
+      subject: data.get("subject")?.toString() ?? "",
+      message: data.get("message")?.toString() ?? "",
+    };
+    setStatus("sending");
+    try {
+      const res = await fetch("/api/resend/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      setStatus(res.ok ? "sent" : "error");
+    } catch {
+      setStatus("error");
+    }
+  }
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSent(true);
-      }}
-    >
+    <form onSubmit={onSubmit}>
       <div className="contact-row">
         <div className="contact-field">
           <Label htmlFor="c-name">Name</Label>
@@ -30,6 +51,7 @@ export function ContactForm() {
             placeholder="Your name"
             autoComplete="name"
             required
+            disabled={status === "sent"}
             className="bg-white"
           />
         </div>
@@ -42,6 +64,7 @@ export function ContactForm() {
             placeholder="you@email.com"
             autoComplete="email"
             required
+            disabled={status === "sent"}
             className="bg-white"
           />
         </div>
@@ -53,6 +76,7 @@ export function ContactForm() {
           name="subject"
           placeholder="What’s this about?"
           required
+          disabled={status === "sent"}
           className="bg-white"
         />
       </div>
@@ -64,18 +88,23 @@ export function ContactForm() {
           rows={6}
           placeholder="Tell us a little more."
           required
+          disabled={status === "sent"}
           className="bg-white"
         />
       </div>
       <div className="contact-actions">
-        <Button size="lg" type="submit">
+        <Button size="lg" type="submit" disabled={busy}>
           Send message
           <ArrowRight aria-hidden="true" />
         </Button>
-        {/* Approved micro-copy stays static; the live region only fills on submit. */}
-        {sent ? (
+        {/* Approved micro-copy stays static; the live region fills on submit. */}
+        {status === "sent" ? (
           <span className="contact-help" role="status">
-            Messages aren’t being delivered just yet — check back soon.
+            Thanks — your message is on its way.
+          </span>
+        ) : status === "error" ? (
+          <span className="contact-help" role="status">
+            Something went wrong. Please try again.
           </span>
         ) : (
           <span className="contact-help">We’ll get back to you.</span>
