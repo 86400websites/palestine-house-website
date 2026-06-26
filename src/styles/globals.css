@@ -2720,6 +2720,43 @@
   max-width: var(--measure);
 }
 
+/* Content-admin hub: link cards to each managed section (S11 11-2). */
+.adm-hub {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+.adm-hub-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  padding: var(--space-5);
+  text-decoration: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.adm-hub-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.adm-hub-card h2 {
+  font: var(--weight-medium) var(--text-lg)/1.2 var(--font-display);
+  color: var(--foreground);
+  margin: 0;
+}
+.adm-hub-card p {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
 .adm-status {
   display: inline-flex;
   align-items: center;
