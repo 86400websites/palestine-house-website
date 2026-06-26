@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date merged** | _pending merge_ — built + pushed 2026-06-26/27; migrations **0023 + 0024 applied + verified on TEST and PRODUCTION** (PROD applied by owner, engine re-verified read-only 2026-06-27) |
-| **Branch / PR** | `claude/sprint-s11-admin-content-management` / #— (open; merge pending owner) |
+| **Date merged** | 2026-06-27 — migrations **0023 + 0024 applied + verified on TEST and PRODUCTION** (PROD applied by owner, engine re-verified read-only); post-merge `/close` = **GO** |
+| **Branch / PR** | `claude/sprint-s11-admin-content-management` / **#39** (merge `040ad6b`) |
 | **Goal** | Give HQ a CRUD admin panel at `/admin/content`, behind the existing `is_admin()` gate, so the client self-manages all private-page content (the 30 element bodies, academy videos, resource/template metadata) + add/remove admins — through new hardened RLS-safe write RPCs, no scripts. |
 
 ## What shipped
