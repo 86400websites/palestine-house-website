@@ -94,6 +94,14 @@ export function ElementTabs({ data }: { data: ElementTabsData }) {
   const [tab, setTab] = React.useState<TabValue>("overview");
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
+  // Open a specific tab when linked with a matching hash (e.g. /elements/slug
+  // #video from the Build tracker's "Watch video"). Runs post-mount so the
+  // server + client both render "overview" first — no hydration mismatch.
+  React.useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (TABS.some((t) => t.value === hash)) setTab(hash as TabValue);
+  }, []);
+
   // WAI-ARIA APG tablist keyboard support: arrows move + select, focus follows.
   function onTabKeyDown(
     e: React.KeyboardEvent<HTMLButtonElement>,
