@@ -2022,6 +2022,85 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--space-5);
 }
+
+/* Welcome dashboard — four premium nav cards (S10 10-10). The art slot holds an
+   icon now; an image can drop in later with no layout change. */
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+.dash-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+.dash-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+.dash-card-art {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--brand-primary-tint);
+  color: var(--brand-primary);
+}
+.dash-card-title {
+  font: var(--weight-medium) var(--text-lg)/1.2 var(--font-display);
+  color: var(--foreground);
+}
+.dash-card-line {
+  font: var(--weight-regular) var(--text-sm)/1.5 var(--font-body);
+  color: var(--muted-foreground);
+  flex: 1;
+  text-wrap: pretty;
+}
+.dash-card-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dash-card-bar {
+  display: block;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--paper-200);
+  overflow: hidden;
+}
+.dash-card-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--brand-primary);
+  border-radius: inherit;
+}
+.dash-card-meta {
+  font: var(--weight-medium) var(--text-xs)/1 var(--font-body);
+  color: var(--subtle-foreground);
+}
+.dash-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font: var(--weight-semibold) var(--text-sm)/1 var(--font-body);
+  color: var(--brand-primary);
+}
 .dash-stats {
   display: flex;
   flex-wrap: wrap;
