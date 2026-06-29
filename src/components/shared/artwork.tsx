@@ -2,13 +2,16 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type ArtworkProps = {
-  /** Asset ID, e.g. "PH-HOME-01" — file at /public/assets/art/<id>.png */
-  assetId: string;
+  /** Asset ID, e.g. "PH-HOME-01" — file at /public/assets/art/<id>.(jpg|png). */
+  assetId: ArtworkAssetId;
   alt: string;
   /** Fixed height in px (block thumbnails); otherwise size via className. */
   height?: number;
   /** CSS aspect-ratio, e.g. "16 / 9" — the mockups size art by ratio. */
   ratio?: string;
+  /** Use contain only where cropping would harm a composed/diagram image. */
+  fit?: "cover" | "contain";
+  objectPosition?: string;
   /** Tighter mask for small block-print thumbnails. */
   block?: boolean;
   rounded?: boolean;
@@ -17,6 +20,39 @@ type ArtworkProps = {
   className?: string;
 };
 
+const ARTWORK_SOURCES = {
+  "PH-ABOUT-01": "/assets/art/PH-ABOUT-01.jpg",
+  "PH-APPLY-01": "/assets/art/PH-APPLY-01.jpg",
+  "PH-BRING-01": "/assets/art/PH-BRING-01.jpg",
+  "PH-BRING-02": "/assets/art/PH-BRING-02.jpg",
+  "PH-EXP-01": "/assets/art/PH-EXP-01.jpg",
+  "PH-EXP-02a": "/assets/art/PH-EXP-02a.jpg",
+  "PH-EXP-02b": "/assets/art/PH-EXP-02b.jpg",
+  "PH-EXP-03a": "/assets/art/PH-EXP-03a.jpg",
+  "PH-EXP-03b": "/assets/art/PH-EXP-03b.jpg",
+  "PH-EXP-03c": "/assets/art/PH-EXP-03c.jpg",
+  "PH-EXP-03d": "/assets/art/PH-EXP-03d.jpg",
+  "PH-EXP-03e": "/assets/art/PH-EXP-03e.jpg",
+  "PH-FOOD-01": "/assets/art/PH-FOOD-01.jpg",
+  "PH-FOOD-02": "/assets/art/PH-FOOD-02.jpg",
+  "PH-HIW-01": "/assets/art/PH-HIW-01.jpg",
+  "PH-HIW-02": "/assets/art/PH-HIW-02.jpg",
+  "PH-HIW-03": "/assets/art/PH-HIW-03.jpg",
+  "PH-HOME-01": "/assets/art/PH-HOME-01.png",
+  "PH-LIVE-01": "/assets/art/PH-LIVE-01.jpg",
+  "PH-LIVE-02": "/assets/art/PH-LIVE-02.jpg",
+  "PH-MODEL-01": "/assets/art/PH-MODEL-01.jpg",
+  "PH-MODEL-02": "/assets/art/PH-MODEL-02.png",
+  "PH-SIGNUP-01": "/assets/art/PH-SIGNUP-01.jpg",
+  "PH-SUPPORT-01": "/assets/art/PH-SUPPORT-01.jpg",
+} as const;
+
+export type ArtworkAssetId = keyof typeof ARTWORK_SOURCES;
+
+export function getArtworkSrc(assetId: ArtworkAssetId) {
+  return ARTWORK_SOURCES[assetId];
+}
+
 /* Original artwork in the house frame: dissolves to the page at the edges,
    never a hard box (design-system/base.css `.ph-art`). */
 export function Artwork({
@@ -24,6 +60,8 @@ export function Artwork({
   alt,
   height,
   ratio,
+  fit = "cover",
+  objectPosition,
   block = false,
   rounded = false,
   sizes = "(max-width: 920px) 100vw, 33vw",
@@ -41,12 +79,12 @@ export function Artwork({
       }}
     >
       <Image
-        src={`/assets/art/${assetId}.png`}
+        src={getArtworkSrc(assetId)}
         alt={alt}
         fill
         sizes={sizes}
         priority={priority}
-        style={{ objectFit: "cover" }}
+        style={{ objectFit: fit, objectPosition }}
       />
     </div>
   );

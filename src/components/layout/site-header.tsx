@@ -7,7 +7,7 @@ import { ChevronDown, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/lib/auth/actions";
 import { Logo } from "@/components/layout/logo";
-import { Artwork } from "@/components/shared/artwork";
+import { Artwork, type ArtworkAssetId } from "@/components/shared/artwork";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -70,7 +70,7 @@ const MEGA_MENUS: Partial<
         head: string;
         items: { label: string; sub: string; href: string }[];
       }[];
-      thumbs: { id: string; cue: string }[];
+      thumbs: { id: ArtworkAssetId; cue: string; objectPosition?: string }[];
     }
   >
 > = {
@@ -94,9 +94,9 @@ const MEGA_MENUS: Partial<
       },
     ],
     thumbs: [
-      { id: "PH-HIW-01", cue: "the quiet corner" },
-      { id: "PH-HIW-02", cue: "hands at work" },
-      { id: "PH-HIW-03", cue: "the room alive" },
+      { id: "PH-HIW-01", cue: "the quiet corner", objectPosition: "50% 56%" },
+      { id: "PH-HIW-02", cue: "hands at work", objectPosition: "50% 54%" },
+      { id: "PH-HIW-03", cue: "the room alive", objectPosition: "50% 58%" },
     ],
   },
   experience: {
@@ -119,9 +119,9 @@ const MEGA_MENUS: Partial<
       },
     ],
     thumbs: [
-      { id: "PH-APPLY-01", cue: "the key turns" },
-      { id: "PH-LIVE-02", cue: "a night live" },
-      { id: "PH-EXP-01", cue: "the main room" },
+      { id: "PH-APPLY-01", cue: "the key turns", objectPosition: "50% 45%" },
+      { id: "PH-LIVE-02", cue: "a night live", objectPosition: "50% 38%" },
+      { id: "PH-EXP-01", cue: "the main room", objectPosition: "50% 45%" },
     ],
   },
 };
@@ -333,6 +333,7 @@ export function SiteHeader() {
                   block
                   rounded
                   sizes="200px"
+                  objectPosition={t.objectPosition}
                 />
               ))}
             </div>

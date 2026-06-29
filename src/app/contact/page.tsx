@@ -38,6 +38,7 @@ export default function ContactPage() {
               assetId="PH-SIGNUP-01"
               alt="An ink-wash illustration of a pointed-arch window with a brass dallah and two cups on a low table, an old city beyond."
               ratio="4 / 5"
+              objectPosition="50% 58%"
               sizes="(max-width: 860px) 100vw, 40vw"
             />
             <p className="contact-art-note">

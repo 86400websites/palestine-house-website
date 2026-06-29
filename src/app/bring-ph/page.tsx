@@ -161,6 +161,7 @@ export default function BringAHousePage() {
               assetId="PH-BRING-02"
               alt="A balanced two-panel ink-wash illustration — on one side a partner's keys and venue, on the other the toolkit HQ brings."
               ratio="16 / 7"
+              objectPosition="50% 32%"
               sizes="(max-width: 992px) 100vw, 992px"
             />
           </Reveal>

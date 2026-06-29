@@ -73,6 +73,7 @@ export default function AboutPage() {
               assetId="PH-EXP-02a"
               alt="An ink-wash illustration of people gathered at the long table of a House, working and talking beneath a tall arched window."
               ratio="16 / 10"
+              objectPosition="50% 54%"
               sizes="(max-width: 1024px) 100vw, 1024px"
             />
           </Reveal>

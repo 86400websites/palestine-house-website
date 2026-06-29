@@ -157,6 +157,7 @@ export default function FocusAreasPage() {
               assetId="PH-EXP-02a"
               alt="An ink-wash illustration of people working and meeting at the long table of a House, beneath a tall arched window."
               ratio="16 / 11"
+              objectPosition="50% 56%"
               sizes="(max-width: 900px) 100vw, 55vw"
               priority
             />

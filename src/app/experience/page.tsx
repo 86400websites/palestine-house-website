@@ -29,30 +29,35 @@ const EXP_PILLARS = [
     name: "Heritage & Memory",
     text: "the recipes, the songs, the stories worth keeping.",
     alt: "A block-print illustration of a dallah pouring coffee into a small cup on a tatreez-edged cloth.",
+    objectPosition: "50% 54%",
   },
   {
     id: "PH-EXP-03b",
     name: "Contemporary Creativity",
     text: "new work from artists making it now.",
     alt: "A block-print illustration of a musician on the low stage of a House.",
+    objectPosition: "50% 50%",
   },
   {
     id: "PH-EXP-03c",
     name: "Education & Exchange",
     text: "talks, workshops, and learning out loud.",
     alt: "A block-print illustration of a study circle around a green table, notebooks open.",
+    objectPosition: "50% 57%",
   },
   {
     id: "PH-EXP-03d",
     name: "Community Activation",
     text: "the dinners, the markets, the reasons to return.",
     alt: "An illustration of friends passing a shared plate down a long dinner table.",
+    objectPosition: "50% 55%",
   },
   {
     id: "PH-EXP-03e",
     name: "Commercial Sustainability",
     text: "the small economy that keeps the doors open.",
     alt: "A block-print illustration of a café counter — a barista, a guest paying, shelves of goods.",
+    objectPosition: "50% 54%",
   },
 ] as const;
 
@@ -169,6 +174,7 @@ export default async function ExperiencePage() {
                     rounded
                     block
                     sizes="(max-width: 700px) 50vw, 20vw"
+                    objectPosition={p.objectPosition}
                   />
                 </div>
                 <h3>{p.name}</h3>
