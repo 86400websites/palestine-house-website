@@ -3,6 +3,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Reveal } from "@/components/motion/reveal";
 import { LoginForm } from "@/components/sections/auth-forms";
+import { getArtworkSrc } from "@/components/shared/artwork";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/safe-redirect";
 
@@ -41,11 +42,11 @@ export default async function LoginPage({
           </div>
           <div className="auth-art" aria-hidden="true">
             <Image
-              src="/assets/art/PH-SIGNUP-01.png"
+              src={getArtworkSrc("PH-SIGNUP-01")}
               alt=""
               fill
               sizes="(max-width: 760px) 0px, 40vw"
-              style={{ objectFit: "cover" }}
+              style={{ objectFit: "cover", objectPosition: "50% 58%" }}
             />
           </div>
         </Reveal>

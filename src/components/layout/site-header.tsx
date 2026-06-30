@@ -7,7 +7,6 @@ import { ChevronDown, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/lib/auth/actions";
 import { Logo } from "@/components/layout/logo";
-import { Artwork } from "@/components/shared/artwork";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -70,7 +69,6 @@ const MEGA_MENUS: Partial<
         head: string;
         items: { label: string; sub: string; href: string }[];
       }[];
-      thumbs: { id: string; cue: string }[];
     }
   >
 > = {
@@ -93,11 +91,6 @@ const MEGA_MENUS: Partial<
         ],
       },
     ],
-    thumbs: [
-      { id: "PH-HIW-01", cue: "the quiet corner" },
-      { id: "PH-HIW-02", cue: "hands at work" },
-      { id: "PH-HIW-03", cue: "the room alive" },
-    ],
   },
   experience: {
     cols: [
@@ -117,11 +110,6 @@ const MEGA_MENUS: Partial<
           { label: "Live programming", sub: "What’s on across the network", href: "/live" },
         ],
       },
-    ],
-    thumbs: [
-      { id: "PH-APPLY-01", cue: "the key turns" },
-      { id: "PH-LIVE-02", cue: "a night live" },
-      { id: "PH-EXP-01", cue: "the main room" },
     ],
   },
 };
@@ -323,19 +311,6 @@ export function SiteHeader() {
                 </div>
               </div>
             ))}
-            <div className="phx-mega-thumbs">
-              {panel.thumbs.map((t) => (
-                <Artwork
-                  key={t.id}
-                  assetId={t.id}
-                  alt=""
-                  height={150}
-                  block
-                  rounded
-                  sizes="200px"
-                />
-              ))}
-            </div>
           </div>
         </div>
       )}

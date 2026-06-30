@@ -6,7 +6,6 @@ import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { LeadForm } from "@/components/sections/lead-form";
 import { SessionCard } from "@/components/shared/session-card";
 import { getLiveSessions, groupSessions } from "@/lib/live/sessions";
 
@@ -29,30 +28,35 @@ const EXP_PILLARS = [
     name: "Heritage & Memory",
     text: "the recipes, the songs, the stories worth keeping.",
     alt: "A block-print illustration of a dallah pouring coffee into a small cup on a tatreez-edged cloth.",
+    objectPosition: "50% 54%",
   },
   {
     id: "PH-EXP-03b",
     name: "Contemporary Creativity",
     text: "new work from artists making it now.",
     alt: "A block-print illustration of a musician on the low stage of a House.",
+    objectPosition: "50% 50%",
   },
   {
     id: "PH-EXP-03c",
     name: "Education & Exchange",
     text: "talks, workshops, and learning out loud.",
     alt: "A block-print illustration of a study circle around a green table, notebooks open.",
+    objectPosition: "50% 57%",
   },
   {
     id: "PH-EXP-03d",
     name: "Community Activation",
     text: "the dinners, the markets, the reasons to return.",
     alt: "An illustration of friends passing a shared plate down a long dinner table.",
+    objectPosition: "50% 55%",
   },
   {
     id: "PH-EXP-03e",
     name: "Commercial Sustainability",
     text: "the small economy that keeps the doors open.",
     alt: "A block-print illustration of a café counter — a barista, a guest paying, shelves of goods.",
+    objectPosition: "50% 54%",
   },
 ] as const;
 
@@ -169,6 +173,7 @@ export default async function ExperiencePage() {
                     rounded
                     block
                     sizes="(max-width: 700px) 50vw, 20vw"
+                    objectPosition={p.objectPosition}
                   />
                 </div>
                 <h3>{p.name}</h3>
@@ -255,19 +260,6 @@ export default async function ExperiencePage() {
             HQ.
           </p>
           <ApplyCta secondaryHref="/bring-ph" secondaryLabel="See what it takes" />
-        </Reveal>
-      </section>
-
-      {/* 7 — Lead magnet */}
-      <section className="ph-section bg-hero">
-        <Reveal className="ph-container leadmagnet">
-          <p className="ph-eyebrow">Free read</p>
-          <h2>Start with a free read.</h2>
-          <p className="leadmagnet-books">
-            <strong>The House Promise</strong> — what a House is, and why it
-            matters.
-          </p>
-          <LeadForm single idPrefix="exp-lead" />
         </Reveal>
       </section>
     </>

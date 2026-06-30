@@ -139,6 +139,7 @@ export default function ModelPage() {
               assetId="PH-MODEL-02"
               alt="A line diagram of three pointed arches — Global HQ (steward & custodian), the Local Partner (licensee & operator), and Aswātna (people & community) — linked by license and support. Three layers, one mission."
               ratio="1456 / 900"
+              fit="contain"
               sizes="(max-width: 960px) 100vw, 960px"
             />
           </Reveal>

@@ -14,7 +14,6 @@ import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { LeadForm } from "@/components/sections/lead-form";
 
 /* Our Support (/our-support) — copy verbatim from docs/page-copy/
    01-public-pages/our-support.md; layout from docs/page-designs/public/
@@ -233,8 +232,7 @@ export default function OurSupportPage() {
         </Reveal>
       </section>
 
-      {/* 7 — Closing CTA (moved before the lead magnet so the page ends on
-          the booklet block like every other page — owner decision, 2026-06-12) */}
+      {/* 7 — Closing CTA (page closer) */}
       <section className="ph-section-lg">
         <Reveal className="ph-container statement">
           <p className="ph-eyebrow">Behind every House</p>
@@ -246,22 +244,6 @@ export default function OurSupportPage() {
             is reviewed by HQ.
           </p>
           <ApplyCta secondaryHref="/bring-ph" secondaryLabel="See what it takes" />
-        </Reveal>
-      </section>
-
-      {/* 8 — Lead magnet (page closer, consistent with Experience/Bring) */}
-      <section className="ph-section bg-hero">
-        <Reveal className="ph-container leadmagnet">
-          <p className="ph-eyebrow">Free reads</p>
-          <h2>See two of the foundations for yourself — free, no account needed.</h2>
-          <p className="leadmagnet-books">
-            <strong>The House Promise</strong> — what a House is, and why it
-            matters.
-            <br />
-            <strong>Operating Model &amp; Governance</strong> — how a House
-            actually runs.
-          </p>
-          <LeadForm idPrefix="sup-lead" />
         </Reveal>
       </section>
     </>

@@ -60,33 +60,34 @@ export default async function ApplyPage() {
 
   return (
     <>
-      {/* 1 — Hero */}
-      <section className="page-hero is-center">
-        <Reveal className="ph-container page-hero-inner">
-          <p className="ph-eyebrow">Apply</p>
-          <h1>Apply to bring a House to your city.</h1>
-          <p className="ph-lead">
-            This is the one step. Submitting this form creates your account and
-            sends your application to HQ. There’s no separate sign-up — applying
-            and creating an account are the same thing.
-          </p>
-        </Reveal>
+      {/* 1 — Art-led hero (consistent with the other public pages) */}
+      <section className="art-hero">
+        <div className="ph-container art-hero-grid">
+          <Reveal className="art-hero-copy">
+            <p className="ph-eyebrow">Apply</p>
+            <h1>Apply to bring a House to your city.</h1>
+            <p className="ph-lead">
+              This is the one step. Submitting this form creates your account and
+              sends your application to HQ. There’s no separate sign-up — applying
+              and creating an account are the same thing.
+            </p>
+          </Reveal>
+          <Reveal className="art-hero-art">
+            <Artwork
+              assetId="PH-APPLY-01"
+              alt="An ink-wash illustration of a hand turning a key in the pointed-arch door of a House — the first step."
+              ratio="16 / 10"
+              sizes="(max-width: 900px) 100vw, 55vw"
+              priority
+            />
+          </Reveal>
+        </div>
       </section>
 
       {/* 2–5 — Context + the form */}
       <section className="ph-section-lg">
         <div className="ph-container apply-grid">
           <Reveal className="apply-context">
-            <div className="apply-context-art">
-              <Artwork
-                assetId="PH-APPLY-01"
-                alt="An ink-wash illustration of a hand turning a key in the pointed-arch door of a House — the first step."
-                ratio="16 / 9"
-                rounded
-                sizes="(max-width: 920px) 100vw, 40vw"
-              />
-            </div>
-
             <div className="apply-context-block">
               <p className="ph-eyebrow">Who brings what</p>
               <p>
