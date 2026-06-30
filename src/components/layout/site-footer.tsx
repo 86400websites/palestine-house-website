@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
-import { FooterLeadForm } from "@/components/layout/footer-lead-form";
 
 /* Locked public footer (docs/page-designs/shared/site-chrome.jsx; copy
    verbatim from docs/page-copy/00-global/footer-copy.md). Identical on
@@ -29,17 +28,6 @@ export function SiteFooter() {
         <div className="phx-footer-col phx-footer-brand">
           <Logo tone="white" size={26} />
           <p>A fixed address for Palestinian culture, in every city.</p>
-          <div className="phx-footer-lead">
-            <p className="phx-footer-lead-title">Or start with two free reads.</p>
-            <p className="phx-footer-lead-books">
-              <strong>The House Promise</strong> — what a House is, and why it
-              matters.
-              <br />
-              <strong>Operating Model &amp; Governance</strong> — how a House
-              actually runs.
-            </p>
-            <FooterLeadForm />
-          </div>
         </div>
         <div className="phx-footer-col">
           <span className="phx-footer-col-title">Explore</span>

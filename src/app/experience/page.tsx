@@ -6,7 +6,6 @@ import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { LeadForm } from "@/components/sections/lead-form";
 import { SessionCard } from "@/components/shared/session-card";
 import { getLiveSessions, groupSessions } from "@/lib/live/sessions";
 
@@ -261,19 +260,6 @@ export default async function ExperiencePage() {
             HQ.
           </p>
           <ApplyCta secondaryHref="/bring-ph" secondaryLabel="See what it takes" />
-        </Reveal>
-      </section>
-
-      {/* 7 — Lead magnet */}
-      <section className="ph-section bg-hero">
-        <Reveal className="ph-container leadmagnet">
-          <p className="ph-eyebrow">Free read</p>
-          <h2>Start with a free read.</h2>
-          <p className="leadmagnet-books">
-            <strong>The House Promise</strong> — what a House is, and why it
-            matters.
-          </p>
-          <LeadForm single idPrefix="exp-lead" />
         </Reveal>
       </section>
     </>

@@ -610,21 +610,6 @@
 }
 
 /* --- Lead-magnet block (centered email row + micro line) ------------------- */
-.leadmagnet {
-  max-width: 36rem;
-  margin-inline: auto;
-  text-align: center;
-}
-.leadmagnet h2 {
-  margin-top: var(--space-3);
-}
-.leadmagnet-books {
-  margin-top: var(--space-4);
-  color: var(--muted-foreground);
-}
-.leadmagnet-books strong {
-  color: var(--foreground);
-}
 .lead-row {
   display: flex;
   flex-wrap: wrap;

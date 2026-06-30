@@ -6,7 +6,6 @@ import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { LeadForm } from "@/components/sections/lead-form";
 
 /* Bring a House (/bring-ph) — absorbs the old How It Works (stage triptych +
    gates timeline). Copy verbatim from docs/page-copy/01-public-pages/
@@ -308,22 +307,6 @@ export default function BringAHousePage() {
             us.
           </p>
           <ApplyCta secondaryHref="/our-support" secondaryLabel="See our support" />
-        </Reveal>
-      </section>
-
-      {/* 8 — Lead magnet */}
-      <section className="ph-section bg-hero">
-        <Reveal className="ph-container leadmagnet">
-          <p className="ph-eyebrow">Free reads</p>
-          <h2>Two free reads before you decide.</h2>
-          <p className="leadmagnet-books">
-            <strong>The House Promise</strong> — what a House is, and why it
-            matters.
-            <br />
-            <strong>Operating Model &amp; Governance</strong> — how a House
-            actually runs.
-          </p>
-          <LeadForm idPrefix="bring-lead" />
         </Reveal>
       </section>
     </>

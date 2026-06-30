@@ -219,7 +219,7 @@ export default function HomePage() {
                 Academy open to you.
               </p>
               <p>
-                Not sure yet? Start with a free read below, or explore how it
+                Not sure yet? Start with a free read, or explore how it
                 works — no account needed.
               </p>
               <div className="home-platform-ctas">
