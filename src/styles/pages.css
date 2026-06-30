@@ -1982,8 +1982,8 @@
 }
 .home-hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.28fr);
-  gap: var(--space-10) var(--space-12);
+  grid-template-columns: minmax(20rem, 0.72fr) minmax(0, 1.48fr);
+  gap: var(--space-8) var(--space-10);
   align-items: center;
 }
 /* copy is first in DOM (so it stacks on top on mobile); pin both to row 1 */
@@ -1991,6 +1991,7 @@
   grid-column: 1;
   grid-row: 1;
   min-width: 0;
+  max-width: 34rem;
 }
 .home-hero-art {
   grid-column: 2;
@@ -1999,7 +2000,7 @@
   min-width: 0;
 }
 .home-hero-copy h1 {
-  font-size: clamp(2.6rem, 2vw + 1.6rem, 3.75rem);
+  font-size: clamp(2.55rem, 1.85vw + 1.55rem, 3.55rem);
 }
 .home-hero-ctas {
   display: flex;
@@ -2011,7 +2012,7 @@
 /* Tablet: keep two columns but balance them more evenly */
 @container page (min-width: 921px) and (max-width: 1099px) {
   .home-hero-grid {
-    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(19rem, 0.82fr) minmax(0, 1.24fr);
     gap: var(--space-8);
   }
 }
@@ -2030,7 +2031,7 @@
     order: -1;
   }
   .home-hero-art .ph-art {
-    aspect-ratio: 16 / 10 !important;
+    aspect-ratio: 1394 / 1128 !important;
   }
   .home-hero-art img {
     object-position: 50% 50%;

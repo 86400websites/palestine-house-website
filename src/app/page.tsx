@@ -101,9 +101,9 @@ export default function HomePage() {
             <Artwork
               assetId="PH-HOME-01"
               alt="An illustration of people gathered around a long table in the café of Palestine House, sharing a meal in warm late light."
-              ratio="16 / 9"
+              ratio="1394 / 1128"
               fit="contain"
-              sizes="(max-width: 920px) 100vw, 60vw"
+              sizes="(max-width: 920px) 100vw, 66vw"
               priority
             />
           </Reveal>
