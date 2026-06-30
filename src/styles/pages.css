@@ -2248,13 +2248,46 @@
   }
 }
 
-/* --- 6 · Lead magnet -------------------------------------------------------- */
-.home-leadmagnet {
-  background: var(--surface-hero);
+/* --- 6 · Lead-magnet dialog (home hero CTA) -------------------------------- */
+/* The booklet capture lives only in the home-hero dialog now (owner decision,
+   2026-06-30). The dialog reuses the shared .lead-row / .lead-label /
+   .lead-input / .lead-micro form styles. */
+.lead-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgb(0 0 0 / 0.5);
 }
-.home-leadmagnet-inner {
-  max-width: 36rem;
-  margin-inline: auto;
+.lead-dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 51;
+  transform: translate(-50%, -50%);
+  width: min(28rem, calc(100vw - 2 * var(--space-4)));
+  padding: var(--space-7);
   text-align: center;
 }
-/* (Home uses the shared .lead-row / .lead-label / .lead-input / .lead-micro) */
+.lead-dialog-title {
+  margin: 0;
+}
+.lead-dialog-close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--radius);
+  color: var(--subtle-foreground);
+  transition: color var(--duration) var(--ease-out);
+}
+.lead-dialog-close:hover {
+  color: var(--foreground);
+}
+.lead-dialog-close:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}

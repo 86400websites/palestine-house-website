@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Download } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { LeadForm } from "@/components/sections/lead-form";
+import { LeadMagnetDialog } from "@/components/sections/lead-magnet-dialog";
 import { SITE_TAGLINE } from "@/lib/site";
 
 /* Home (/) — copy verbatim from docs/page-copy/01-public-pages/home.md;
@@ -89,12 +89,7 @@ export default function HomePage() {
                   <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg">
-                <a href="#booklet">
-                  <Download aria-hidden="true" />
-                  Download The House Promise (free)
-                </a>
-              </Button>
+              <LeadMagnetDialog />
             </div>
           </Reveal>
           <Reveal className="home-hero-art">
@@ -244,18 +239,6 @@ export default function HomePage() {
                 </Button>
               </div>
             </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <PageDivider />
-
-      {/* 6 — Lead-magnet capture */}
-      <section className="ph-section-lg home-leadmagnet" id="booklet">
-        <div className="ph-container">
-          <Reveal className="home-leadmagnet-inner">
-            <h2>Get The House Promise — free.</h2>
-            <LeadForm single idPrefix="home-lead" />
           </Reveal>
         </div>
       </section>
