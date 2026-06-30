@@ -1979,11 +1979,21 @@
     min-height: calc(100svh - 72px);
     padding-block: var(--space-8) var(--space-16);
   }
+  /* Nudge the headline + CTAs slightly inward from the container edge. */
+  .home-hero-copy {
+    padding-inline-start: var(--space-6);
+  }
+  /* Cap the art to the landing viewport so the full illustration fits with no
+     bottom crop on short screens. The art uses object-fit: contain, so the cap
+     letterboxes invisibly against the dissolved/transparent edges. */
+  .home-hero-art .ph-art {
+    max-height: calc(100svh - 72px - var(--space-8) - var(--space-16));
+  }
 }
 .home-hero-grid {
   display: grid;
-  grid-template-columns: minmax(20rem, 0.72fr) minmax(0, 1.48fr);
-  gap: var(--space-8) var(--space-10);
+  grid-template-columns: minmax(20rem, 0.78fr) minmax(0, 1.42fr);
+  gap: var(--space-8) var(--space-12);
   align-items: center;
 }
 /* copy is first in DOM (so it stacks on top on mobile); pin both to row 1 */
