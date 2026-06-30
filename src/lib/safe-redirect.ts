@@ -12,10 +12,16 @@ import { headers } from "next/headers";
       path (rejects absolute, protocol-relative `//`, and backslash `\` targets)
       so login can't be turned into an open redirect.
    The allow-list mirrors the Supabase redirect URL allow-list (local +
-   Preview wildcard + Production). When the custom domain lands (decision D3),
-   add it to PRODUCTION_HOSTS here and to the Supabase allow-list together. */
+   Preview wildcard + Production). The custom domain (decision D3) landed
+   2026-06-30: www + apex palestine-house.com are allow-listed here and must
+   stay in sync with the Supabase redirect allow-list. The Vercel .app domain
+   stays listed while it still resolves. */
 
-const PRODUCTION_HOSTS = ["palestine-house-website.vercel.app"];
+const PRODUCTION_HOSTS = [
+  "palestine-house-website.vercel.app",
+  "www.palestine-house.com",
+  "palestine-house.com",
+];
 
 /* Vercel Preview deployments for this team: <deploy>-86400-s-projects.vercel.app
    (matches the Supabase redirect wildcard https://*-86400-s-projects.vercel.app). */
