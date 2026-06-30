@@ -22,10 +22,10 @@ type ArtworkProps = {
 
 const ARTWORK_SOURCES = {
   "PH-ABOUT-01": "/assets/art/PH-ABOUT-01.jpg",
-  "PH-APPLY-01": "/assets/art/PH-APPLY-01.jpg",
-  "PH-BRING-01": "/assets/art/PH-BRING-01.jpg",
+  "PH-APPLY-01": "/assets/art/PH-APPLY-01.png",
+  "PH-BRING-01": "/assets/art/PH-BRING-01.png",
   "PH-BRING-02": "/assets/art/PH-BRING-02.jpg",
-  "PH-EXP-01": "/assets/art/PH-EXP-01.jpg",
+  "PH-EXP-01": "/assets/art/PH-EXP-01.png",
   "PH-EXP-02a": "/assets/art/PH-EXP-02a.jpg",
   "PH-EXP-02b": "/assets/art/PH-EXP-02b.jpg",
   "PH-EXP-03a": "/assets/art/PH-EXP-03a.jpg",
@@ -34,17 +34,17 @@ const ARTWORK_SOURCES = {
   "PH-EXP-03d": "/assets/art/PH-EXP-03d.jpg",
   "PH-EXP-03e": "/assets/art/PH-EXP-03e.jpg",
   "PH-FOOD-01": "/assets/art/PH-FOOD-01.jpg",
-  "PH-FOOD-02": "/assets/art/PH-FOOD-02.jpg",
+  "PH-FOOD-02": "/assets/art/PH-FOOD-02.png",
   "PH-HIW-01": "/assets/art/PH-HIW-01.jpg",
   "PH-HIW-02": "/assets/art/PH-HIW-02.jpg",
   "PH-HIW-03": "/assets/art/PH-HIW-03.jpg",
   "PH-HOME-01": "/assets/art/PH-HOME-01.png",
-  "PH-LIVE-01": "/assets/art/PH-LIVE-01.jpg",
-  "PH-LIVE-02": "/assets/art/PH-LIVE-02.jpg",
-  "PH-MODEL-01": "/assets/art/PH-MODEL-01.jpg",
+  "PH-LIVE-01": "/assets/art/PH-LIVE-01.png",
+  "PH-LIVE-02": "/assets/art/PH-LIVE-02.png",
+  "PH-MODEL-01": "/assets/art/PH-MODEL-01.png",
   "PH-MODEL-02": "/assets/art/PH-MODEL-02.png",
   "PH-SIGNUP-01": "/assets/art/PH-SIGNUP-01.jpg",
-  "PH-SUPPORT-01": "/assets/art/PH-SUPPORT-01.jpg",
+  "PH-SUPPORT-01": "/assets/art/PH-SUPPORT-01.png",
 } as const;
 
 export type ArtworkAssetId = keyof typeof ARTWORK_SOURCES;

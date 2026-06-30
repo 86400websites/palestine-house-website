@@ -1659,7 +1659,7 @@
    About (/about) — page-specific (About.html)
    ======================================================================== */
 .about-hero-art {
-  max-width: 28rem;
+  max-width: min(100%, 34rem);
   margin-inline: auto;
 }
 
