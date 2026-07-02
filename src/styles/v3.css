@@ -7,11 +7,10 @@
 
      .ph-page             — the public shell root (site-chrome.tsx); gated
                             workspace/admin routes never render it.
-     body:has(.ph-page)   — extends the remap to Radix portals (the booklet
-                            LeadMagnetDialog, the mobile nav Sheet, tooltips)
-                            which mount under <body>, outside .ph-page. On
-                            gated routes no .ph-page exists anywhere, so this
-                            can never match there.
+     body:has(.ph-page)   — extends the remap to Radix portals (the mobile
+                            nav Sheet, tooltips) which mount under <body>,
+                            outside .ph-page. On gated routes no .ph-page
+                            exists anywhere, so this can never match there.
 
    The pair is wrapped in :is(...) because :is() parses its list FORGIVINGLY:
    in a browser without :has() the body:has(...) arm is dropped but .ph-page
@@ -196,7 +195,7 @@
   position: relative;
   /* pull under the sticky 72px header so the photo runs to the viewport top */
   margin-top: calc(-1 * var(--header-h));
-  min-height: min(100svh, 58rem);
+  min-height: min(100svh, 52rem);
   display: flex;
   flex-direction: column;
   color: var(--white);
@@ -239,40 +238,35 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--space-16);
-  padding-top: calc(var(--header-h) + var(--space-12));
+  gap: var(--space-12);
+  padding-top: calc(var(--header-h) + var(--space-10));
   padding-bottom: var(--space-8);
 }
 .v3-hero-copy {
-  max-width: 36rem;
+  max-width: 34rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 .v3-hero-copy h1 {
   color: var(--white);
-  font-size: clamp(2.6rem, 2.4vw + 1.7rem, 4.2rem);
+  /* DR1-8 rebalance: a notch smaller than the first pass so the hero reads
+     editorial, not billboard */
+  font-size: clamp(2.25rem, 1.9vw + 1.45rem, 3.4rem);
   line-height: var(--leading-tight);
 }
 .v3-hero-sub {
   color: rgba(255, 255, 255, 0.9);
   font: var(--text-lead);
-  max-width: 32rem;
+  max-width: 30rem;
 }
 .v3-hero-ctas {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-4);
-}
-.v3-hero-quiet {
-  color: var(--cream-100);
-  font: var(--weight-medium) var(--text-sm) / 1 var(--font-body);
-  padding-block: var(--space-2);
-}
-.v3-hero-quiet:hover {
-  color: var(--white);
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 .v3-hero-feats {
   list-style: none;
@@ -293,18 +287,20 @@
 }
 .v3-hero-feat svg {
   flex: none;
+  width: 22px;
+  height: 22px;
   margin-top: 2px;
   opacity: 0.95;
 }
 .v3-hero-feat-title {
   display: block;
-  font: var(--weight-semibold) var(--text-base) / 1.3 var(--font-body);
+  font: var(--weight-semibold) var(--text-sm) / 1.3 var(--font-body);
   color: var(--white);
 }
 .v3-hero-feat-sub {
   display: block;
   margin-top: 2px;
-  font: var(--weight-regular) var(--text-sm) / 1.5 var(--font-body);
+  font: var(--weight-regular) var(--text-xs) / 1.5 var(--font-body);
   color: rgba(255, 255, 255, 0.85);
   max-width: 13rem;
 }
@@ -370,27 +366,56 @@
   border-radius: 2px;
   background: var(--copper-500);
 }
-.v3-strip-scroller {
+/* Continuous auto-drift marquee (DR1-8, owner-sanctioned exception to the
+   no-auto-carousel rule — recorded in §4 D-DR1). The track holds the card
+   list twice; translating -50% loops seamlessly because each list carries
+   its own trailing gap. Pauses on hover; reduced-motion falls back to a
+   plain manual scroller below. */
+.v3-marquee {
   margin-top: var(--space-8);
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scroll-padding-inline: var(--space-1);
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: var(--stone-300) transparent;
-  padding-bottom: var(--space-3);
+  overflow: hidden;
+}
+.v3-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: v3-marquee 60s linear infinite;
+}
+.v3-marquee:hover .v3-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes v3-marquee {
+  to {
+    transform: translateX(-50%);
+  }
 }
 .v3-strip {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--space-6) var(--space-2) 0;
   display: flex;
   gap: var(--space-6);
 }
 .v3-strip-card {
   flex: 0 0 auto;
-  width: min(280px, 76cqw);
-  scroll-snap-align: start;
+  width: min(280px, 72cqw);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* the global reduced-motion rule freezes the animation at frame 0; make
+     the strip a manual scroller so every card stays reachable */
+  .v3-marquee {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--stone-300) transparent;
+    padding-inline: var(--gutter);
+  }
+  .v3-marquee-track {
+    animation: none;
+    width: auto;
+  }
+  .v3-marquee-track > ul[aria-hidden] {
+    display: none;
+  }
 }
 .v3-strip-photo {
   aspect-ratio: 3 / 4;
@@ -433,6 +458,47 @@
   margin-top: var(--space-2);
   color: var(--muted-foreground);
   max-width: 26rem;
+}
+
+/* --- Platform band ("The work is real…") — photo background (DR1-8) ------- */
+.v3-platform {
+  position: relative;
+  isolation: isolate;
+  color: var(--white);
+}
+.v3-platform-img {
+  object-fit: cover;
+  z-index: -1;
+  /* mirrored: the photo's focal side sits on the right in the master — flip
+     it left so the white partner card doesn't cover it (owner direction) */
+  transform: scaleX(-1);
+}
+.v3-platform-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--char-950) 84%, transparent) 0%,
+    color-mix(in srgb, var(--char-950) 68%, transparent) 55%,
+    color-mix(in srgb, var(--char-950) 56%, transparent) 100%
+  );
+}
+.v3-platform-inner {
+  position: relative;
+  z-index: 1;
+}
+.v3-platform .home-split-copy h2 {
+  color: var(--white);
+}
+.v3-platform .home-split-copy p {
+  color: rgba(255, 255, 255, 0.9);
+}
+/* keyboard focus over the dark photo needs the light ring */
+.ph-page
+  .v3-platform
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: var(--cream-100);
 }
 
 /* (Proof-strip numeral copper lives with its component in pages.css — no

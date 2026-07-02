@@ -172,7 +172,7 @@ Universal mechanics:
 - Wrap in `LazyMotion` + `domAnimation`; reusable primitives in `src/components/motion/` (`FadeIn`, `SlideUp`, `Stagger`, `Reveal`).
 - **Always respect `prefers-reduced-motion`** via `useReducedMotion` — the mockups already gate reveals behind it; the build must too.
 
-Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal duration 300–600ms; reveal distance 16–24px (`--reveal-travel`); hover scale none / ≤1.02; **no parallax, no cursor effects, no springs, no auto-playing carousels.**
+Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal duration 300–600ms; reveal distance 16–24px (`--reveal-travel`); hover scale none / ≤1.02; **no parallax, no cursor effects, no springs, no auto-playing carousels** — *one sanctioned exception (owner decision 2026-07-02, DR1-8, recorded §4 D-DR1): the Home "Inside a Palestine House" strip drifts as a slow continuous CSS marquee (~60s loop, pauses on hover, `prefers-reduced-motion` falls back to a manual scroller). Do not add further auto-motion without the same explicit sign-off.*
 
 ## 9. Image / media guidance
 
@@ -203,7 +203,7 @@ Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal 
 
 ## 12. Per-page art notes (public shell)
 
-- **Home is the v3 benchmark (DR1, 2026-07-02):** full-bleed tatreez photo hero (transparent header, scrim, mini-features band) → cream/photo culture split (arch-café) → the six-photo "Inside a Palestine House" scroll-snap strip → copper-numeral stages → charcoal proof strip → platform split. New DR-series pages measure against it.
+- **Home is the v3 benchmark (DR1, 2026-07-02):** full-bleed tatreez photo hero (transparent header, scrim, Apply + "Explore the model" CTAs, mini-features band) → cream/photo culture split (arch-café) → the six-photo "Inside a Palestine House" auto-drift marquee → copper-numeral stages → charcoal proof strip → the platform split on the mirrored oud-night photo band. New DR-series pages measure against it. *(The booklet lead magnet and the nav mega-menus were removed at DR1-8 — owner decisions, §4 D-DR1.)*
 - **All other public pages are in the intended intermediate state:** old layouts + legacy illustrations rendered in v3 colors/chrome, awaiting their DR2+ redesigns — don't "fix" them backward, and don't redesign them ad hoc outside a sprint.
 - **Experience** was the most artwork-heavy page (hero artwork, day/night vignettes, five-pillar thumbnails, live strip) — its v3 pass should lead with the strongest photography.
 - **Bring a House** is the densest public page — pace it with generous whitespace when its v3 pass comes.

@@ -1,16 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Coffee, Music, Users } from "lucide-react";
-import { Reveal } from "@/components/motion/reveal";
+import { Reveal, Stagger } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { LeadMagnetDialog } from "@/components/sections/lead-magnet-dialog";
 import { PHOTO_SOURCES } from "@/components/shared/photo";
 
-/* v3 Home hero (DR1-4) — full-bleed tatreez photo under the transparent
-   header, per the owner's reference mockup (docs/source-assets/design-refs/
-   v3/examples/home-page-hero-example.png). Headline/subline/mini-features
-   are the owner-approved copy from that reference (DR1-4 gate); the Apply
-   CTA + booklet dialog are the locked conversion pair, unchanged. */
+/* v3 Home hero (DR1-4, CTAs revised DR1-8) — full-bleed tatreez photo under
+   the transparent header, per the owner's reference mockup (docs/source-assets/
+   design-refs/v3/examples/home-page-hero-example.png). Headline/subline/
+   mini-features are the owner-approved copy from that reference; the CTA pair
+   matches it too — Apply + "Explore the model" (the booklet lead magnet was
+   retired entirely at DR1-8, owner decision 2026-07-02). */
 
 const HERO_FEATS = [
   {
@@ -47,7 +47,7 @@ export function HomeHero() {
       />
       <div className="v3-hero-scrim" aria-hidden="true" />
       <div className="ph-container v3-hero-inner">
-        <Reveal className="v3-hero-copy">
+        <Stagger className="v3-hero-copy">
           <h1>A home for Palestinian culture, in every city.</h1>
           <p className="v3-hero-sub">
             Palestine House helps local partners build permanent spaces for
@@ -57,13 +57,12 @@ export function HomeHero() {
             <Button asChild size="lg" className="v3-cta">
               <Link href="/apply">Apply to bring a House</Link>
             </Button>
-            <LeadMagnetDialog />
+            <Button asChild size="lg" variant="outline" className="v3-cta">
+              <Link href="/model">Explore the model</Link>
+            </Button>
           </div>
-          <Link className="v3-hero-quiet" href="/model">
-            Explore the model →
-          </Link>
-        </Reveal>
-        <Reveal delay={0.12}>
+        </Stagger>
+        <Reveal delay={0.24}>
           <ul className="v3-hero-feats">
             {HERO_FEATS.map((f) => (
               <li key={f.title} className="v3-hero-feat">

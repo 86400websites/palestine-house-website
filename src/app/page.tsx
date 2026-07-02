@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { Photo } from "@/components/shared/photo";
+import { Photo, PHOTO_SOURCES } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { HomeHero } from "@/components/sections/home/home-hero";
@@ -135,9 +136,21 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 6 — The work is real / A private platform for partners */}
-      <section className="ph-section-lg">
-        <div className="ph-container home-split">
+      {/* 6 — The work is real / A private platform for partners — photo band
+          (DR1-8): the oud-night photo, mirrored so its focal side sits left
+          where the copy is, not under the white partner card. */}
+      <section className="ph-section-lg v3-platform">
+        <Image
+          src={PHOTO_SOURCES["ph-photo-oud-night"]}
+          alt=""
+          aria-hidden="true"
+          fill
+          quality={70}
+          sizes="100vw"
+          className="v3-platform-img"
+        />
+        <div className="v3-platform-scrim" aria-hidden="true" />
+        <div className="ph-container home-split v3-platform-inner">
           <Reveal className="home-split-copy">
             <h2>The work is real. So is the welcome.</h2>
             <p>
@@ -161,10 +174,7 @@ export default function HomePage() {
                 and once you’re approved the full playbook, the toolkit, and the
                 Academy open to you.
               </p>
-              <p>
-                Not sure yet? Start with a free read, or explore how it
-                works — no account needed.
-              </p>
+              <p>Not sure yet? Explore how it works — no account needed.</p>
               <div className="home-platform-ctas">
                 <div>
                   <Button asChild>
