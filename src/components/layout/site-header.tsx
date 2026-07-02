@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/lib/auth/actions";
-import { Logo } from "@/components/layout/logo";
+import { BrandLogo } from "@/components/layout/brand-logo";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -59,6 +59,12 @@ const NAV_LINKS = [
 ] as const;
 
 type NavKey = (typeof NAV_LINKS)[number]["key"];
+
+/* Routes whose hero pulls under a TRANSPARENT header (v3 photo heroes).
+   The header solidifies on scroll or whenever a menu opens. Empty until the
+   v3 Home hero lands (DR1-4 adds "/"), so every page keeps the readable
+   warm-solid chrome in the meantime. */
+const OVERLAY_ROUTES: string[] = [];
 
 /* Mega-menu content — verbatim from the approved mockup chrome. */
 const MEGA_MENUS: Partial<
@@ -119,7 +125,31 @@ export function SiteHeader() {
   const [open, setOpen] = React.useState<NavKey | null>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [authed, setAuthed] = React.useState<boolean | null>(null);
+  const [scrolled, setScrolled] = React.useState(false);
   const panel = open ? MEGA_MENUS[open] : undefined;
+
+  /* Transparent-over-photo header (v3): only on OVERLAY_ROUTES, and only
+     while at the top with every menu closed — scrolling or opening the mega
+     panel / mobile sheet solidifies it so content never floats on glass. */
+  const overlayRoute = OVERLAY_ROUTES.includes(pathname);
+  React.useEffect(() => {
+    if (!overlayRoute) return;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        setScrolled(window.scrollY > 32);
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [overlayRoute]);
+  const overlay = overlayRoute && !scrolled && !open && !mobileOpen;
 
   /* Close the mega panel on Escape (keyboard parity with mouseleave). */
   React.useEffect(() => {
@@ -153,9 +183,13 @@ export function SiteHeader() {
   }, [pathname]);
 
   return (
-    <header className="phx-header" onMouseLeave={() => setOpen(null)}>
+    <header
+      className="phx-header"
+      data-overlay={overlay ? "" : undefined}
+      onMouseLeave={() => setOpen(null)}
+    >
       <div className="ph-container phx-header-inner">
-        <Logo href="/" size={30} />
+        <BrandLogo href="/" />
 
         <nav className="phx-nav" aria-label="Main">
           {NAV_LINKS.map((l) => {

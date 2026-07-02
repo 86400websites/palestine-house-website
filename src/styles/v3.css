@@ -118,3 +118,61 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline-color: var(--cream-100);
 }
+
+/* --- v3 brand lockup (brand-logo.tsx) — copper arch PNG + real-text word --- */
+.phx-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+}
+.phx-brand img {
+  display: block;
+}
+.phx-brand-word {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: 1.22rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--char-900);
+  transition: color var(--duration) var(--ease-out);
+}
+.phx-footer .phx-brand-word {
+  color: var(--cream-50);
+}
+
+/* --- Header overlay state (photo heroes; site-header.tsx sets data-overlay
+   only at top-of-page with all menus closed on OVERLAY_ROUTES) -------------- */
+.phx-header[data-overlay] {
+  background: transparent;
+  border-bottom-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.phx-header[data-overlay] .phx-brand-word {
+  color: var(--cream-50);
+}
+.phx-header[data-overlay] .phx-nav-link,
+.phx-header[data-overlay] .phx-signin {
+  color: #f3ede1;
+}
+.phx-header[data-overlay] .phx-signin:hover {
+  color: var(--white);
+}
+.phx-header[data-overlay] .phx-nav-link:hover,
+.phx-header[data-overlay] .phx-nav-link.is-open,
+.phx-header[data-overlay] .phx-nav-link[aria-current="page"] {
+  /* the reference's translucent olive pill with pale sage-cream text */
+  background: rgba(85, 99, 64, 0.55);
+  color: var(--olive-100);
+}
+.phx-header[data-overlay] .phx-nav-link[aria-current="page"]::after {
+  background: var(--sage-300);
+}
+/* Keyboard focus on the transparent (photo) header needs a light ring. */
+.phx-header[data-overlay]
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: var(--cream-100);
+}
