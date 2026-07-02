@@ -61,10 +61,8 @@ const NAV_LINKS = [
 type NavKey = (typeof NAV_LINKS)[number]["key"];
 
 /* Routes whose hero pulls under a TRANSPARENT header (v3 photo heroes).
-   The header solidifies on scroll or whenever a menu opens. Empty until the
-   v3 Home hero lands (DR1-4 adds "/"), so every page keeps the readable
-   warm-solid chrome in the meantime. */
-const OVERLAY_ROUTES: string[] = [];
+   The header solidifies on scroll or whenever a menu opens. */
+const OVERLAY_ROUTES: string[] = ["/"];
 
 /* Mega-menu content — verbatim from the approved mockup chrome. */
 const MEGA_MENUS: Partial<

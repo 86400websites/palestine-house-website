@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
-import { PageDivider } from "@/components/shared/page-divider";
+import { Photo } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { LeadMagnetDialog } from "@/components/sections/lead-magnet-dialog";
+import { HomeHero } from "@/components/sections/home/home-hero";
 import { SITE_TAGLINE } from "@/lib/site";
 
-/* Home (/) — copy verbatim from docs/page-copy/01-public-pages/home.md;
-   layout from docs/page-designs/public/Home.app.jsx (approved mockup). */
+/* Home (/) — v3 design refresh (DR1, 2026-07-02): layout + hero/split copy
+   from the owner's reference images (docs/source-assets/design-refs/v3/);
+   the retained sections keep their locked copy verbatim. The pre-v3 page
+   followed docs/page-copy/01-public-pages/home.md + the retired mockup. */
 
 /* The root layout's title.default already resolves the home title to
    "Palestine House". Set only description + canonical here; do NOT override
@@ -44,27 +46,6 @@ const HOME_STAGES = [
   },
 ] as const;
 
-const HOME_FEELS = [
-  {
-    key: "cafe",
-    id: "PH-FOOD-02",
-    text: "A café where the recipes are here to stay.",
-    alt: "A still-life illustration of knafeh and za’atar on the House’s long table in warm light.",
-  },
-  {
-    key: "stage",
-    id: "PH-LIVE-01",
-    text: "A stage where the oud plays on a Friday night.",
-    alt: "An illustration of a musician playing the oud on the low stage of Palestine House, an audience gathered close.",
-  },
-  {
-    key: "room",
-    id: "PH-EXP-01",
-    text: "A room your city can always come back to.",
-    alt: "An illustration of the café-and-stage room of Palestine House, warm and full of life.",
-  },
-] as const;
-
 const HOME_PROOF = [
   { n: "10", label: "focus areas" },
   { n: "30", label: "topics" },
@@ -77,75 +58,38 @@ const HOME_PROOF = [
 export default function HomePage() {
   return (
     <>
-      {/* 1 — Hero — headline + CTAs left, large art right */}
-      <section className="home-hero">
-        <div className="ph-container home-hero-grid">
-          <Reveal className="home-hero-copy">
-            <h1>A fixed address for Palestinian culture, in every city.</h1>
-            <div className="home-hero-ctas">
-              <Button asChild size="lg">
-                <Link href="/apply">
-                  Apply to bring a House
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-              <LeadMagnetDialog />
-            </div>
-          </Reveal>
-          <Reveal className="home-hero-art">
-            <Artwork
-              assetId="PH-HOME-01"
-              alt="An illustration of people gathered around a long table in the café of Palestine House, sharing a meal in warm late light."
-              ratio="1394 / 1128"
-              fit="contain"
-              sizes="(max-width: 920px) 100vw, 66vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
+      {/* 1 — Hero — full-bleed tatreez photo under the transparent header */}
+      <HomeHero />
 
-      <PageDivider />
-
-      {/* 2 — Culture deserves more than a moment (feeling cards) */}
-      <section className="ph-section-lg home-feels">
-        <div className="ph-container">
-          <Reveal className="home-feels-head">
+      {/* 2 — Culture deserves more than a moment (cream / photo split) */}
+      <section className="v3-split">
+        <div className="v3-split-panel">
+          <Reveal>
             <p className="ph-eyebrow">A living place</p>
             <h2>Culture deserves more than a moment.</h2>
             <p className="ph-lead">
+              We are building a global network of Palestine Houses—permanent
+              cultural homes that nourish identity, celebrate creativity, and
+              strengthen communities.
+            </p>
+            <p className="v3-split-line">
               Pop-ups end. Hashtags scroll past. A Palestine House stays.
             </p>
-          </Reveal>
-          <div className="home-feels-grid">
-            {HOME_FEELS.map((f, i) => (
-              <Reveal key={f.key} delay={i * 0.09}>
-                <article
-                  data-feel={f.key}
-                  className="ph-card ph-card--lift home-feel-card"
-                >
-                  <div className="home-feel-art">
-                    <Artwork assetId={f.id} alt={f.alt} ratio="3 / 2" />
-                  </div>
-                  <p className="home-feel-text">{f.text}</p>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-          <Reveal className="home-feels-close">
-            <p className="home-feels-close-lead">
-              It’s a real place, open every day — food, music, art, and a living
-              community under one roof. Not a protest. Not a campaign. A home.
-            </p>
-            <p className="home-feels-close-statement">
-              Palestine House is how that room gets built — and we give you
-              everything you need to build it.
+            <p className="v3-split-body">
+              It’s a real place, open every day — food, music, art, and a
+              living community under one roof. Not a protest. Not a campaign.
+              A home.
             </p>
           </Reveal>
         </div>
+        <div className="v3-split-photo">
+          <Photo
+            assetId="ph-photo-arch-cafe"
+            alt="An arched stone doorway opening into the warm café room of a Palestine House."
+            sizes="(max-width: 880px) 100vw, 55vw"
+          />
+        </div>
       </section>
-
-      <PageDivider />
 
       {/* 3 — One path, three stages */}
       <section className="ph-section-lg">
