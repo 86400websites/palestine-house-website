@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Artwork } from "@/components/shared/artwork";
 import { Photo } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { HomeHero } from "@/components/sections/home/home-hero";
+import { InsideStrip } from "@/components/sections/home/inside-strip";
 import { SITE_TAGLINE } from "@/lib/site";
 
 /* Home (/) — v3 design refresh (DR1, 2026-07-02): layout + hero/split copy
@@ -27,22 +27,16 @@ export const metadata: Metadata = {
 
 const HOME_STAGES = [
   {
-    id: "PH-HIW-01",
     name: "Plan & Prepare",
     text: "the model, your city, and what running a House really takes.",
-    alt: "An illustration of a person reading in the quiet study corner of the House by an arched window.",
   },
   {
-    id: "PH-HIW-02",
     name: "Design & Build",
     text: "a clear 120-day launch plan, tracked task by task.",
-    alt: "An illustration of hands building and preparing the House’s room, the same arched window behind them.",
   },
   {
-    id: "PH-HIW-03",
     name: "Operate & Program",
     text: "run your House day to day, to the standard every House shares.",
-    alt: "An illustration of the House’s room in full life, people gathered at the long table under the arched window.",
   },
 ] as const;
 
@@ -91,21 +85,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3 — One path, three stages */}
-      <section className="ph-section-lg">
+      {/* 3 — Inside a Palestine House (photo strip) */}
+      <InsideStrip />
+
+      {/* 4 — One path, three stages (editorial columns, copper numerals) */}
+      <section className="ph-section-lg v3-stages-section">
         <div className="ph-container">
-          <Reveal className="home-stages-head">
+          <Reveal className="v3-stages-head">
             <h2>One path, three stages.</h2>
             <p className="ph-lead">
               The entire playbook is a guided path, so you always know the next
               step.
             </p>
           </Reveal>
-          <div className="home-stages">
+          <div className="v3-stages">
             {HOME_STAGES.map((s, i) => (
               <Reveal key={s.name} delay={i * 0.09}>
-                <article className="home-stage">
-                  <Artwork assetId={s.id} alt={s.alt} ratio="4 / 5" />
+                <article className="v3-stage">
+                  <span className="v3-stage-num" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   <h3>{s.name}</h3>
                   <p>{s.text}</p>
                 </article>
@@ -115,7 +114,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4 — A complete system, not a binder (proof numbers) */}
+      {/* 5 — A complete system, not a binder (proof numbers) */}
       <section className="ph-section-lg ph-section-dark home-proof">
         <Reveal className="ph-container home-proof-inner">
           <div className="home-proof-head">
@@ -136,7 +135,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 5 — The work is real / A private platform for partners */}
+      {/* 6 — The work is real / A private platform for partners */}
       <section className="ph-section-lg">
         <div className="ph-container home-split">
           <Reveal className="home-split-copy">

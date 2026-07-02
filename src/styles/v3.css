@@ -339,8 +339,104 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   inset: 0;
 }
 
+/* --- "Inside a Palestine House" photo strip (inside-strip.tsx) ------------ */
+.v3-rule-head {
+  position: relative;
+  padding-bottom: var(--space-4);
+}
+.v3-rule-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 56px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--copper-500);
+}
+.v3-strip-scroller {
+  margin-top: var(--space-8);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-1);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--stone-300) transparent;
+  padding-bottom: var(--space-3);
+}
+.v3-strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-6);
+}
+.v3-strip-card {
+  flex: 0 0 auto;
+  width: min(280px, 76cqw);
+  scroll-snap-align: start;
+}
+.v3-strip-photo {
+  aspect-ratio: 3 / 4;
+}
+.v3-strip-title {
+  margin-top: var(--space-4);
+  font: var(--weight-semibold) var(--text-lg) / 1.25 var(--font-display);
+}
+.v3-strip-sub {
+  margin-top: var(--space-2);
+  font: var(--weight-regular) var(--text-sm) / 1.5 var(--font-body);
+  color: var(--muted-foreground);
+}
+
+/* --- "One path, three stages." — editorial columns, copper numerals ------- */
+.v3-stages-head {
+  max-width: var(--measure);
+}
+.v3-stages-head .ph-lead {
+  margin-top: var(--space-4);
+}
+.v3-stages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-10);
+  margin-top: var(--space-12);
+}
+.v3-stage {
+  border-top: 1px solid var(--border-strong);
+  padding-top: var(--space-6);
+}
+.v3-stage-num {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-3xl);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--copper-500);
+}
+.v3-stage h3 {
+  margin-top: var(--space-4);
+}
+.v3-stage p {
+  margin-top: var(--space-2);
+  color: var(--muted-foreground);
+  max-width: 26rem;
+}
+
+/* --- Proof strip numerals go copper on the warm charcoal ------------------- */
+.ph-page .home-proof-item dd {
+  color: var(--copper-300);
+}
+
 /* --- v3 responsive (container queries on .ph-page, like the rest of the
    public shell) ------------------------------------------------------------ */
+@container page (max-width: 860px) {
+  .v3-stages {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+}
 @container page (max-width: 880px) {
   .v3-split {
     grid-template-columns: 1fr;
