@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
+import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -90,43 +91,25 @@ const BRING_RULES = [
 export default function BringAHousePage() {
   return (
     <>
-      {/* 1 — Hero */}
-      <section className="art-hero">
-        <div className="ph-container art-hero-grid">
-          <Reveal className="art-hero-copy">
-            <p className="ph-eyebrow">Bring a House</p>
-            <h1>Bring Palestine House to your city.</h1>
-            <p className="ph-lead">
-              A House is a real business with real cultural weight — a café, a
-              venue, and a home for the community, open every day. Here’s why
-              people open one, and what it takes to do it well.
-            </p>
-            <div className="page-hero-ctas">
-              <Button asChild size="lg">
-                <Link href="/apply">
-                  Apply to bring a House
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/our-support">See our support</Link>
-              </Button>
-            </div>
-            <p className="page-hero-support">
-              Every application is reviewed by HQ.
-            </p>
-          </Reveal>
-          <Reveal className="art-hero-art">
-            <Artwork
-              assetId="PH-BRING-01"
-              alt="An ink-wash illustration of a House threshold — a tall pointed-arch doorway opening onto the street, a new address."
-              ratio="16 / 10"
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
+      {/* 1 — v3 photo hero (DR1-9). The master is framed chest-down on the
+          pour by composition — the crop centers the dallah + cups so it reads
+          as an intentional detail shot. */}
+      <PageHero
+        photo="ph-photo-bring-house"
+        alt="Arabic coffee being poured from a brass dallah into a small cup."
+        position="62% 58%"
+        eyebrow="Bring a House"
+        title="Bring Palestine House to your city."
+        lead="A House is a real business with real cultural weight — a café, a venue, and a home for the community, open every day. Here’s why people open one, and what it takes to do it well."
+        support="Every application is reviewed by HQ."
+      >
+        <Button asChild size="lg" className="v3-cta">
+          <Link href="/apply">Apply to bring a House</Link>
+        </Button>
+        <Button asChild variant="outline" size="lg" className="v3-cta">
+          <Link href="/our-support">See our support</Link>
+        </Button>
+      </PageHero>
 
       {/* 2 — Why bring one */}
       <section className="ph-section-lg">

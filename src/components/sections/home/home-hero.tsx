@@ -62,7 +62,7 @@ export function HomeHero() {
             </Button>
           </div>
         </Stagger>
-        <Reveal delay={0.24}>
+        <Reveal delay={0.24} className="v3-hero-featwrap">
           <ul className="v3-hero-feats">
             {HERO_FEATS.map((f) => (
               <li key={f.title} className="v3-hero-feat">

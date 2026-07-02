@@ -4,6 +4,7 @@ import { ArrowRight, Play } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
+import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { SessionCard } from "@/components/shared/session-card";
@@ -66,47 +67,26 @@ export default async function ExperiencePage() {
 
   return (
     <>
-      {/* 1 — Hero */}
-      <section className="art-hero">
-        <div className="ph-container art-hero-grid">
-          <Reveal className="art-hero-copy">
-            <p className="ph-eyebrow">Experience</p>
-            <h1>What a Palestine House feels like.</h1>
-            <p className="ph-lead">
-              A café where the coffee is good and the food is cooked from real
-              recipes. A stage that turns the same room into a concert, a film
-              night, a reading. A place your city can come back to, any day of
-              the week.
-            </p>
-            <div className="page-hero-ctas">
-              <Button asChild size="lg">
-                <Link href="/apply">
-                  Apply to bring a House
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <a href="#whats-on">
-                  <Play aria-hidden="true" />
-                  Watch what’s on
-                </a>
-              </Button>
-            </div>
-            <p className="page-hero-support">
-              Every application is reviewed by HQ.
-            </p>
-          </Reveal>
-          <Reveal className="art-hero-art">
-            <Artwork
-              assetId="PH-EXP-01"
-              alt="An ink-wash illustration of the main room of a House — café tables in the warm light of tall pointed-arch windows."
-              ratio="16 / 10"
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
+      {/* 1 — v3 photo hero (DR1-9) */}
+      <PageHero
+        photo="ph-photo-experience"
+        alt="An oud player performing to a seated audience in a candlelit stone room."
+        position="50% 32%"
+        eyebrow="Experience"
+        title="What a Palestine House feels like."
+        lead="A café where the coffee is good and the food is cooked from real recipes. A stage that turns the same room into a concert, a film night, a reading. A place your city can come back to, any day of the week."
+        support="Every application is reviewed by HQ."
+      >
+        <Button asChild size="lg" className="v3-cta">
+          <Link href="/apply">Apply to bring a House</Link>
+        </Button>
+        <Button asChild variant="outline" size="lg" className="v3-cta">
+          <a href="#whats-on">
+            <Play aria-hidden="true" />
+            Watch what’s on
+          </a>
+        </Button>
+      </PageHero>
 
       {/* 2 — A café by day. A stage by night. */}
       <section className="ph-section-lg">

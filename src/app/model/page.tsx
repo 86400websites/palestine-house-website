@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
+import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -58,43 +58,23 @@ const MODEL_NEVER = [
 export default function ModelPage() {
   return (
     <>
-      {/* 1 — Art-led hero */}
-      <section className="art-hero">
-        <div className="ph-container art-hero-grid">
-          <Reveal className="art-hero-copy">
-            <p className="ph-eyebrow">The Model</p>
-            <h1>One name. Many Houses. One standard.</h1>
-            <p className="ph-lead">
-              Every Palestine House is owned and run by people who know their
-              own city. What holds the network together is a shared way of
-              working — here’s how it fits.
-            </p>
-            <div className="page-hero-ctas">
-              <Button asChild size="lg">
-                <Link href="/apply">
-                  Apply to bring a House
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/our-support">See our support</Link>
-              </Button>
-            </div>
-            <p className="page-hero-support">
-              Every application is reviewed by HQ.
-            </p>
-          </Reveal>
-          <Reveal className="art-hero-art">
-            <Artwork
-              assetId="PH-MODEL-01"
-              alt="An ink-wash illustration of a Palestine House on its street — stone, glass, and a tall pointed-arch entrance."
-              ratio="16 / 10"
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
+      {/* 1 — v3 photo hero (DR1-9) */}
+      <PageHero
+        photo="ph-photo-model"
+        alt="Hands embroidering red tatreez patterns at a workshop table."
+        position="50% 55%"
+        eyebrow="The Model"
+        title="One name. Many Houses. One standard."
+        lead="Every Palestine House is owned and run by people who know their own city. What holds the network together is a shared way of working — here’s how it fits."
+        support="Every application is reviewed by HQ."
+      >
+        <Button asChild size="lg" className="v3-cta">
+          <Link href="/apply">Apply to bring a House</Link>
+        </Button>
+        <Button asChild variant="outline" size="lg" className="v3-cta">
+          <Link href="/our-support">See our support</Link>
+        </Button>
+      </PageHero>
 
       {/* 2 — A cultural embassy (feature row) */}
       <section className="ph-section-lg">

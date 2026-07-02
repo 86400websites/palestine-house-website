@@ -237,8 +237,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: var(--space-12);
+  /* copy centers itself via margin-block auto; the mini-features wrapper
+     sits below it, pinned toward the bottom band (DR1-9 rebalance) */
+  justify-content: flex-start;
+  gap: var(--space-10);
   padding-top: calc(var(--header-h) + var(--space-10));
   padding-bottom: var(--space-8);
 }
@@ -248,6 +250,13 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-5);
+}
+.v3-hero .v3-hero-copy {
+  margin-block: auto;
+  /* nudge the copy block left of the container edge — only by whatever
+     outer whitespace actually exists, so it never clips at narrow widths
+     (DR1-9, owner direction) */
+  margin-left: calc(-1 * min(var(--space-8), max(0px, (100cqw - var(--content-max)) / 2)));
 }
 .v3-hero-copy h1 {
   color: var(--white);
@@ -303,6 +312,44 @@
   font: var(--weight-regular) var(--text-xs) / 1.5 var(--font-body);
   color: rgba(255, 255, 255, 0.85);
   max-width: 13rem;
+}
+
+/* --- v3 photo page-hero (page-hero.tsx — DR1-9) — the inner pages' shorter
+   photo band; reuses the Home hero's copy/scrim/CTA grammar. --------------- */
+.v3-page-hero {
+  position: relative;
+  margin-top: calc(-1 * var(--header-h));
+  min-height: min(74svh, 38rem);
+  display: flex;
+  flex-direction: column;
+  color: var(--white);
+  isolation: isolate;
+}
+.v3-page-hero-img {
+  object-fit: cover;
+  z-index: -1;
+}
+.v3-page-hero-inner {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: calc(var(--header-h) + var(--space-8));
+  padding-bottom: var(--space-10);
+}
+.v3-page-hero .ph-eyebrow {
+  color: var(--sage-300);
+}
+.v3-page-hero-copy h1 {
+  color: var(--white);
+  font-size: clamp(2.05rem, 1.6vw + 1.3rem, 2.9rem);
+  line-height: var(--leading-tight);
+}
+.v3-page-hero-support {
+  font: var(--weight-regular) var(--text-xs) / 1.4 var(--font-body);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 /* --- v3 cream / photo split ("Culture deserves more than a moment.") ------ */
@@ -378,7 +425,8 @@
 .v3-marquee-track {
   display: flex;
   width: max-content;
-  animation: v3-marquee 60s linear infinite;
+  will-change: transform;
+  animation: v3-marquee 35s linear infinite;
 }
 .v3-marquee:hover .v3-marquee-track {
   animation-play-state: paused;
@@ -531,20 +579,37 @@
     gap: var(--space-10);
     padding-top: calc(var(--header-h) + var(--space-8));
   }
-  .v3-hero-feats {
+  /* Mobile hero breathes: headline → subline → buttons only — the three
+     mini-features are hidden (their territory is the strip right below)
+     so the photo + copy get the whole viewport (owner direction, DR1-9). */
+  .v3-hero-featwrap {
+    display: none;
+  }
+  /* "Inside a Palestine House" stacks as a simple vertical list on mobile —
+     no marquee, no sideways scroll (owner direction, DR1-9). Desktop keeps
+     the auto-drift. */
+  .v3-marquee {
+    overflow: visible;
+    padding-inline: var(--gutter);
+  }
+  .v3-marquee-track {
+    display: block;
+    width: auto;
+    animation: none;
+  }
+  .v3-marquee-track > ul[aria-hidden] {
+    display: none;
+  }
+  .v3-strip {
     flex-direction: column;
-    gap: 0;
+    gap: var(--space-8);
+    padding: 0;
   }
-  .v3-hero-feat {
-    padding-block: var(--space-4);
+  .v3-strip-card {
+    width: 100%;
   }
-  .v3-hero-feat + .v3-hero-feat {
-    border-left: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    padding-left: 0;
-  }
-  .v3-hero-feat-sub {
-    max-width: none;
+  .v3-strip-photo {
+    aspect-ratio: 4 / 3;
   }
 }
 @container page (max-width: 420px) {

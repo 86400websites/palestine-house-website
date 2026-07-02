@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Artwork } from "@/components/shared/artwork";
 import { TatreezDivider } from "@/components/shared/tatreez-divider";
+import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { ApplyForm } from "@/components/sections/apply-form";
 import { createClient } from "@/lib/supabase/server";
@@ -60,29 +60,15 @@ export default async function ApplyPage() {
 
   return (
     <>
-      {/* 1 — Art-led hero (consistent with the other public pages) */}
-      <section className="art-hero">
-        <div className="ph-container art-hero-grid">
-          <Reveal className="art-hero-copy">
-            <p className="ph-eyebrow">Apply</p>
-            <h1>Apply to bring a House to your city.</h1>
-            <p className="ph-lead">
-              This is the one step. Submitting this form creates your account and
-              sends your application to HQ. There’s no separate sign-up — applying
-              and creating an account are the same thing.
-            </p>
-          </Reveal>
-          <Reveal className="art-hero-art">
-            <Artwork
-              assetId="PH-APPLY-01"
-              alt="An ink-wash illustration of a hand turning a key in the pointed-arch door of a House — the first step."
-              ratio="16 / 10"
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
+      {/* 1 — v3 photo hero (DR1-9, consistent with the other public pages) */}
+      <PageHero
+        photo="ph-photo-apply"
+        alt="A singer smiling at a microphone beside a keyboard, mid-performance."
+        position="55% 30%"
+        eyebrow="Apply"
+        title="Apply to bring a House to your city."
+        lead="This is the one step. Submitting this form creates your account and sends your application to HQ. There’s no separate sign-up — applying and creating an account are the same thing."
+      />
 
       {/* 2–5 — Context + the form */}
       <section className="ph-section-lg">

@@ -57,9 +57,17 @@ const NAV_LINKS = [
   },
 ] as const;
 
-/* Routes whose hero pulls under a TRANSPARENT header (v3 photo heroes).
-   The header solidifies on scroll or when the mobile menu opens. */
-const OVERLAY_ROUTES: string[] = ["/"];
+/* Routes whose hero pulls under a TRANSPARENT header (v3 photo heroes:
+   the Home hero + the PageHero pages, DR1-9). The header solidifies on
+   scroll or when the mobile menu opens. */
+const OVERLAY_ROUTES: string[] = [
+  "/",
+  "/model",
+  "/experience",
+  "/bring-ph",
+  "/our-support",
+  "/apply",
+];
 
 export function SiteHeader() {
   const pathname = usePathname();

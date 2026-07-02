@@ -15,6 +15,12 @@ export const PHOTO_SOURCES = {
   "ph-photo-film-screening": "/assets/photos/ph-photo-film-screening.jpg",
   "ph-photo-book-talk": "/assets/photos/ph-photo-book-talk.jpg",
   "ph-photo-market-day": "/assets/photos/ph-photo-market-day.jpg",
+  /* DR1-9 — page-hero photos */
+  "ph-photo-model": "/assets/photos/ph-photo-model.jpg",
+  "ph-photo-experience": "/assets/photos/ph-photo-experience.jpg",
+  "ph-photo-bring-house": "/assets/photos/ph-photo-bring-house.jpg",
+  "ph-photo-our-support": "/assets/photos/ph-photo-our-support.jpg",
+  "ph-photo-apply": "/assets/photos/ph-photo-apply.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;

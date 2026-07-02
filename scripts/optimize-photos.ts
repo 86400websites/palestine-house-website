@@ -45,6 +45,12 @@ const PHOTOS: { src: string; out: string; width: number; height: number }[] = [
   { src: "film-screening.jpg", out: "ph-photo-film-screening.jpg", width: 2000, height: 2000 },
   { src: "book-talk.jpg", out: "ph-photo-book-talk.jpg", width: 1600, height: 2000 },
   { src: "market-day.png", out: "ph-photo-market-day.jpg", width: 1600, height: 2000 },
+  /* DR1-9 — page-hero photos (owner masters, 2026-07-03) */
+  { src: "model.jpeg", out: "ph-photo-model.jpg", width: 1600, height: 1600 },
+  { src: "experience.jpeg", out: "ph-photo-experience.jpg", width: 1600, height: 1600 },
+  { src: "bring-house.jpeg", out: "ph-photo-bring-house.jpg", width: 1600, height: 1600 },
+  { src: "our-support.jpg", out: "ph-photo-our-support.jpg", width: 2000, height: 2000 },
+  { src: "apply.jpg", out: "ph-photo-apply.jpg", width: 2000, height: 2000 },
 ];
 
 const kb = (n: number) => `${Math.round(n / 1024)} KB`;
