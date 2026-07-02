@@ -16,8 +16,9 @@
  *
  * Outputs (committed, served by the app):
  *   public/assets/photos/ph-photo-*.jpg   — progressive mozjpeg, ≤ ~2000px, target < 500 KB each
- *   public/assets/logo/ph-logo-full.png   — full lockup (arch + wordmark + tagline), transparent
  *   public/assets/logo/ph-logo-mark.png   — copper arch mark only (™ + text excluded), transparent
+ *     (no full-lockup output — the chrome renders the wordmark as real HTML text and the
+ *      OG image composites the mark; add a lockup crop only when a surface consumes it)
  *
  * Usage:
  *   pnpm tsx scripts/optimize-photos.ts
@@ -56,10 +57,11 @@ async function encodePhoto(entry: (typeof PHOTOS)[number]): Promise<void> {
     .resize({ width: entry.width, height: entry.height, fit: "inside", withoutEnlargement: true });
 
   // Walk quality down until the file fits the budget (dark event photography
-  // usually lands well under it at q82 already).
+  // usually lands well under it at q82 already). q60 is the hard floor —
+  // guard the quality about to be USED, not the one just used.
   let quality = 82;
   let buf = await base.jpeg({ quality, mozjpeg: true, progressive: true }).toBuffer();
-  while (buf.length > TARGET_BYTES && quality > 60) {
+  while (buf.length > TARGET_BYTES && quality - 6 >= 60) {
     quality -= 6;
     buf = await base.jpeg({ quality, mozjpeg: true, progressive: true }).toBuffer();
   }
@@ -167,9 +169,6 @@ async function main(): Promise<void> {
   for (const entry of PHOTOS) await encodePhoto(entry);
 
   const raw = await keyOutBackground();
-  // Full lockup: everything that survived the key (any visible pixel).
-  const fullBox = bbox(raw.data, raw.width, raw.height, (_r, _g, _b, a) => a > 20);
-  await writeLogoCrop(raw, fullBox, 8, "ph-logo-full.png");
   // Arch mark: the copper pixels only (saturated, warm) — excludes the ™ and the
   // charcoal wordmark/tagline, which the chrome renders as real HTML text instead.
   const markBox = bbox(

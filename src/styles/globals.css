@@ -300,11 +300,13 @@
   }
 
   /* On dark surfaces the green ring falls under the 3:1 non-text minimum —
-     use the pale green tint there (S1 1d audit, 2026-06-12). */
+     use the pale green tint there (S1 1d audit, 2026-06-12). The v3 public
+     scope re-points --focus-ring-on-dark to warm cream (v3.css) — one
+     selector list, recolored per shell. */
   .phx-footer :where(a, button, input, select, textarea, [tabindex]):focus-visible,
   .ph-section-dark
     :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-    outline-color: var(--green-100);
+    outline-color: var(--focus-ring-on-dark, var(--green-100));
   }
 
   * {
@@ -466,7 +468,9 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-6);
-  height: 72px;
+  /* the one source of the header height — the v3 hero pull-under and inner
+     paddings all read the same token (v3.css) */
+  height: var(--header-h);
 }
 .phx-nav {
   display: flex;

@@ -11,17 +11,21 @@
                             LeadMagnetDialog, the mobile nav Sheet, tooltips)
                             which mount under <body>, outside .ph-page. On
                             gated routes no .ph-page exists anywhere, so this
-                            can never match there. In a browser without :has()
-                            those portalled surfaces just keep the original
-                            green tokens — cosmetic, never broken.
+                            can never match there.
+
+   The pair is wrapped in :is(...) because :is() parses its list FORGIVINGLY:
+   in a browser without :has() the body:has(...) arm is dropped but .ph-page
+   keeps matching, so in-page v3 survives and only portalled surfaces fall
+   back to the legacy green tokens (cosmetic). A bare comma list would be
+   invalidated WHOLESALE by the unsupported :has() — never write these scopes
+   as `.ph-page X, body:has(.ph-page) X`.
 
    Raw v3 tokens (copper / olive / sage / cream / char) live in globals.css
    :root. NOTHING here may touch the ws- or adm-prefixed classes or raw legacy
    token values — the gated workspace keeps the original system untouched.
 --------------------------------------------------------------------------- */
 
-.ph-page,
-body:has(.ph-page) {
+:is(.ph-page, body:has(.ph-page)) {
   /* base surfaces + text */
   --background: var(--cream-50);
   --foreground: var(--char-900);
@@ -56,22 +60,22 @@ body:has(.ph-page) {
   --accent: var(--cream-100);
   --accent-foreground: var(--char-900);
 
-  /* focus shadow keyed to the v3 primary */
-  --shadow-focus: 0 0 0 3px rgba(95, 110, 73, 0.3);
+  /* focus shadow keyed to the v3 primary; dark-surface focus rings go warm
+     cream (consumed by the S1 dark-surface rule in globals.css) */
+  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--olive-600) 30%, transparent);
+  --focus-ring-on-dark: var(--cream-100);
 }
 
 /* --- Buttons (scoped restyle — src/components/ui/button.tsx is untouched) --
    The default variant flips to olive automatically via the --primary remap.
    The outline variant becomes the v3 cream secondary (the reference's
    "EXPLORE THE MODEL" treatment). */
-.ph-page [data-slot="button"][data-variant="outline"],
-body:has(.ph-page) [data-slot="button"][data-variant="outline"] {
+:is(.ph-page, body:has(.ph-page)) [data-slot="button"][data-variant="outline"] {
   background: var(--cream-100);
   border-color: transparent;
   color: var(--char-900);
 }
-.ph-page [data-slot="button"][data-variant="outline"]:hover,
-body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
+:is(.ph-page, body:has(.ph-page)) [data-slot="button"][data-variant="outline"]:hover {
   background: var(--cream-200);
   color: var(--char-900);
 }
@@ -110,13 +114,22 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   color: var(--copper-300);
 }
 
-/* Focus rings on the v3 dark surfaces: the pale-green tint was the S1 fix for
-   the ink-900 surfaces; on warm charcoal use warm cream instead. */
-.ph-page .phx-footer :where(a, button, input, select, textarea, [tabindex]):focus-visible,
-.ph-page
-  .ph-section-dark
-  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline-color: var(--cream-100);
+/* (Dark-surface focus rings: --focus-ring-on-dark above feeds the S1 rule in
+   globals.css — one selector list, recolored per shell.) */
+
+/* --- Legacy-page corrections under the v3 remap (until DR2 redesigns them) -- */
+/* "Live now" is a STATUS — it keeps the locked muted red, not the copper the
+   --brand-accent remap would give it (status grammar: color + text). */
+.ph-page :is(.live-badge, .live-chip-live) {
+  background: var(--red-600);
+}
+/* These paired a raw green token with a now-olive brand token — re-pair them
+   on the olive side so one component doesn't mix two green systems. */
+.ph-page .live-filter-tag.is-active {
+  color: var(--olive-700);
+}
+.ph-page :is(.live-pill, .sup-artefact-icon) {
+  background: var(--olive-100);
 }
 
 /* --- v3 brand lockup (brand-logo.tsx) — copper arch PNG + real-text word --- */
@@ -156,7 +169,7 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
 }
 .phx-header[data-overlay] .phx-nav-link,
 .phx-header[data-overlay] .phx-signin {
-  color: #f3ede1;
+  color: var(--cream-100);
 }
 .phx-header[data-overlay] .phx-signin:hover {
   color: var(--white);
@@ -165,7 +178,7 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
 .phx-header[data-overlay] .phx-nav-link.is-open,
 .phx-header[data-overlay] .phx-nav-link[aria-current="page"] {
   /* the reference's translucent olive pill with pale sage-cream text */
-  background: rgba(85, 99, 64, 0.55);
+  background: color-mix(in srgb, var(--olive-700) 55%, transparent);
   color: var(--olive-100);
 }
 .phx-header[data-overlay] .phx-nav-link[aria-current="page"]::after {
@@ -194,8 +207,11 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   object-position: 60% 42%;
   z-index: -1;
 }
-/* AA scrim (pre-computed DR1 plan): heavier over the left copy column and the
-   top/bottom bands, lightest over the embroidery on the right. */
+/* AA scrim: heavier over the left copy column and the top/bottom bands,
+   lightest over the embroidery on the right. The top band is strong enough
+   that the overlay-header nav labels stay legible even where the photo's
+   bright cloth sits under them (exit-gate review fix). All stops derive from
+   --char-950 via color-mix so a scrim retune is one token change. */
 .v3-hero-scrim {
   position: absolute;
   inset: 0;
@@ -203,17 +219,17 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   background:
     linear-gradient(
       90deg,
-      rgba(32, 26, 21, 0.78) 0%,
-      rgba(32, 26, 21, 0.55) 34%,
-      rgba(32, 26, 21, 0.15) 62%,
-      rgba(32, 26, 21, 0.3) 100%
+      color-mix(in srgb, var(--char-950) 78%, transparent) 0%,
+      color-mix(in srgb, var(--char-950) 55%, transparent) 34%,
+      color-mix(in srgb, var(--char-950) 18%, transparent) 62%,
+      color-mix(in srgb, var(--char-950) 42%, transparent) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(32, 26, 21, 0.45) 0%,
-      rgba(32, 26, 21, 0) 26%,
-      rgba(32, 26, 21, 0) 62%,
-      rgba(32, 26, 21, 0.6) 100%
+      color-mix(in srgb, var(--char-950) 60%, transparent) 0%,
+      transparent 30%,
+      transparent 60%,
+      color-mix(in srgb, var(--char-950) 60%, transparent) 100%
     );
 }
 .v3-hero-inner {
@@ -251,7 +267,7 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   gap: var(--space-4);
 }
 .v3-hero-quiet {
-  color: #f3ede1;
+  color: var(--cream-100);
   font: var(--weight-medium) var(--text-sm) / 1 var(--font-body);
   padding-block: var(--space-2);
 }
@@ -389,13 +405,8 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   color: var(--muted-foreground);
 }
 
-/* --- "One path, three stages." — editorial columns, copper numerals ------- */
-.v3-stages-head {
-  max-width: var(--measure);
-}
-.v3-stages-head .ph-lead {
-  margin-top: var(--space-4);
-}
+/* --- "One path, three stages." — editorial columns, copper numerals
+   (the section head reuses the shared .sec-head primitive) ----------------- */
 .v3-stages {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -424,10 +435,8 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   max-width: 26rem;
 }
 
-/* --- Proof strip numerals go copper on the warm charcoal ------------------- */
-.ph-page .home-proof-item dd {
-  color: var(--copper-300);
-}
+/* (Proof-strip numeral copper lives with its component in pages.css — no
+   cross-file override.) */
 
 /* --- v3 responsive (container queries on .ph-page, like the rest of the
    public shell) ------------------------------------------------------------ */
@@ -470,5 +479,12 @@ body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
   }
   .v3-hero-feat-sub {
     max-width: none;
+  }
+}
+@container page (max-width: 420px) {
+  /* narrow phones: stack the CTA pair full-width (the outline booklet
+     button's long nowrap label would overflow the copy column otherwise) */
+  .v3-hero-ctas > * {
+    width: 100%;
   }
 }

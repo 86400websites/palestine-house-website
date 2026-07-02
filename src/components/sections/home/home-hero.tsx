@@ -4,6 +4,7 @@ import { Coffee, Music, Users } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { LeadMagnetDialog } from "@/components/sections/lead-magnet-dialog";
+import { PHOTO_SOURCES } from "@/components/shared/photo";
 
 /* v3 Home hero (DR1-4) — full-bleed tatreez photo under the transparent
    header, per the owner's reference mockup (docs/source-assets/design-refs/
@@ -33,12 +34,15 @@ export function HomeHero() {
   return (
     <section className="v3-hero">
       <Image
-        src="/assets/photos/ph-photo-hero-tatreez.jpg"
+        src={PHOTO_SOURCES["ph-photo-hero-tatreez"]}
         alt="Hands embroidering red tatreez patterns on white cloth."
         fill
         priority
         quality={78}
-        sizes="100vw"
+        /* cover on a min(100svh, 58rem) box: portrait viewports need ~1.5×
+           the viewport HEIGHT in width; browsers without max() in sizes
+           fall back to 100vw (the previous behavior) */
+        sizes="max(100vw, 150svh)"
         className="v3-hero-img"
       />
       <div className="v3-hero-scrim" aria-hidden="true" />

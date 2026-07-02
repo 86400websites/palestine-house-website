@@ -1984,7 +1984,9 @@
   font-size: clamp(2.25rem, 2.6vw + 1rem, 3.5rem);
   line-height: 1;
   letter-spacing: var(--tracking-tight);
-  color: var(--white);
+  /* v3 (DR1): copper numerals on the warm charcoal proof band (Home is
+     public-only, so this needs no scoping). */
+  color: var(--copper-300);
 }
 .home-proof-item dt {
   font: var(--text-ui);

@@ -1,6 +1,8 @@
 # Palestine House — Design System
 
-> **Companion to [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md).** TECH-ARCHITECTURE fixes the *mechanics* (Tailwind v4, shadcn/ui, `next/font`, `next/image`, Framer Motion). This file fixes the *taste* for Palestine House. **The canonical source of token values is the bound design system shipped with the mockups** (`/docs/page-designs/design-system/tokens/` — colors, fonts, typography, spacing — plus `/docs/page-designs/shared/site-chrome.css` and `shared/pages.css`). Port those values into `src/styles/globals.css` in Sprint 0.1 and keep this file in sync. Where this file and the design-system tokens disagree, **the tokens win** — update this file.
+> **Companion to [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md).** TECH-ARCHITECTURE fixes the *mechanics* (Tailwind v4, shadcn/ui, `next/font`, `next/image`, Framer Motion). This file fixes the *taste* for Palestine House.
+>
+> **v3 (DR1, 2026-07-02): the public shell runs the warm, cultural, photography-led v3 system.** Its canonical token source is the code itself — `src/styles/globals.css` (`:root` v3 raw tokens) + `src/styles/v3.css` (the public-scoped semantic remap) — built from the owner's reference images in `docs/source-assets/design-refs/v3/`. The old mockups + bound design system (`/docs/page-designs/…`) and the Claude Design V2 project are **retired as design inputs for the public shell**; they remain the reference for the **gated workspace**, which deliberately keeps the original green/paper system (§14) until its own refresh sprint. Two tiers, one token file: v3 values apply only inside `.ph-page` (+ `body:has(.ph-page)` for portalled UI), so the workspace is structurally unaffected. Where this file and the shipped tokens disagree, **the code wins** — update this file.
 
 ---
 
@@ -10,7 +12,7 @@
 
 Universal anti-patterns (avoid everywhere):
 - Generic centered-everything layouts with no rhythm or hierarchy.
-- Stock-photo soup and clip-art icons — Palestine House uses **original, hand-painted-feeling artwork only** (ink linework + soft gouache washes on warm paper).
+- Stock-photo soup and clip-art icons — public imagery is the **owner's own warm, candlelit cultural photography** (v3: tatreez, oud nights, supper clubs, markets — real Palestinian life, never generic stock, never corporate imagery). The legacy ink-and-gouache illustrations survive only on not-yet-migrated pages and in the workspace.
 - Cramped spacing — amateur sites are always too tight. White space is a feature here.
 - A dead, static hero — but also never a flashy one. Calm ≠ static.
 - Type with no hierarchy. Type is ~80% of the design.
@@ -23,7 +25,7 @@ Universal anti-patterns (avoid everywhere):
 - **Core offer:** **Apply to bring a House** — the single public CTA (compact nav button "Apply"; supporting line *Every application is reviewed by HQ.*). Questions route to Contact. Never "create a free account," never "join now."
 - **Personality:** warm · rooted · dignified · disciplined · premium.
 - **Register / archetype:** **Editorial** with a minimal/premium lean — serif display type, generous whitespace, restrained refined motion. Think long-read cultural publications, not SaaS.
-- **Art direction:** "One House, Many Rooms" — original ink linework + soft gouache washes on warm paper, blending into the warm-white page background; one warm light source; the recurring Palestinian arch; tatreez-derived accents (e.g. the section divider). Final artwork by asset ID lives in `/docs/page-designs/assets/art/` (mockup-referenced) with masters, textures, and empty-state marks in `/docs/source-assets/images/`.
+- **Art direction (v3, DR1 2026-07-02):** **warm cultural photography** — candlelit, heritage-rich scenes of Palestinian life (tatreez hands, oud nights, supper clubs, book talks, market days) over dark charcoal scrims and cream editorial surfaces; the **copper arch** from the "Our Culture Embassy" logo as the brand mark and accent metal; the recurring Palestinian arch; tatreez-derived details. Full-bleed photo heroes under a transparent header; straight-edged photography (the radial-dissolve treatment belongs to the legacy illustration system). Reference images + photo masters: `docs/source-assets/design-refs/v3/`. *(The previous "One House, Many Rooms" ink-and-gouache direction is retired for the public shell; its assets remain on not-yet-migrated pages + the workspace.)*
 - **Reference sites (adapt, never copy):** Akub (akub-restaurant.com) — rooted, chaptered "feel the place" scroll; Pioneer Works (pioneerworks.org) — time-of-day programming vignettes; Barbican & Southbank Centre "What's On" — editorial live-events strips; Serpentine — honest, anti-hype institutional voice.
 - **The one-sentence test:** "When someone lands, it should feel **like stepping into a warm, confident cultural home that has nothing to prove.**"
 
@@ -35,9 +37,29 @@ Universal anti-patterns (avoid everywhere):
 
 ## 3. Color system
 
-A rooted palette: **heritage green leads**, with muted red, ink black, and warm whites as refined fine-art tones. Red is an accent — used sparingly and intentionally (a highlight, a status, a thread of tatreez), never a second primary.
+### v3 public palette (DR1, 2026-07-02 — owner-approved)
 
-All values below are recorded **verbatim from `/docs/page-designs/design-system/tokens/colors.css`** (the canonical source — re-verify there if in doubt):
+The public shell's rooted, warm palette: **cream surfaces, warm charcoal depth, olive action, copper accent** — from the owner's reference images + the copper-arch logo. Applied via the scoped remap in `src/styles/v3.css` (`.ph-page, body:has(.ph-page)`); raw tokens in `globals.css` `:root`.
+
+| Role | Token | Value | Notes |
+|---|---|---|---|
+| Page background | `--cream-50` | `#FAF6EE` | Warm cream page |
+| Panels / secondary button | `--cream-100` | `#F6EFE4` | Culture-split panel, quiet CTA |
+| Muted washes | `--cream-200` | `#EFE6D6` | Alt sections, hovers |
+| Text + dark sections / footer | `--char-900` | `#2A241E` | White on it 14.9:1 |
+| Photo scrims | `--char-950` | `#201A15` | Hero gradient base |
+| Primary action (Apply) | `--olive-600` / hover `--olive-700` | `#5F6E49` / `#556340` | White text 5.5:1 / 6.5:1 |
+| Olive tint | `--olive-100` | `#EAEDE2` | Active-nav wash |
+| Copper accent | `--copper-700` on cream · `--copper-500` display · `--copper-300` on dark | `#8F5A2E` / `#B0713D` / `#C89A6A` | Eyebrows/links 5.0:1 · logo/numerals (large) · dark-section numerals 6.5:1 |
+| On-dark accent | `--sage-300` | `#A9B58E` | Nav pill text, dark eyebrows (7.1:1) |
+| Warm hairline | `--line-warm` | `#E7DFCF` | Borders/inputs on cream |
+| Status | unchanged | — | Success/warning/error tokens carry over |
+
+Scoping rule: **never change a legacy `:root` value for a v3 need** — add a v3 raw token and remap the semantic alias inside the `.ph-page` scope. The workspace consumes the same aliases at their legacy values.
+
+### Legacy palette (gated workspace + not-yet-migrated public layouts)
+
+Heritage green leads, muted red accents, warm paper — recorded verbatim from the retired `design-system/tokens/colors.css`; still the live system inside the gated shell (§14):
 
 | Token | Value | Use |
 |---|---|---|
@@ -54,11 +76,11 @@ All values below are recorded **verbatim from `/docs/page-designs/design-system/
 | Muted / alt section | `#F2EEE5` (`--paper-200`, `--surface-muted`) | Alternate section backgrounds |
 | Status | success `#1A6B4A` · warning `#B58A2D` (bg `#F6EEDB`) · error `#B23A2E` (bg `#F6E5E2`) | Status error is deliberately distinct from the accent red |
 
-> Never eyeball or invent values. Hard rule from the token file: never arrange green / red / black / white as stripes or a triangle, and never render them at full flag saturation in UI chrome — color lives most powerfully in the artwork.
+> Never invent values ad hoc — v3 values were eyeballed from the owner's reference images **once, with owner sign-off (DR1-2 gate)**; everything since reads the tokens. **Hard rule (carries into v3 unchanged):** never arrange green / red / black / white as stripes or a triangle, and never render them at full flag saturation in UI chrome — color lives most powerfully in the imagery.
 
-### CSS variables (`src/styles/globals.css`)
+### CSS variables (`src/styles/globals.css` + `src/styles/v3.css`)
 
-Tailwind v4 is **CSS-first**: `@import "tailwindcss";`, raw values in `:root`, exposed via `@theme inline` (shadcn's v4 setup). Map the design-system tokens to the shadcn variable names so every component inherits the brand (values from `design-system/tokens/colors.css`):
+Tailwind v4 is **CSS-first**: `@import "tailwindcss";`, raw values in `:root`, exposed via `@theme inline` (shadcn's v4 setup). The `:root` block below is the **legacy mapping** the workspace still runs on; the **v3 public shell re-points these same semantic aliases** inside `.ph-page, body:has(.ph-page)` (see `v3.css`) — `@theme inline` keeps live `var()` chains, so utilities like `bg-primary` resolve per-element and the remap needs zero component changes:
 
 ```css
 @layer base {
@@ -118,13 +140,13 @@ Port the scale from `design-system/tokens/typography.css`. Known anchors from th
 - Editorial asymmetry where it earns its place — artwork in negative space (e.g. the Experience hero headline sits in the artwork's negative space), offset vignettes, the day/night paired panels. Coherent, never chaotic.
 - Every scroll reveals something — but **calmly**: a new section treatment, not a new gimmick.
 - Responsive from **320px** up; tap targets ≥ 44×44px.
-- **The header and footer are locked** (`shared/site-chrome.css` / `site-chrome.jsx`): identical on every page, never redesigned per page. Footer carries the brand block, four link columns — Explore (The Model · Experience · Live Programming) · Bring a House (Why bring one · Our support) · Account (Sign in) · Legal (Privacy · Terms · Contact) — the Apply block, the booklet lead-magnet block, and the tagline (per `/docs/page-copy/00-global/footer-copy.md`).
+- **The header and footer are one locked system** (`src/components/layout/site-header.tsx` / `site-footer.tsx` + the `.phx-*` CSS): identical on every public page, never redesigned per page. v3 (DR1): the header is warm cream glass with the copper-arch `BrandLogo`, and carries a sanctioned **transparent overlay state** on photo-hero routes (`OVERLAY_ROUTES` in site-header.tsx — currently `/`) that solidifies on scroll or when any menu opens — one system with two states, not a per-page redesign. The footer is warm charcoal with copper column titles: brand block, four link columns — Explore (The Model · Experience · Live Programming) · Bring a House (Why bring one · Our support) · Account (Sign in) · Legal (Privacy · Terms · Contact) — the Apply band, and the tagline. *(The booklet lead-magnet block left the footer in the pre-S13 sprint — it lives only in the home-hero dialog.)*
 
 ## 6. Component rules
 
 Build on shadcn/ui primitives themed via §3 — not one-off overrides.
 
-- **Buttons:** *primary* = heritage green (the Apply CTA), *secondary/outline* = ink outline on paper. Display-font weight for button text. Shape per the design-system radius (8px default, 12px cards, 16px feature cards) — restrained, never pill.
+- **Buttons:** on the public shell (v3), *primary* = olive (`--olive-600`, the Apply CTA) and *secondary/outline* = the quiet cream button (`--cream-100`, borderless) — both restyled purely via the scoped tokens/CSS, `button.tsx` untouched; the opt-in `.v3-cta` modifier (uppercase, tracked, small) is for the hero + footer Apply CTAs only, never blanket. In the workspace, *primary* stays heritage green. Shape per the design-system radius (8px default, 12px cards, 16px feature cards) — restrained, never pill.
 - **Nav tooltip (project-specific):** each of the four nav labels renders a styled hover one-liner via a single reusable Tooltip component — **never raw `title` attributes**. On mobile, the one-liner shows as a sub-label inside the shadcn `Sheet` menu. Copy owned by `/docs/page-copy/00-global/navigation-copy.md`.
 - **Forms (react-hook-form + zod):** light surface, 1px warm border; focus ring uses `--ring`; error = colored border **and** text message (never color alone); labels above inputs. The Apply form is the flagship form — calm, single column, dignified.
 - **Cards / surfaces:** consistent radius, subtle warm border, gentle lift on hover (≤1.02). Session cards (Live Programming) are one shared component reused on `/live` and the Experience live strip — never two implementations.
@@ -154,11 +176,14 @@ Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal 
 
 ## 9. Image / media guidance
 
-- **All artwork is original** ink-and-gouache illustration per the art direction — never stock photos, never generic icons. The final artwork ships in-repo by asset ID (PH-HOME-01, PH-EXP-01…03e, PH-BRING-01/02, PH-SUPPORT-01, PH-HIW-01/02/03 triptych, etc.): `/docs/page-designs/assets/art/` (the files the mockups reference) and `/docs/source-assets/images/` (masters plus textures `PH-TEX-*` and empty-state marks `PH-EMPTY-*`).
-- All images via `next/image` — never raw `<img>`. `priority` above the fold; explicit `width`/`height` (CLS).
-- All images under `/public/assets/`, organized by page (`/assets/home/`, `/assets/experience/`, `/assets/logo/`…), referenced by path. To update an image, replace the file in place, same filename.
-- Aspect ratios per the mockups (e.g. PH-EXP-01: 16:9 desktop / 4:5 mobile; vignette pairs 4:5 with identical framing) — measure against the rendered mockup page, never guess. Compress to <~200KB where possible; meaningful `alt` text always.
-- The final artwork already exists in `/docs` (above) — copy it into `/public/assets/` as pages are built. If a new asset is ever genuinely missing, use a neutral placeholder at the **correct aspect ratio** and flag it; never lock layout against the wrong ratio.
+**v3 (DR1): the public shell is photography-led.** The imagery is the **owner's own photography** — warm, candlelit, culturally rooted scenes; never stock, never corporate.
+
+- **Photos** render through `src/components/shared/photo.tsx` (`PHOTO_SOURCES`, ids `ph-photo-*`) with the straight-edged `.v3-photo` frame — cover crops, optional 12px radius, **no radial dissolve** (that treatment belongs to the legacy illustration system and stays in `Artwork` for the not-yet-migrated pages). Optimized files ship in `public/assets/photos/` (≤2000px, ≤~500KB); **masters + the owner's reference mockups live in `docs/source-assets/design-refs/v3/`** (gitignored — OneDrive is canon). Regenerate outputs with `pnpm tsx scripts/optimize-photos.ts` (idempotent; sharp is a devDependency only).
+- **The brand mark** is the copper arch (`public/assets/logo/ph-logo-mark.png`, from the owner's "Our Culture Embassy" lockup) — rendered in the chrome by `BrandLogo` (mark PNG + real-text wordmark). The favicon `src/app/icon.svg` is a simplified hand vector of the arch; apple-icon + the OG image composite the real PNG. Follow-up: request the designer's SVG/reverse masters.
+- **Photo heroes:** full-bleed `next/image` `fill` + `priority` + `sizes="100vw"`, under the transparent header, with the two-layer charcoal scrim (`.v3-hero-scrim`) — verify AA with a contrast picker on the rendered page, not just math.
+- The legacy PH-* illustrations remain in `public/assets/art/` and keep serving the not-yet-migrated public pages + workspace; don't delete them until DR-series sprints retire their pages.
+- All images via `next/image` — never raw `<img>`. `priority` above the fold only; explicit dimensions or a fixed-size frame (CLS). Meaningful, neutral `alt` text always (describe the scene; don't assert real events or identify people).
+- If an asset is genuinely missing, use a neutral placeholder at the **correct aspect ratio** and flag it; never lock layout against the wrong ratio.
 
 ## 10. Responsive design rules
 
@@ -178,15 +203,16 @@ Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal 
 
 ## 12. Per-page art notes (public shell)
 
-- **Experience** is the most artwork-heavy page on the site (hero artwork, day/night vignette pair, five-pillar block-print thumbnails, live strip); every other page is calmer by comparison.
-- **Bring a House** is the densest public page (it absorbed How It Works) — pace it with generous whitespace; reuse the repointed stage triptych and milestone timeline patterns; do not redesign them.
-- **Home** voices the full line "Bring Palestine House to Your City" as a section heading; the nav label stays short.
-- **Live** is the public hero feature — editorial "what's on" treatment, warm and arch-framed, with graceful empty states ("Quiet right now — here's a recent night while the calendar fills.").
+- **Home is the v3 benchmark (DR1, 2026-07-02):** full-bleed tatreez photo hero (transparent header, scrim, mini-features band) → cream/photo culture split (arch-café) → the six-photo "Inside a Palestine House" scroll-snap strip → copper-numeral stages → charcoal proof strip → platform split. New DR-series pages measure against it.
+- **All other public pages are in the intended intermediate state:** old layouts + legacy illustrations rendered in v3 colors/chrome, awaiting their DR2+ redesigns — don't "fix" them backward, and don't redesign them ad hoc outside a sprint.
+- **Experience** was the most artwork-heavy page (hero artwork, day/night vignettes, five-pillar thumbnails, live strip) — its v3 pass should lead with the strongest photography.
+- **Bring a House** is the densest public page — pace it with generous whitespace when its v3 pass comes.
+- **Live** is the public hero feature — editorial "what's on" treatment with graceful empty states ("Quiet right now — here's a recent night while the calendar fills.").
 
 ## 13. What not to over-customize
 
-- Don't invent tokens beyond the bound design system (`/docs/page-designs/design-system/`); expand only when a real screen needs it, and record it here.
-- No dark mode, no second primary color, no third typeface.
+- Don't invent tokens beyond the shipped system (`globals.css` `:root` + the v3 scoped remap in `v3.css`); expand only when a real screen needs it, and record it here. Never mutate a legacy value to serve a v3 need — add a v3 token instead (§3 scoping rule).
+- No dark mode, no third typeface. Copper is an **accent metal**, olive the single action color — don't promote either into a second primary.
 - Don't hand-build what shadcn/ui provides; theme the primitive.
 - Don't over-animate — restraint *is* the brand.
 - Don't finalize layouts against placeholder artwork at the wrong aspect ratio.

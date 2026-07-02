@@ -91,7 +91,7 @@ export default function HomePage() {
       {/* 4 — One path, three stages (editorial columns, copper numerals) */}
       <section className="ph-section-lg v3-stages-section">
         <div className="ph-container">
-          <Reveal className="v3-stages-head">
+          <Reveal className="sec-head">
             <h2>One path, three stages.</h2>
             <p className="ph-lead">
               The entire playbook is a guided path, so you always know the next

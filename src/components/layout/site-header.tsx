@@ -128,23 +128,19 @@ export function SiteHeader() {
 
   /* Transparent-over-photo header (v3): only on OVERLAY_ROUTES, and only
      while at the top with every menu closed — scrolling or opening the mega
-     panel / mobile sheet solidifies it so content never floats on glass. */
+     panel / mobile sheet solidifies it so content never floats on glass.
+     React bails out on same-value setState, so no throttle is needed; the
+     cleanup resets the flag so stale scroll state never leaks across route
+     changes (exit-gate review fix). */
   const overlayRoute = OVERLAY_ROUTES.includes(pathname);
   React.useEffect(() => {
     if (!overlayRoute) return;
-    let raf = 0;
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        setScrolled(window.scrollY > 32);
-      });
-    };
+    const onScroll = () => setScrolled(window.scrollY > 32);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
+      setScrolled(false);
     };
   }, [overlayRoute]);
   const overlay = overlayRoute && !scrolled && !open && !mobileOpen;
@@ -186,8 +182,16 @@ export function SiteHeader() {
       data-overlay={overlay ? "" : undefined}
       onMouseLeave={() => setOpen(null)}
     >
+      {/* The overlay state is JS-driven (scroll listener) — without JS the
+          transparent header would float unreadably over the page below the
+          hero, so no-script clients get the solid warm chrome instead. */}
+      {overlayRoute && (
+        <noscript>
+          <style>{`.phx-header[data-overlay]{background:rgba(250,246,238,.92);border-bottom-color:var(--line-warm);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.phx-header[data-overlay] .phx-nav-link,.phx-header[data-overlay] .phx-signin,.phx-header[data-overlay] .phx-brand-word{color:var(--char-900)}`}</style>
+        </noscript>
+      )}
       <div className="ph-container phx-header-inner">
-        <BrandLogo href="/" />
+        <BrandLogo href="/" priority />
 
         <nav className="phx-nav" aria-label="Main">
           {NAV_LINKS.map((l) => {

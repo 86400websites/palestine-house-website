@@ -6,7 +6,7 @@ import Image from "next/image";
    The source PNG's charcoal wordmark disappears on dark/photo surfaces and
    softens on retina — HTML text stays crisp at any DPI and recolors with the
    chrome state through .phx-brand-word (v3.css). The "Our Culture Embassy"
-   tagline lives in the full lockup asset + the OG image, not the chrome.
+   tagline lives in the owner's logo master + the OG image, not the chrome.
    Public shell only — the gated workspace/admin shells keep layout/logo.tsx. */
 
 const MARK_RATIO = 289 / 303; // ph-logo-mark.png intrinsic aspect
@@ -15,9 +15,12 @@ type BrandLogoProps = {
   href?: string;
   /** Mark height in px; the wordmark scales through .phx-brand-word. */
   height?: number;
+  /** Only the header instance is above the fold — the footer one must not
+   *  issue an eager high-priority fetch that competes with hero LCP. */
+  priority?: boolean;
 };
 
-export function BrandLogo({ href, height = 34 }: BrandLogoProps) {
+export function BrandLogo({ href, height = 34, priority }: BrandLogoProps) {
   const content = (
     <>
       <Image
@@ -26,7 +29,7 @@ export function BrandLogo({ href, height = 34 }: BrandLogoProps) {
         aria-hidden="true"
         width={Math.round(height * MARK_RATIO)}
         height={height}
-        priority
+        priority={priority}
       />
       <span className="phx-brand-word">Palestine House</span>
     </>
