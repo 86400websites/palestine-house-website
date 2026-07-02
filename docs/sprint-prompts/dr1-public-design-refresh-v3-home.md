@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Date merged** | _pending — build complete 2026-07-02, PR open for owner review_ |
+| **Date merged** | _pending — build complete 2026-07-03 (DR1-0…DR1-9, head `2c96d64`); owner merge + `/close` next. Fill the PR # + merge date at close._ |
 | **Branch / PR** | `claude/sprint-dr1-design-v3-home` / PR TBD |
 | **Goal** | Replace the illustration-on-paper public design with the owner's **warm, cultural, photography-led premium system (v3)** — foundations (tokens · imagery treatment · chrome · brand surfaces) + the redesigned **Home page** only. Frontend/design only; the gated workspace stays visually untouched. Also: retire the un-started S13/S14 to the ROADMAP §A backlog (owner re-direction — sprints added ad hoc from here). |
 
@@ -29,6 +29,12 @@ The sprint ran from the approved plan at `~/.claude/plans/ok-so-will-we-flickeri
 
 </details>
 
+## Reviews
+
+- **8-angle adversarial exit-gate review (DR1-7):** ~29 candidates → 17 fixes applied on-branch, remainder accepted + documented (details in "What shipped").
+- **Independent Codex review (owner-run, 2026-07-03, at `fb3be31` — through DR1-8):** **APPROVE — zero blocking, zero non-blocking.** Verified: protected-path guard clean; lead-magnet removal left no dangling references; session probe same-origin + CSP untouched; marquee CSS-only with reduced-motion fallback; secret/path scan clean. (Codex note: `docs/page-copy/` absent from its checkout → copy compared against the diff + §4 D-DR1 instead; local build needed `NODE_OPTIONS=--max-old-space-size=4096`.)
+- **Engine delta self-review of `fb3be31..2c96d64` (DR1-9, post-Codex):** clean — path-guard still CLEAN on the full branch; `OVERLAY_ROUTES` additions + `PageHero` hunks reviewed line-by-line; `.ph-page` confirmed `container-type: inline-size` (the `cqw` nudge math is valid); five hero pages' headlines/eyebrows/support lines grep-verified **verbatim** in the prerendered HTML; one `priority` image per page; five neutral new alt strings are the only new copy.
+
 ## Checks & results
 
 - `pnpm run typecheck` / `lint` / `build` — green after **every** sub-step (46 routes; `/` static; apple-icon + OG prerender statically).
@@ -45,7 +51,9 @@ The sprint ran from the approved plan at `~/.claude/plans/ok-so-will-we-flickeri
 
 ## Follow-ups
 
-- **DR2+:** remaining public pages (`/model`, `/experience`, `/bring-ph`, `/our-support`, `/live`, `/apply`, auth, legal) get their v3 layouts — until then they intentionally render old layouts in v3 colors.
+- **DR2+:** remaining public page BODIES get their v3 layouts (`/model`, `/experience`, `/bring-ph`, `/our-support` bodies below their new heroes, plus `/live`, `/about`, `/focus-areas`, `/contact`, auth, legal) — until then they intentionally render old layouts in v3 colors.
+- **Bring-a-House hero master** is framed chest-down (no head in the source) — the crop centers the coffee pour deliberately; owner may supply an alternate master (one-line swap in `bring-ph/page.tsx` + one pipeline entry).
+- The two public **booklet PDFs stay in Storage** and remain featured in the gated `/resources`; only the public capture UI was retired (D-DR1(7b)).
 - Request from the designer: the logo **SVG master** + a reverse (light) wordmark variant; a higher-res hero master (current 1535px is thin for 2× large desktops).
 - Owner: confirm photo usage rights/consent for identifiable people; consider publishing the v3 foundations to a new Claude Design **V3** project for browsable preview.
 - Workspace logo swap (green arch → copper) deferred to the future workspace-refresh sprint (2-line change).
