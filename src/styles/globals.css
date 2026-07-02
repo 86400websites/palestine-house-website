@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./pages.css";
+@import "./v3.css";
 
 /* ---------------------------------------------------------------------------
    Palestine House — design system foundation (Sprint 0.1).
@@ -174,6 +175,28 @@
   --duration-slow: 560ms;
   --reveal-travel: 20px;
   --hover-lift: 1.02;
+
+  /* --- v3 raw palette (DR1 public design refresh — warm cultural photography
+         system). Additive only: nothing below is referenced outside the
+         public-shell scope in v3.css, so the gated workspace keeps the
+         original green/paper system untouched. Values eyeballed from the
+         owner's reference images + the copper-arch logo. ------------------- */
+  --copper-500: #B0713D; /* logo arch — decorative, large display, numerals */
+  --copper-300: #C89A6A; /* copper for text/accents on dark charcoal */
+  --copper-700: #8F5A2E; /* text-safe copper on cream (eyebrows, links) */
+  --copper-800: #7A4C26; /* copper hover/pressed */
+  --copper-100: #F0E2D3; /* copper tint wash */
+  --olive-600: #5F6E49; /* v3 primary action (Apply) — white text AA */
+  --olive-700: #556340; /* primary hover/pressed */
+  --olive-100: #EAEDE2; /* olive tint (active-nav wash) */
+  --sage-300: #A9B58E; /* on-dark accent (nav pill text, dark eyebrows) */
+  --cream-50: #FAF6EE; /* v3 page background */
+  --cream-100: #F6EFE4; /* panels / secondary button */
+  --cream-200: #EFE6D6; /* muted washes */
+  --char-900: #2A241E; /* warm charcoal — dark sections, footer */
+  --char-950: #201A15; /* deepest warm — photo scrims */
+  --line-warm: #E7DFCF; /* warm hairline border on cream */
+  --header-h: 72px;
 }
 
 /* ---------------------------------------------------------------------------

@@ -1,0 +1,120 @@
+/* ---------------------------------------------------------------------------
+   Palestine House — v3 public-shell theme layer (DR1 design refresh).
+
+   The warm, cultural, photography-led system from the owner's 2026-07-02
+   reference images. This file remaps the SEMANTIC aliases only, inside a
+   public-only scope:
+
+     .ph-page             — the public shell root (site-chrome.tsx); gated
+                            workspace/admin routes never render it.
+     body:has(.ph-page)   — extends the remap to Radix portals (the booklet
+                            LeadMagnetDialog, the mobile nav Sheet, tooltips)
+                            which mount under <body>, outside .ph-page. On
+                            gated routes no .ph-page exists anywhere, so this
+                            can never match there. In a browser without :has()
+                            those portalled surfaces just keep the original
+                            green tokens — cosmetic, never broken.
+
+   Raw v3 tokens (copper / olive / sage / cream / char) live in globals.css
+   :root. NOTHING here may touch the ws- or adm-prefixed classes or raw legacy
+   token values — the gated workspace keeps the original system untouched.
+--------------------------------------------------------------------------- */
+
+.ph-page,
+body:has(.ph-page) {
+  /* base surfaces + text */
+  --background: var(--cream-50);
+  --foreground: var(--char-900);
+  --surface-card: var(--cream-100);
+  --surface-muted: var(--cream-200);
+  /* Light warm hero wash for the not-yet-redesigned pages (/apply, auth,
+     art-heroes). The v3 Home hero uses its own photo + scrim, not this. */
+  --surface-hero: var(--cream-100);
+  --border: var(--line-warm);
+  --input: var(--line-warm);
+  --ring: var(--olive-600);
+
+  /* brand roles */
+  --brand-primary: var(--olive-600);
+  --brand-primary-hover: var(--olive-700);
+  --brand-primary-tint: var(--olive-100);
+  --brand-accent: var(--copper-700);
+  --brand-accent-hover: var(--copper-800);
+  --brand-accent-tint: var(--copper-100);
+  --link: var(--olive-700);
+  --link-hover: var(--olive-600);
+
+  /* shadcn map */
+  --card: var(--white);
+  --card-foreground: var(--char-900);
+  --popover: var(--white);
+  --popover-foreground: var(--char-900);
+  --primary: var(--olive-600);
+  --secondary: var(--cream-200);
+  --secondary-foreground: var(--char-900);
+  --muted: var(--cream-200);
+  --accent: var(--cream-100);
+  --accent-foreground: var(--char-900);
+
+  /* focus shadow keyed to the v3 primary */
+  --shadow-focus: 0 0 0 3px rgba(95, 110, 73, 0.3);
+}
+
+/* --- Buttons (scoped restyle — src/components/ui/button.tsx is untouched) --
+   The default variant flips to olive automatically via the --primary remap.
+   The outline variant becomes the v3 cream secondary (the reference's
+   "EXPLORE THE MODEL" treatment). */
+.ph-page [data-slot="button"][data-variant="outline"],
+body:has(.ph-page) [data-slot="button"][data-variant="outline"] {
+  background: var(--cream-100);
+  border-color: transparent;
+  color: var(--char-900);
+}
+.ph-page [data-slot="button"][data-variant="outline"]:hover,
+body:has(.ph-page) [data-slot="button"][data-variant="outline"]:hover {
+  background: var(--cream-200);
+  color: var(--char-900);
+}
+
+/* Opt-in CTA treatment from the reference hero — uppercase, tracked, small.
+   Applied per-CTA (hero + footer Apply band), never blanket. */
+.v3-cta {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+/* --- v3 photography frame (photo.tsx) — straight edges, cover crop; the
+   legacy .ph-art radial dissolve is for illustration-on-white, not photos. */
+.v3-photo {
+  position: relative;
+  overflow: hidden;
+  background: var(--cream-200); /* letterbox tone while the image loads */
+}
+.v3-photo > img {
+  object-fit: cover;
+}
+.v3-photo--rounded {
+  border-radius: var(--radius-md);
+}
+
+/* --- Dark sections go warm charcoal on the public shell ------------------- */
+.ph-page .ph-section-dark {
+  background: var(--char-900);
+}
+.ph-page .ph-section-dark .ph-eyebrow {
+  color: var(--sage-300);
+}
+.ph-page .ph-section-dark :is(.editorial-index, .fa-letter, .fa-caps-label) {
+  color: var(--copper-300);
+}
+
+/* Focus rings on the v3 dark surfaces: the pale-green tint was the S1 fix for
+   the ink-900 surfaces; on warm charcoal use warm cream instead. */
+.ph-page .phx-footer :where(a, button, input, select, textarea, [tabindex]):focus-visible,
+.ph-page
+  .ph-section-dark
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: var(--cream-100);
+}
