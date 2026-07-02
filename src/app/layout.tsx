@@ -44,9 +44,10 @@ export const metadata: Metadata = {
   },
 };
 
-/* Mobile browser chrome colour (S7 Step 6) — matches the manifest theme_color. */
+/* Mobile browser chrome colour — matches the manifest theme_color
+   (v3 warm charcoal, DR1-6). */
 export const viewport: Viewport = {
-  themeColor: "#1A6B4A",
+  themeColor: "#2A241E",
 };
 
 /* JSON-LD: Organization + WebSite (TECH-ARCHITECTURE §14). */

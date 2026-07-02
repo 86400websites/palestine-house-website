@@ -12,8 +12,9 @@ export default function manifest(): MetadataRoute.Manifest {
     description: SITE_TAGLINE,
     start_url: "/",
     display: "standalone",
-    background_color: "#FAF8F3",
-    theme_color: "#1A6B4A",
+    /* v3 (DR1-6): warm cream field + charcoal mobile chrome. */
+    background_color: "#FAF6EE",
+    theme_color: "#2A241E",
     icons: [
       {
         src: "/icon.svg",
