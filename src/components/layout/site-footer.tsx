@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Logo } from "@/components/layout/logo";
+import { BrandLogo } from "@/components/layout/brand-logo";
 import { Button } from "@/components/ui/button";
 
 /* Locked public footer (docs/page-designs/shared/site-chrome.jsx; copy
@@ -26,7 +26,7 @@ export function SiteFooter() {
 
       <div className="ph-container phx-footer-grid">
         <div className="phx-footer-col phx-footer-brand">
-          <Logo tone="white" size={26} />
+          <BrandLogo height={30} />
           <p>A fixed address for Palestinian culture, in every city.</p>
         </div>
         <div className="phx-footer-col">

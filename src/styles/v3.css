@@ -1,0 +1,556 @@
+/* ---------------------------------------------------------------------------
+   Palestine House — v3 public-shell theme layer (DR1 design refresh).
+
+   The warm, cultural, photography-led system from the owner's 2026-07-02
+   reference images. This file remaps the SEMANTIC aliases only, inside a
+   public-only scope:
+
+     .ph-page             — the public shell root (site-chrome.tsx); gated
+                            workspace/admin routes never render it.
+     body:has(.ph-page)   — extends the remap to Radix portals (the mobile
+                            nav Sheet, tooltips) which mount under <body>,
+                            outside .ph-page. On gated routes no .ph-page
+                            exists anywhere, so this can never match there.
+
+   The pair is wrapped in :is(...) because :is() parses its list FORGIVINGLY:
+   in a browser without :has() the body:has(...) arm is dropped but .ph-page
+   keeps matching, so in-page v3 survives and only portalled surfaces fall
+   back to the legacy green tokens (cosmetic). A bare comma list would be
+   invalidated WHOLESALE by the unsupported :has() — never write these scopes
+   as `.ph-page X, body:has(.ph-page) X`.
+
+   Raw v3 tokens (copper / olive / sage / cream / char) live in globals.css
+   :root. NOTHING here may touch the ws- or adm-prefixed classes or raw legacy
+   token values — the gated workspace keeps the original system untouched.
+--------------------------------------------------------------------------- */
+
+:is(.ph-page, body:has(.ph-page)) {
+  /* base surfaces + text */
+  --background: var(--cream-50);
+  --foreground: var(--char-900);
+  --surface-card: var(--cream-100);
+  --surface-muted: var(--cream-200);
+  /* Light warm hero wash for the not-yet-redesigned pages (/apply, auth,
+     art-heroes). The v3 Home hero uses its own photo + scrim, not this. */
+  --surface-hero: var(--cream-100);
+  --border: var(--line-warm);
+  --input: var(--line-warm);
+  --ring: var(--olive-600);
+
+  /* brand roles */
+  --brand-primary: var(--olive-600);
+  --brand-primary-hover: var(--olive-700);
+  --brand-primary-tint: var(--olive-100);
+  --brand-accent: var(--copper-700);
+  --brand-accent-hover: var(--copper-800);
+  --brand-accent-tint: var(--copper-100);
+  --link: var(--olive-700);
+  --link-hover: var(--olive-600);
+
+  /* shadcn map */
+  --card: var(--white);
+  --card-foreground: var(--char-900);
+  --popover: var(--white);
+  --popover-foreground: var(--char-900);
+  --primary: var(--olive-600);
+  --secondary: var(--cream-200);
+  --secondary-foreground: var(--char-900);
+  --muted: var(--cream-200);
+  --accent: var(--cream-100);
+  --accent-foreground: var(--char-900);
+
+  /* focus shadow keyed to the v3 primary; dark-surface focus rings go warm
+     cream (consumed by the S1 dark-surface rule in globals.css) */
+  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--olive-600) 30%, transparent);
+  --focus-ring-on-dark: var(--cream-100);
+}
+
+/* --- Buttons (scoped restyle — src/components/ui/button.tsx is untouched) --
+   The default variant flips to olive automatically via the --primary remap.
+   The outline variant becomes the v3 cream secondary (the reference's
+   "EXPLORE THE MODEL" treatment). */
+:is(.ph-page, body:has(.ph-page)) [data-slot="button"][data-variant="outline"] {
+  background: var(--cream-100);
+  border-color: transparent;
+  color: var(--char-900);
+}
+:is(.ph-page, body:has(.ph-page)) [data-slot="button"][data-variant="outline"]:hover {
+  background: var(--cream-200);
+  color: var(--char-900);
+}
+
+/* Opt-in CTA treatment from the reference hero — uppercase, tracked, small.
+   Applied per-CTA (hero + footer Apply band), never blanket. */
+.v3-cta {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+/* --- v3 photography frame (photo.tsx) — straight edges, cover crop; the
+   legacy .ph-art radial dissolve is for illustration-on-white, not photos. */
+.v3-photo {
+  position: relative;
+  overflow: hidden;
+  background: var(--cream-200); /* letterbox tone while the image loads */
+}
+.v3-photo > img {
+  object-fit: cover;
+}
+.v3-photo--rounded {
+  border-radius: var(--radius-md);
+}
+
+/* --- Dark sections go warm charcoal on the public shell ------------------- */
+.ph-page .ph-section-dark {
+  background: var(--char-900);
+}
+.ph-page .ph-section-dark .ph-eyebrow {
+  color: var(--sage-300);
+}
+.ph-page .ph-section-dark :is(.editorial-index, .fa-letter, .fa-caps-label) {
+  color: var(--copper-300);
+}
+
+/* (Dark-surface focus rings: --focus-ring-on-dark above feeds the S1 rule in
+   globals.css — one selector list, recolored per shell.) */
+
+/* --- Legacy-page corrections under the v3 remap (until DR2 redesigns them) -- */
+/* "Live now" is a STATUS — it keeps the locked muted red, not the copper the
+   --brand-accent remap would give it (status grammar: color + text). */
+.ph-page :is(.live-badge, .live-chip-live) {
+  background: var(--red-600);
+}
+/* These paired a raw green token with a now-olive brand token — re-pair them
+   on the olive side so one component doesn't mix two green systems. */
+.ph-page .live-filter-tag.is-active {
+  color: var(--olive-700);
+}
+.ph-page :is(.live-pill, .sup-artefact-icon) {
+  background: var(--olive-100);
+}
+
+/* --- v3 brand lockup (brand-logo.tsx) — copper arch PNG + real-text word --- */
+.phx-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+}
+.phx-brand img {
+  display: block;
+}
+.phx-brand-word {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: 1.22rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--char-900);
+  transition: color var(--duration) var(--ease-out);
+}
+.phx-footer .phx-brand-word {
+  color: var(--cream-50);
+}
+
+/* --- Header overlay state (photo heroes; site-header.tsx sets data-overlay
+   only at top-of-page with all menus closed on OVERLAY_ROUTES) -------------- */
+.phx-header[data-overlay] {
+  background: transparent;
+  border-bottom-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.phx-header[data-overlay] .phx-brand-word {
+  color: var(--cream-50);
+}
+.phx-header[data-overlay] .phx-nav-link,
+.phx-header[data-overlay] .phx-signin {
+  color: var(--cream-100);
+}
+.phx-header[data-overlay] .phx-signin:hover {
+  color: var(--white);
+}
+.phx-header[data-overlay] .phx-nav-link:hover,
+.phx-header[data-overlay] .phx-nav-link.is-open,
+.phx-header[data-overlay] .phx-nav-link[aria-current="page"] {
+  /* the reference's translucent olive pill with pale sage-cream text */
+  background: color-mix(in srgb, var(--olive-700) 55%, transparent);
+  color: var(--olive-100);
+}
+.phx-header[data-overlay] .phx-nav-link[aria-current="page"]::after {
+  background: var(--sage-300);
+}
+/* Keyboard focus on the transparent (photo) header needs a light ring. */
+.phx-header[data-overlay]
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: var(--cream-100);
+}
+
+/* --- v3 Home hero (home-hero.tsx) — full-bleed photo, scrim, copy left,
+   mini-features pinned to the bottom band ---------------------------------- */
+.v3-hero {
+  position: relative;
+  /* pull under the sticky 72px header so the photo runs to the viewport top */
+  margin-top: calc(-1 * var(--header-h));
+  min-height: min(100svh, 52rem);
+  display: flex;
+  flex-direction: column;
+  color: var(--white);
+  isolation: isolate;
+}
+.v3-hero-img {
+  object-fit: cover;
+  object-position: 60% 42%;
+  z-index: -1;
+}
+/* AA scrim: heavier over the left copy column and the top/bottom bands,
+   lightest over the embroidery on the right. The top band is strong enough
+   that the overlay-header nav labels stay legible even where the photo's
+   bright cloth sits under them (exit-gate review fix). All stops derive from
+   --char-950 via color-mix so a scrim retune is one token change. */
+.v3-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--char-950) 78%, transparent) 0%,
+      color-mix(in srgb, var(--char-950) 55%, transparent) 34%,
+      color-mix(in srgb, var(--char-950) 18%, transparent) 62%,
+      color-mix(in srgb, var(--char-950) 42%, transparent) 100%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--char-950) 60%, transparent) 0%,
+      transparent 30%,
+      transparent 60%,
+      color-mix(in srgb, var(--char-950) 60%, transparent) 100%
+    );
+}
+.v3-hero-inner {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-12);
+  padding-top: calc(var(--header-h) + var(--space-10));
+  padding-bottom: var(--space-8);
+}
+.v3-hero-copy {
+  max-width: 34rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+.v3-hero-copy h1 {
+  color: var(--white);
+  /* DR1-8 rebalance: a notch smaller than the first pass so the hero reads
+     editorial, not billboard */
+  font-size: clamp(2.25rem, 1.9vw + 1.45rem, 3.4rem);
+  line-height: var(--leading-tight);
+}
+.v3-hero-sub {
+  color: rgba(255, 255, 255, 0.9);
+  font: var(--text-lead);
+  max-width: 30rem;
+}
+.v3-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.v3-hero-feats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8) var(--space-10);
+}
+.v3-hero-feat {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.v3-hero-feat + .v3-hero-feat {
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  padding-left: var(--space-10);
+}
+.v3-hero-feat svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  opacity: 0.95;
+}
+.v3-hero-feat-title {
+  display: block;
+  font: var(--weight-semibold) var(--text-sm) / 1.3 var(--font-body);
+  color: var(--white);
+}
+.v3-hero-feat-sub {
+  display: block;
+  margin-top: 2px;
+  font: var(--weight-regular) var(--text-xs) / 1.5 var(--font-body);
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 13rem;
+}
+
+/* --- v3 cream / photo split ("Culture deserves more than a moment.") ------ */
+.v3-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.2fr);
+  background: var(--cream-100);
+}
+.v3-split-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: clamp(3rem, 7vw, 6.5rem);
+  /* left edge lines up with .ph-container's content edge */
+  padding-left: max(var(--gutter), calc((100cqw - var(--content-max)) / 2 + var(--gutter)));
+  padding-right: clamp(1.5rem, 4vw, 4rem);
+}
+.v3-split-panel h2 {
+  margin-top: var(--space-3);
+  font-size: clamp(1.9rem, 1.4vw + 1.3rem, 2.6rem);
+  max-width: 24ch;
+}
+.v3-split-panel .ph-lead {
+  margin-top: var(--space-5);
+  max-width: 36rem;
+}
+.v3-split-line {
+  margin-top: var(--space-6);
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-md);
+  color: var(--char-900);
+}
+.v3-split-body {
+  margin-top: var(--space-3);
+  color: var(--muted-foreground);
+  line-height: var(--leading-normal);
+  max-width: 36rem;
+}
+.v3-split-photo {
+  position: relative;
+  min-height: 100%;
+}
+.v3-split-photo .v3-photo {
+  position: absolute;
+  inset: 0;
+}
+
+/* --- "Inside a Palestine House" photo strip (inside-strip.tsx) ------------ */
+.v3-rule-head {
+  position: relative;
+  padding-bottom: var(--space-4);
+}
+.v3-rule-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 56px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--copper-500);
+}
+/* Continuous auto-drift marquee (DR1-8, owner-sanctioned exception to the
+   no-auto-carousel rule — recorded in §4 D-DR1). The track holds the card
+   list twice; translating -50% loops seamlessly because each list carries
+   its own trailing gap. Pauses on hover; reduced-motion falls back to a
+   plain manual scroller below. */
+.v3-marquee {
+  margin-top: var(--space-8);
+  overflow: hidden;
+}
+.v3-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: v3-marquee 60s linear infinite;
+}
+.v3-marquee:hover .v3-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes v3-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.v3-strip {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-6) var(--space-2) 0;
+  display: flex;
+  gap: var(--space-6);
+}
+.v3-strip-card {
+  flex: 0 0 auto;
+  width: min(280px, 72cqw);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* the global reduced-motion rule freezes the animation at frame 0; make
+     the strip a manual scroller so every card stays reachable */
+  .v3-marquee {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--stone-300) transparent;
+    padding-inline: var(--gutter);
+  }
+  .v3-marquee-track {
+    animation: none;
+    width: auto;
+  }
+  .v3-marquee-track > ul[aria-hidden] {
+    display: none;
+  }
+}
+.v3-strip-photo {
+  aspect-ratio: 3 / 4;
+}
+.v3-strip-title {
+  margin-top: var(--space-4);
+  font: var(--weight-semibold) var(--text-lg) / 1.25 var(--font-display);
+}
+.v3-strip-sub {
+  margin-top: var(--space-2);
+  font: var(--weight-regular) var(--text-sm) / 1.5 var(--font-body);
+  color: var(--muted-foreground);
+}
+
+/* --- "One path, three stages." — editorial columns, copper numerals
+   (the section head reuses the shared .sec-head primitive) ----------------- */
+.v3-stages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-10);
+  margin-top: var(--space-12);
+}
+.v3-stage {
+  border-top: 1px solid var(--border-strong);
+  padding-top: var(--space-6);
+}
+.v3-stage-num {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-3xl);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--copper-500);
+}
+.v3-stage h3 {
+  margin-top: var(--space-4);
+}
+.v3-stage p {
+  margin-top: var(--space-2);
+  color: var(--muted-foreground);
+  max-width: 26rem;
+}
+
+/* --- Platform band ("The work is real…") — photo background (DR1-8) ------- */
+.v3-platform {
+  position: relative;
+  isolation: isolate;
+  color: var(--white);
+}
+.v3-platform-img {
+  object-fit: cover;
+  z-index: -1;
+  /* mirrored: the photo's focal side sits on the right in the master — flip
+     it left so the white partner card doesn't cover it (owner direction) */
+  transform: scaleX(-1);
+}
+.v3-platform-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--char-950) 84%, transparent) 0%,
+    color-mix(in srgb, var(--char-950) 68%, transparent) 55%,
+    color-mix(in srgb, var(--char-950) 56%, transparent) 100%
+  );
+}
+.v3-platform-inner {
+  position: relative;
+  z-index: 1;
+}
+.v3-platform .home-split-copy h2 {
+  color: var(--white);
+}
+.v3-platform .home-split-copy p {
+  color: rgba(255, 255, 255, 0.9);
+}
+/* keyboard focus over the dark photo needs the light ring */
+.ph-page
+  .v3-platform
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: var(--cream-100);
+}
+
+/* (Proof-strip numeral copper lives with its component in pages.css — no
+   cross-file override.) */
+
+/* --- v3 responsive (container queries on .ph-page, like the rest of the
+   public shell) ------------------------------------------------------------ */
+@container page (max-width: 860px) {
+  .v3-stages {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+}
+@container page (max-width: 880px) {
+  .v3-split {
+    grid-template-columns: 1fr;
+  }
+  .v3-split-photo {
+    order: -1;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+  .v3-split-panel {
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+}
+@container page (max-width: 720px) {
+  .v3-hero-inner {
+    gap: var(--space-10);
+    padding-top: calc(var(--header-h) + var(--space-8));
+  }
+  .v3-hero-feats {
+    flex-direction: column;
+    gap: 0;
+  }
+  .v3-hero-feat {
+    padding-block: var(--space-4);
+  }
+  .v3-hero-feat + .v3-hero-feat {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding-left: 0;
+  }
+  .v3-hero-feat-sub {
+    max-width: none;
+  }
+}
+@container page (max-width: 420px) {
+  /* narrow phones: stack the CTA pair full-width (the outline booklet
+     button's long nowrap label would overflow the copy column otherwise) */
+  .v3-hero-ctas > * {
+    width: 100%;
+  }
+}

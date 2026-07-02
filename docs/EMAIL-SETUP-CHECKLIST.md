@@ -15,11 +15,18 @@ own:
 
 ---
 
-## Part 1 — Mailchimp (the booklet forms)
+## Part 1 — Mailchimp (applicant tagging)
 
-**Turns on:** when someone enters their email to get a booklet, they are added to
-your Mailchimp audience and tagged `lead-booklet-a` / `lead-booklet-b`. Every new
-applicant is also tagged `applicant`.
+> **⚠️ UPDATE (2026-07-02, DR1-8 — owner decision):** the **booklet lead-magnet
+> capture was removed from the site entirely** (the home-hero dialog, the form,
+> and the `/api/mailchimp/booklet-capture` route are deleted; the hero's second
+> CTA links to The Model instead). Everything about `lead-booklet-a/b` tags and
+> the booklet-delivery automation (step 5 below, and the lead-form test in
+> Part 3) is **obsolete — skip it**. Mailchimp now does one thing: tags every
+> new **applicant** `applicant`, so steps 1–4 still apply if you want that.
+
+**Turns on:** every new applicant is tagged `applicant` in your Mailchimp
+audience.
 
 - [ ] **1.** Create a Mailchimp account (free is fine) and create one **Audience**.
 - [ ] **2.** Get your **API key** — Mailchimp → your profile (bottom-left) → **Account & billing** → **Extras** → **API keys** → **Create A Key**. Copy it. → this is `MAILCHIMP_API_KEY`.

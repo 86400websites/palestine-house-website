@@ -1,12 +1,19 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { ImageResponse } from "next/og";
 
-/* iOS home-screen / apple-touch icon (S7 Step 6) — the brand arch mark on the
-   heritage-green field, matching icon.svg and the OG image. */
+/* iOS home-screen / apple-touch icon — v3 (DR1-6): the owner's copper arch
+   mark on the warm cream field. Uses the pixel-faithful mark PNG (same asset
+   the chrome renders) rather than a re-drawn vector. */
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-export default function AppleIcon() {
+export default async function AppleIcon() {
+  const mark = await readFile(
+    path.join(process.cwd(), "public", "assets", "logo", "ph-logo-mark.png"),
+  );
+  const src = `data:image/png;base64,${mark.toString("base64")}`;
   return new ImageResponse(
     (
       <div
@@ -16,26 +23,11 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#1A6B4A",
+          background: "#FAF6EE",
         }}
       >
-        <svg width="96" height="120" viewBox="0 0 48 60" fill="none">
-          <path
-            d="M8 57 V30 A32 32 0 0 1 24 2.5 A32 32 0 0 1 40 30 V57"
-            stroke="#F6F1E8"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M16.5 57 V34 A15.5 15.5 0 0 1 24 20.6 A15.5 15.5 0 0 1 31.5 34 V57"
-            stroke="#F6F1E8"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.4"
-          />
-        </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse JSX, not a page */}
+        <img src={src} width={100} height={105} alt="" />
       </div>
     ),
     size,
