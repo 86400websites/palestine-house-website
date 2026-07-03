@@ -352,6 +352,16 @@
   max-width: 13rem;
 }
 
+/* Mobile-only band for the hero mini-features — charcoal so it flows out of
+   the photo's dark bottom scrim (home-hero.tsx renders it after the hero;
+   hidden on desktop, shown ≤720px). */
+.v3-hero-feats-mobile {
+  display: none;
+  background: var(--char-900);
+  color: var(--white);
+  padding-block: var(--space-6);
+}
+
 /* --- v3 photo page-hero (page-hero.tsx — DR1-9) — the inner pages' shorter
    photo band; reuses the Home hero's copy/scrim/CTA grammar. --------------- */
 .v3-page-hero {
@@ -675,25 +685,31 @@
         color-mix(in srgb, var(--char-950) 60%, transparent) 100%
       );
   }
-  /* Mobile hero: features stack as a single hairline-divided column, and the
-     copy block rides very slightly below true center so the headline clears
-     the top band (owner direction, 2026-07-03). */
+  /* Mobile hero ends at the buttons — the photo + copy get the whole
+     viewport, riding a bit below center; the three features move to their
+     own band right after the hero (owner direction, 2026-07-03). */
   .v3-hero .v3-hero-copy {
-    padding-top: var(--space-6);
+    padding-top: var(--space-10);
   }
-  .v3-hero-feats {
+  .v3-hero-featwrap {
+    display: none;
+  }
+  .v3-hero-feats-mobile {
+    display: block;
+  }
+  .v3-hero-feats-mobile .v3-hero-feats {
     flex-direction: column;
     gap: 0;
   }
-  .v3-hero-feat {
+  .v3-hero-feats-mobile .v3-hero-feat {
     padding-block: var(--space-4);
   }
-  .v3-hero-feat + .v3-hero-feat {
+  .v3-hero-feats-mobile .v3-hero-feat + .v3-hero-feat {
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     padding-left: 0;
   }
-  .v3-hero-feat-sub {
+  .v3-hero-feats-mobile .v3-hero-feat-sub {
     max-width: none;
   }
   /* "Inside a Palestine House" stacks as a simple vertical list on mobile —

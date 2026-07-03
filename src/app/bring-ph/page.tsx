@@ -143,7 +143,9 @@ export default function BringAHousePage() {
               assetId="PH-BRING-02"
               alt="A performer opens the night to a full room at a House."
               ratio="16 / 7"
-              objectPosition="50% 32%"
+              /* 10%: the performer's head sits near the frame top — the old
+                 32% cropped it in the 16:7 window (DR1 final polish) */
+              objectPosition="50% 10%"
               sizes="(max-width: 992px) 100vw, 992px"
             />
           </Reveal>

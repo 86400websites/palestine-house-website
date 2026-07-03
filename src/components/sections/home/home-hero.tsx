@@ -30,8 +30,25 @@ const HERO_FEATS = [
   },
 ] as const;
 
+function HeroFeats() {
+  return (
+    <ul className="v3-hero-feats">
+      {HERO_FEATS.map((f) => (
+        <li key={f.title} className="v3-hero-feat">
+          <f.icon size={26} strokeWidth={1.6} aria-hidden="true" />
+          <div>
+            <span className="v3-hero-feat-title">{f.title}</span>
+            <span className="v3-hero-feat-sub">{f.sub}</span>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function HomeHero() {
   return (
+    <>
     <section className="v3-hero">
       <Image
         src={PHOTO_SOURCES["ph-photo-hero-tatreez"]}
@@ -62,20 +79,22 @@ export function HomeHero() {
             </Button>
           </div>
         </Stagger>
+        {/* Desktop: the mini-features live in the hero's bottom band.
+            On mobile this wrapper hides and the sibling band below shows
+            instead (owner direction, 2026-07-03) — display:none removes the
+            hidden copy from the accessibility tree, so nothing reads twice. */}
         <Reveal delay={0.24} className="v3-hero-featwrap">
-          <ul className="v3-hero-feats">
-            {HERO_FEATS.map((f) => (
-              <li key={f.title} className="v3-hero-feat">
-                <f.icon size={26} strokeWidth={1.6} aria-hidden="true" />
-                <div>
-                  <span className="v3-hero-feat-title">{f.title}</span>
-                  <span className="v3-hero-feat-sub">{f.sub}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <HeroFeats />
         </Reveal>
       </div>
     </section>
+    {/* Mobile: the hero ends at the buttons; the three features follow as
+        their own charcoal band right after the photo. Hidden on desktop. */}
+    <div className="v3-hero-feats-mobile">
+      <Reveal className="ph-container">
+        <HeroFeats />
+      </Reveal>
+    </div>
+    </>
   );
 }
