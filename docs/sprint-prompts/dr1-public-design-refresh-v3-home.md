@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date merged** | _pending — build complete 2026-07-03 (DR1-0…DR1-9, head `2c96d64`); owner merge + `/close` next. Fill the PR # + merge date at close._ |
-| **Branch / PR** | `claude/sprint-dr1-design-v3-home` / PR TBD |
+| **Date merged** | **2026-07-03** (merge `fad9bed`; post-merge `/close` = **GO**) |
+| **Branch / PR** | `claude/sprint-dr1-design-v3-home` / **PR #45** (16 commits, DR1-0…DR1-11) |
 | **Goal** | Replace the illustration-on-paper public design with the owner's **warm, cultural, photography-led premium system (v3)** — foundations (tokens · imagery treatment · chrome · brand surfaces) + the redesigned **Home page** only. Frontend/design only; the gated workspace stays visually untouched. Also: retire the un-started S13/S14 to the ROADMAP §A backlog (owner re-direction — sprints added ad hoc from here). |
 
 ## What shipped (owner-gated DR1-0…DR1-7, push per step)
