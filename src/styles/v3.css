@@ -80,7 +80,9 @@
 }
 
 /* Opt-in CTA treatment from the reference hero — uppercase, tracked, small.
-   Applied per-CTA (hero + footer Apply band), never blanket. */
+   Grammar (DR1-10): the photo heroes + the footer Apply band carry .v3-cta
+   (no arrow icons); in-flow body CTAs stay sentence case with the arrow.
+   Never blanket. */
 .v3-cta {
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -129,6 +131,39 @@
 }
 .ph-page :is(.live-pill, .sup-artefact-icon) {
   background: var(--olive-100);
+}
+
+/* One clock for the overlay↔solid morph: nav labels + Sign in recolor at the
+   same 320ms as the glass bar and wordmark (hover washes stay fast) —
+   DR1-10. */
+.phx-header .phx-nav-link,
+.phx-header .phx-signin {
+  transition:
+    color var(--duration) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+/* Custom mobile-sheet close (site-header.tsx renders it; the shadcn built-in
+   is a 16px hit area) — 44px tap target, top-right. */
+.phx-sheet-close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+.phx-sheet-close:hover {
+  color: var(--foreground);
+}
+.phx-sheet-close svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* --- v3 brand lockup (brand-logo.tsx) — copper arch PNG + real-text word --- */
@@ -253,9 +288,12 @@
 }
 .v3-hero .v3-hero-copy {
   margin-block: auto;
-  /* nudge the copy block left of the container edge — only by whatever
-     outer whitespace actually exists, so it never clips at narrow widths
-     (DR1-9, owner direction) */
+}
+/* Nudge the whole hero one rail left of the container edge — copy AND the
+   mini-features share the same left line (DR1-10) — only by whatever outer
+   whitespace actually exists, so it never clips at narrow widths. */
+.v3-hero .v3-hero-copy,
+.v3-hero .v3-hero-featwrap {
   margin-left: calc(-1 * min(var(--space-8), max(0px, (100cqw - var(--content-max)) / 2)));
 }
 .v3-hero-copy h1 {
@@ -340,7 +378,9 @@
   padding-bottom: var(--space-10);
 }
 .v3-page-hero .ph-eyebrow {
-  color: var(--sage-300);
+  /* warm cream, not sage — sage falls under AA on bright photo regions where
+     the scrim is lightest (DR1-10); sage stays for solid charcoal sections */
+  color: var(--cream-100);
 }
 .v3-page-hero-copy h1 {
   color: var(--white);
@@ -349,7 +389,12 @@
 }
 .v3-page-hero-support {
   font: var(--weight-regular) var(--text-xs) / 1.4 var(--font-body);
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* The Experience day-figure photo (4:5 like its Artwork twin beside it). */
+.exp-mood-photo {
+  aspect-ratio: 4 / 5;
 }
 
 /* --- v3 cream / photo split ("Culture deserves more than a moment.") ------ */
@@ -373,7 +418,8 @@
   max-width: 24ch;
 }
 .v3-split-panel .ph-lead {
-  margin-top: var(--space-5);
+  /* matches the shared .sec-head rhythm (DR1-10) */
+  margin-top: var(--space-4);
   max-width: 36rem;
 }
 .v3-split-line {
@@ -399,6 +445,14 @@
 }
 
 /* --- "Inside a Palestine House" photo strip (inside-strip.tsx) ------------ */
+/* Same-background neighbors share a ~6rem join like the rest of the page —
+   without these, two ph-section-lg paddings stack to ~12rem (DR1-10). */
+.v3-inside {
+  padding-bottom: var(--space-10);
+}
+.v3-stages-section {
+  padding-top: var(--space-14);
+}
 .v3-rule-head {
   position: relative;
   padding-bottom: var(--space-4);
@@ -517,9 +571,6 @@
 .v3-platform-img {
   object-fit: cover;
   z-index: -1;
-  /* mirrored: the photo's focal side sits on the right in the master — flip
-     it left so the white partner card doesn't cover it (owner direction) */
-  transform: scaleX(-1);
 }
 .v3-platform-scrim {
   position: absolute;
@@ -542,11 +593,11 @@
 .v3-platform .home-split-copy p {
   color: rgba(255, 255, 255, 0.9);
 }
-/* keyboard focus over the dark photo needs the light ring */
-.ph-page
-  .v3-platform
-  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline-color: var(--cream-100);
+/* Keyboard focus on ALL photo surfaces needs the light ring — repointing
+   --ring here recolors both the base outline rule and the shadcn Button's
+   box-shadow ring in one move (DR1-10). */
+.ph-page :is(.v3-hero, .v3-page-hero, .v3-platform) {
+  --ring: var(--cream-100);
 }
 
 /* (Proof-strip numeral copper lives with its component in pages.css — no
@@ -558,6 +609,30 @@
   .v3-stages {
     grid-template-columns: 1fr;
     gap: var(--space-8);
+  }
+}
+@container page (max-width: 980px) {
+  /* Stacked platform band: the copy spans the full width, so the scrim goes
+     top-weighted instead of left-weighted (DR1-10 — AA over bright photo
+     regions on phones/tablets). */
+  .v3-platform-scrim {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--char-950) 82%, transparent) 0%,
+      color-mix(in srgb, var(--char-950) 72%, transparent) 55%,
+      color-mix(in srgb, var(--char-950) 60%, transparent) 100%
+    );
+  }
+}
+@container page (max-width: 920px) {
+  /* Mobile chrome + hero tap targets meet the 44px standard (DR1-10);
+     desktop visual sizes untouched. */
+  .phx-actions [data-slot="button"] {
+    min-height: var(--tap-target);
+    min-width: var(--tap-target);
+  }
+  .v3-hero-ctas > * {
+    min-height: var(--tap-target);
   }
 }
 @container page (max-width: 880px) {
@@ -579,11 +654,47 @@
     gap: var(--space-10);
     padding-top: calc(var(--header-h) + var(--space-8));
   }
-  /* Mobile hero breathes: headline → subline → buttons only — the three
-     mini-features are hidden (their territory is the strip right below)
-     so the photo + copy get the whole viewport (owner direction, DR1-9). */
-  .v3-hero-featwrap {
-    display: none;
+  /* Full-width mobile copy sits over the photo's center — flatten the
+     horizontal scrim ramp so the whole column stays AA (the desktop ramp
+     lightens to 18% at 62%, tuned for copy held in the left third) —
+     DR1-10. */
+  .v3-hero-scrim {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--char-950) 78%, transparent) 0%,
+        color-mix(in srgb, var(--char-950) 60%, transparent) 40%,
+        color-mix(in srgb, var(--char-950) 48%, transparent) 70%,
+        color-mix(in srgb, var(--char-950) 55%, transparent) 100%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--char-950) 60%, transparent) 0%,
+        transparent 30%,
+        transparent 60%,
+        color-mix(in srgb, var(--char-950) 60%, transparent) 100%
+      );
+  }
+  /* Mobile hero: features stack as a single hairline-divided column, and the
+     copy block rides very slightly below true center so the headline clears
+     the top band (owner direction, 2026-07-03). */
+  .v3-hero .v3-hero-copy {
+    padding-top: var(--space-6);
+  }
+  .v3-hero-feats {
+    flex-direction: column;
+    gap: 0;
+  }
+  .v3-hero-feat {
+    padding-block: var(--space-4);
+  }
+  .v3-hero-feat + .v3-hero-feat {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding-left: 0;
+  }
+  .v3-hero-feat-sub {
+    max-width: none;
   }
   /* "Inside a Palestine House" stacks as a simple vertical list on mobile —
      no marquee, no sideways scroll (owner direction, DR1-9). Desktop keeps
@@ -613,9 +724,19 @@
   }
 }
 @container page (max-width: 420px) {
-  /* narrow phones: stack the CTA pair full-width (the outline booklet
-     button's long nowrap label would overflow the copy column otherwise) */
+  /* narrow phones: stack the CTA pair full-width (nowrap button labels
+     would overflow the copy column otherwise) */
   .v3-hero-ctas > * {
     width: 100%;
+  }
+  /* 320-360px: the nowrap wordmark + Apply + hamburger don't fit — keep the
+     copper mark (the brand link keeps its aria-label) and tighten gaps so
+     nothing overflows the viewport (DR1-10). */
+  .phx-brand-word {
+    display: none;
+  }
+  .phx-header-inner,
+  .phx-actions {
+    gap: var(--space-3);
   }
 }

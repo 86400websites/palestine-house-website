@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
+import { Photo } from "@/components/shared/photo";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { PageHero } from "@/components/sections/page-hero";
@@ -28,35 +29,35 @@ const EXP_PILLARS = [
     id: "PH-EXP-03a",
     name: "Heritage & Memory",
     text: "the recipes, the songs, the stories worth keeping.",
-    alt: "A block-print illustration of a dallah pouring coffee into a small cup on a tatreez-edged cloth.",
+    alt: "Speakers in conversation over a low table at a House talk.",
     objectPosition: "50% 54%",
   },
   {
     id: "PH-EXP-03b",
     name: "Contemporary Creativity",
     text: "new work from artists making it now.",
-    alt: "A block-print illustration of a musician on the low stage of a House.",
+    alt: "A stone mosaic of the Dome of the Rock on the House wall.",
     objectPosition: "50% 50%",
   },
   {
     id: "PH-EXP-03c",
     name: "Education & Exchange",
     text: "talks, workshops, and learning out loud.",
-    alt: "A block-print illustration of a study circle around a green table, notebooks open.",
+    alt: "Readers sharing pages aloud in the armchairs of a House gathering.",
     objectPosition: "50% 57%",
   },
   {
     id: "PH-EXP-03d",
     name: "Community Activation",
     text: "the dinners, the markets, the reasons to return.",
-    alt: "An illustration of friends passing a shared plate down a long dinner table.",
+    alt: "Red carnations gathered on a woven tray for the evening.",
     objectPosition: "50% 55%",
   },
   {
     id: "PH-EXP-03e",
     name: "Commercial Sustainability",
     text: "the small economy that keeps the doors open.",
-    alt: "A block-print illustration of a café counter — a barista, a guest paying, shelves of goods.",
+    alt: "The café room set for the evening — cushioned seating, a balustrade, a projector ready.",
     objectPosition: "50% 54%",
   },
 ] as const;
@@ -97,10 +98,13 @@ export default async function ExperiencePage() {
           </Reveal>
           <Reveal className="exp-daynight">
             <figure className="exp-mood">
-              <Artwork
-                assetId="PH-EXP-02a"
-                alt="An ink-wash illustration of the room by day — people reading, working, and meeting over coffee."
-                ratio="4 / 5"
+              {/* Day figure: a genuine daytime café scene (DR1-10 design QA —
+                  the file behind PH-EXP-02a is a night-performance photo that
+                  contradicted this caption). */}
+              <Photo
+                assetId="ph-photo-arch-cafe"
+                alt="The café room in daylight — wooden tables behind an arched stone doorway."
+                className="exp-mood-photo"
                 sizes="(max-width: 760px) 100vw, 40vw"
               />
               <figcaption className="exp-mood-cap">
@@ -110,7 +114,7 @@ export default async function ExperiencePage() {
             <figure className="exp-mood is-night">
               <Artwork
                 assetId="PH-EXP-02b"
-                alt="The same room by night — chairs turned to the low stage for a performance, lamps low."
+                alt="The same room by night — the crowd on its feet, dancing together at a House celebration."
                 ratio="4 / 5"
                 sizes="(max-width: 760px) 100vw, 40vw"
               />

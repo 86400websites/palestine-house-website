@@ -3,12 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { signOutAction } from "@/lib/auth/actions";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetTitle,
   SheetTrigger,
@@ -187,7 +188,16 @@ export function SiteHeader() {
                   <Menu aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="top" className="gap-0 px-6 pb-6">
+              <SheetContent
+                side="top"
+                className="gap-0 px-6 pb-6"
+                showCloseButton={false}
+              >
+                {/* The built-in close is a 16px hit area — this one meets the
+                    44px tap target (DR1-10; ui/sheet.tsx stays untouched). */}
+                <SheetClose className="phx-sheet-close" aria-label="Close menu">
+                  <X aria-hidden="true" />
+                </SheetClose>
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <nav aria-label="Main, mobile" className="pt-10">
                   <div className="phx-mobile-links">

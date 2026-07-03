@@ -64,7 +64,7 @@ function CardList({ hidden }: { hidden?: boolean }) {
             alt={hidden ? "" : c.alt}
             rounded
             className="v3-strip-photo"
-            sizes="(max-width: 720px) 72vw, 280px"
+            sizes="(max-width: 720px) 100vw, 280px"
           />
           <h3 className="v3-strip-title">{c.title}</h3>
           <p className="v3-strip-sub">{c.sub}</p>
@@ -87,6 +87,9 @@ export function InsideStrip() {
           className="v3-marquee"
           role="region"
           aria-label="Scenes from inside a Palestine House"
+          /* focusable so the reduced-motion scroller works by keyboard;
+             harmless in the animated state (DR1-10) */
+          tabIndex={0}
         >
           <div className="v3-marquee-track">
             <CardList />

@@ -36,19 +36,19 @@ const BRING_STAGES = [
     id: "PH-HIW-01",
     name: "Plan & Prepare",
     text: "governance, your city, your venue.",
-    alt: "An ink-wash illustration of an empty room being measured and planned — the House before it begins.",
+    alt: "A partner reads through planning notes spread across the House rugs.",
   },
   {
     id: "PH-HIW-02",
     name: "Design & Build",
     text: "the launch itself, tracked task by task.",
-    alt: "An ink-wash illustration of hands at work — the same room mid-build, taking shape.",
+    alt: "The House taking shape — an arched hallway hung with framed tatreez.",
   },
   {
     id: "PH-HIW-03",
     name: "Operate & Program",
     text: "running the House to the standard every House shares.",
-    alt: "An ink-wash illustration of the finished room, open and hosting — the House alive.",
+    alt: "The stage set for the evening — guitar, microphones, and lantern light.",
   },
 ] as const;
 
@@ -141,7 +141,7 @@ export default function BringAHousePage() {
           <Reveal className="bring-split-art">
             <Artwork
               assetId="PH-BRING-02"
-              alt="A balanced two-panel ink-wash illustration — on one side a partner's keys and venue, on the other the toolkit HQ brings."
+              alt="A performer opens the night to a full room at a House."
               ratio="16 / 7"
               objectPosition="50% 32%"
               sizes="(max-width: 992px) 100vw, 992px"

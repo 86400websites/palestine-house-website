@@ -95,7 +95,7 @@ export default function ModelPage() {
           <div className="feature-row-art">
             <Artwork
               assetId="PH-FOOD-01"
-              alt="An ink-wash illustration of a platter of musakhan on the long table of a House, light from a tall window."
+              alt="An arched passage into the House, a kilim runner leading the way in."
               ratio="4 / 5"
               sizes="(max-width: 880px) 100vw, 50vw"
             />

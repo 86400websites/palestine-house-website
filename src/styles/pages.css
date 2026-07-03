@@ -669,7 +669,9 @@
    The Model (/model) — page-specific (TheModel.html)
    ======================================================================== */
 .model-h2 {
-  font-size: clamp(2rem, 1.6vw + 1.3rem, 2.85rem);
+  /* capped a clear step below the v3 page-hero h1 (DR1-10 — the old value
+     was tuned against the retired 4rem art-hero h1 and out-shouted it) */
+  font-size: clamp(1.9rem, 1.3vw + 1.15rem, 2.5rem);
 }
 
 /* Three-layers — the official arch-diagram artwork */
@@ -702,7 +704,8 @@
 /* What it is / isn't */
 .model-statement-h {
   margin-top: var(--space-3);
-  font-size: clamp(2rem, 1.8vw + 1.3rem, 3rem);
+  /* capped below the v3 page-hero h1 (DR1-10, same reason as .model-h2) */
+  font-size: clamp(1.9rem, 1.3vw + 1.15rem, 2.5rem);
 }
 .model-isnt {
   list-style: none;
@@ -1808,8 +1811,13 @@
   flex: none;
   line-height: 1.4;
 }
-.apply-steps h3 {
-  font-size: var(--text-md);
+/* Step titles are <p>s, not headings (h1 → h3 → h2 broke the outline —
+   DR1-10); this recipe recreates the old h3 look. */
+.apply-steps .apply-step-title {
+  margin: 0;
+  font: var(--weight-medium) var(--text-md) / var(--leading-snug)
+    var(--font-display);
+  color: var(--foreground);
 }
 .apply-steps p {
   margin-top: var(--space-1);

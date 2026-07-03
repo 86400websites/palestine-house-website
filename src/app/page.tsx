@@ -136,12 +136,14 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 6 — The work is real / A private platform for partners — photo band
-          (DR1-8): the oud-night photo, mirrored so its focal side sits left
-          where the copy is, not under the white partner card. */}
+      {/* 6 — The work is real / A private platform for partners — photo band.
+          Film-screening (DR1-10): its dark audience texture sits under the
+          copy and the glowing screen falls behind the white card — and unlike
+          oud-night it doesn't repeat a recognizable marquee image on the
+          same page. */}
       <section className="ph-section-lg v3-platform">
         <Image
-          src={PHOTO_SOURCES["ph-photo-oud-night"]}
+          src={PHOTO_SOURCES["ph-photo-film-screening"]}
           alt=""
           aria-hidden="true"
           fill

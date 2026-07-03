@@ -101,7 +101,11 @@ export default async function ApplyPage() {
                   <li key={s.n}>
                     <span className="apply-step-n">{s.n}</span>
                     <div>
-                      <h3>{s.title}.</h3>
+                      {/* Not a heading: these precede the page's first h2, and
+                          h1 → h3 → h2 breaks the outline (DR1-10 design QA).
+                          Styled identically via the widened .apply-steps
+                          selector in pages.css. */}
+                      <p className="apply-step-title">{s.title}.</p>
                       <p>{s.text}</p>
                     </div>
                   </li>
@@ -118,7 +122,7 @@ export default async function ApplyPage() {
           <Reveal className="ph-card apply-form-card">
             <h2 className="apply-form-title">The application.</h2>
             <div className="apply-form-divider">
-              <TatreezDivider width="120px" opacity={0.7} />
+              <TatreezDivider width="120px" opacity={0.7} palette="v3" />
             </div>
             <ApplyForm />
           </Reveal>
