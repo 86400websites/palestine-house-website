@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Artwork } from "@/components/shared/artwork";
 import { TatreezDivider } from "@/components/shared/tatreez-divider";
+import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { ApplyForm } from "@/components/sections/apply-form";
 import { createClient } from "@/lib/supabase/server";
@@ -60,29 +60,15 @@ export default async function ApplyPage() {
 
   return (
     <>
-      {/* 1 — Art-led hero (consistent with the other public pages) */}
-      <section className="art-hero">
-        <div className="ph-container art-hero-grid">
-          <Reveal className="art-hero-copy">
-            <p className="ph-eyebrow">Apply</p>
-            <h1>Apply to bring a House to your city.</h1>
-            <p className="ph-lead">
-              This is the one step. Submitting this form creates your account and
-              sends your application to HQ. There’s no separate sign-up — applying
-              and creating an account are the same thing.
-            </p>
-          </Reveal>
-          <Reveal className="art-hero-art">
-            <Artwork
-              assetId="PH-APPLY-01"
-              alt="An ink-wash illustration of a hand turning a key in the pointed-arch door of a House — the first step."
-              ratio="16 / 10"
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
+      {/* 1 — v3 photo hero (DR1-9, consistent with the other public pages) */}
+      <PageHero
+        photo="ph-photo-apply"
+        alt="A singer smiling at a microphone beside a keyboard, mid-performance."
+        position="55% 30%"
+        eyebrow="Apply"
+        title="Apply to bring a House to your city."
+        lead="This is the one step. Submitting this form creates your account and sends your application to HQ. There’s no separate sign-up — applying and creating an account are the same thing."
+      />
 
       {/* 2–5 — Context + the form */}
       <section className="ph-section-lg">
@@ -115,7 +101,11 @@ export default async function ApplyPage() {
                   <li key={s.n}>
                     <span className="apply-step-n">{s.n}</span>
                     <div>
-                      <h3>{s.title}.</h3>
+                      {/* Not a heading: these precede the page's first h2, and
+                          h1 → h3 → h2 breaks the outline (DR1-10 design QA).
+                          Styled identically via the widened .apply-steps
+                          selector in pages.css. */}
+                      <p className="apply-step-title">{s.title}.</p>
                       <p>{s.text}</p>
                     </div>
                   </li>
@@ -132,7 +122,7 @@ export default async function ApplyPage() {
           <Reveal className="ph-card apply-form-card">
             <h2 className="apply-form-title">The application.</h2>
             <div className="apply-form-divider">
-              <TatreezDivider width="120px" opacity={0.7} />
+              <TatreezDivider width="120px" opacity={0.7} palette="v3" />
             </div>
             <ApplyForm />
           </Reveal>

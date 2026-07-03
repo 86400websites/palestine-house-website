@@ -1,7 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Palestine House">
-  <rect width="64" height="64" rx="14" fill="#1A6B4A"/>
-  <g transform="translate(12 7) scale(0.84)" fill="none" stroke="#F6F1E8" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M8 57 V30 A32 32 0 0 1 24 2.5 A32 32 0 0 1 40 30 V57" stroke-width="5"/>
-    <path d="M16.5 57 V34 A15.5 15.5 0 0 1 24 20.6 A15.5 15.5 0 0 1 31.5 34 V57" stroke-width="3" opacity="0.45"/>
+  <!-- v3 favicon (DR1-6): simplified copper arch from the owner's 2026-07-02
+       "Our Culture Embassy" mark, legible at 16-48px. The pixel-faithful mark
+       (public/assets/logo/ph-logo-mark.png) renders the larger brand surfaces
+       (apple-icon, OG); this hand vector carries only the arch + keystone. -->
+  <rect width="64" height="64" rx="14" fill="#FAF6EE"/>
+  <g stroke="#B0713D" fill="none">
+    <path d="M16 53 V30 A16 16 0 0 1 48 30 V53" stroke-width="5"/>
+    <path d="M25 53 V33 A7 7 0 0 1 39 33 V53" stroke-width="3.5"/>
   </g>
+  <!-- keystone: cream wedge opens the gap, trapezoid sits inside it -->
+  <polygon points="25.5,8 38.5,8 36,24 28,24" fill="#FAF6EE"/>
+  <path d="M27.6 11 L36.4 11 L34.8 20 L29.2 20 Z" fill="none" stroke="#B0713D" stroke-width="2.4"/>
 </svg>

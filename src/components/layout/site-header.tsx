@@ -3,13 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Menu, X } from "lucide-react";
 import { signOutAction } from "@/lib/auth/actions";
-import { Logo } from "@/components/layout/logo";
+import { BrandLogo } from "@/components/layout/brand-logo";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetTitle,
   SheetTrigger,
@@ -20,10 +20,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-/* Locked public header (docs/page-designs/shared/site-chrome.jsx) — identical
-   on every page, never redesigned per page. Logo → Home · four labels (hover
-   one-liners from navigation-copy.md; mega-menus on The Model + Experience,
-   approved via mockup — PROJECT-STATUS §4) · Sign in · green Apply. */
+/* Public header — identical on every page, never redesigned per page.
+   Logo → Home · four plain labels with hover one-liners (the mega-menu
+   panels were removed at DR1-8, owner decision 2026-07-02 — the labels link
+   directly and explain themselves via the tooltip) · Sign in · Apply. */
 
 /* tip = desktop hover one-liner (navigation-copy.md, verbatim);
    tipShort = mobile menu sub-label (owner-approved short set, 2026-06-12). */
@@ -58,78 +58,41 @@ const NAV_LINKS = [
   },
 ] as const;
 
-type NavKey = (typeof NAV_LINKS)[number]["key"];
-
-/* Mega-menu content — verbatim from the approved mockup chrome. */
-const MEGA_MENUS: Partial<
-  Record<
-    NavKey,
-    {
-      cols: {
-        head: string;
-        items: { label: string; sub: string; href: string }[];
-      }[];
-    }
-  >
-> = {
-  model: {
-    cols: [
-      {
-        head: "Who’s who",
-        items: [
-          { label: "Partners", sub: "The people who open a House", href: "/model" },
-          { label: "HQ", sub: "The team behind every House", href: "/model" },
-          { label: "The network", sub: "One House in every city", href: "/model" },
-        ],
-      },
-      {
-        head: "How it works",
-        items: [
-          { label: "Plan & Prepare", sub: "Learn before you build", href: "/bring-ph#what-it-takes" },
-          { label: "Design & Build", sub: "The 120-day launch", href: "/bring-ph#what-it-takes" },
-          { label: "Operate & Program", sub: "Open, and keep it alive", href: "/bring-ph#what-it-takes" },
-        ],
-      },
-    ],
-  },
-  experience: {
-    cols: [
-      {
-        head: "The rooms",
-        items: [
-          { label: "The café", sub: "Coffee, plates, all-day welcome", href: "/experience" },
-          { label: "The stage", sub: "Music, readings, film", href: "/experience" },
-          { label: "The workspace", sub: "A quiet place to belong", href: "/experience" },
-        ],
-      },
-      {
-        head: "More to find",
-        items: [
-          { label: "The workshops", sub: "Heritage as living practice", href: "/experience#programming" },
-          { label: "The community", sub: "A city’s fixed address", href: "/experience#programming" },
-          { label: "Live programming", sub: "What’s on across the network", href: "/live" },
-        ],
-      },
-    ],
-  },
-};
+/* Routes whose hero pulls under a TRANSPARENT header (v3 photo heroes:
+   the Home hero + the PageHero pages, DR1-9). The header solidifies on
+   scroll or when the mobile menu opens. */
+const OVERLAY_ROUTES: string[] = [
+  "/",
+  "/model",
+  "/experience",
+  "/bring-ph",
+  "/our-support",
+  "/apply",
+];
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const [open, setOpen] = React.useState<NavKey | null>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [authed, setAuthed] = React.useState<boolean | null>(null);
-  const panel = open ? MEGA_MENUS[open] : undefined;
+  const [scrolled, setScrolled] = React.useState(false);
 
-  /* Close the mega panel on Escape (keyboard parity with mouseleave). */
+  /* Transparent-over-photo header (v3): only on OVERLAY_ROUTES, and only
+     while at the top with the mobile sheet closed — scrolling or opening it
+     solidifies the bar so content never floats on glass. React bails out on
+     same-value setState, so no throttle is needed; the cleanup resets the
+     flag so stale scroll state never leaks across route changes. */
+  const overlayRoute = OVERLAY_ROUTES.includes(pathname);
   React.useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(null);
+    if (!overlayRoute) return;
+    const onScroll = () => setScrolled(window.scrollY > 32);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      setScrolled(false);
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [overlayRoute]);
+  const overlay = overlayRoute && !scrolled && !mobileOpen;
 
   /* Reflect auth state in the locked chrome (Sign in ↔ Sign out, and the green
      Apply CTA ↔ My Dashboard) WITHOUT making any page dynamic: a same-origin
@@ -153,52 +116,43 @@ export function SiteHeader() {
   }, [pathname]);
 
   return (
-    <header className="phx-header" onMouseLeave={() => setOpen(null)}>
+    <header className="phx-header" data-overlay={overlay ? "" : undefined}>
+      {/* The overlay state is JS-driven (scroll listener) — without JS the
+          transparent header would float unreadably over the page below the
+          hero, so no-script clients get the solid warm chrome instead. */}
+      {overlayRoute && (
+        <noscript>
+          <style>{`.phx-header[data-overlay]{background:rgba(250,246,238,.92);border-bottom-color:var(--line-warm);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.phx-header[data-overlay] .phx-nav-link,.phx-header[data-overlay] .phx-signin,.phx-header[data-overlay] .phx-brand-word{color:var(--char-900)}`}</style>
+        </noscript>
+      )}
       <div className="ph-container phx-header-inner">
-        <Logo href="/" size={30} />
+        <BrandLogo href="/" priority />
 
         <nav className="phx-nav" aria-label="Main">
-          {NAV_LINKS.map((l) => {
-            const hasMenu = !!MEGA_MENUS[l.key];
-            const isOpen = open === l.key;
-            const isActive = pathname === l.href;
-            const link = (
-              <Link
-                key={l.key}
-                className={cn("phx-nav-link", isOpen && "is-open")}
-                href={l.href}
-                aria-current={isActive ? "page" : undefined}
-                aria-expanded={hasMenu ? isOpen : undefined}
-                aria-describedby={`nav-tip-${l.key}`}
-                onMouseEnter={() => setOpen(hasMenu ? l.key : null)}
-                onFocus={() => setOpen(hasMenu ? l.key : null)}
-              >
-                {l.label}
-                {hasMenu && (
-                  <span className="phx-nav-chev">
-                    <ChevronDown size={15} aria-hidden="true" />
+          {NAV_LINKS.map((l) => (
+            /* Every label shows its one-liner as a styled tooltip (never a
+               raw title attribute); on mobile it becomes the Sheet sub-label. */
+            <Tooltip key={l.key} delayDuration={150}>
+              <TooltipTrigger asChild>
+                <Link
+                  className="phx-nav-link"
+                  href={l.href}
+                  aria-current={pathname === l.href ? "page" : undefined}
+                  aria-describedby={`nav-tip-${l.key}`}
+                >
+                  {l.label}
+                  {/* One-liner for assistive tech — aria-describedby has broad
+                      screen-reader support (aria-description alone does not). */}
+                  <span id={`nav-tip-${l.key}`} className="sr-only">
+                    {l.tip}
                   </span>
-                )}
-                {/* One-liner for assistive tech — aria-describedby has broad
-                    screen-reader support (aria-description alone does not). */}
-                <span id={`nav-tip-${l.key}`} className="sr-only">
-                  {l.tip}
-                </span>
-              </Link>
-            );
-            /* Labels without a mega panel show their one-liner as a styled
-               tooltip (never a raw title attribute); mega labels explain
-               themselves through the open panel. */
-            if (hasMenu) return link;
-            return (
-              <Tooltip key={l.key} delayDuration={150}>
-                <TooltipTrigger asChild>{link}</TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-64 text-sm">
-                  {l.tip}
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-64 text-sm">
+                {l.tip}
+              </TooltipContent>
+            </Tooltip>
+          ))}
         </nav>
 
         <div className="phx-actions">
@@ -234,7 +188,16 @@ export function SiteHeader() {
                   <Menu aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="top" className="gap-0 px-6 pb-6">
+              <SheetContent
+                side="top"
+                className="gap-0 px-6 pb-6"
+                showCloseButton={false}
+              >
+                {/* The built-in close is a 16px hit area — this one meets the
+                    44px tap target (DR1-10; ui/sheet.tsx stays untouched). */}
+                <SheetClose className="phx-sheet-close" aria-label="Close menu">
+                  <X aria-hidden="true" />
+                </SheetClose>
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <nav aria-label="Main, mobile" className="pt-10">
                   <div className="phx-mobile-links">
@@ -289,31 +252,6 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Mega-menu panel */}
-      {panel && (
-        <div className="phx-mega">
-          <div className="ph-container phx-mega-inner">
-            {panel.cols.map((col) => (
-              <div key={col.head} className="phx-mega-col">
-                <span className="phx-mega-head">{col.head}</span>
-                <div className="phx-mega-links">
-                  {col.items.map((it) => (
-                    <Link
-                      key={it.label}
-                      className="phx-mega-link"
-                      href={it.href}
-                      onClick={() => setOpen(null)}
-                    >
-                      <span className="phx-mega-link-label">{it.label}</span>
-                      <span className="phx-mega-link-sub">{it.sub}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </header>
   );
 }

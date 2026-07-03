@@ -9,9 +9,9 @@ import {
   Info,
   Play,
 } from "lucide-react";
-import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
+import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -62,40 +62,20 @@ const SUP_ARTEFACTS = [
 export default function OurSupportPage() {
   return (
     <>
-      {/* 1 — Hero */}
-      <section className="art-hero">
-        <div className="ph-container art-hero-grid">
-          <Reveal className="art-hero-copy">
-            <p className="ph-eyebrow">Our Support</p>
-            <h1>You’re not doing this alone.</h1>
-            <p className="ph-lead">
-              A House is yours to run — but the standard, the tools, and the
-              people behind it are shared across the whole network. Here’s
-              exactly what comes with that.
-            </p>
-            <div className="page-hero-ctas">
-              <Button asChild size="lg">
-                <Link href="/apply">
-                  Apply to bring a House
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-            </div>
-            <p className="page-hero-support">
-              Every application is reviewed by HQ.
-            </p>
-          </Reveal>
-          <Reveal className="art-hero-art">
-            <Artwork
-              assetId="PH-SUPPORT-01"
-              alt="An ink-wash illustration of the toolkit as real artefacts — a printed checklist, a template, and a screen on a House worktable."
-              ratio="3 / 2"
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
+      {/* 1 — v3 photo hero (DR1-9) */}
+      <PageHero
+        photo="ph-photo-our-support"
+        alt="Women in embroidered thobes dancing together at a House gathering."
+        position="50% 22%"
+        eyebrow="Our Support"
+        title="You’re not doing this alone."
+        lead="A House is yours to run — but the standard, the tools, and the people behind it are shared across the whole network. Here’s exactly what comes with that."
+        support="Every application is reviewed by HQ."
+      >
+        <Button asChild size="lg" className="v3-cta">
+          <Link href="/apply">Apply to bring a House</Link>
+        </Button>
+      </PageHero>
 
       {/* 2 — The full playbook */}
       <section className="ph-section-lg">

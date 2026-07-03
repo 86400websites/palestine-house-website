@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { Logo } from "@/components/layout/logo";
+import { BrandLogo } from "@/components/layout/brand-logo";
 import { Button } from "@/components/ui/button";
 
 /* Locked public footer (docs/page-designs/shared/site-chrome.jsx; copy
@@ -15,18 +14,17 @@ export function SiteFooter() {
             <h2>Ready to open a House in your city?</h2>
             <p>Every application is reviewed by HQ.</p>
           </div>
-          <Button asChild size="lg">
-            <Link href="/apply">
-              Apply to bring a House
-              <ArrowRight aria-hidden="true" />
-            </Link>
+          {/* Same uppercase grammar as the photo-hero CTAs (DR1-10) — the
+              in-flow body CTAs keep sentence case + arrow. */}
+          <Button asChild size="lg" className="v3-cta">
+            <Link href="/apply">Apply to bring a House</Link>
           </Button>
         </div>
       </div>
 
       <div className="ph-container phx-footer-grid">
         <div className="phx-footer-col phx-footer-brand">
-          <Logo tone="white" size={26} />
+          <BrandLogo height={30} />
           <p>A fixed address for Palestinian culture, in every city.</p>
         </div>
         <div className="phx-footer-col">

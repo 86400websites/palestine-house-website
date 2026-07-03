@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import { Artwork } from "@/components/shared/artwork";
+import { Photo } from "@/components/shared/photo";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
+import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { SessionCard } from "@/components/shared/session-card";
@@ -27,35 +29,35 @@ const EXP_PILLARS = [
     id: "PH-EXP-03a",
     name: "Heritage & Memory",
     text: "the recipes, the songs, the stories worth keeping.",
-    alt: "A block-print illustration of a dallah pouring coffee into a small cup on a tatreez-edged cloth.",
+    alt: "Speakers in conversation over a low table at a House talk.",
     objectPosition: "50% 54%",
   },
   {
     id: "PH-EXP-03b",
     name: "Contemporary Creativity",
     text: "new work from artists making it now.",
-    alt: "A block-print illustration of a musician on the low stage of a House.",
+    alt: "A stone mosaic of the Dome of the Rock on the House wall.",
     objectPosition: "50% 50%",
   },
   {
     id: "PH-EXP-03c",
     name: "Education & Exchange",
     text: "talks, workshops, and learning out loud.",
-    alt: "A block-print illustration of a study circle around a green table, notebooks open.",
+    alt: "Readers sharing pages aloud in the armchairs of a House gathering.",
     objectPosition: "50% 57%",
   },
   {
     id: "PH-EXP-03d",
     name: "Community Activation",
     text: "the dinners, the markets, the reasons to return.",
-    alt: "An illustration of friends passing a shared plate down a long dinner table.",
+    alt: "Red carnations gathered on a woven tray for the evening.",
     objectPosition: "50% 55%",
   },
   {
     id: "PH-EXP-03e",
     name: "Commercial Sustainability",
     text: "the small economy that keeps the doors open.",
-    alt: "A block-print illustration of a café counter — a barista, a guest paying, shelves of goods.",
+    alt: "The café room set for the evening — cushioned seating, a balustrade, a projector ready.",
     objectPosition: "50% 54%",
   },
 ] as const;
@@ -66,47 +68,26 @@ export default async function ExperiencePage() {
 
   return (
     <>
-      {/* 1 — Hero */}
-      <section className="art-hero">
-        <div className="ph-container art-hero-grid">
-          <Reveal className="art-hero-copy">
-            <p className="ph-eyebrow">Experience</p>
-            <h1>What a Palestine House feels like.</h1>
-            <p className="ph-lead">
-              A café where the coffee is good and the food is cooked from real
-              recipes. A stage that turns the same room into a concert, a film
-              night, a reading. A place your city can come back to, any day of
-              the week.
-            </p>
-            <div className="page-hero-ctas">
-              <Button asChild size="lg">
-                <Link href="/apply">
-                  Apply to bring a House
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <a href="#whats-on">
-                  <Play aria-hidden="true" />
-                  Watch what’s on
-                </a>
-              </Button>
-            </div>
-            <p className="page-hero-support">
-              Every application is reviewed by HQ.
-            </p>
-          </Reveal>
-          <Reveal className="art-hero-art">
-            <Artwork
-              assetId="PH-EXP-01"
-              alt="An ink-wash illustration of the main room of a House — café tables in the warm light of tall pointed-arch windows."
-              ratio="16 / 10"
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
+      {/* 1 — v3 photo hero (DR1-9) */}
+      <PageHero
+        photo="ph-photo-experience"
+        alt="An oud player performing to a seated audience in a candlelit stone room."
+        position="50% 32%"
+        eyebrow="Experience"
+        title="What a Palestine House feels like."
+        lead="A café where the coffee is good and the food is cooked from real recipes. A stage that turns the same room into a concert, a film night, a reading. A place your city can come back to, any day of the week."
+        support="Every application is reviewed by HQ."
+      >
+        <Button asChild size="lg" className="v3-cta">
+          <Link href="/apply">Apply to bring a House</Link>
+        </Button>
+        <Button asChild variant="outline" size="lg" className="v3-cta">
+          <a href="#whats-on">
+            <Play aria-hidden="true" />
+            Watch what’s on
+          </a>
+        </Button>
+      </PageHero>
 
       {/* 2 — A café by day. A stage by night. */}
       <section className="ph-section-lg">
@@ -117,10 +98,13 @@ export default async function ExperiencePage() {
           </Reveal>
           <Reveal className="exp-daynight">
             <figure className="exp-mood">
-              <Artwork
-                assetId="PH-EXP-02a"
-                alt="An ink-wash illustration of the room by day — people reading, working, and meeting over coffee."
-                ratio="4 / 5"
+              {/* Day figure: a genuine daytime café scene (DR1-10 design QA —
+                  the file behind PH-EXP-02a is a night-performance photo that
+                  contradicted this caption). */}
+              <Photo
+                assetId="ph-photo-arch-cafe"
+                alt="The café room in daylight — wooden tables behind an arched stone doorway."
+                className="exp-mood-photo"
                 sizes="(max-width: 760px) 100vw, 40vw"
               />
               <figcaption className="exp-mood-cap">
@@ -130,7 +114,7 @@ export default async function ExperiencePage() {
             <figure className="exp-mood is-night">
               <Artwork
                 assetId="PH-EXP-02b"
-                alt="The same room by night — chairs turned to the low stage for a performance, lamps low."
+                alt="The same room by night — the crowd on its feet, dancing together at a House celebration."
                 ratio="4 / 5"
                 sizes="(max-width: 760px) 100vw, 40vw"
               />

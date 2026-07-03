@@ -30,7 +30,7 @@ export default function AboutPage() {
           <Reveal className="art-hero-art about-hero-art">
             <Artwork
               assetId="PH-ABOUT-01"
-              alt="An ink-wash illustration of a woman embroidering tatreez at a table by a pointed-arch window, an old city beyond."
+              alt="An arched hallway into the House, a kilim runner leading to the open door."
               ratio="4 / 5"
               sizes="(max-width: 900px) 100vw, 40vw"
               priority
@@ -71,7 +71,7 @@ export default function AboutPage() {
           <Reveal className="about-artband-art">
             <Artwork
               assetId="PH-EXP-02a"
-              alt="An ink-wash illustration of people gathered at the long table of a House, working and talking beneath a tall arched window."
+              alt="Dancers in embroidered thobes take their bow before a full House room."
               ratio="16 / 10"
               objectPosition="50% 54%"
               sizes="(max-width: 1024px) 100vw, 1024px"
@@ -83,7 +83,7 @@ export default function AboutPage() {
       {/* 4 — Tagline statement band */}
       <section className="ph-section-lg bg-muted about-tagline">
         <Reveal className="ph-container about-tagline-inner">
-          <TatreezDivider width="200px" opacity={0.7} />
+          <TatreezDivider width="200px" opacity={0.7} palette="v3" />
           <p className="about-tagline-line">
             Passion inspires.
             <br />
