@@ -1926,26 +1926,45 @@
    strip, platform split, and the lead-magnet dialog below are still live.
    ======================================================================== */
 
-/* --- 4 · Proof numbers — stated plainly, centred -------------------------- */
-/* .home-proof background comes from .ph-section-dark (owner scheme, 2026-06-12) */
+/* --- 4 · Proof numbers — olive band, stats over the caption (DR2-4) ------- */
+/* .home-proof surface = .ph-section-dark + .ph-section-olive (v3.css). The
+   olive-branch ornaments hug the band edges and clip there — never overflow. */
+.home-proof {
+  position: relative;
+  overflow: hidden;
+}
+.home-proof-branch {
+  position: absolute;
+  z-index: 0;
+  height: auto;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.home-proof-branch--left {
+  width: clamp(90px, 12vw, 190px);
+  left: 0;
+  top: 50%;
+  transform: translate(-28%, -50%);
+}
+.home-proof-branch--right {
+  width: clamp(110px, 14vw, 230px);
+  right: 0;
+  bottom: 0;
+  transform: translate(24%, 30%);
+}
 .home-proof-inner {
+  position: relative;
+  z-index: 1;
   text-align: center;
-}
-.home-proof-head {
-  max-width: 44rem;
-  margin-inline: auto;
-}
-.home-proof-head .ph-lead {
-  margin-top: var(--space-4);
-  margin-inline: auto;
 }
 .home-proof-strip {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: var(--space-8) var(--space-6);
-  margin: var(--space-12) 0 0;
+  margin: 0;
 }
 .home-proof-item {
+  position: relative;
   display: flex;
   flex-direction: column-reverse; /* number above its label; dt precedes dd in DOM */
   align-items: center;
@@ -1958,7 +1977,7 @@
   font-size: clamp(2.25rem, 2.6vw + 1rem, 3.5rem);
   line-height: 1;
   letter-spacing: var(--tracking-tight);
-  /* v3 (DR1): copper numerals on the warm charcoal proof band (Home is
+  /* v3: copper numerals — warm sand on the olive band (DR2-4; Home is
      public-only, so this needs no scoping). */
   color: var(--copper-300);
 }
@@ -1967,9 +1986,37 @@
   font-weight: var(--weight-medium);
   color: rgba(255, 255, 255, 0.8);
 }
+/* Thin copper hairlines between the five stats (mockup) — desktop only. */
+.home-proof-item + .home-proof-item::before {
+  content: "";
+  position: absolute;
+  left: calc(-0.5 * var(--space-6));
+  top: 50%;
+  transform: translateY(-50%);
+  height: 76%;
+  width: 1px;
+  background: color-mix(in srgb, var(--copper-300) 45%, transparent);
+}
+/* The caption reads as one flowing serif line under the stats (mockup):
+   the h2 keeps the section's heading semantics but flows inline with it. */
+.home-proof-caption {
+  max-width: 46rem;
+  margin: var(--space-12) auto 0;
+}
+/* .home-proof prefix outranks globals' own .ph-section-dark color rules
+   (globals' body rules land after this file in the @import cascade). */
+.home-proof .home-proof-caption h2,
+.home-proof .home-proof-caption .ph-lead {
+  display: inline;
+  font: var(--weight-regular) var(--text-xl) / 1.6 var(--font-display);
+  color: var(--white);
+}
 @container page (max-width: 860px) {
   .home-proof-strip {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .home-proof-item + .home-proof-item::before {
+    content: none;
   }
 }
 

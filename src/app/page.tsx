@@ -48,12 +48,14 @@ const HOME_STAGES = [
   },
 ] as const;
 
+/* DR2-4 — label wording/casing owner-approved (copy table, 2026-07-06);
+   the numbers themselves are locked proof numbers. */
 const HOME_PROOF = [
-  { n: "10", label: "focus areas" },
-  { n: "30", label: "topics" },
-  { n: "200+", label: "checklist items" },
-  { n: "267", label: "templates" },
-  { n: "120", label: "day launch" },
+  { n: "10", label: "Focus areas" },
+  { n: "30", label: "Topics" },
+  { n: "200+", label: "Checklist items" },
+  { n: "267", label: "Templates" },
+  { n: "120", label: "Day launch plan" },
 ] as const;
 
 
@@ -144,16 +146,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5 — A complete system, not a binder (proof numbers) */}
-      <section className="ph-section-lg ph-section-dark home-proof">
+      {/* 5 — A complete system, not a binder (DR2-4: olive proof band —
+          stats over the centered caption, olive-branch ornaments clipped at
+          the band edges, per the owner's proof-band mockup) */}
+      <section className="ph-section-lg ph-section-dark ph-section-olive home-proof">
+        <Image
+          src={ART_SOURCES["ph-art-branch-4"]}
+          alt=""
+          aria-hidden="true"
+          width={792}
+          height={1200}
+          sizes="190px"
+          className="home-proof-branch home-proof-branch--left"
+        />
+        <Image
+          src={ART_SOURCES["ph-art-branch-1"]}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={914}
+          sizes="230px"
+          className="home-proof-branch home-proof-branch--right"
+        />
         <Reveal className="ph-container home-proof-inner">
-          <div className="home-proof-head">
-            <h2>A complete system, not a binder.</h2>
-            <p className="ph-lead">
-              Everything it takes to open and run a House, in one place, with
-              your progress saved as you build.
-            </p>
-          </div>
           <dl className="home-proof-strip">
             {HOME_PROOF.map((p) => (
               <div key={p.label} className="home-proof-item">
@@ -162,6 +177,13 @@ export default function HomePage() {
               </div>
             ))}
           </dl>
+          <div className="home-proof-caption">
+            <h2>A complete system, not a binder.</h2>{" "}
+            <p className="ph-lead">
+              Everything it takes to open and run a House, in one place, with
+              your progress saved as you build.
+            </p>
+          </div>
         </Reveal>
       </section>
 
