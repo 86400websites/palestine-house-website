@@ -25,6 +25,10 @@ typecheck ✅ · lint ✅ · build ✅ (46 routes) · responsive matrix 320→14
 - **DESIGN.md** §5 (chrome) + §9 (brand lockup) rewritten from the DR1 "mark PNG + real-text wordmark, tagline not in chrome" scheme to the DR2.1 two-lockup-PNG system.
 - The gated workspace/admin shells keep their inline-SVG `Logo` (S8 decision); favicon/apple-icon/OG unchanged (the arch mark is unchanged; OG already carries the tagline lockup) — the lockup is public-chrome only.
 
+## Post-gate owner change (2026-07-06, commit `a2086f1`)
+
+- **Proof-band olive branches, owner refinement.** Desktop: removed the two small sprigs that flanked the caption sentence (`home-proof-caption-branch` + `.is-left`) — the two corner branches (`--left` branch-4, `--right` branch-1) stay. Mobile (≤1000px): dropped **all** the desktop branches and replaced them with a single small `ph-art-branch-3` sprig bookending the band — one centered at the top (`--m-top`), one mirrored (`scaleY(-1)`) at the very bottom (`--m-bottom`). Retired the old mobile `--top` garland and the `--left/--right` mobile rescale rules. typecheck/lint/build green; verified on rendered desktop 1280 + mobile 375/320 (CDP emulation).
+
 ## Follow-ups
 
 - Owner Preview eyeball: the PNG↔white-lockup swap on Home scroll (instant swap, colors fade); the 2-line proof caption at ~1280–1536px; bring-ph cards vs Home's.
