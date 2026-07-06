@@ -611,6 +611,10 @@
 }
 .v3-stage-panel h3 {
   font-size: var(--text-xl);
+  /* Explicit white — the global heading color (warm charcoal) otherwise wins
+     over the panel's inherited cream and vanishes on the moss surface
+     (owner fix, 2026-07-06). */
+  color: var(--white);
 }
 .v3-stage-panel p {
   margin-top: var(--space-3);
