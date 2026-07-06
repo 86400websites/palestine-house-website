@@ -25,7 +25,8 @@ Bring the three owner-mocked surfaces to final v3 from the new DR2 mockups (mast
 | DR2-6 | `0bdd26a` | Mobile pass 320→768px: fifth stat centers on its own row ≤860px; ornaments drop early; footer inset slims + sprig drops ≤560px; plate numeral → `--text-xl` |
 | owner fixes | `cd5a749` | White stage-card titles (global heading color was winning over the panel cream) · desktop nav hover tooltips switched to the mobile `tipShort` set · supplied logo re-run through the pipeline → **byte-identical mark** (already live; master now at `logo/logo-master.png` for fresh clones) |
 | DR2-7 | `59ec86e` | Exit gate: 3-lens adversarial full-diff review + fixes, path-guard CLEAN, `DESIGN.md` §3/§5/§6/§12 updated, trackers + this record |
-| post-gate owner fix | *(follow-up commit)* | Owner: keep the olive ornaments on mobile — the exit gate had hidden the band branches ≤1000px and the footer sprig ≤560px; instead they now **rescale into text-free zones** (left branch tip stays inside the gutter per the graze math; right branch tucks into the bottom padding below the caption; sprig 56px in the corner, clear of the centered copyright at 320px) |
+| post-gate owner fix | `03695fc` | Owner: keep the olive ornaments on mobile — the exit gate had hidden the band branches ≤1000px and the footer sprig ≤560px; instead they now **rescale into text-free zones** (left branch tip stays inside the gutter per the graze math; right branch tucks into the bottom padding below the caption; sprig 56px in the corner, clear of the centered copyright at 320px) |
+| post-gate owner fix 2 | *(follow-up commit)* | Owner: "still not enough olive on mobile" — narrow layouts (≤1000px) gain a **third, mobile-only ornament**: `ph-art-branch-3` (the horizontal branch, previously unused) garlands the top-right padding strip (visible ≤80px vs the 96px pad), and the bottom-right branch grows to clamp(120px, 34vw, 200px) (visible ≤94px, still under the caption's zone). Desktop ≥1001px untouched — owner called it perfect |
 
 ## Exit-gate review (DR2-7)
 
@@ -33,7 +34,7 @@ Three parallel adversarial lenses over the full diff vs `main` (CSS/cascade+layo
 
 **Fixed on-branch (6):** footer copyright rgba .45→.55 (4.42:1 → 5.95:1 AA) · left branch graze on the first stat label: `translate(-40%)` + ornaments hidden ≤1000px (both lenses flagged the -28%/860px combo) · proof section `aria-labelledby` (h2 sits after the stats in DOM per mockup) · dead `.phx-footer-arabic` line-height (specificity) · arch-plate 1px overlap (sub-pixel photo hairline at fractional zoom) · *(from the a11y lens's clean-categories: nothing else moved).*
 
-**Accepted, documented (4):** `ph-art-branch-3.png` (100 KB) + its registry entry ship unused — **reserved for DR3 ornament use** · `sizes` media queries approximate the container-query breakpoints (±20px fetch band; hidden images never load) · `optimize-photos.ts` skip-if-absent exits 0 on a typo'd master name (fits the fresh-clone-per-sprint flow; logs `skip …`) · caption h2 after the stats is a usability wart, not a WCAG failure (mitigated by `aria-labelledby`).
+**Accepted, documented (4):** ~~`ph-art-branch-3.png` ships unused — reserved for DR3~~ *(superseded: it became the mobile top garland in the second post-gate owner fix)* · `sizes` media queries approximate the container-query breakpoints (±20px fetch band; hidden images never load) · `optimize-photos.ts` skip-if-absent exits 0 on a typo'd master name (fits the fresh-clone-per-sprint flow; logs `skip …`) · caption h2 after the stats is a usability wart, not a WCAG failure (mitigated by `aria-labelledby`).
 
 **Verified clean:** path-guard — zero files under workspace/admin/ui/middleware/next.config/supabase (18 files, all public shell + docs + assets + script) · proof numbers verbatim · Apply band + all 14 pre-existing Apply strings untouched, no CTA added/removed · footer/header still single shared components; footer renders only via `SiteChrome` on `.ph-page` (sticky-footer math + cream surround + `:has()`-less fallback all hold) · container `page` declared on `.ph-page`, ancestor of all new `@container` rules · no new deps/routes/`"use client"`/env · all five footer link targets exist · AA computed on every new pair (numerals 6.33:1 · labels 10.67:1 · card body 9.93:1 · titles 16.9:1 · links 11.14:1 · Arabic 8.86:1 at the correct 4.5 bar) · reduced-motion untouched (no new animation).
 
@@ -51,7 +52,7 @@ The owner ran a Codex pass on 2026-07-06 that — due to a checkout/range mix-up
 
 ## Follow-ups (non-blocking)
 
-- DR3: remaining public page bodies to v3 (`/model` `/experience` `/bring-ph` `/our-support` bodies + `/live` `/about` `/focus-areas` `/contact` + auth + legal); `ph-art-branch-3` reserved for it.
+- DR3: remaining public page bodies to v3 (`/model` `/experience` `/bring-ph` `/our-support` bodies + `/live` `/about` `/focus-areas` `/contact` + auth + legal). All four branch assets are now in use.
 - Owner Preview eyeball at phone width (code-level mobile audit ran; real-device check pending).
 - Optional: stacked footer wordmark if the owner wants the mockup's exact brand block.
 

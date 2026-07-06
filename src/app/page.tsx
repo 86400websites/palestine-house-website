@@ -174,6 +174,18 @@ export default function HomePage() {
           sizes="230px"
           className="home-proof-branch home-proof-branch--right"
         />
+        {/* Mobile-only third ornament (owner, 2026-07-06 — "more olive on
+            mobile"): the horizontal branch garlands the band's top-right
+            padding strip; desktop (≥1001px) keeps its two-branch layout. */}
+        <Image
+          src={ART_SOURCES["ph-art-branch-3"]}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={317}
+          sizes="430px"
+          className="home-proof-branch home-proof-branch--top"
+        />
         <Reveal className="ph-container home-proof-inner">
           <dl className="home-proof-strip">
             {HOME_PROOF.map((p) => (
