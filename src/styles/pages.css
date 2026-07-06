@@ -1944,9 +1944,9 @@
   width: clamp(90px, 12vw, 190px);
   left: 0;
   top: 50%;
-  /* -40%, and hidden ≤1000px below: keeps the visible tip clear of the
-     first stat label at every width the band renders it (DR2-7 exit-gate
-     review — both the a11y and layout lenses flagged the -28% graze). */
+  /* -40% (was -28%): keeps the visible tip clear of the first stat label
+     on wide layouts; ≤1000px the block below rescales both branches into
+     the text-free zones instead (DR2-7 exit-gate review + owner fix). */
   transform: translate(-40%, -50%);
 }
 .home-proof-branch--right {
@@ -2027,13 +2027,19 @@
     grid-column: 1 / -1;
   }
 }
-/* The branch ornaments sit behind the stat text once the layout narrows —
-   decorative only, so they drop rather than fight the numbers for
-   legibility. 1000px, not 860: below that the left branch's tip can still
-   graze the first stat label (DR2-7 exit-gate review, both lenses). */
+/* Narrow layouts keep the branches (owner, 2026-07-06 — post-gate fix:
+   originally hidden ≤1000px) but scale them into the band's text-free
+   zones: the left tip stays inside the gutter, clear of the first stat
+   label at every width (exit-gate graze math), and the right branch tucks
+   into the bottom padding below the caption. */
 @container page (max-width: 1000px) {
-  .home-proof-branch {
-    display: none;
+  .home-proof-branch--left {
+    width: clamp(72px, 12vw, 120px);
+    transform: translate(-45%, -50%);
+  }
+  .home-proof-branch--right {
+    width: clamp(84px, 16vw, 150px);
+    transform: translate(32%, 45%);
   }
 }
 

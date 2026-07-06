@@ -24,7 +24,8 @@ Bring the three owner-mocked surfaces to final v3 from the new DR2 mockups (mast
 | DR2-5 | `37afbe3` | Footer: moss inset card, Arabic line `بيت فلسطين في كل مدينة` (`lang="ar" dir="rtl"`, system-font fallback), columns per mockup (Our Support · Why bring one. · Sign In · Terms of Use · Privacy Policy), white caps titles, centered tagline between hairlines + crossed-olive sprig, copyright kept. Copy table approved pre-build |
 | DR2-6 | `0bdd26a` | Mobile pass 320→768px: fifth stat centers on its own row ≤860px; ornaments drop early; footer inset slims + sprig drops ≤560px; plate numeral → `--text-xl` |
 | owner fixes | `cd5a749` | White stage-card titles (global heading color was winning over the panel cream) · desktop nav hover tooltips switched to the mobile `tipShort` set · supplied logo re-run through the pipeline → **byte-identical mark** (already live; master now at `logo/logo-master.png` for fresh clones) |
-| DR2-7 | *(this commit)* | Exit gate: 3-lens adversarial full-diff review + fixes, path-guard CLEAN, `DESIGN.md` §3/§5/§6/§12 updated, trackers + this record |
+| DR2-7 | `59ec86e` | Exit gate: 3-lens adversarial full-diff review + fixes, path-guard CLEAN, `DESIGN.md` §3/§5/§6/§12 updated, trackers + this record |
+| post-gate owner fix | *(follow-up commit)* | Owner: keep the olive ornaments on mobile — the exit gate had hidden the band branches ≤1000px and the footer sprig ≤560px; instead they now **rescale into text-free zones** (left branch tip stays inside the gutter per the graze math; right branch tucks into the bottom padding below the caption; sprig 56px in the corner, clear of the centered copyright at 320px) |
 
 ## Exit-gate review (DR2-7)
 
