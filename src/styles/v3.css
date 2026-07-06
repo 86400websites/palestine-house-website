@@ -114,6 +114,12 @@
 .ph-page .ph-section-dark :is(.editorial-index, .fa-letter, .fa-caps-label) {
   color: var(--copper-300);
 }
+/* DR2 — olive band modifier: composes WITH .ph-section-dark (inheriting all
+   its on-dark text rules, which stay AA on the darker moss) and repaints the
+   surface per the owner's proof-band mockup. */
+.ph-page .ph-section-dark.ph-section-olive {
+  background: var(--moss-900);
+}
 
 /* (Dark-surface focus rings: --focus-ring-on-dark above feeds the S1 rule in
    globals.css — one selector list, recolored per shell.) */
@@ -542,35 +548,87 @@
   color: var(--muted-foreground);
 }
 
-/* --- "One path, three stages." — editorial columns, copper numerals
-   (the section head reuses the shared .sec-head primitive) ----------------- */
+/* --- "One path, three stages." — photo cards with moss arch-notch number
+   plates + the Al-Aqsa line-art beside the grid (DR2-3, owner mockup; the
+   centered head reuses the shared .sec-head.is-center primitive) ----------- */
+.v3-stages-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 30%);
+  gap: var(--space-10);
+  align-items: center;
+  margin-top: var(--space-12);
+}
 .v3-stages {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-10);
-  margin-top: var(--space-12);
+  gap: var(--space-6);
 }
-.v3-stage {
-  border-top: 1px solid var(--border-strong);
-  padding-top: var(--space-6);
+.v3-stages > * {
+  min-width: 0;
 }
+.v3-stage-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--moss-700);
+}
+.v3-stage-photo {
+  position: relative;
+  aspect-ratio: 1 / 1;
+}
+.v3-stage-photo img {
+  object-fit: cover;
+}
+.v3-stage-panel {
+  position: relative;
+  flex: 1;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+  text-align: center;
+  color: var(--cream-50);
+}
+/* The number plate: an arch tab rising from the panel's top edge into the
+   photo — same moss as the panel, so the two read as one shape. */
 .v3-stage-num {
-  display: block;
+  position: absolute;
+  /* 1px down = 1px overlap into the same-color panel — kills the sub-pixel
+     photo hairline at fractional zoom levels (DR2-7 exit-gate review). */
+  top: 1px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 2.75rem;
+  border-radius: 999px 999px 0 0;
+  background: var(--moss-700);
   font-family: var(--font-display);
   font-weight: var(--weight-semibold);
-  font-size: var(--text-3xl);
+  /* --text-xl, not 2xl — the numeral sits inside the 2.75rem arch tab with
+     breathing room at every viewport (DR2-6 mobile pass). */
+  font-size: var(--text-xl);
   line-height: 1;
-  letter-spacing: var(--tracking-tight);
-  color: var(--copper-500);
+  color: var(--copper-300);
 }
-.v3-stage h3 {
-  margin-top: var(--space-4);
+.v3-stage-panel h3 {
+  font-size: var(--text-xl);
+  /* Explicit white — the global heading color (warm charcoal) otherwise wins
+     over the panel's inherited cream and vanishes on the moss surface
+     (owner fix, 2026-07-06). */
+  color: var(--white);
 }
-.v3-stage p {
-  margin-top: var(--space-2);
-  color: var(--muted-foreground);
-  max-width: 26rem;
+.v3-stage-panel p {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--cream-100);
 }
+.v3-stages-art img {
+  width: 100%;
+  height: auto;
+}
+/* (Stages responsive rules live in the shared v3 responsive section below.) */
 
 /* --- Platform band ("The work is real…") — photo background (DR1-8) ------- */
 .v3-platform {
@@ -615,10 +673,22 @@
 
 /* --- v3 responsive (container queries on .ph-page, like the rest of the
    public shell) ------------------------------------------------------------ */
+@container page (max-width: 1100px) {
+  /* The line-art is a decorative flourish — dropped when the width is tight
+     rather than pushing real content down (DR2-3). */
+  .v3-stages-layout {
+    grid-template-columns: 1fr;
+  }
+  .v3-stages-art {
+    display: none;
+  }
+}
 @container page (max-width: 860px) {
   .v3-stages {
     grid-template-columns: 1fr;
     gap: var(--space-8);
+    max-width: 26rem;
+    margin-inline: auto;
   }
 }
 @container page (max-width: 980px) {

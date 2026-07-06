@@ -1926,26 +1926,53 @@
    strip, platform split, and the lead-magnet dialog below are still live.
    ======================================================================== */
 
-/* --- 4 · Proof numbers — stated plainly, centred -------------------------- */
-/* .home-proof background comes from .ph-section-dark (owner scheme, 2026-06-12) */
+/* --- 4 · Proof numbers — olive band, stats over the caption (DR2-4) ------- */
+/* .home-proof surface = .ph-section-dark + .ph-section-olive (v3.css). The
+   olive-branch ornaments hug the band edges and clip there — never overflow. */
+.home-proof {
+  position: relative;
+  overflow: hidden;
+}
+.home-proof-branch {
+  position: absolute;
+  z-index: 0;
+  height: auto;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.home-proof-branch--left {
+  width: clamp(90px, 12vw, 190px);
+  left: 0;
+  top: 50%;
+  /* -40% (was -28%): keeps the visible tip clear of the first stat label
+     on wide layouts; ≤1000px the block below rescales both branches into
+     the text-free zones instead (DR2-7 exit-gate review + owner fix). */
+  transform: translate(-40%, -50%);
+}
+.home-proof-branch--right {
+  width: clamp(110px, 14vw, 230px);
+  right: 0;
+  bottom: 0;
+  transform: translate(24%, 30%);
+}
+/* The horizontal garland exists only on narrow layouts (block below) —
+   desktop keeps the mockup's two-branch composition. */
+.home-proof-branch--top {
+  display: none;
+}
 .home-proof-inner {
+  position: relative;
+  z-index: 1;
   text-align: center;
-}
-.home-proof-head {
-  max-width: 44rem;
-  margin-inline: auto;
-}
-.home-proof-head .ph-lead {
-  margin-top: var(--space-4);
-  margin-inline: auto;
 }
 .home-proof-strip {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: var(--space-8) var(--space-6);
-  margin: var(--space-12) 0 0;
+  margin: 0;
 }
 .home-proof-item {
+  position: relative;
   display: flex;
   flex-direction: column-reverse; /* number above its label; dt precedes dd in DOM */
   align-items: center;
@@ -1958,7 +1985,7 @@
   font-size: clamp(2.25rem, 2.6vw + 1rem, 3.5rem);
   line-height: 1;
   letter-spacing: var(--tracking-tight);
-  /* v3 (DR1): copper numerals on the warm charcoal proof band (Home is
+  /* v3: copper numerals — warm sand on the olive band (DR2-4; Home is
      public-only, so this needs no scoping). */
   color: var(--copper-300);
 }
@@ -1967,9 +1994,92 @@
   font-weight: var(--weight-medium);
   color: rgba(255, 255, 255, 0.8);
 }
+/* Thin copper hairlines between the five stats (mockup) — desktop only. */
+.home-proof-item + .home-proof-item::before {
+  content: "";
+  position: absolute;
+  left: calc(-0.5 * var(--space-6));
+  top: 50%;
+  transform: translateY(-50%);
+  height: 76%;
+  width: 1px;
+  background: color-mix(in srgb, var(--copper-300) 45%, transparent);
+}
+/* The caption reads as one flowing serif line under the stats (mockup):
+   the h2 keeps the section's heading semantics but flows inline with it.
+   On desktop an olive sprig flanks it on each side (owner, 2026-07-06). */
+.home-proof-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  max-width: 64rem;
+  margin: var(--space-12) auto 0;
+}
+.home-proof-caption-text {
+  max-width: 46rem;
+}
+.home-proof-caption-branch {
+  flex: none;
+  width: clamp(90px, 10vw, 140px);
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.home-proof-caption-branch.is-left {
+  transform: scaleX(-1);
+}
+/* .home-proof prefix outranks globals' own .ph-section-dark color rules
+   (globals' body rules land after this file in the @import cascade). */
+.home-proof .home-proof-caption h2,
+.home-proof .home-proof-caption .ph-lead {
+  display: inline;
+  font: var(--weight-regular) var(--text-xl) / 1.6 var(--font-display);
+  color: var(--white);
+}
 @container page (max-width: 860px) {
   .home-proof-strip {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .home-proof-item + .home-proof-item::before {
+    content: none;
+  }
+  /* 2-2-1 flow: the fifth stat centers on its own full row instead of
+     hanging left (DR2-6 mobile pass). */
+  .home-proof-item:last-child {
+    grid-column: 1 / -1;
+  }
+}
+/* Narrow layouts keep the branches (owner, 2026-07-06 — post-gate fix:
+   originally hidden ≤1000px) but scale them into the band's text-free
+   zones: the left tip stays inside the gutter, clear of the first stat
+   label at every width (exit-gate graze math), and the right branch tucks
+   into the bottom padding below the caption. */
+@container page (max-width: 1000px) {
+  .home-proof-branch--left {
+    width: clamp(72px, 12vw, 120px);
+    transform: translate(-45%, -50%);
+  }
+  /* Richer foliage on narrow layouts (owner, 2026-07-06): the right branch
+     grows into the bottom padding (visible ≤94px vs the 96px strip) and the
+     horizontal branch garlands the top-right padding — all three stay in
+     text-free zones. */
+  .home-proof-branch--right {
+    width: clamp(120px, 34vw, 200px);
+    transform: translate(28%, 38%);
+  }
+  .home-proof-branch--top {
+    display: block;
+    top: 0;
+    right: 0;
+    width: clamp(220px, 62vw, 430px);
+    transform: translate(20%, -30%);
+  }
+  /* The caption's flanking sprigs are a desktop flourish — at narrow widths
+     they'd squeeze the sentence, and the band already carries its three
+     edge ornaments. */
+  .home-proof-caption-branch {
+    display: none;
   }
 }
 

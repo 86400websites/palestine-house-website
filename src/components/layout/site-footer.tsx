@@ -1,10 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/layout/brand-logo";
+import { ART_SOURCES } from "@/components/shared/photo";
 import { Button } from "@/components/ui/button";
 
-/* Locked public footer (docs/page-designs/shared/site-chrome.jsx; copy
-   verbatim from docs/page-copy/00-global/footer-copy.md). Identical on
-   every page — never redesigned per page. */
+/* Locked public footer — v3 refresh (DR2-5: owner footer mockup + the
+   owner-approved copy table, 2026-07-06): moss inset card, Arabic brand
+   line, updated column labels, centered tagline + olive sprig. Identical
+   on every page — never redesigned per page. */
 export function SiteFooter() {
   return (
     <footer className="phx-footer">
@@ -26,6 +29,9 @@ export function SiteFooter() {
         <div className="phx-footer-col phx-footer-brand">
           <BrandLogo height={30} />
           <p>A fixed address for Palestinian culture, in every city.</p>
+          <p className="phx-footer-arabic" lang="ar" dir="rtl">
+            بيت فلسطين في كل مدينة
+          </p>
         </div>
         <div className="phx-footer-col">
           <span className="phx-footer-col-title">Explore</span>
@@ -35,17 +41,17 @@ export function SiteFooter() {
         </div>
         <div className="phx-footer-col">
           <span className="phx-footer-col-title">Bring a House</span>
-          <Link href="/bring-ph">Why bring one</Link>
-          <Link href="/our-support">Our support</Link>
+          <Link href="/our-support">Our Support</Link>
+          <Link href="/bring-ph">Why bring one.</Link>
         </div>
         <div className="phx-footer-col">
           <span className="phx-footer-col-title">Account</span>
-          <Link href="/login">Sign in</Link>
+          <Link href="/login">Sign In</Link>
         </div>
         <div className="phx-footer-col">
           <span className="phx-footer-col-title">Legal</span>
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/terms">Terms</Link>
+          <Link href="/terms">Terms of Use</Link>
+          <Link href="/privacy">Privacy Policy</Link>
           <Link href="/contact">Contact</Link>
         </div>
       </div>
@@ -57,6 +63,15 @@ export function SiteFooter() {
           </span>
           <span className="phx-footer-copyright">© Palestine House.</span>
         </div>
+        <Image
+          src={ART_SOURCES["ph-art-branch-2"]}
+          alt=""
+          aria-hidden="true"
+          width={1106}
+          height={1131}
+          sizes="72px"
+          className="phx-footer-sprig"
+        />
       </div>
     </footer>
   );

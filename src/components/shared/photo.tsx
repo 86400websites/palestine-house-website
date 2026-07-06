@@ -21,9 +21,27 @@ export const PHOTO_SOURCES = {
   "ph-photo-bring-house": "/assets/photos/ph-photo-bring-house.jpg",
   "ph-photo-our-support": "/assets/photos/ph-photo-our-support.jpg",
   "ph-photo-apply": "/assets/photos/ph-photo-apply.jpg",
+  /* DR2 — "One path, three stages" card photos */
+  "ph-photo-stage-plan": "/assets/photos/ph-photo-stage-plan.jpg",
+  "ph-photo-stage-build": "/assets/photos/ph-photo-stage-build.jpg",
+  "ph-photo-stage-cafe": "/assets/photos/ph-photo-stage-cafe.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;
+
+/* DR2 — keyed decorative art (transparent palette PNGs from
+   scripts/optimize-photos.ts): the sepia Al-Aqsa line-art illustration and
+   the four olive-branch ornaments. Purely decorative — consumers render them
+   as plain next/image with aria-hidden + empty alt and explicit dimensions. */
+export const ART_SOURCES = {
+  "ph-art-line-alaqsa": "/assets/art/ph-art-line-alaqsa.png",
+  "ph-art-branch-1": "/assets/art/ph-art-branch-1.png",
+  "ph-art-branch-2": "/assets/art/ph-art-branch-2.png",
+  "ph-art-branch-3": "/assets/art/ph-art-branch-3.png",
+  "ph-art-branch-4": "/assets/art/ph-art-branch-4.png",
+} as const;
+
+export type ArtId = keyof typeof ART_SOURCES;
 
 type PhotoProps = {
   assetId: PhotoId;

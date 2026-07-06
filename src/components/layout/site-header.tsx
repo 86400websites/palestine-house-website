@@ -25,34 +25,32 @@ import {
    panels were removed at DR1-8, owner decision 2026-07-02 — the labels link
    directly and explain themselves via the tooltip) · Sign in · Apply. */
 
-/* tip = desktop hover one-liner (navigation-copy.md, verbatim);
-   tipShort = mobile menu sub-label (owner-approved short set, 2026-06-12). */
+/* tipShort = the short sub-label (owner-approved set, 2026-06-12) — used by
+   BOTH the mobile menu and, since the owner fix of 2026-07-06 (DR2), the
+   desktop hover tooltip: one simple line everywhere (the long
+   navigation-copy.md one-liners were retired from the hover). */
 const NAV_LINKS = [
   {
     key: "model",
     label: "The Model",
-    tip: "Who the players are, and how it works.",
     tipShort: "How it works.",
     href: "/model",
   },
   {
     key: "experience",
     label: "Experience",
-    tip: "Step inside a House — the feeling, the programs, the people.",
     tipShort: "Step inside a House.",
     href: "/experience",
   },
   {
     key: "bring",
     label: "Bring a House",
-    tip: "Why bring Palestine House to your city, and what it takes.",
     tipShort: "What it takes.",
     href: "/bring-ph",
   },
   {
     key: "support",
     label: "Our Support",
-    tip: "What HQ gives every partner, behind every House.",
     tipShort: "Behind every House.",
     href: "/our-support",
   },
@@ -130,8 +128,10 @@ export function SiteHeader() {
 
         <nav className="phx-nav" aria-label="Main">
           {NAV_LINKS.map((l) => (
-            /* Every label shows its one-liner as a styled tooltip (never a
-               raw title attribute); on mobile it becomes the Sheet sub-label. */
+            /* Every label shows the same short sub-label the mobile menu uses,
+               as a styled tooltip (never a raw title attribute) — one simple
+               line on hover, identical wording on every device (owner fix,
+               2026-07-06). */
             <Tooltip key={l.key} delayDuration={150}>
               <TooltipTrigger asChild>
                 <Link
@@ -141,15 +141,15 @@ export function SiteHeader() {
                   aria-describedby={`nav-tip-${l.key}`}
                 >
                   {l.label}
-                  {/* One-liner for assistive tech — aria-describedby has broad
+                  {/* Sub-label for assistive tech — aria-describedby has broad
                       screen-reader support (aria-description alone does not). */}
                   <span id={`nav-tip-${l.key}`} className="sr-only">
-                    {l.tip}
+                    {l.tipShort}
                   </span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-64 text-sm">
-                {l.tip}
+                {l.tipShort}
               </TooltipContent>
             </Tooltip>
           ))}

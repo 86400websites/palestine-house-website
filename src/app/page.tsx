@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { Photo, PHOTO_SOURCES } from "@/components/shared/photo";
+import { Photo, PHOTO_SOURCES, ART_SOURCES } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { HomeHero } from "@/components/sections/home/home-hero";
@@ -26,27 +26,36 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+/* DR2-3 — stage-card copy + photo alts owner-approved (copy table, 2026-07-06) */
 const HOME_STAGES = [
   {
     name: "Plan & Prepare",
-    text: "the model, your city, and what running a House really takes.",
+    text: "We help you lay the foundation for a strong and sustainable House.",
+    photo: "ph-photo-stage-plan",
+    alt: "A planning studio wall of maps, sketches and tile samples for a new Palestine House.",
   },
   {
     name: "Design & Build",
-    text: "a clear 120-day launch plan, tracked task by task.",
+    text: "We guide the creation of a beautiful, functional and welcoming space.",
+    photo: "ph-photo-stage-build",
+    alt: "A workshop of patterned tiles, timber and lanterns mid-build.",
   },
   {
     name: "Operate & Program",
-    text: "run your House day to day, to the standard every House shares.",
+    text: "We support you to run meaningful programs and build lasting community.",
+    photo: "ph-photo-stage-cafe",
+    alt: "A candlelit café room set for an evening performance.",
   },
 ] as const;
 
+/* DR2-4 — label wording/casing owner-approved (copy table, 2026-07-06);
+   the numbers themselves are locked proof numbers. */
 const HOME_PROOF = [
-  { n: "10", label: "focus areas" },
-  { n: "30", label: "topics" },
-  { n: "200+", label: "checklist items" },
-  { n: "267", label: "templates" },
-  { n: "120", label: "day launch" },
+  { n: "10", label: "Focus areas" },
+  { n: "30", label: "Topics" },
+  { n: "200+", label: "Checklist items" },
+  { n: "267", label: "Templates" },
+  { n: "120", label: "Day launch plan" },
 ] as const;
 
 
@@ -89,42 +98,95 @@ export default function HomePage() {
       {/* 3 — Inside a Palestine House (photo strip) */}
       <InsideStrip />
 
-      {/* 4 — One path, three stages (editorial columns, copper numerals) */}
+      {/* 4 — One path, three stages (DR2-3: photo cards with moss arch-notch
+          number plates + the Al-Aqsa line-art beside the grid, per the
+          owner's stages-section mockup) */}
       <section className="ph-section-lg v3-stages-section">
         <div className="ph-container">
-          <Reveal className="sec-head">
+          <Reveal className="sec-head is-center">
             <h2>One path, three stages.</h2>
             <p className="ph-lead">
-              The entire playbook is a guided path, so you always know the next
-              step.
+              A replicable blueprint. Local at heart. Global in spirit.
             </p>
           </Reveal>
-          <div className="v3-stages">
-            {HOME_STAGES.map((s, i) => (
-              <Reveal key={s.name} delay={i * 0.09}>
-                <article className="v3-stage">
-                  <span className="v3-stage-num" aria-hidden="true">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h3>{s.name}</h3>
-                  <p>{s.text}</p>
-                </article>
-              </Reveal>
-            ))}
+          <div className="v3-stages-layout">
+            <div className="v3-stages">
+              {HOME_STAGES.map((s, i) => (
+                <Reveal key={s.name} delay={i * 0.09}>
+                  <article className="v3-stage-card">
+                    <div className="v3-stage-photo">
+                      <Image
+                        src={PHOTO_SOURCES[s.photo]}
+                        alt={s.alt}
+                        fill
+                        sizes="(max-width: 880px) 100vw, (max-width: 1100px) 33vw, 24vw"
+                      />
+                    </div>
+                    <div className="v3-stage-panel">
+                      <span className="v3-stage-num" aria-hidden="true">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <h3>{s.name}</h3>
+                      <p>{s.text}</p>
+                    </div>
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+            <div className="v3-stages-art" aria-hidden="true">
+              <Image
+                src={ART_SOURCES["ph-art-line-alaqsa"]}
+                alt=""
+                width={1095}
+                height={1309}
+                sizes="(max-width: 1100px) 0px, 30vw"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 5 — A complete system, not a binder (proof numbers) */}
-      <section className="ph-section-lg ph-section-dark home-proof">
+      {/* 5 — A complete system, not a binder (DR2-4: olive proof band —
+          stats over the centered caption, olive-branch ornaments clipped at
+          the band edges, per the owner's proof-band mockup) */}
+      {/* aria-labelledby: the caption h2 sits AFTER the stats in the DOM
+          (mockup layout) — naming the section keeps screen-reader users
+          oriented before the bare numbers (DR2-7 exit-gate review). */}
+      <section
+        className="ph-section-lg ph-section-dark ph-section-olive home-proof"
+        aria-labelledby="home-proof-title"
+      >
+        <Image
+          src={ART_SOURCES["ph-art-branch-4"]}
+          alt=""
+          aria-hidden="true"
+          width={792}
+          height={1200}
+          sizes="190px"
+          className="home-proof-branch home-proof-branch--left"
+        />
+        <Image
+          src={ART_SOURCES["ph-art-branch-1"]}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={914}
+          sizes="230px"
+          className="home-proof-branch home-proof-branch--right"
+        />
+        {/* Mobile-only third ornament (owner, 2026-07-06 — "more olive on
+            mobile"): the horizontal branch garlands the band's top-right
+            padding strip; desktop (≥1001px) keeps its two-branch layout. */}
+        <Image
+          src={ART_SOURCES["ph-art-branch-3"]}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={317}
+          sizes="430px"
+          className="home-proof-branch home-proof-branch--top"
+        />
         <Reveal className="ph-container home-proof-inner">
-          <div className="home-proof-head">
-            <h2>A complete system, not a binder.</h2>
-            <p className="ph-lead">
-              Everything it takes to open and run a House, in one place, with
-              your progress saved as you build.
-            </p>
-          </div>
           <dl className="home-proof-strip">
             {HOME_PROOF.map((p) => (
               <div key={p.label} className="home-proof-item">
@@ -133,6 +195,36 @@ export default function HomePage() {
               </div>
             ))}
           </dl>
+          {/* Desktop: an olive sprig flanks the caption on each side (owner,
+              2026-07-06); on narrow layouts they yield to the band's three
+              edge ornaments. */}
+          <div className="home-proof-caption">
+            <Image
+              src={ART_SOURCES["ph-art-branch-3"]}
+              alt=""
+              aria-hidden="true"
+              width={1200}
+              height={317}
+              sizes="140px"
+              className="home-proof-caption-branch is-left"
+            />
+            <div className="home-proof-caption-text">
+              <h2 id="home-proof-title">A complete system, not a binder.</h2>{" "}
+              <p className="ph-lead">
+                Everything it takes to open and run a House, in one place, with
+                your progress saved as you build.
+              </p>
+            </div>
+            <Image
+              src={ART_SOURCES["ph-art-branch-3"]}
+              alt=""
+              aria-hidden="true"
+              width={1200}
+              height={317}
+              sizes="140px"
+              className="home-proof-caption-branch"
+            />
+          </div>
         </Reveal>
       </section>
 
