@@ -124,7 +124,7 @@ export function SiteHeader() {
         </noscript>
       )}
       <div className="ph-container phx-header-inner">
-        <BrandLogo href="/" priority />
+        <BrandLogo href="/" />
 
         <nav className="phx-nav" aria-label="Main">
           {NAV_LINKS.map((l) => (

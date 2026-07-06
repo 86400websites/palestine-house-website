@@ -12,7 +12,14 @@ import Image from "next/image";
      the full lockup + Apply + hamburger don't fit (DR1-10).
    All images are decorative (aria-hidden): the header link names itself via
    aria-label; the linkless footer instance renders an sr-only brand line.
-   Public shell only — the gated workspace/admin shells keep layout/logo.tsx. */
+   Public shell only — the gated workspace/admin shells keep layout/logo.tsx.
+
+   No `priority`: all three render lazily (next/image default). Only one is
+   ever display:block per surface, and a display:none lazy <img> is never
+   fetched until it's shown — so the two hidden variants don't download on
+   load and none of them issue a high-priority preload that would race the
+   hero photo's LCP (DR2.1-6 exit-gate review). The visible variant is in the
+   top viewport, so its lazy fetch still fires immediately. */
 
 const MARK_RATIO = 289 / 303; // ph-logo-mark.png intrinsic aspect
 const LOCKUP_RATIO = 900 / 422; // ph-logo-lockup(-dark).png intrinsic aspect
@@ -23,17 +30,9 @@ type BrandLogoProps = {
   height?: number;
   /** Lockup height in px (both PNG variants). */
   lockupHeight?: number;
-  /** Only the header instance is above the fold — the footer one must not
-   *  issue an eager high-priority fetch that competes with hero LCP. */
-  priority?: boolean;
 };
 
-export function BrandLogo({
-  href,
-  height = 34,
-  lockupHeight = 54,
-  priority,
-}: BrandLogoProps) {
+export function BrandLogo({ href, height = 34, lockupHeight = 54 }: BrandLogoProps) {
   const lockupWidth = Math.round(lockupHeight * LOCKUP_RATIO);
   const content = (
     <>
@@ -44,7 +43,6 @@ export function BrandLogo({
         className="phx-brand-lockup"
         width={lockupWidth}
         height={lockupHeight}
-        priority={priority}
       />
       <Image
         src="/assets/logo/ph-logo-lockup-dark.png"
@@ -53,7 +51,6 @@ export function BrandLogo({
         className="phx-brand-lockup phx-brand-lockup--dark"
         width={lockupWidth}
         height={lockupHeight}
-        priority={priority}
       />
       <Image
         src="/assets/logo/ph-logo-mark.png"
@@ -62,7 +59,6 @@ export function BrandLogo({
         className="phx-brand-mark"
         width={Math.round(height * MARK_RATIO)}
         height={height}
-        priority={priority}
       />
       {!href && <span className="sr-only">Palestine House — Our Culture Embassy</span>}
     </>

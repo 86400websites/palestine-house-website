@@ -828,11 +828,15 @@ img.phx-brand-mark {
   }
   /* 320-360px: the full lockup (~114px wide) + Apply + hamburger don't fit —
      keep the copper mark alone (the brand link keeps its aria-label) and
-     tighten gaps so nothing overflows the viewport (DR1-10 / DR2.1-2). The
-     :is() lifts the hide to (0,3,0) so it outranks the overlay/footer
-     --dark show rules above at every surface; this block sits later in the
-     file, so the tie breaks this way. */
-  :is(.phx-header, .phx-header[data-overlay], .phx-footer) img.phx-brand-lockup {
+     tighten gaps so nothing overflows the viewport (DR1-10 / DR2.1-2). Both
+     lockup classes are hidden (the dark img carries both), and the double
+     img.phx-brand-lockup.phx-brand-lockup--dark selector is (0,4,1) — it
+     genuinely outranks the overlay show rule .phx-header[data-overlay]
+     img.phx-brand-lockup--dark (0,3,1), so the mark-only fallback holds by
+     specificity, not by source order (DR2.1-6 exit-gate review). */
+  :is(.phx-header, .phx-header[data-overlay], .phx-footer) img.phx-brand-lockup,
+  :is(.phx-header, .phx-header[data-overlay], .phx-footer)
+    img.phx-brand-lockup.phx-brand-lockup--dark {
     display: none;
   }
   img.phx-brand-mark {
