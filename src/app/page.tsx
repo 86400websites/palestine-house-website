@@ -132,17 +132,26 @@ export default function HomePage() {
           sizes="270px"
           className="home-proof-branch home-proof-branch--right"
         />
-        {/* Mobile-only third ornament (owner, 2026-07-06 — "more olive on
-            mobile"): the horizontal branch garlands the band's top-right
-            padding strip; desktop (≥1001px) keeps its two-branch layout. */}
+        {/* Mobile-only bookends (owner, 2026-07-06): the small olive sprig
+            sits once at the top of the band and once, mirrored, at the very
+            bottom — the desktop corner branches are hidden on mobile. */}
         <Image
           src={ART_SOURCES["ph-art-branch-3"]}
           alt=""
           aria-hidden="true"
           width={1200}
           height={317}
-          sizes="430px"
-          className="home-proof-branch home-proof-branch--top"
+          sizes="240px"
+          className="home-proof-branch home-proof-branch--m-top"
+        />
+        <Image
+          src={ART_SOURCES["ph-art-branch-3"]}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={317}
+          sizes="240px"
+          className="home-proof-branch home-proof-branch--m-bottom"
         />
         <Reveal className="ph-container home-proof-inner">
           <dl className="home-proof-strip">
@@ -153,19 +162,9 @@ export default function HomePage() {
               </div>
             ))}
           </dl>
-          {/* Desktop: an olive sprig flanks the caption on each side (owner,
-              2026-07-06); on narrow layouts they yield to the band's three
-              edge ornaments. */}
+          {/* The caption is a single centered serif line (owner, 2026-07-06 —
+              the desktop flanking sprigs were removed). */}
           <div className="home-proof-caption">
-            <Image
-              src={ART_SOURCES["ph-art-branch-3"]}
-              alt=""
-              aria-hidden="true"
-              width={1200}
-              height={317}
-              sizes="140px"
-              className="home-proof-caption-branch is-left"
-            />
             <div className="home-proof-caption-text">
               <h2 id="home-proof-title">A complete system, not a binder.</h2>{" "}
               <p className="ph-lead">
@@ -173,15 +172,6 @@ export default function HomePage() {
                 your progress saved as you build.
               </p>
             </div>
-            <Image
-              src={ART_SOURCES["ph-art-branch-3"]}
-              alt=""
-              aria-hidden="true"
-              width={1200}
-              height={317}
-              sizes="140px"
-              className="home-proof-caption-branch"
-            />
           </div>
         </Reveal>
       </section>
