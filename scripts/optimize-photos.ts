@@ -21,6 +21,11 @@
  *     master (same checkerboard-preview export style). Kept as a SEPARATE master so
  *     re-running never regenerates ph-logo-mark.png from different source dimensions
  *     (brand-logo.tsx hard-codes the shipped mark's aspect ratio).
+ *   docs/source-assets/design-refs/v3/logo/logo-lockup-white-master.png -> the owner's
+ *     white-text lockup (reference ONLY): its white wordmark sits on the light
+ *     checkerboard, so no color/luminance key can separate them. The shipped dark
+ *     lockup below derives from the COLOR master instead — charcoal -> white,
+ *     copper kept — reproducing this reference with identical geometry.
  *
  * Masters absent on disk are SKIPPED with a note (a fresh clone usually carries only
  * the current sprint's masters) — already-committed outputs stay untouched.
@@ -30,8 +35,9 @@
  *   public/assets/art/ph-art-*.png        — keyed, trimmed, transparent decorative art (DR2)
  *   public/assets/logo/ph-logo-mark.png   — copper arch mark only (™ + text excluded), transparent
  *   public/assets/logo/ph-logo-lockup.png — the full lockup (arch + wordmark + tagline + ™),
- *     keyed + trimmed, ≤900px wide — consumed by the light-chrome BrandLogo (DR2.1); the
- *     dark footer + [data-overlay] header keep the mark + real-text lockup
+ *     keyed + trimmed, ≤900px wide — the light-chrome BrandLogo (DR2.1)
+ *   public/assets/logo/ph-logo-lockup-dark.png — the same lockup with the charcoal
+ *     text turned white (copper arch kept) — the dark footer + [data-overlay] header
  *
  * Usage:
  *   pnpm tsx scripts/optimize-photos.ts
@@ -302,8 +308,22 @@ async function main(): Promise<void> {
     const raw = await keyOutBackground(path.join(SRC, "logo", "logo-lockup-master.png"));
     const lockupBox = bbox(raw.data, raw.width, raw.height, (_r, _g, _b, a) => a > 8);
     await writeLogoCrop(raw, lockupBox, 8, "ph-logo-lockup.png", false, 900);
+    // Dark-chrome variant (owner white master as reference — see the source
+    // note above): charcoal/gray pixels -> white, copper stays copper; alpha
+    // untouched so the un-blended edges stay smooth on dark surfaces. Same
+    // bbox -> both lockups ship pixel-registered at identical dimensions.
+    const rawDark = { data: Buffer.from(raw.data), width: raw.width, height: raw.height };
+    for (let i = 0; i < rawDark.data.length; i += 4) {
+      const d = rawDark.data;
+      if (d[i + 3] > 0 && !(d[i] - d[i + 2] > 30 && d[i] > 110)) {
+        d[i] = 255;
+        d[i + 1] = 255;
+        d[i + 2] = 255;
+      }
+    }
+    await writeLogoCrop(rawDark, lockupBox, 8, "ph-logo-lockup-dark.png", false, 900);
   } else {
-    console.log("skip   ph-logo-lockup.png (master absent)");
+    console.log("skip   ph-logo-lockup.png + ph-logo-lockup-dark.png (master absent)");
   }
 
   console.log("done.");

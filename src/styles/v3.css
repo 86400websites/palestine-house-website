@@ -172,11 +172,12 @@
   height: 20px;
 }
 
-/* --- v3 brand lockup (brand-logo.tsx) — two renderings, one per surface -----
-   DR2.1-2 (owner decision 2026-07-06): light chrome shows the owner's full
-   lockup PNG; dark surfaces (footer + [data-overlay] header) show the arch
-   mark + real-text wordmark/tagline recolored cream — the PNG's charcoal
-   text would vanish there. */
+/* --- v3 brand lockup (brand-logo.tsx) — the owner's logo PNGs, one per
+   surface (DR2.1-2 + owner fix 2026-07-06 "the actual logo, not text"):
+   color lockup on light chrome · white-text lockup on the dark footer +
+   [data-overlay] header · arch mark alone ≤420px (DR1-10). The dark img
+   carries BOTH lockup classes, so surface rules hide .phx-brand-lockup and
+   re-show the --dark one right after (same specificity, later wins). */
 .phx-brand {
   display: inline-flex;
   align-items: center;
@@ -189,51 +190,15 @@
 .phx-brand-lockup {
   height: auto;
 }
-.phx-brand-text {
+.phx-brand-lockup--dark,
+.phx-brand-mark {
   display: none;
-  align-items: center;
-  gap: 0.625rem;
-}
-.phx-brand-col {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.22rem;
-}
-.phx-brand-word {
-  font-family: var(--font-display);
-  font-weight: var(--weight-semibold);
-  font-size: 1.18rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 1;
-  white-space: nowrap;
-  color: var(--char-900);
-  transition: color var(--duration) var(--ease-out);
-}
-.phx-brand-tagline {
-  font-family: var(--font-body);
-  font-weight: var(--weight-medium);
-  font-size: 0.56rem;
-  letter-spacing: 0.31em;
-  text-transform: uppercase;
-  line-height: 1;
-  white-space: nowrap;
-  /* the master's tagline reads a step lighter than the wordmark */
-  color: color-mix(in srgb, var(--char-900) 72%, var(--cream-50));
-  transition: color var(--duration) var(--ease-out);
 }
 .phx-footer .phx-brand-lockup {
   display: none;
 }
-.phx-footer .phx-brand-text {
-  display: inline-flex;
-}
-.phx-footer .phx-brand-word {
-  color: var(--cream-50);
-}
-.phx-footer .phx-brand-tagline {
-  color: var(--cream-100);
+.phx-footer .phx-brand-lockup--dark {
+  display: block;
 }
 
 /* --- Header overlay state (photo heroes; site-header.tsx sets data-overlay
@@ -247,14 +212,8 @@
 .phx-header[data-overlay] .phx-brand-lockup {
   display: none;
 }
-.phx-header[data-overlay] .phx-brand-text {
-  display: inline-flex;
-}
-.phx-header[data-overlay] .phx-brand-word {
-  color: var(--cream-50);
-}
-.phx-header[data-overlay] .phx-brand-tagline {
-  color: var(--cream-100);
+.phx-header[data-overlay] .phx-brand-lockup--dark {
+  display: block;
 }
 .phx-header[data-overlay] .phx-nav-link,
 .phx-header[data-overlay] .phx-signin {
@@ -864,20 +823,17 @@
   .v3-hero-ctas > * {
     width: 100%;
   }
-  /* 320-360px: the nowrap wordmark + Apply + hamburger don't fit — keep the
-     copper mark only (the brand link keeps its aria-label) and tighten gaps
-     so nothing overflows the viewport (DR1-10). DR2.1-2: the full lockup PNG
-     (~114px wide) is likewise too wide here, so BOTH header states fall back
-     to the text variant with its word/tagline hidden = mark-only. */
-  .phx-brand-lockup {
+  /* 320-360px: the full lockup (~114px wide) + Apply + hamburger don't fit —
+     keep the copper mark alone (the brand link keeps its aria-label) and
+     tighten gaps so nothing overflows the viewport (DR1-10 / DR2.1-2). The
+     :is() lifts the hide to (0,3,0) so it outranks the overlay/footer
+     --dark show rules above at every surface; this block sits later in the
+     file, so the tie breaks this way. */
+  :is(.phx-header, .phx-header[data-overlay], .phx-footer) .phx-brand-lockup {
     display: none;
   }
-  .phx-brand-text {
-    display: inline-flex;
-  }
-  .phx-brand-word,
-  .phx-brand-tagline {
-    display: none;
+  .phx-brand-mark {
+    display: block;
   }
   .phx-header-inner,
   .phx-actions {

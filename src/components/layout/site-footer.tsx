@@ -27,7 +27,9 @@ export function SiteFooter() {
 
       <div className="ph-container phx-footer-grid">
         <div className="phx-footer-col phx-footer-brand">
-          <BrandLogo height={30} />
+          {/* DR2.1-2: the white-text lockup PNG — taller than the old 30px
+              mark+word row because the lockup stacks arch/word/tagline. */}
+          <BrandLogo height={30} lockupHeight={64} />
           <p>A fixed address for Palestinian culture, in every city.</p>
           <p className="phx-footer-arabic" lang="ar" dir="rtl">
             بيت فلسطين في كل مدينة

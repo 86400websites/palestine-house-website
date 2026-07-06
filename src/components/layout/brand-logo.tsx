@@ -1,27 +1,27 @@
 import Link from "next/link";
 import Image from "next/image";
 
-/* v3 public-chrome brand lockup — two renderings of the owner's logo, switched
-   purely by chrome state in v3.css (DR2.1-2, owner decision 2026-07-06):
-   - Light chrome (solid warm header): the full lockup PNG exactly as supplied
-     (copper arch + "PALESTINE HOUSE" + "OUR CULTURE EMBASSY" + ™).
-   - Dark chrome (charcoal/moss footer + the [data-overlay] photo header): the
-     PNG's charcoal text would disappear there, so the same lockup renders as
-     the arch mark PNG + REAL TEXT (wordmark + tagline) that recolors to cream
-     through .phx-brand-word / .phx-brand-tagline and stays crisp at any DPI.
-   Both variants are always in the DOM; .phx-brand-lockup / .phx-brand-text
-   pick one per surface (plus the header's noscript fallback and the ≤420px
-   mark-only rule — DR1-10). The ™ lives only in the PNG, not the text variant.
+/* v3 public-chrome brand lockup — the owner's actual logo PNGs on every
+   surface, switched purely by chrome state in v3.css (DR2.1-2 + owner fix
+   2026-07-06: "use the actual logo instead of texts"):
+   - Light chrome (solid warm header): the color lockup (charcoal wordmark).
+   - Dark chrome (moss footer + the [data-overlay] photo header): the
+     white-text lockup (copper arch kept), derived pixel-registered from the
+     same master — see scripts/optimize-photos.ts.
+   - ≤420px: both header states fall back to the copper arch mark alone —
+     the full lockup + Apply + hamburger don't fit (DR1-10).
+   All images are decorative (aria-hidden): the header link names itself via
+   aria-label; the linkless footer instance renders an sr-only brand line.
    Public shell only — the gated workspace/admin shells keep layout/logo.tsx. */
 
 const MARK_RATIO = 289 / 303; // ph-logo-mark.png intrinsic aspect
-const LOCKUP_RATIO = 900 / 422; // ph-logo-lockup.png intrinsic aspect
+const LOCKUP_RATIO = 900 / 422; // ph-logo-lockup(-dark).png intrinsic aspect
 
 type BrandLogoProps = {
   href?: string;
-  /** Mark height in px (text variant); the wordmark scales through CSS. */
+  /** Arch-mark height in px (the ≤420px fallback). */
   height?: number;
-  /** Lockup height in px (light-chrome variant). */
+  /** Lockup height in px (both PNG variants). */
   lockupHeight?: number;
   /** Only the header instance is above the fold — the footer one must not
    *  issue an eager high-priority fetch that competes with hero LCP. */
@@ -34,6 +34,7 @@ export function BrandLogo({
   lockupHeight = 54,
   priority,
 }: BrandLogoProps) {
+  const lockupWidth = Math.round(lockupHeight * LOCKUP_RATIO);
   const content = (
     <>
       <Image
@@ -41,24 +42,29 @@ export function BrandLogo({
         alt=""
         aria-hidden="true"
         className="phx-brand-lockup"
-        width={Math.round(lockupHeight * LOCKUP_RATIO)}
+        width={lockupWidth}
         height={lockupHeight}
         priority={priority}
       />
-      <span className="phx-brand-text">
-        <Image
-          src="/assets/logo/ph-logo-mark.png"
-          alt=""
-          aria-hidden="true"
-          width={Math.round(height * MARK_RATIO)}
-          height={height}
-          priority={priority}
-        />
-        <span className="phx-brand-col">
-          <span className="phx-brand-word">Palestine House</span>
-          <span className="phx-brand-tagline">Our Culture Embassy</span>
-        </span>
-      </span>
+      <Image
+        src="/assets/logo/ph-logo-lockup-dark.png"
+        alt=""
+        aria-hidden="true"
+        className="phx-brand-lockup phx-brand-lockup--dark"
+        width={lockupWidth}
+        height={lockupHeight}
+        priority={priority}
+      />
+      <Image
+        src="/assets/logo/ph-logo-mark.png"
+        alt=""
+        aria-hidden="true"
+        className="phx-brand-mark"
+        width={Math.round(height * MARK_RATIO)}
+        height={height}
+        priority={priority}
+      />
+      {!href && <span className="sr-only">Palestine House — Our Culture Embassy</span>}
     </>
   );
 
