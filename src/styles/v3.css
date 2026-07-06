@@ -592,7 +592,9 @@
    photo — same moss as the panel, so the two read as one shape. */
 .v3-stage-num {
   position: absolute;
-  top: 0;
+  /* 1px down = 1px overlap into the same-color panel — kills the sub-pixel
+     photo hairline at fractional zoom levels (DR2-7 exit-gate review). */
+  top: 1px;
   left: 50%;
   transform: translate(-50%, -100%);
   display: grid;

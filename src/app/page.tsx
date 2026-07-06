@@ -149,7 +149,13 @@ export default function HomePage() {
       {/* 5 — A complete system, not a binder (DR2-4: olive proof band —
           stats over the centered caption, olive-branch ornaments clipped at
           the band edges, per the owner's proof-band mockup) */}
-      <section className="ph-section-lg ph-section-dark ph-section-olive home-proof">
+      {/* aria-labelledby: the caption h2 sits AFTER the stats in the DOM
+          (mockup layout) — naming the section keeps screen-reader users
+          oriented before the bare numbers (DR2-7 exit-gate review). */}
+      <section
+        className="ph-section-lg ph-section-dark ph-section-olive home-proof"
+        aria-labelledby="home-proof-title"
+      >
         <Image
           src={ART_SOURCES["ph-art-branch-4"]}
           alt=""
@@ -178,7 +184,7 @@ export default function HomePage() {
             ))}
           </dl>
           <div className="home-proof-caption">
-            <h2>A complete system, not a binder.</h2>{" "}
+            <h2 id="home-proof-title">A complete system, not a binder.</h2>{" "}
             <p className="ph-lead">
               Everything it takes to open and run a House, in one place, with
               your progress saved as you build.

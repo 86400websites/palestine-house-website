@@ -655,8 +655,10 @@
   margin: 0;
 }
 /* DR2-5 — Arabic brand line. Inter carries no Arabic glyphs; the stack's
-   system fallback renders the script (no new font dependency). */
-.phx-footer-arabic {
+   system fallback renders the script (no new font dependency). The
+   .phx-footer-brand prefix outranks the `.phx-footer-brand p` line-height
+   above (DR2-7 exit-gate review). */
+.phx-footer-brand .phx-footer-arabic {
   font-size: var(--text-lg);
   line-height: 1.4;
 }
@@ -690,7 +692,9 @@
   background: rgba(255, 255, 255, 0.16);
 }
 .phx-footer-copyright {
-  color: rgba(255, 255, 255, 0.45);
+  /* 0.55 alpha = 5.95:1 on moss-950 — 0.45 sat at 4.42:1, under the 4.5 AA
+     bar for 14px text (DR2-7 exit-gate review). */
+  color: rgba(255, 255, 255, 0.55);
   font: var(--weight-regular) var(--text-sm) / 1 var(--font-body);
 }
 .phx-footer-sprig {

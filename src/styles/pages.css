@@ -1944,7 +1944,10 @@
   width: clamp(90px, 12vw, 190px);
   left: 0;
   top: 50%;
-  transform: translate(-28%, -50%);
+  /* -40%, and hidden ≤1000px below: keeps the visible tip clear of the
+     first stat label at every width the band renders it (DR2-7 exit-gate
+     review — both the a11y and layout lenses flagged the -28% graze). */
+  transform: translate(-40%, -50%);
 }
 .home-proof-branch--right {
   width: clamp(110px, 14vw, 230px);
@@ -2023,9 +2026,12 @@
   .home-proof-item:last-child {
     grid-column: 1 / -1;
   }
-  /* The branch ornaments sit behind the stat text once the grid narrows —
-     decorative only, so they drop rather than fight the numbers for
-     legibility (DR2-6 mobile pass). */
+}
+/* The branch ornaments sit behind the stat text once the layout narrows —
+   decorative only, so they drop rather than fight the numbers for
+   legibility. 1000px, not 860: below that the left branch's tip can still
+   graze the first stat label (DR2-7 exit-gate review, both lenses). */
+@container page (max-width: 1000px) {
   .home-proof-branch {
     display: none;
   }

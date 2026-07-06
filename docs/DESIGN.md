@@ -46,14 +46,19 @@ The public shell's rooted, warm palette: **cream surfaces, warm charcoal depth, 
 | Page background | `--cream-50` | `#FAF6EE` | Warm cream page |
 | Panels / secondary button | `--cream-100` | `#F6EFE4` | Culture-split panel, quiet CTA |
 | Muted washes | `--cream-200` | `#EFE6D6` | Alt sections, hovers |
-| Text + dark sections / footer | `--char-900` | `#2A241E` | White on it 14.9:1 |
+| Text + dark sections | `--char-900` | `#2A241E` | White on it 14.9:1 *(the footer moved to `--moss-950`, DR2)* |
 | Photo scrims | `--char-950` | `#201A15` | Hero gradient base |
 | Primary action (Apply) | `--olive-600` / hover `--olive-700` | `#5F6E49` / `#556340` | White text 5.5:1 / 6.5:1 |
 | Olive tint | `--olive-100` | `#EAEDE2` | Active-nav wash |
 | Copper accent | `--copper-700` on cream · `--copper-500` display · `--copper-300` on dark | `#8F5A2E` / `#B0713D` / `#C89A6A` | Eyebrows/links 5.0:1 · logo/numerals (large) · dark-section numerals 6.5:1 |
 | On-dark accent | `--sage-300` | `#A9B58E` | Nav pill text, dark eyebrows (7.1:1) |
+| Moss stage plates *(DR2)* | `--moss-700` | `#393C29` | Stage-card panels; white titles + cream body |
+| Olive proof band *(DR2)* | `--moss-900` | `#20230E` | `.ph-section-olive` surface; copper numerals |
+| Footer green-black *(DR2)* | `--moss-950` | `#1B1E14` | The inset footer card |
 | Warm hairline | `--line-warm` | `#E7DFCF` | Borders/inputs on cream |
 | Status | unchanged | — | Success/warning/error tokens carry over |
+
+**DR2 additions (2026-07-06):** the three moss greens were sampled from the owner's DR2 mockups (stages plates · proof band · footer masters in `docs/source-assets/design-refs/v3/`) — **additive only**, no DR1 value changed; the mockups' warm-sand numerals resolve to the existing `--copper-300`, so no sand token was added. The owner's brand-palette poster (`refs/palette-poster.png`) is recorded as **reference, not a retune** — its near-duplicate values (`#F6F1E7` cream · `#2B241C` charcoal · `#B4552D` terracotta …) stay deliberately unadopted (owner decision, 2026-07-06).
 
 Scoping rule: **never change a legacy `:root` value for a v3 need** — add a v3 raw token and remap the semantic alias inside the `.ph-page` scope. The workspace consumes the same aliases at their legacy values.
 
@@ -140,14 +145,14 @@ Port the scale from `design-system/tokens/typography.css`. Known anchors from th
 - Editorial asymmetry where it earns its place — artwork in negative space (e.g. the Experience hero headline sits in the artwork's negative space), offset vignettes, the day/night paired panels. Coherent, never chaotic.
 - Every scroll reveals something — but **calmly**: a new section treatment, not a new gimmick.
 - Responsive from **320px** up; tap targets ≥ 44×44px.
-- **The header and footer are one locked system** (`src/components/layout/site-header.tsx` / `site-footer.tsx` + the `.phx-*` CSS): identical on every public page, never redesigned per page. v3 (DR1): the header is warm cream glass with the copper-arch `BrandLogo`, and carries a sanctioned **transparent overlay state** on photo-hero routes (`OVERLAY_ROUTES` in site-header.tsx — currently `/`) that solidifies on scroll or when any menu opens — one system with two states, not a per-page redesign. The footer is warm charcoal with copper column titles: brand block, four link columns — Explore (The Model · Experience · Live Programming) · Bring a House (Why bring one · Our support) · Account (Sign in) · Legal (Privacy · Terms · Contact) — the Apply band, and the tagline. *(The booklet lead-magnet block left the footer in the pre-S13 sprint — it lives only in the home-hero dialog.)*
+- **The header and footer are one locked system** (`src/components/layout/site-header.tsx` / `site-footer.tsx` + the `.phx-*` CSS): identical on every public page, never redesigned per page. v3 (DR1): the header is warm cream glass with the copper-arch `BrandLogo`, and carries a sanctioned **transparent overlay state** on photo-hero routes (`OVERLAY_ROUTES` in site-header.tsx — the six photo-hero routes since DR1-9) that solidifies on scroll or when any menu opens — one system with two states, not a per-page redesign. The footer (v3 · DR2-5, owner mockup) is a **moss green-black (`--moss-950`) inset rounded card** — the cream page shows around it — holding the Apply band, the brand block (tagline + the Arabic line بيت فلسطين في كل مدينة, `lang="ar" dir="rtl"`, system-font fallback), four link columns with white caps titles — Explore (The Model · Experience · Live Programming) · Bring a House (Our Support · Why bring one.) · Account (Sign In) · Legal (Terms of Use · Privacy Policy · Contact) — and the centered tagline between hairlines with the crossed-olive sprig (the sprig drops and the inset slims at ≤560px). *(The booklet lead-magnet block left the footer in the pre-S13 sprint — it lives only in the home-hero dialog.)*
 
 ## 6. Component rules
 
 Build on shadcn/ui primitives themed via §3 — not one-off overrides.
 
 - **Buttons:** on the public shell (v3), *primary* = olive (`--olive-600`, the Apply CTA) and *secondary/outline* = the quiet cream button (`--cream-100`, borderless) — both restyled purely via the scoped tokens/CSS, `button.tsx` untouched; the opt-in `.v3-cta` modifier (uppercase, tracked, small) is for the hero + footer Apply CTAs only, never blanket. In the workspace, *primary* stays heritage green. Shape per the design-system radius (8px default, 12px cards, 16px feature cards) — restrained, never pill.
-- **Nav tooltip (project-specific):** each of the four nav labels renders a styled hover one-liner via a single reusable Tooltip component — **never raw `title` attributes**. On mobile, the one-liner shows as a sub-label inside the shadcn `Sheet` menu. Copy owned by `/docs/page-copy/00-global/navigation-copy.md`.
+- **Nav tooltip (project-specific):** each of the four nav labels renders the **same short sub-label the mobile `Sheet` menu uses** — one simple line on hover, identical wording on every device (owner fix, 2026-07-06; the long `navigation-copy.md` one-liners are retired from the hover) — via a single reusable Tooltip component, **never raw `title` attributes**.
 - **Forms (react-hook-form + zod):** light surface, 1px warm border; focus ring uses `--ring`; error = colored border **and** text message (never color alone); labels above inputs. The Apply form is the flagship form — calm, single column, dignified.
 - **Cards / surfaces:** consistent radius, subtle warm border, gentle lift on hover (≤1.02). Session cards (Live Programming) are one shared component reused on `/live` and the Experience live strip — never two implementations.
 - **Status badges (Live now / Upcoming / Recording):** color + text, never color alone.
@@ -203,7 +208,7 @@ Register parameters (locked): easing slow ease-out `[0.22, 1, 0.36, 1]`; reveal 
 
 ## 12. Per-page art notes (public shell)
 
-- **Home is the v3 benchmark (DR1, 2026-07-02):** full-bleed tatreez photo hero (transparent header, scrim, Apply + "Explore the model" CTAs, mini-features band) → cream/photo culture split (arch-café) → the six-photo "Inside a Palestine House" auto-drift marquee → copper-numeral stages → charcoal proof strip → the platform split on the mirrored oud-night photo band. New DR-series pages measure against it. *(The booklet lead magnet and the nav mega-menus were removed at DR1-8 — owner decisions, §4 D-DR1.)*
+- **Home is the v3 benchmark (DR1, 2026-07-02 · stages/proof finalized DR2, 2026-07-06):** full-bleed tatreez photo hero (transparent header, scrim, Apply + "Explore the model" CTAs, mini-features band) → cream/photo culture split (arch-café) → the six-photo "Inside a Palestine House" auto-drift marquee → the **moss photo-card stages** (arch-notch number plates + the Al-Aqsa line-art beside the grid, DR2-3) → the **olive proof band** (branch ornaments, stats over the flowing caption, DR2-4) → the platform split on the film-screening photo band. New DR-series pages measure against it; the DR2 mockups live in `docs/source-assets/design-refs/v3/refs/`. *(The booklet lead magnet and the nav mega-menus were removed at DR1-8 — owner decisions, §4 D-DR1.)*
 - **All other public pages are in the intended intermediate state:** old layouts + legacy illustrations rendered in v3 colors/chrome, awaiting their DR2+ redesigns — don't "fix" them backward, and don't redesign them ad hoc outside a sprint.
 - **Experience** was the most artwork-heavy page (hero artwork, day/night vignettes, five-pillar thumbnails, live strip) — its v3 pass should lead with the strongest photography.
 - **Bring a House** is the densest public page — pace it with generous whitespace when its v3 pass comes.
