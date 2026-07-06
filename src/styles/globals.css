@@ -584,9 +584,14 @@
 
 /* --- Footer ---------------------------------------------------------------- */
 .phx-footer {
-  /* v3 (DR1-3): warm charcoal (was ink-900) — public chrome only. */
-  background: var(--char-900);
+  /* v3 (DR2-5): moss green-black inset card per the owner's footer mockup —
+     the cream page shows around it (public chrome only; was DR1 charcoal). */
+  position: relative;
+  overflow: hidden;
+  background: var(--moss-950);
   color: var(--white);
+  margin: var(--space-4);
+  border-radius: var(--radius-lg);
 }
 .phx-footer a {
   color: rgba(255, 255, 255, 0.8);
@@ -635,8 +640,8 @@
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  /* v3 (DR1-3): copper column titles on the charcoal footer (≈6.5:1). */
-  color: var(--copper-300);
+  /* v3 (DR2-5): white caps titles on the moss footer, per the mockup. */
+  color: var(--white);
 }
 .phx-footer-col a {
   font: var(--weight-regular) var(--text-base) / 1.3 var(--font-body);
@@ -649,25 +654,53 @@
   line-height: var(--leading-normal);
   margin: 0;
 }
+/* DR2-5 — Arabic brand line. Inter carries no Arabic glyphs; the stack's
+   system fallback renders the script (no new font dependency). */
+.phx-footer-arabic {
+  font-size: var(--text-lg);
+  line-height: 1.4;
+}
+/* DR2-5 — the bottom line: centered tagline flanked by hairlines (the old
+   full-width top border is replaced by the flanking rules), copyright
+   beneath, olive sprig at the right. */
 .phx-footer-bottom {
-  border-top: var(--border-width) solid rgba(255, 255, 255, 0.12);
+  position: relative;
 }
 .phx-footer-bottom-inner {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  text-align: center;
   padding-block: var(--space-6);
 }
 .phx-footer-tagline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  width: 100%;
   font-family: var(--font-display);
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.85);
+}
+.phx-footer-tagline::before,
+.phx-footer-tagline::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.16);
 }
 .phx-footer-copyright {
   color: rgba(255, 255, 255, 0.45);
   font: var(--weight-regular) var(--text-sm) / 1 var(--font-body);
+}
+.phx-footer-sprig {
+  position: absolute;
+  right: var(--space-6);
+  bottom: var(--space-5);
+  width: 72px;
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 @container page (max-width: 980px) {
