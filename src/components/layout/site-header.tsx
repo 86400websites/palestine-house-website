@@ -120,7 +120,7 @@ export function SiteHeader() {
           hero, so no-script clients get the solid warm chrome instead. */}
       {overlayRoute && (
         <noscript>
-          <style>{`.phx-header[data-overlay]{background:rgba(250,246,238,.92);border-bottom-color:var(--line-warm);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.phx-header[data-overlay] .phx-nav-link,.phx-header[data-overlay] .phx-signin{color:var(--char-900)}.phx-header[data-overlay] .phx-brand-lockup{display:block}.phx-header[data-overlay] .phx-brand-lockup--dark{display:none}@container page (max-width:420px){.phx-header[data-overlay] .phx-brand-lockup{display:none}}`}</style>
+          <style>{`.phx-header[data-overlay]{background:rgba(250,246,238,.92);border-bottom-color:var(--line-warm);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.phx-header[data-overlay] .phx-nav-link,.phx-header[data-overlay] .phx-signin{color:var(--char-900)}.phx-header[data-overlay] img.phx-brand-lockup{display:block}.phx-header[data-overlay] img.phx-brand-lockup--dark{display:none}@container page (max-width:420px){.phx-header[data-overlay] img.phx-brand-lockup{display:none}}`}</style>
         </noscript>
       )}
       <div className="ph-container phx-header-inner">

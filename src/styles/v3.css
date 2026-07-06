@@ -190,14 +190,17 @@
 .phx-brand-lockup {
   height: auto;
 }
-.phx-brand-lockup--dark,
-.phx-brand-mark {
+/* img-qualified (0,1,1) — the `.phx-brand img` block rule above ties on
+   specificity, so these must match it and win by order; every show/hide
+   below keeps the img prefix for the same reason. */
+img.phx-brand-lockup--dark,
+img.phx-brand-mark {
   display: none;
 }
-.phx-footer .phx-brand-lockup {
+.phx-footer img.phx-brand-lockup {
   display: none;
 }
-.phx-footer .phx-brand-lockup--dark {
+.phx-footer img.phx-brand-lockup--dark {
   display: block;
 }
 
@@ -209,10 +212,10 @@
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-.phx-header[data-overlay] .phx-brand-lockup {
+.phx-header[data-overlay] img.phx-brand-lockup {
   display: none;
 }
-.phx-header[data-overlay] .phx-brand-lockup--dark {
+.phx-header[data-overlay] img.phx-brand-lockup--dark {
   display: block;
 }
 .phx-header[data-overlay] .phx-nav-link,
@@ -829,10 +832,10 @@
      :is() lifts the hide to (0,3,0) so it outranks the overlay/footer
      --dark show rules above at every surface; this block sits later in the
      file, so the tie breaks this way. */
-  :is(.phx-header, .phx-header[data-overlay], .phx-footer) .phx-brand-lockup {
+  :is(.phx-header, .phx-header[data-overlay], .phx-footer) img.phx-brand-lockup {
     display: none;
   }
-  .phx-brand-mark {
+  img.phx-brand-mark {
     display: block;
   }
   .phx-header-inner,
