@@ -2018,6 +2018,17 @@
   .home-proof-item + .home-proof-item::before {
     content: none;
   }
+  /* 2-2-1 flow: the fifth stat centers on its own full row instead of
+     hanging left (DR2-6 mobile pass). */
+  .home-proof-item:last-child {
+    grid-column: 1 / -1;
+  }
+  /* The branch ornaments sit behind the stat text once the grid narrows —
+     decorative only, so they drop rather than fight the numbers for
+     legibility (DR2-6 mobile pass). */
+  .home-proof-branch {
+    display: none;
+  }
 }
 
 /* --- 5 · The work is real / A private platform for partners ---------------- */

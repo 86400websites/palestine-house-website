@@ -713,6 +713,15 @@
     grid-template-columns: 1fr;
     gap: var(--space-8);
   }
+  /* DR2-6 mobile pass: a slimmer inset keeps ~2rem of content width on
+     320px phones; the sprig drops before it can crowd the centered
+     tagline/copyright block. */
+  .phx-footer {
+    margin: var(--space-2);
+  }
+  .phx-footer-sprig {
+    display: none;
+  }
 }
 
 /* ---------------------------------------------------------------------------
