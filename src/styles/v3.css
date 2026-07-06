@@ -172,7 +172,12 @@
   height: 20px;
 }
 
-/* --- v3 brand lockup (brand-logo.tsx) — copper arch PNG + real-text word --- */
+/* --- v3 brand lockup (brand-logo.tsx) — the owner's logo PNGs, one per
+   surface (DR2.1-2 + owner fix 2026-07-06 "the actual logo, not text"):
+   color lockup on light chrome · white-text lockup on the dark footer +
+   [data-overlay] header · arch mark alone ≤420px (DR1-10). The dark img
+   carries BOTH lockup classes, so surface rules hide .phx-brand-lockup and
+   re-show the --dark one right after (same specificity, later wins). */
 .phx-brand {
   display: inline-flex;
   align-items: center;
@@ -182,18 +187,21 @@
 .phx-brand img {
   display: block;
 }
-.phx-brand-word {
-  font-family: var(--font-display);
-  font-weight: var(--weight-semibold);
-  font-size: 1.22rem;
-  letter-spacing: -0.01em;
-  line-height: 1;
-  white-space: nowrap;
-  color: var(--char-900);
-  transition: color var(--duration) var(--ease-out);
+.phx-brand-lockup {
+  height: auto;
 }
-.phx-footer .phx-brand-word {
-  color: var(--cream-50);
+/* img-qualified (0,1,1) — the `.phx-brand img` block rule above ties on
+   specificity, so these must match it and win by order; every show/hide
+   below keeps the img prefix for the same reason. */
+img.phx-brand-lockup--dark,
+img.phx-brand-mark {
+  display: none;
+}
+.phx-footer img.phx-brand-lockup {
+  display: none;
+}
+.phx-footer img.phx-brand-lockup--dark {
+  display: block;
 }
 
 /* --- Header overlay state (photo heroes; site-header.tsx sets data-overlay
@@ -204,8 +212,11 @@
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-.phx-header[data-overlay] .phx-brand-word {
-  color: var(--cream-50);
+.phx-header[data-overlay] img.phx-brand-lockup {
+  display: none;
+}
+.phx-header[data-overlay] img.phx-brand-lockup--dark {
+  display: block;
 }
 .phx-header[data-overlay] .phx-nav-link,
 .phx-header[data-overlay] .phx-signin {
@@ -815,11 +826,21 @@
   .v3-hero-ctas > * {
     width: 100%;
   }
-  /* 320-360px: the nowrap wordmark + Apply + hamburger don't fit — keep the
-     copper mark (the brand link keeps its aria-label) and tighten gaps so
-     nothing overflows the viewport (DR1-10). */
-  .phx-brand-word {
+  /* 320-360px: the full lockup (~114px wide) + Apply + hamburger don't fit —
+     keep the copper mark alone (the brand link keeps its aria-label) and
+     tighten gaps so nothing overflows the viewport (DR1-10 / DR2.1-2). Both
+     lockup classes are hidden (the dark img carries both), and the double
+     img.phx-brand-lockup.phx-brand-lockup--dark selector is (0,4,1) — it
+     genuinely outranks the overlay show rule .phx-header[data-overlay]
+     img.phx-brand-lockup--dark (0,3,1), so the mark-only fallback holds by
+     specificity, not by source order (DR2.1-6 exit-gate review). */
+  :is(.phx-header, .phx-header[data-overlay], .phx-footer) img.phx-brand-lockup,
+  :is(.phx-header, .phx-header[data-overlay], .phx-footer)
+    img.phx-brand-lockup.phx-brand-lockup--dark {
     display: none;
+  }
+  img.phx-brand-mark {
+    display: block;
   }
   .phx-header-inner,
   .phx-actions {

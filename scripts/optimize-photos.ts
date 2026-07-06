@@ -17,6 +17,15 @@
  *     BAKED INTO the pixels (3-channel RGB, no alpha). This script keys the light
  *     checkerboard background out to real alpha, un-blends the antialiased edges,
  *     then crops the full lockup (trim) and the copper arch mark (saturation bbox).
+ *   docs/source-assets/design-refs/v3/logo/logo-lockup-master.png -> the DR2.1 full-lockup
+ *     master (same checkerboard-preview export style). Kept as a SEPARATE master so
+ *     re-running never regenerates ph-logo-mark.png from different source dimensions
+ *     (brand-logo.tsx hard-codes the shipped mark's aspect ratio).
+ *   docs/source-assets/design-refs/v3/logo/logo-lockup-white-master.png -> the owner's
+ *     white-text lockup (reference ONLY): its white wordmark sits on the light
+ *     checkerboard, so no color/luminance key can separate them. The shipped dark
+ *     lockup below derives from the COLOR master instead — charcoal -> white,
+ *     copper kept — reproducing this reference with identical geometry.
  *
  * Masters absent on disk are SKIPPED with a note (a fresh clone usually carries only
  * the current sprint's masters) — already-committed outputs stay untouched.
@@ -25,8 +34,10 @@
  *   public/assets/photos/ph-photo-*.jpg   — progressive mozjpeg, ≤ ~2000px, target < 500 KB each
  *   public/assets/art/ph-art-*.png        — keyed, trimmed, transparent decorative art (DR2)
  *   public/assets/logo/ph-logo-mark.png   — copper arch mark only (™ + text excluded), transparent
- *     (no full-lockup output — the chrome renders the wordmark as real HTML text and the
- *      OG image composites the mark; add a lockup crop only when a surface consumes it)
+ *   public/assets/logo/ph-logo-lockup.png — the full lockup (arch + wordmark + tagline + ™),
+ *     keyed + trimmed, ≤900px wide — the light-chrome BrandLogo (DR2.1)
+ *   public/assets/logo/ph-logo-lockup-dark.png — the same lockup with the charcoal
+ *     text turned white (copper arch kept) — the dark footer + [data-overlay] header
  *
  * Usage:
  *   pnpm tsx scripts/optimize-photos.ts
@@ -181,8 +192,7 @@ async function encodeArt(entry: (typeof ART)[number]): Promise<void> {
  * logo screenshot into real alpha, and un-blend edge pixels against the light bg so
  * the mark stays clean on dark surfaces. Returns raw RGBA + dims.
  */
-async function keyOutBackground(): Promise<{ data: Buffer; width: number; height: number }> {
-  const srcPath = path.join(SRC, "logo", "logo-master.png");
+async function keyOutBackground(srcPath: string): Promise<{ data: Buffer; width: number; height: number }> {
   const { data, info } = await sharp(srcPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const BG = 245; // midpoint of the checkerboard's two tones
   for (let i = 0; i < data.length; i += 4) {
@@ -242,6 +252,7 @@ async function writeLogoCrop(
   pad: number,
   outName: string,
   copperOnly = false,
+  maxWidth?: number,
 ): Promise<void> {
   const left = Math.max(0, box.left - pad);
   const top = Math.max(0, box.top - pad);
@@ -257,12 +268,15 @@ async function writeLogoCrop(
     }
   }
   const outPath = path.join(OUT_LOGO, outName);
-  const buf = await sharp(data, { raw: { width: raw.width, height: raw.height, channels: 4 } })
-    .extract({ left, top, width, height })
-    .png({ compressionLevel: 9, palette: true })
-    .toBuffer();
+  let pipeline = sharp(data, { raw: { width: raw.width, height: raw.height, channels: 4 } })
+    .extract({ left, top, width, height });
+  if (maxWidth) {
+    pipeline = pipeline.resize({ width: maxWidth, fit: "inside", withoutEnlargement: true });
+  }
+  const buf = await pipeline.png({ compressionLevel: 9, palette: true }).toBuffer();
   await fs.writeFile(outPath, buf);
-  console.log(`logo   ${outName}  ${width}x${height}  ${kb(buf.length)}`);
+  const meta = await sharp(buf).metadata();
+  console.log(`logo   ${outName}  ${meta.width}x${meta.height}  ${kb(buf.length)}`);
 }
 
 async function main(): Promise<void> {
@@ -274,7 +288,7 @@ async function main(): Promise<void> {
   for (const entry of ART) await encodeArt(entry);
 
   if (await exists(path.join(SRC, "logo", "logo-master.png"))) {
-    const raw = await keyOutBackground();
+    const raw = await keyOutBackground(path.join(SRC, "logo", "logo-master.png"));
     // Arch mark: the copper pixels only (saturated, warm) — excludes the ™ and the
     // charcoal wordmark/tagline, which the chrome renders as real HTML text instead.
     const markBox = bbox(
@@ -286,6 +300,30 @@ async function main(): Promise<void> {
     await writeLogoCrop(raw, markBox, 8, "ph-logo-mark.png", true);
   } else {
     console.log("skip   ph-logo-mark.png (master absent)");
+  }
+
+  // DR2.1 — the full lockup (arch + PALESTINE HOUSE + OUR CULTURE EMBASSY + ™) for
+  // the light-chrome BrandLogo. Full-content bbox: everything the keyer kept.
+  if (await exists(path.join(SRC, "logo", "logo-lockup-master.png"))) {
+    const raw = await keyOutBackground(path.join(SRC, "logo", "logo-lockup-master.png"));
+    const lockupBox = bbox(raw.data, raw.width, raw.height, (_r, _g, _b, a) => a > 8);
+    await writeLogoCrop(raw, lockupBox, 8, "ph-logo-lockup.png", false, 900);
+    // Dark-chrome variant (owner white master as reference — see the source
+    // note above): charcoal/gray pixels -> white, copper stays copper; alpha
+    // untouched so the un-blended edges stay smooth on dark surfaces. Same
+    // bbox -> both lockups ship pixel-registered at identical dimensions.
+    const rawDark = { data: Buffer.from(raw.data), width: raw.width, height: raw.height };
+    for (let i = 0; i < rawDark.data.length; i += 4) {
+      const d = rawDark.data;
+      if (d[i + 3] > 0 && !(d[i] - d[i + 2] > 30 && d[i] > 110)) {
+        d[i] = 255;
+        d[i + 1] = 255;
+        d[i + 2] = 255;
+      }
+    }
+    await writeLogoCrop(rawDark, lockupBox, 8, "ph-logo-lockup-dark.png", false, 900);
+  } else {
+    console.log("skip   ph-logo-lockup.png + ph-logo-lockup-dark.png (master absent)");
   }
 
   console.log("done.");

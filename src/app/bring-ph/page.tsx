@@ -5,6 +5,7 @@ import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { PageHero } from "@/components/sections/page-hero";
+import { StageCards } from "@/components/sections/stage-cards";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -28,28 +29,6 @@ const BRING_WE = [
   "The brand, and the standards every House is held to.",
   "The full toolkit — the playbook, the templates, the training.",
   "The support to open and operate, from first decision to launch and beyond.",
-] as const;
-
-/* The repointed triptych — one room, three moments of becoming. */
-const BRING_STAGES = [
-  {
-    id: "PH-HIW-01",
-    name: "Plan & Prepare",
-    text: "governance, your city, your venue.",
-    alt: "A partner reads through planning notes spread across the House rugs.",
-  },
-  {
-    id: "PH-HIW-02",
-    name: "Design & Build",
-    text: "the launch itself, tracked task by task.",
-    alt: "The House taking shape — an arched hallway hung with framed tatreez.",
-  },
-  {
-    id: "PH-HIW-03",
-    name: "Operate & Program",
-    text: "running the House to the standard every House shares.",
-    alt: "The stage set for the evening — guitar, microphones, and lantern light.",
-  },
 ] as const;
 
 const BRING_GATES = [
@@ -180,7 +159,9 @@ export default function BringAHousePage() {
         </div>
       </section>
 
-      {/* 4 — What it takes: the three stages */}
+      {/* 4 — What it takes: the three stages (DR2.1-4: Home's v3 stage
+          photo-cards via the shared StageCards — replacing the PH-HIW
+          artwork triptych; cards only, no side art, per the owner) */}
       <section className="ph-section-lg" id="what-it-takes">
         <div className="ph-container">
           <Reveal className="sec-head">
@@ -191,24 +172,9 @@ export default function BringAHousePage() {
               order — three stages across a 120-day plan.
             </p>
           </Reveal>
-          <Reveal className="bring-triptych">
-            {BRING_STAGES.map((s, i) => (
-              <figure key={s.id} className="bring-stage">
-                <Artwork
-                  assetId={s.id}
-                  alt={s.alt}
-                  ratio="4 / 5"
-                  rounded
-                  sizes="(max-width: 860px) 100vw, 33vw"
-                />
-                <figcaption>
-                  <span className="bring-stage-n">{"0" + (i + 1)}</span>
-                  <h3>{s.name}</h3>
-                  <p>{s.text}</p>
-                </figcaption>
-              </figure>
-            ))}
-          </Reveal>
+          <div className="bring-stages-cards">
+            <StageCards sizes="(max-width: 860px) 100vw, 33vw" />
+          </div>
           <Reveal>
             <p className="bring-stages-close">
               You won’t face it all at once. You see your current stage and the

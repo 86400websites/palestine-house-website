@@ -1193,45 +1193,18 @@
   }
 }
 
-/* The repointed triptych — one room, three moments of becoming */
-.bring-triptych {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-8);
+/* The three stages — Home's v3 stage photo-cards via the shared StageCards
+   (DR2.1-4, replacing the PH-HIW artwork triptych; the .v3-stage* styles +
+   their responsive rules live in v3.css). This wrapper only spaces the grid
+   under the section head, as .v3-stages-layout does on Home. */
+.bring-stages-cards {
   margin-top: var(--space-12);
-}
-.bring-stage {
-  margin: 0;
-}
-.bring-stage figcaption {
-  margin-top: var(--space-5);
-}
-.bring-stage-n {
-  font-family: var(--font-display);
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-lg);
-  color: var(--brand-primary);
-}
-.bring-stage h3 {
-  margin-top: var(--space-2);
-  font-size: var(--text-xl);
-}
-.bring-stage p {
-  margin-top: var(--space-2);
-  color: var(--muted-foreground);
 }
 .bring-stages-close {
   margin-top: var(--space-12);
   font: var(--text-lead);
   color: var(--muted-foreground);
   max-width: 38rem;
-}
-@container page (max-width: 860px) {
-  .bring-triptych {
-    grid-template-columns: 1fr;
-    max-width: 24rem;
-    gap: var(--space-10);
-  }
 }
 
 /* Gates timeline — calm horizontal progression */
@@ -1950,15 +1923,31 @@
   transform: translate(-40%, -50%);
 }
 .home-proof-branch--right {
-  width: clamp(110px, 14vw, 230px);
+  /* DR2.1-3 (owner, 2026-07-06): the corner branch reads as a fuller
+     bottom-right ornament — was clamp(110px,14vw,230px) / translate(24%,30%),
+     which cropped most of the L-shape into the corner. A slight bleed keeps
+     it anchored to the band edge; the vertical arm hugs the far right. */
+  width: clamp(150px, 17vw, 270px);
   right: 0;
   bottom: 0;
-  transform: translate(24%, 30%);
+  transform: translate(8%, 10%);
 }
-/* The horizontal garland exists only on narrow layouts (block below) —
-   desktop keeps the mockup's two-branch composition. */
-.home-proof-branch--top {
+/* Mobile bookends (owner, 2026-07-06): one small centered sprig at the top
+   of the band and one mirrored at the bottom — hidden on desktop, where the
+   two corner branches carry the composition. */
+.home-proof-branch--m-top,
+.home-proof-branch--m-bottom {
   display: none;
+  left: 50%;
+  width: clamp(150px, 46vw, 240px);
+}
+.home-proof-branch--m-top {
+  top: 0;
+  transform: translate(-50%, -40%);
+}
+.home-proof-branch--m-bottom {
+  bottom: 0;
+  transform: translate(-50%, 40%) scaleY(-1);
 }
 .home-proof-inner {
   position: relative;
@@ -2019,16 +2008,6 @@
 .home-proof-caption-text {
   max-width: 46rem;
 }
-.home-proof-caption-branch {
-  flex: none;
-  width: clamp(90px, 10vw, 140px);
-  height: auto;
-  opacity: 0.9;
-  pointer-events: none;
-}
-.home-proof-caption-branch.is-left {
-  transform: scaleX(-1);
-}
 /* .home-proof prefix outranks globals' own .ph-section-dark color rules
    (globals' body rules land after this file in the @import cascade). */
 .home-proof .home-proof-caption h2,
@@ -2036,6 +2015,19 @@
   display: inline;
   font: var(--weight-regular) var(--text-xl) / 1.6 var(--font-display);
   color: var(--white);
+}
+/* DR2.1-3 (owner, 2026-07-06): on sprig-flanked desktop layouts the caption
+   sits as two balanced lines — text-xl ran to three. Scoped ≥1001px so the
+   narrow layouts keep their DR2-approved rendering untouched. */
+@container page (min-width: 1001px) {
+  .home-proof-caption-text {
+    max-width: 48rem;
+    text-wrap: balance;
+  }
+  .home-proof .home-proof-caption h2,
+  .home-proof .home-proof-caption .ph-lead {
+    font: var(--weight-regular) var(--text-lg) / 1.6 var(--font-display);
+  }
 }
 @container page (max-width: 860px) {
   .home-proof-strip {
@@ -2050,36 +2042,17 @@
     grid-column: 1 / -1;
   }
 }
-/* Narrow layouts keep the branches (owner, 2026-07-06 — post-gate fix:
-   originally hidden ≤1000px) but scale them into the band's text-free
-   zones: the left tip stays inside the gutter, clear of the first stat
-   label at every width (exit-gate graze math), and the right branch tucks
-   into the bottom padding below the caption. */
+/* Mobile (owner, 2026-07-06): drop the desktop corner branches entirely and
+   bookend the band instead with a single small centered sprig at the top and
+   one mirrored at the very bottom. */
 @container page (max-width: 1000px) {
-  .home-proof-branch--left {
-    width: clamp(72px, 12vw, 120px);
-    transform: translate(-45%, -50%);
-  }
-  /* Richer foliage on narrow layouts (owner, 2026-07-06): the right branch
-     grows into the bottom padding (visible ≤94px vs the 96px strip) and the
-     horizontal branch garlands the top-right padding — all three stay in
-     text-free zones. */
+  .home-proof-branch--left,
   .home-proof-branch--right {
-    width: clamp(120px, 34vw, 200px);
-    transform: translate(28%, 38%);
-  }
-  .home-proof-branch--top {
-    display: block;
-    top: 0;
-    right: 0;
-    width: clamp(220px, 62vw, 430px);
-    transform: translate(20%, -30%);
-  }
-  /* The caption's flanking sprigs are a desktop flourish — at narrow widths
-     they'd squeeze the sentence, and the band already carries its three
-     edge ornaments. */
-  .home-proof-caption-branch {
     display: none;
+  }
+  .home-proof-branch--m-top,
+  .home-proof-branch--m-bottom {
+    display: block;
   }
 }
 
