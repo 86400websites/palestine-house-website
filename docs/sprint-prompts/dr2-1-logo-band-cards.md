@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date built** | 2026-07-06 (pre-merge; **independent Codex review = APPROVE, zero blocking / zero non-blocking**; owner Preview → merge → `/close` pending) |
-| **Branch / PR** | `claude/sprint-dr2-1-logo-band-cards` / PR # TBD |
+| **Date merged** | 2026-07-06 (PR #50, merge `c19f3f3`; post-merge `/close` = **GO**; **independent Codex review = APPROVE, zero blocking / zero non-blocking**) |
+| **Branch / PR** | `claude/sprint-dr2-1-logo-band-cards` (deleted post-merge) / **PR #50** |
 | **Goal** | Owner-requested ad-hoc polish on the DR1/DR2 public surfaces: use the owner's new logo site-wide in the public chrome, refine the Home proof band (2-line caption + fuller corner olive branch), reuse the Home "One path, three stages" photo cards on `/bring-ph`, and verify responsiveness 320→1440. Frontend/design only — **does not consume DR3** (public page bodies), which stays next. |
 
 ## What shipped
