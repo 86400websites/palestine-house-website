@@ -1,6 +1,6 @@
 # DR2 — Home v3 sections + chrome: stages · proof band · footer
 
-> **Status: BUILD COMPLETE (pre-merge), 2026-07-06.** Branch `claude/sprint-dr2-stages-proof-footer`, owner-gated DR2-0…DR2-7, push-per-step. Final stamp (PR number, merge hash, post-merge `/close`) added at close.
+> **Status: ✅ MERGED — PR #48, 2026-07-06 (merge `c3e448b`); post-merge `/close` = GO.** Branch `claude/sprint-dr2-stages-proof-footer` (deleted after merge), 14 commits `7d21e2f`…`0ec50d7`, owner-gated DR2-0…DR2-7 + three post-gate owner fixes, push-per-step. Close checks on merged `main`: typecheck/lint/build green, tree clean + fast-forwarded, secret-scan of `c304689..c3e448b` clean (only tracker prose hits), path-guard CLEAN (incl. package files — no dependency change), proof numbers verbatim, `.env.local` untracked.
 
 ## What this sprint was
 
@@ -27,7 +27,7 @@ Bring the three owner-mocked surfaces to final v3 from the new DR2 mockups (mast
 | DR2-7 | `59ec86e` | Exit gate: 3-lens adversarial full-diff review + fixes, path-guard CLEAN, `DESIGN.md` §3/§5/§6/§12 updated, trackers + this record |
 | post-gate owner fix | `03695fc` | Owner: keep the olive ornaments on mobile — the exit gate had hidden the band branches ≤1000px and the footer sprig ≤560px; instead they now **rescale into text-free zones** (left branch tip stays inside the gutter per the graze math; right branch tucks into the bottom padding below the caption; sprig 56px in the corner, clear of the centered copyright at 320px) |
 | post-gate owner fix 2 | `77bca19` | Owner: "still not enough olive on mobile" — narrow layouts (≤1000px) gain a **third, mobile-only ornament**: `ph-art-branch-3` (the horizontal branch, previously unused) garlands the top-right padding strip (visible ≤80px vs the 96px pad), and the bottom-right branch grows to clamp(120px, 34vw, 200px) (visible ≤94px, still under the caption's zone). Desktop ≥1001px untouched — owner called it perfect |
-| post-gate owner fix 3 | *(follow-up commit)* | Owner: olive on both sides of the proof caption on **desktop** — a mirrored `ph-art-branch-3` sprig pair (clamp 90–140px, aria-hidden) flanks the caption inside a centered flex row (text keeps its 46rem measure); the sprigs yield ≤1000px where the band already carries its three edge ornaments |
+| post-gate owner fix 3 | `d2e2301` | Owner: olive on both sides of the proof caption on **desktop** — a mirrored `ph-art-branch-3` sprig pair (clamp 90–140px, aria-hidden) flanks the caption inside a centered flex row (text keeps its 46rem measure); the sprigs yield ≤1000px where the band already carries its three edge ornaments |
 
 ## Exit-gate review (DR2-7)
 
