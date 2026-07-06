@@ -195,12 +195,35 @@ export default function HomePage() {
               </div>
             ))}
           </dl>
+          {/* Desktop: an olive sprig flanks the caption on each side (owner,
+              2026-07-06); on narrow layouts they yield to the band's three
+              edge ornaments. */}
           <div className="home-proof-caption">
-            <h2 id="home-proof-title">A complete system, not a binder.</h2>{" "}
-            <p className="ph-lead">
-              Everything it takes to open and run a House, in one place, with
-              your progress saved as you build.
-            </p>
+            <Image
+              src={ART_SOURCES["ph-art-branch-3"]}
+              alt=""
+              aria-hidden="true"
+              width={1200}
+              height={317}
+              sizes="140px"
+              className="home-proof-caption-branch is-left"
+            />
+            <div className="home-proof-caption-text">
+              <h2 id="home-proof-title">A complete system, not a binder.</h2>{" "}
+              <p className="ph-lead">
+                Everything it takes to open and run a House, in one place, with
+                your progress saved as you build.
+              </p>
+            </div>
+            <Image
+              src={ART_SOURCES["ph-art-branch-3"]}
+              alt=""
+              aria-hidden="true"
+              width={1200}
+              height={317}
+              sizes="140px"
+              className="home-proof-caption-branch"
+            />
           </div>
         </Reveal>
       </section>

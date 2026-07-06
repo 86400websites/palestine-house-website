@@ -2006,10 +2006,28 @@
   background: color-mix(in srgb, var(--copper-300) 45%, transparent);
 }
 /* The caption reads as one flowing serif line under the stats (mockup):
-   the h2 keeps the section's heading semantics but flows inline with it. */
+   the h2 keeps the section's heading semantics but flows inline with it.
+   On desktop an olive sprig flanks it on each side (owner, 2026-07-06). */
 .home-proof-caption {
-  max-width: 46rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  max-width: 64rem;
   margin: var(--space-12) auto 0;
+}
+.home-proof-caption-text {
+  max-width: 46rem;
+}
+.home-proof-caption-branch {
+  flex: none;
+  width: clamp(90px, 10vw, 140px);
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.home-proof-caption-branch.is-left {
+  transform: scaleX(-1);
 }
 /* .home-proof prefix outranks globals' own .ph-section-dark color rules
    (globals' body rules land after this file in the @import cascade). */
@@ -2056,6 +2074,12 @@
     right: 0;
     width: clamp(220px, 62vw, 430px);
     transform: translate(20%, -30%);
+  }
+  /* The caption's flanking sprigs are a desktop flourish — at narrow widths
+     they'd squeeze the sentence, and the band already carries its three
+     edge ornaments. */
+  .home-proof-caption-branch {
+    display: none;
   }
 }
 
