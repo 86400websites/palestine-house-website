@@ -1950,10 +1950,15 @@
   transform: translate(-40%, -50%);
 }
 .home-proof-branch--right {
-  width: clamp(110px, 14vw, 230px);
+  /* DR2.1-3 (owner, 2026-07-06): the corner branch reads as a fuller
+     bottom-right ornament — was clamp(110px,14vw,230px) / translate(24%,30%),
+     which cropped most of the L-shape into the corner. A slight bleed keeps
+     it anchored to the band edge; the vertical arm hugs the far right, clear
+     of the caption's right sprig down to 1024px (leaf-tip graze only). */
+  width: clamp(150px, 17vw, 270px);
   right: 0;
   bottom: 0;
-  transform: translate(24%, 30%);
+  transform: translate(8%, 10%);
 }
 /* The horizontal garland exists only on narrow layouts (block below) —
    desktop keeps the mockup's two-branch composition. */
@@ -2036,6 +2041,19 @@
   display: inline;
   font: var(--weight-regular) var(--text-xl) / 1.6 var(--font-display);
   color: var(--white);
+}
+/* DR2.1-3 (owner, 2026-07-06): on sprig-flanked desktop layouts the caption
+   sits as two balanced lines — text-xl ran to three. Scoped ≥1001px so the
+   narrow layouts keep their DR2-approved rendering untouched. */
+@container page (min-width: 1001px) {
+  .home-proof-caption-text {
+    max-width: 48rem;
+    text-wrap: balance;
+  }
+  .home-proof .home-proof-caption h2,
+  .home-proof .home-proof-caption .ph-lead {
+    font: var(--weight-regular) var(--text-lg) / 1.6 var(--font-display);
+  }
 }
 @container page (max-width: 860px) {
   .home-proof-strip {
