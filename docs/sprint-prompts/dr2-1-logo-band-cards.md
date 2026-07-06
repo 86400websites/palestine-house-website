@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Date built** | 2026-07-06 (pre-merge; owner Preview → merge → `/close` pending) |
+| **Date built** | 2026-07-06 (pre-merge; **independent Codex review = APPROVE, zero blocking / zero non-blocking**; owner Preview → merge → `/close` pending) |
 | **Branch / PR** | `claude/sprint-dr2-1-logo-band-cards` / PR # TBD |
 | **Goal** | Owner-requested ad-hoc polish on the DR1/DR2 public surfaces: use the owner's new logo site-wide in the public chrome, refine the Home proof band (2-line caption + fuller corner olive branch), reuse the Home "One path, three stages" photo cards on `/bring-ph`, and verify responsiveness 320→1440. Frontend/design only — **does not consume DR3** (public page bodies), which stays next. |
 
@@ -13,9 +13,13 @@
 - **bring-ph stage cards (DR2.1-4).** Home's stage-card grid extracted to a shared `src/components/sections/stage-cards.tsx` (`StageCards`, cards only). Home renders it unchanged inside `.v3-stages-layout` (Al-Aqsa art column intact); `/bring-ph` §4 "One path, three stages" swaps its PH-HIW artwork triptych for the same cards, full-width in a `.bring-stages-cards` wrapper (no side art, owner's "cards only" call). Removed: `BRING_STAGES` const, `.bring-triptych`/`.bring-stage*` CSS, the `PH-HIW-01..03` registry entries + the three `public/assets/art/PH-HIW-0*.jpg` files. The section's own head + the "You won't face it all at once…" close line stay verbatim; the cards reuse Home's owner-approved DR2 copy (owner copy gate).
 - **Responsive sweep (DR2.1-5).** DevTools-protocol device-emulated screenshots at true 320/430/1024/1280/1440 (plain headless clamps windows to ~496px). Verified both header states, footer lockup, proof band 2-line caption + corner branch, and both stages sections; caught + fixed a chrome cascade bug (below).
 
+## Prompt used
+
+Executed directly in this Claude Code session (not a pasted prompt) as a gated master prompt per the `/sprint-prompt` DR2.1 plan — sub-steps DR2.1-0…DR2.1-6, one owner "proceed" gate after each, commit + push per sub-step. Plan file: `~/.claude/plans/please-execute-sprint-prompt-with-generic-yao.md`. Two owner mid-/post-sprint changes were folded in on request (white-lockup-PNG on dark chrome at DR2.1-2; the proof-band olive-branch desktop/mobile refinement after the gate — see below).
+
 ## Checks & results
 
-typecheck ✅ · lint ✅ · build ✅ (46 routes) · responsive matrix 320→1440 ✅ (visual, CDP emulation) · path-guard ✅ (zero workspace/admin/middleware/next.config/supabase/api/env/package files in the diff) · repo hygiene ✅ (masters gitignored, never tracked) · exit-gate adversarial review ✅ (3 lenses → per-finding verification; 2 confirmed findings fixed, 2 refuted).
+typecheck ✅ · lint ✅ · build ✅ (46 routes) · responsive matrix 320→1440 ✅ (visual, CDP device-emulation) · path-guard ✅ (zero workspace/admin/middleware/next.config/supabase/api/env/package files in the diff) · repo hygiene ✅ (masters gitignored, never tracked) · exit-gate adversarial review ✅ (3 lenses → per-finding verification; 2 confirmed findings fixed, 2 refuted) · **independent Codex review ✅ = APPROVE, zero blocking / zero non-blocking** (path-guard, proof numbers verbatim, logo confined to public chrome/assets/CSS, shared StageCards used only on Home + /bring-ph all confirmed; Codex noted it could not source-compare copy because `docs/page-copy/` is gitignored — expected, OneDrive is canon).
 
 ## Deviations & learnings
 
