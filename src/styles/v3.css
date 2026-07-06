@@ -114,6 +114,12 @@
 .ph-page .ph-section-dark :is(.editorial-index, .fa-letter, .fa-caps-label) {
   color: var(--copper-300);
 }
+/* DR2 — olive band modifier: composes WITH .ph-section-dark (inheriting all
+   its on-dark text rules, which stay AA on the darker moss) and repaints the
+   surface per the owner's proof-band mockup. */
+.ph-page .ph-section-dark.ph-section-olive {
+  background: var(--moss-900);
+}
 
 /* (Dark-surface focus rings: --focus-ring-on-dark above feeds the S1 rule in
    globals.css — one selector list, recolored per shell.) */

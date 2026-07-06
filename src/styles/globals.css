@@ -196,6 +196,15 @@
   --char-900: #2A241E; /* warm charcoal — dark sections, footer */
   --char-950: #201A15; /* deepest warm — photo scrims */
   --line-warm: #E7DFCF; /* warm hairline border on cream */
+
+  /* --- DR2 additive moss greens (sampled from the owner's DR2 mockups:
+         stages-section plates, olive proof band, footer). Additive only
+         (owner decision 2026-07-06) — every DR1 value above is untouched;
+         the mockups' warm-sand numerals resolve to the existing
+         --copper-300, so no new sand token. --------------------------- */
+  --moss-700: #393C29; /* stage-card plate green (arch-notch panels) */
+  --moss-900: #20230E; /* olive proof-band background */
+  --moss-950: #1B1E14; /* footer green-black */
   --header-h: 72px;
 }
 
