@@ -1193,45 +1193,18 @@
   }
 }
 
-/* The repointed triptych — one room, three moments of becoming */
-.bring-triptych {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-8);
+/* The three stages — Home's v3 stage photo-cards via the shared StageCards
+   (DR2.1-4, replacing the PH-HIW artwork triptych; the .v3-stage* styles +
+   their responsive rules live in v3.css). This wrapper only spaces the grid
+   under the section head, as .v3-stages-layout does on Home. */
+.bring-stages-cards {
   margin-top: var(--space-12);
-}
-.bring-stage {
-  margin: 0;
-}
-.bring-stage figcaption {
-  margin-top: var(--space-5);
-}
-.bring-stage-n {
-  font-family: var(--font-display);
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-lg);
-  color: var(--brand-primary);
-}
-.bring-stage h3 {
-  margin-top: var(--space-2);
-  font-size: var(--text-xl);
-}
-.bring-stage p {
-  margin-top: var(--space-2);
-  color: var(--muted-foreground);
 }
 .bring-stages-close {
   margin-top: var(--space-12);
   font: var(--text-lead);
   color: var(--muted-foreground);
   max-width: 38rem;
-}
-@container page (max-width: 860px) {
-  .bring-triptych {
-    grid-template-columns: 1fr;
-    max-width: 24rem;
-    gap: var(--space-10);
-  }
 }
 
 /* Gates timeline — calm horizontal progression */

@@ -7,6 +7,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { HomeHero } from "@/components/sections/home/home-hero";
 import { InsideStrip } from "@/components/sections/home/inside-strip";
+import { StageCards } from "@/components/sections/stage-cards";
 import { SITE_TAGLINE } from "@/lib/site";
 
 /* Home (/) — v3 design refresh (DR1, 2026-07-02): layout + hero/split copy
@@ -25,28 +26,6 @@ export const metadata: Metadata = {
   description: SITE_TAGLINE,
   alternates: { canonical: "/" },
 };
-
-/* DR2-3 — stage-card copy + photo alts owner-approved (copy table, 2026-07-06) */
-const HOME_STAGES = [
-  {
-    name: "Plan & Prepare",
-    text: "We help you lay the foundation for a strong and sustainable House.",
-    photo: "ph-photo-stage-plan",
-    alt: "A planning studio wall of maps, sketches and tile samples for a new Palestine House.",
-  },
-  {
-    name: "Design & Build",
-    text: "We guide the creation of a beautiful, functional and welcoming space.",
-    photo: "ph-photo-stage-build",
-    alt: "A workshop of patterned tiles, timber and lanterns mid-build.",
-  },
-  {
-    name: "Operate & Program",
-    text: "We support you to run meaningful programs and build lasting community.",
-    photo: "ph-photo-stage-cafe",
-    alt: "A candlelit café room set for an evening performance.",
-  },
-] as const;
 
 /* DR2-4 — label wording/casing owner-approved (copy table, 2026-07-06);
    the numbers themselves are locked proof numbers. */
@@ -100,7 +79,8 @@ export default function HomePage() {
 
       {/* 4 — One path, three stages (DR2-3: photo cards with moss arch-notch
           number plates + the Al-Aqsa line-art beside the grid, per the
-          owner's stages-section mockup) */}
+          owner's stages-section mockup; cards extracted to the shared
+          StageCards in DR2.1-4 — /bring-ph renders the same cards) */}
       <section className="ph-section-lg v3-stages-section">
         <div className="ph-container">
           <Reveal className="sec-head is-center">
@@ -110,29 +90,7 @@ export default function HomePage() {
             </p>
           </Reveal>
           <div className="v3-stages-layout">
-            <div className="v3-stages">
-              {HOME_STAGES.map((s, i) => (
-                <Reveal key={s.name} delay={i * 0.09}>
-                  <article className="v3-stage-card">
-                    <div className="v3-stage-photo">
-                      <Image
-                        src={PHOTO_SOURCES[s.photo]}
-                        alt={s.alt}
-                        fill
-                        sizes="(max-width: 880px) 100vw, (max-width: 1100px) 33vw, 24vw"
-                      />
-                    </div>
-                    <div className="v3-stage-panel">
-                      <span className="v3-stage-num" aria-hidden="true">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <h3>{s.name}</h3>
-                      <p>{s.text}</p>
-                    </div>
-                  </article>
-                </Reveal>
-              ))}
-            </div>
+            <StageCards sizes="(max-width: 880px) 100vw, (max-width: 1100px) 33vw, 24vw" />
             <div className="v3-stages-art" aria-hidden="true">
               <Image
                 src={ART_SOURCES["ph-art-line-alaqsa"]}
