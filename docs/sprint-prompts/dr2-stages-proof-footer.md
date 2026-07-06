@@ -41,7 +41,9 @@ Three parallel adversarial lenses over the full diff vs `main` (CSS/cascade+layo
 
 ## Independent review status
 
-The owner ran a Codex pass on 2026-07-06 that — due to a checkout/range mix-up — reviewed the **DR1** diff (`1f6d871..fb3be31`: booklet-capture deletion, mega-menu removal, marquee; verdict: approve, zero blocking, consistent with DR1's original Codex approval). **DR2 itself therefore has no independent Codex verdict**; the internal 3-lens exit-gate review above stands as this sprint's review. Optional pre-merge re-run: point Codex at `main...claude/sprint-dr2-stages-proof-footer` (the prompt is in this record's session log / PROJECT-STATUS §1).
+**Codex review of the full DR2 diff (`main...claude/sprint-dr2-stages-proof-footer`, tip `d2e2301`, 2026-07-06) = APPROVE — zero blocking, zero non-blocking.** Codex independently ran typecheck/lint/build (green, 45 routes) and verified: no changes under protected/gated surfaces (workspace/admin/ui/middleware/API routes/next.config/Supabase/package files), proof numbers verbatim, footer Apply band + session-aware header CTA intact, no new `"use client"` boundary, decorative art aria-hidden with empty alt.
+
+*(History: an earlier same-day Codex run reviewed the **DR1** range `1f6d871..fb3be31` by mistake — checkout/range mix-up; that approve belongs to the already-merged DR1, not this sprint. Superseded by the correct-range verdict above.)*
 
 ## Deviations & learnings
 
