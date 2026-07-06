@@ -37,6 +37,10 @@ Three parallel adversarial lenses over the full diff vs `main` (CSS/cascade+layo
 
 **Verified clean:** path-guard — zero files under workspace/admin/ui/middleware/next.config/supabase (18 files, all public shell + docs + assets + script) · proof numbers verbatim · Apply band + all 14 pre-existing Apply strings untouched, no CTA added/removed · footer/header still single shared components; footer renders only via `SiteChrome` on `.ph-page` (sticky-footer math + cream surround + `:has()`-less fallback all hold) · container `page` declared on `.ph-page`, ancestor of all new `@container` rules · no new deps/routes/`"use client"`/env · all five footer link targets exist · AA computed on every new pair (numerals 6.33:1 · labels 10.67:1 · card body 9.93:1 · titles 16.9:1 · links 11.14:1 · Arabic 8.86:1 at the correct 4.5 bar) · reduced-motion untouched (no new animation).
 
+## Independent review status
+
+The owner ran a Codex pass on 2026-07-06 that — due to a checkout/range mix-up — reviewed the **DR1** diff (`1f6d871..fb3be31`: booklet-capture deletion, mega-menu removal, marquee; verdict: approve, zero blocking, consistent with DR1's original Codex approval). **DR2 itself therefore has no independent Codex verdict**; the internal 3-lens exit-gate review above stands as this sprint's review. Optional pre-merge re-run: point Codex at `main...claude/sprint-dr2-stages-proof-footer` (the prompt is in this record's session log / PROJECT-STATUS §1).
+
 ## Deviations & learnings
 
 - **Footer BrandLogo kept** (arch + wordmark) instead of the mockup's stacked text-only "PALESTINE HOUSE" — locked shared brand component; owner can request the stacked variant ("fix footer logo").
