@@ -79,13 +79,26 @@ const PHOTOS: { src: string; out: string; width: number; height: number }[] = [
   { src: "stage-plan.png", out: "ph-photo-stage-plan.jpg", width: 1600, height: 1600 },
   { src: "stage-build.png", out: "ph-photo-stage-build.jpg", width: 1600, height: 1600 },
   { src: "stage-cafe.png", out: "ph-photo-stage-cafe.jpg", width: 1600, height: 1600 },
-  /* DR3.1 — /model body: distinct hero + embassy gallery + closing band + still-life
-     (owner masters, 2026-07-07). model.jpeg REPLACES the earlier tatreez-reuse hero. */
-  { src: "embassy-cafe.jpg", out: "ph-photo-embassy-cafe.jpg", width: 1600, height: 2000 },
-  { src: "embassy-venue.jpg", out: "ph-photo-embassy-venue.jpg", width: 1600, height: 2000 },
-  { src: "embassy-community.jpg", out: "ph-photo-embassy-community.jpg", width: 1600, height: 2000 },
+  /* DR3.1 — /model body. The §1 "cultural embassy" collage: 4 photos per
+     category (café · venue · community) that rotate through a big + 3-thumb
+     layout; plus the closing-band invite and the "what this is" still-life
+     (owner masters, 2026-07-07). The hero (ph-photo-model) is left unchanged. */
+  { src: "embassy-cafe-1.jpg", out: "ph-photo-embassy-cafe-1.jpg", width: 1200, height: 1200 },
+  { src: "embassy-cafe-2.jpg", out: "ph-photo-embassy-cafe-2.jpg", width: 1200, height: 1200 },
+  { src: "embassy-cafe-3.jpg", out: "ph-photo-embassy-cafe-3.jpg", width: 1200, height: 1200 },
+  { src: "embassy-cafe-4.jpg", out: "ph-photo-embassy-cafe-4.jpg", width: 1200, height: 1200 },
+  { src: "embassy-venue-1.jpg", out: "ph-photo-embassy-venue-1.jpg", width: 1200, height: 1200 },
+  { src: "embassy-venue-2.jpg", out: "ph-photo-embassy-venue-2.jpg", width: 1200, height: 1200 },
+  { src: "embassy-venue-3.jpg", out: "ph-photo-embassy-venue-3.jpg", width: 1200, height: 1200 },
+  { src: "embassy-venue-4.jpg", out: "ph-photo-embassy-venue-4.jpg", width: 1200, height: 1200 },
+  { src: "embassy-community-1.jpg", out: "ph-photo-embassy-community-1.jpg", width: 1200, height: 1200 },
+  { src: "embassy-community-2.jpg", out: "ph-photo-embassy-community-2.jpg", width: 1200, height: 1200 },
+  { src: "embassy-community-3.jpg", out: "ph-photo-embassy-community-3.jpg", width: 1200, height: 1200 },
+  { src: "embassy-community-4.jpg", out: "ph-photo-embassy-community-4.jpg", width: 1200, height: 1200 },
   { src: "model-invite.jpg", out: "ph-photo-model-invite.jpg", width: 2000, height: 2000 },
   { src: "model-still.jpg", out: "ph-photo-model-still.jpg", width: 1400, height: 1400 },
+  /* the §1 green tatreez side-strip (opaque → jpeg); a narrow decorative band */
+  { src: "embassy-tatreez.png", out: "ph-photo-embassy-tatreez.jpg", width: 500, height: 2400 },
 ];
 
 /** DR2 decorative masters (in SRC/art) -> keyed transparent PNGs in OUT_ART.
@@ -101,7 +114,7 @@ const ART: { src: string; out: string; width: number; height: number }[] = [
 /** DR3.1 — art masters that ALREADY carry real transparency (gold line-art olive
  *  branch for /model). Optimized as-is: trim the transparent margins + bound the size;
  *  the adaptive background keyer above would wrongly un-blend already-clean edges. */
-const DIRECT_ART: { src: string; out: string; width: number; height: number }[] = [
+const DIRECT_ART: { src: string; out: string; width: number; height: number; trim?: boolean }[] = [
   { src: "model-branch.png", out: "ph-art-model-branch.png", width: 900, height: 900 },
 ];
 
@@ -303,9 +316,9 @@ async function encodeDirectArt(entry: (typeof DIRECT_ART)[number]): Promise<void
     console.log(`skip   ${entry.out} (master absent)`);
     return;
   }
-  const buf = await sharp(srcPath)
-    .ensureAlpha()
-    .trim()
+  let pipe = sharp(srcPath).ensureAlpha();
+  if (entry.trim !== false) pipe = pipe.trim();
+  const buf = await pipe
     .resize({ width: entry.width, height: entry.height, fit: "inside", withoutEnlargement: true })
     .png({ compressionLevel: 9, palette: true }) // few-color line-art quantizes tiny
     .toBuffer();

@@ -1,59 +1,103 @@
 "use client";
 
-import Image from "next/image";
-import { m, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import { PHOTO_SOURCES, type PhotoId } from "@/components/shared/photo";
 
-/* DR3.1 — the /model "cultural embassy" gallery. A living stack of three House
-   scenes — café, venue, community — that slowly shuffles: the front photo eases
-   back and the next rises forward, on a calm loop (owner direction, 2026-07-07).
+/* DR3.1 — the /model "cultural embassy" collage. Three columns — café, venue,
+   community — each a big image over a row of three thumbnails. Within every
+   column the four photos slowly rotate through the slots (the featured photo
+   eases to a thumbnail, the next rises to the feature spot), so the section
+   feels alive (owner direction, 2026-07-07). Columns are phase-staggered so
+   they don't move in lockstep.
 
-   This is the second sanctioned exception to DESIGN.md §8 "no auto-carousels"
-   (after the Home marquee, D-DR1) — recorded as D-DR3.1. It stays in the
-   editorial register: slow, eased, never a spring; it pauses on hover / focus /
-   when the tab is hidden; and it collapses to a plain static stack under
-   prefers-reduced-motion (belt-and-suspenders with the global kill-switch).
+   Second sanctioned exception to DESIGN.md §8 "no auto-carousels" (after the
+   Home marquee, D-DR1) — recorded as D-DR3.1. Slow, cross-faded, pauses on
+   hover / focus / hidden tab, and freezes to a static collage under
+   prefers-reduced-motion (the global CSS kill-switch also stops the fades). */
 
-   Animated with m.* only — the tree runs under <LazyMotion strict> (providers). */
+type Column = {
+  key: string;
+  title: string;
+  subtitle: string;
+  photos: [PhotoId, PhotoId, PhotoId, PhotoId];
+};
 
-type Scene = { photo: PhotoId; label: string; alt: string };
-
-const SCENES: Scene[] = [
+const COLUMNS: Column[] = [
   {
-    photo: "ph-photo-embassy-cafe",
-    label: "Café",
-    alt: "A brass coffee pot and warm bread on a candlelit café table.",
+    key: "cafe",
+    title: "A real café.",
+    subtitle: "Rooted in Palestinian hospitality, food, and daily life.",
+    photos: [
+      "ph-photo-embassy-cafe-1",
+      "ph-photo-embassy-cafe-2",
+      "ph-photo-embassy-cafe-3",
+      "ph-photo-embassy-cafe-4",
+    ],
   },
   {
-    photo: "ph-photo-embassy-venue",
-    label: "Venue",
-    alt: "Guests seated together in the warm, arched room of a Palestine House.",
+    key: "venue",
+    title: "A real venue.",
+    subtitle: "For art, music, film, literature, ideas, and gatherings.",
+    photos: [
+      "ph-photo-embassy-venue-1",
+      "ph-photo-embassy-venue-2",
+      "ph-photo-embassy-venue-3",
+      "ph-photo-embassy-venue-4",
+    ],
   },
   {
-    photo: "ph-photo-embassy-community",
-    label: "Community",
-    alt: "People celebrating together on a warm evening at a Palestine House.",
+    key: "community",
+    title: "A real community anchor.",
+    subtitle: "Built for connection, reflection, and belonging.",
+    photos: [
+      "ph-photo-embassy-community-1",
+      "ph-photo-embassy-community-2",
+      "ph-photo-embassy-community-3",
+      "ph-photo-embassy-community-4",
+    ],
   },
 ];
 
-/* Depth slots (0 = front). The shuffle just re-assigns each card to a slot.
-   zIndex is applied via `style` (discrete), never tweened. */
-const SLOTS = [
-  { y: 0, scale: 1, opacity: 1, zIndex: 30 },
-  { y: 26, scale: 0.93, opacity: 1, zIndex: 20 },
-  { y: 50, scale: 0.86, opacity: 0.88, zIndex: 10 },
-] as const;
+const DWELL_MS = 3600;
 
-const pose = (s: (typeof SLOTS)[number]) => ({ y: s.y, scale: s.scale, opacity: s.opacity });
+/** A tatreez-flower flourish (copper), purely decorative. */
+function Ornament({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M12 1.5l1.9 6.3 6.3-1.9-4.5 4.6 4.5 4.6-6.3-1.9L12 22.5l-1.9-6.3-6.3 1.9 4.5-4.6-4.5-4.6 6.3 1.9z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
-const EASE_OUT = [0.22, 1, 0.36, 1] as const;
-const DWELL_MS = 3400;
+/** One image slot: the four category photos stacked, only the active one shown
+    (cross-fade via CSS opacity). Photos are decorative — the caption carries the
+    meaning — so alt is empty and the group is labelled instead. */
+function Slot({ photos, active, className }: { photos: PhotoId[]; active: number; className: string }) {
+  return (
+    <div className={className}>
+      {photos.map((p, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={p}
+          src={PHOTO_SOURCES[p]}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className={i === active ? "is-active" : undefined}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function EmbassyGallery() {
   const reduced = useReducedMotion();
   const [mounted, setMounted] = useState(false);
-  const [front, setFront] = useState(0);
+  const [tick, setTick] = useState(0);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -61,52 +105,40 @@ export function EmbassyGallery() {
   useEffect(() => {
     if (!mounted || reduced || paused) return;
     const id = window.setInterval(() => {
-      if (!document.hidden) setFront((f) => (f + 1) % SCENES.length);
+      if (!document.hidden) setTick((t) => t + 1);
     }, DWELL_MS);
     return () => window.clearInterval(id);
   }, [mounted, reduced, paused]);
 
-  /* First client render must match SSR (both: static deck, front 0) — only then
-     do reduced-motion users swap to the flat stack. No hydration mismatch. */
-  if (mounted && reduced) {
-    return (
-      <div className="embassy-gallery is-static" role="group" aria-label="Inside a Palestine House: café, venue, community">
-        {SCENES.map((s) => (
-          <figure key={s.photo} className="embassy-card">
-            <Image src={PHOTO_SOURCES[s.photo]} alt={s.alt} fill sizes="(max-width: 880px) 90vw, 360px" className="embassy-card-img" />
-            <figcaption className="embassy-card-label">{s.label}</figcaption>
-          </figure>
-        ))}
-      </div>
-    );
-  }
-
-  const animating = mounted && !reduced;
+  const moving = mounted && !reduced;
 
   return (
     <div
-      className="embassy-gallery"
+      className="embassy"
       role="group"
-      aria-label="Inside a Palestine House: café, venue, community"
+      aria-label="Scenes from inside a Palestine House: a real café, a real venue, a real community anchor"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      {SCENES.map((s, i) => {
-        const slot = SLOTS[(i - front + SCENES.length) % SCENES.length];
+      {COLUMNS.map((col, ci) => {
+        // phase-stagger the columns so they don't rotate in lockstep
+        const offset = moving ? (tick + ci) % 4 : 0;
+        const big = offset % 4;
+        const thumbs = [1, 2, 3].map((k) => (offset + k) % 4);
         return (
-          <m.figure
-            key={s.photo}
-            className="embassy-card"
-            initial={pose(SLOTS[i])}
-            animate={pose(animating ? slot : SLOTS[i])}
-            transition={{ duration: 0.85, ease: EASE_OUT }}
-            style={{ zIndex: (animating ? slot : SLOTS[i]).zIndex }}
-          >
-            <Image src={PHOTO_SOURCES[s.photo]} alt={s.alt} fill sizes="(max-width: 880px) 90vw, 360px" className="embassy-card-img" />
-            <figcaption className="embassy-card-label">{s.label}</figcaption>
-          </m.figure>
+          <div className="embassy-col" key={col.key}>
+            <Slot photos={col.photos} active={big} className="embassy-big" />
+            <div className="embassy-thumbs">
+              {thumbs.map((t, k) => (
+                <Slot key={k} photos={col.photos} active={t} className="embassy-thumb" />
+              ))}
+            </div>
+            <Ornament className="embassy-orn" />
+            <h3 className="embassy-col-title">{col.title}</h3>
+            <p className="embassy-col-sub">{col.subtitle}</p>
+          </div>
         );
       })}
     </div>

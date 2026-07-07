@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ART_SOURCES } from "@/components/shared/photo";
 import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
@@ -77,23 +78,39 @@ export default function ModelPage() {
         </Button>
       </PageHero>
 
-      {/* 2 — A cultural embassy (feature row + living gallery) */}
-      <section className="ph-section-lg">
-        <div className="ph-container feature-row is-reverse">
-          <Reveal className="feature-row-copy">
+      {/* 2 — A cultural embassy (café · venue · community collage) */}
+      <section className="ph-section-lg model-embassy">
+        <div className="model-embassy-strip" aria-hidden="true" />
+        <div className="ph-container model-embassy-grid">
+          <Reveal className="model-embassy-copy">
             <p className="ph-eyebrow">What a House carries</p>
-            <h2 className="model-h2">A cultural embassy, not a themed café.</h2>
-            <p>
-              Each House is a real café, a real venue, a real community anchor.
-              It carries the weight of representing a culture — and the joy of
-              it.
-            </p>
-            <p>
-              Every plate served, every dabke night, every exhibition is a small
-              act of permanence.
+            <svg
+              className="model-embassy-star"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M12 1.5l1.9 6.3 6.3-1.9-4.5 4.6 4.5 4.6-6.3-1.9L12 22.5l-1.9-6.3-6.3 1.9 4.5-4.6-4.5-4.6 6.3 1.9z"
+                fill="currentColor"
+              />
+            </svg>
+            <h2 className="model-h2">
+              A cultural embassy, <em>not a themed café.</em>
+            </h2>
+            {/* eslint-disable-next-line @next/next/no-img-element -- decorative fixed-size flourish */}
+            <img
+              className="model-embassy-sprig"
+              src={ART_SOURCES["ph-art-model-branch"]}
+              alt=""
+              aria-hidden="true"
+            />
+            <p className="model-embassy-lead">
+              Every bite, artwork, story, concert, every exhibition, we carry
+              connection into a welcoming part of a permanent cultural presence.
             </p>
           </Reveal>
-          <FadeIn className="feature-row-art">
+          <FadeIn className="model-embassy-gallery">
             <EmbassyGallery />
           </FadeIn>
         </div>
