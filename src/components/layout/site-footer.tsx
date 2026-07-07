@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/layout/brand-logo";
-import { ART_SOURCES } from "@/components/shared/photo";
+import { ART_SOURCES, Photo } from "@/components/shared/photo";
 import { Button } from "@/components/ui/button";
 
 /* Locked public footer — v3 refresh (DR2-5: owner footer mockup + the
@@ -11,17 +12,53 @@ import { Button } from "@/components/ui/button";
 export function SiteFooter() {
   return (
     <footer className="phx-footer">
+      {/* Closing CTA — the rich invite band, identical on every public page
+          (DR3.1: promoted from the /model design so there is one premium
+          call-to-action site-wide instead of a plain strip). */}
       <div className="phx-footer-apply">
-        <div className="ph-container phx-footer-apply-inner">
-          <div>
-            <h2>Ready to open a House in your city?</h2>
-            <p>Every application is reviewed by HQ.</p>
+        <div className="phx-footer-cta">
+          <Photo
+            assetId="ph-photo-model-invite"
+            alt="Guests gathered at the lantern-lit, ivy-framed doorway of a Palestine House in the evening."
+            sizes="(max-width: 880px) 100vw, 40vw"
+            className="phx-footer-cta-photo"
+          />
+          <div className="phx-footer-cta-content">
+            <h2>Could your city hold the next Palestine House?</h2>
+            <span className="phx-footer-cta-rule" aria-hidden="true" />
+            <div className="phx-footer-cta-row">
+              <p className="phx-footer-cta-lead">
+                If you have the venue, the commitment, and the community, we’ll
+                help you build the standard.
+              </p>
+              <div className="phx-footer-cta-buttons">
+                <Button asChild size="lg" className="v3-cta phx-footer-cta-apply">
+                  <Link href="/apply">
+                    Apply to bring a House
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="v3-cta phx-footer-cta-support"
+                >
+                  <Link href="/our-support">
+                    See our support
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
-          {/* Same uppercase grammar as the photo-hero CTAs (DR1-10) — the
-              in-flow body CTAs keep sentence case + arrow. */}
-          <Button asChild size="lg" className="v3-cta">
-            <Link href="/apply">Apply to bring a House</Link>
-          </Button>
+          {/* eslint-disable-next-line @next/next/no-img-element -- decorative branch */}
+          <img
+            className="phx-footer-cta-branch"
+            src={ART_SOURCES["ph-art-model-branch"]}
+            alt=""
+            aria-hidden="true"
+          />
         </div>
       </div>
 

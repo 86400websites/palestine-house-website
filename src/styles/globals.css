@@ -603,23 +603,118 @@
 .phx-footer-apply {
   border-bottom: var(--border-width) solid rgba(255, 255, 255, 0.12);
 }
-.phx-footer-apply-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-6);
-  padding-block: var(--space-12);
+/* Rich closing CTA at the top of the footer card (DR3.1). The photo bleeds to
+   the card's rounded edge (the card is overflow:hidden). Terracotta apply +
+   gold outline support; gold branch. */
+.phx-footer-cta {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.4fr) minmax(0, 1fr);
+  align-items: stretch;
 }
-.phx-footer-apply h2 {
-  color: var(--white);
-  font: var(--weight-semibold) var(--text-2xl) / var(--leading-snug)
-    var(--font-display);
+.phx-footer-cta-photo {
+  /* definite height so next/image `fill` resolves inside the grid cell */
+  height: clamp(20rem, 30vw, 26rem);
+}
+.phx-footer-cta-content {
+  align-self: center;
+  max-width: 44rem;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 4rem);
+}
+.phx-footer-cta-content h2 {
   margin: 0;
+  font: var(--weight-regular) clamp(1.8rem, 2vw + 1rem, 2.7rem) /
+    var(--leading-tight) var(--font-display);
+  color: var(--cream-50);
 }
-.phx-footer-apply p {
-  color: rgba(255, 255, 255, 0.7);
-  margin: var(--space-2) 0 0;
+.phx-footer-cta-rule {
+  display: block;
+  position: relative;
+  width: 13rem;
+  height: 1px;
+  margin: var(--space-6) 0;
+  background: var(--copper-300);
+  opacity: 0.6;
+}
+.phx-footer-cta-rule::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--copper-300);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.phx-footer-cta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+  align-items: center;
+}
+.phx-footer-cta-lead {
+  max-width: 20rem;
+  padding-right: var(--space-6);
+  border-right: 1px solid rgba(200, 154, 106, 0.3);
+  font: var(--text-lead);
+  color: var(--cream-100);
+}
+.phx-footer-cta-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.phx-footer-cta-buttons > * {
+  width: 100%;
+}
+.phx-footer-cta-apply {
+  justify-content: space-between;
+  background: #924721;
+  color: var(--cream-50);
+}
+.phx-footer-cta-apply:hover {
+  background: #7d3c1b;
+}
+.phx-footer-cta-support {
+  justify-content: space-between;
+  border-color: var(--copper-300);
+  background: transparent;
+  color: var(--copper-300);
+}
+.phx-footer-cta-support:hover {
+  background: rgba(200, 154, 106, 0.12);
+  color: var(--copper-300);
+}
+.phx-footer-cta-branch {
+  position: absolute;
+  right: -1%;
+  bottom: -8%;
+  width: clamp(150px, 18vw, 280px);
+  height: auto;
+  opacity: 0.7;
+  transform: rotate(4deg);
+  pointer-events: none;
+}
+@container page (max-width: 880px) {
+  .phx-footer-cta {
+    grid-template-columns: 1fr;
+  }
+  .phx-footer-cta-photo {
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+  .phx-footer-cta-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  .phx-footer-cta-lead {
+    max-width: none;
+    padding-right: 0;
+    border-right: 0;
+  }
+  .phx-footer-cta-branch {
+    width: 120px;
+  }
 }
 
 .phx-footer-grid {
