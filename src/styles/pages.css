@@ -808,14 +808,100 @@
   }
 }
 
-/* Three-layers — the official arch-diagram artwork */
-.model-diagram-art {
-  width: 100%;
-  max-width: 60rem;
-  margin: var(--space-12) auto 0;
+/* Three layers, one team — the network arches (DR3.1). Fills sampled from the
+   §2 mockup (olive / warm sand / terracotta); icons + copy inherit each arch's
+   foreground. */
+.model-arches {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(var(--space-2), 1.6vw, var(--space-5));
+  margin-top: var(--space-12);
 }
-.model-roles {
-  margin-top: var(--space-10);
+.model-arch {
+  flex: 1 1 0;
+  max-width: 19rem;
+  min-height: clamp(18rem, 24vw, 22rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(2.25rem, 3.4vw, 3.25rem) var(--space-6) var(--space-8);
+  border-radius: 50% 50% var(--radius-md) var(--radius-md) /
+    27% 27% var(--radius-md) var(--radius-md);
+}
+.model-arch-icon {
+  width: 42px;
+  height: 42px;
+  stroke-width: 1.5;
+  margin-bottom: var(--space-5);
+  color: currentColor;
+}
+.model-arch-seal {
+  width: 58px;
+  height: auto;
+  margin-bottom: var(--space-5);
+}
+.model-arch-title {
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  font-size: 1rem;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+.model-arch-text {
+  margin-top: var(--space-4);
+  font: var(--text-ui);
+  line-height: var(--leading-normal);
+  color: inherit;
+}
+.model-arch--green {
+  background: #424528;
+  color: var(--cream-100);
+}
+.model-arch--cream {
+  background: #e5dac9;
+  color: var(--char-900);
+}
+.model-arch--terra {
+  background: #ac5f3b;
+  color: var(--cream-100);
+}
+.model-arch-arrow {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 26px;
+  height: 26px;
+  stroke-width: 1.5;
+  color: var(--muted-foreground);
+}
+.model-arch-note {
+  margin-top: var(--space-8);
+  text-align: center;
+}
+.model-arch-note p {
+  max-width: 32rem;
+  margin-inline: auto;
+  font: var(--text-ui);
+  color: var(--muted-foreground);
+}
+@container page (max-width: 820px) {
+  .model-arches {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+  }
+  .model-arch {
+    /* row->column: reset the flex-basis:0 so height follows content, not 0 */
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 22rem;
+    min-height: 0;
+    padding-bottom: var(--space-10);
+  }
+  .model-arch-arrow {
+    transform: rotate(90deg);
+  }
 }
 
 /* Run under license — quiet editorial line */

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight, House, Key } from "lucide-react";
 import { ART_SOURCES } from "@/components/shared/photo";
-import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { PageHero } from "@/components/sections/page-hero";
@@ -17,27 +17,6 @@ export const metadata: Metadata = {
   description:
     "One name. Many Houses. One standard. How Palestine House fits together — three layers, one license, three rules that never bend.",
 };
-
-const MODEL_ROLES = [
-  {
-    n: "01",
-    kicker: "Steward & Custodian",
-    title: "Global HQ",
-    text: "Owns and protects the brand, sets the standards, builds the toolkit and this platform, and holds the Aswātna relationship.",
-  },
-  {
-    n: "02",
-    kicker: "Licensee & Operator",
-    title: "The Local Partner",
-    text: "Brings the venue, the team, the local relationships, and the daily work of running a real business.",
-  },
-  {
-    n: "03",
-    kicker: "People & Community",
-    title: "Aswātna",
-    text: "The cultural-programming partner who curates the launch and keeps the creative standard high.",
-  },
-] as const;
 
 const MODEL_NEVER = [
   {
@@ -116,35 +95,49 @@ export default function ModelPage() {
         </div>
       </section>
 
-      {/* 3 — Three layers, one team (artwork section — white per owner scheme) */}
+      {/* 3 — Three layers, one team (the network arches) */}
       <section className="ph-section-lg">
         <div className="ph-container">
-          <Reveal className="sec-head is-center">
-            <p className="ph-eyebrow">How it fits together</p>
+          <Reveal className="sec-head">
+            <p className="ph-eyebrow">How the network works</p>
             <h2>Three layers, one team.</h2>
-            <p className="ph-lead">
-              One name across the network, held up by three roles that each do
-              their part — and stay in their lane.
+          </Reveal>
+          <Reveal className="model-arches">
+            <div className="model-arch model-arch--green">
+              <Key className="model-arch-icon" aria-hidden="true" />
+              <h3 className="model-arch-title">Global HQ</h3>
+              <p className="model-arch-text">
+                Protects the name, standards, platform, and toolkit.
+              </p>
+            </div>
+            <ArrowRight className="model-arch-arrow" aria-hidden="true" />
+            <div className="model-arch model-arch--cream">
+              <House className="model-arch-icon" aria-hidden="true" />
+              <h3 className="model-arch-title">The Local Partner</h3>
+              <p className="model-arch-text">
+                Runs the House, team, venue, and daily business.
+              </p>
+            </div>
+            <ArrowRight className="model-arch-arrow" aria-hidden="true" />
+            <div className="model-arch model-arch--terra">
+              {/* eslint-disable-next-line @next/next/no-img-element -- decorative partner seal */}
+              <img
+                className="model-arch-seal"
+                src="/assets/partners/aswatna-mark.png"
+                alt=""
+                aria-hidden="true"
+              />
+              <h3 className="model-arch-title">Aswātna</h3>
+              <p className="model-arch-text">
+                Curates culture, launch programming, artists, and community.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal className="model-arch-note">
+            <p>
+              The agreement connects all three: one name, one standard, local
+              ownership.
             </p>
-          </Reveal>
-          <Reveal className="model-diagram-art">
-            <Artwork
-              assetId="PH-MODEL-02"
-              alt="A line diagram of three pointed arches — Global HQ (steward & custodian), the Local Partner (licensee & operator), and Aswātna (people & community) — linked by license and support. Three layers, one mission."
-              ratio="1456 / 900"
-              fit="contain"
-              sizes="(max-width: 960px) 100vw, 960px"
-            />
-          </Reveal>
-          <Reveal className="editorial-cols model-roles">
-            {MODEL_ROLES.map((r) => (
-              <div key={r.n} className="editorial-col">
-                <span className="editorial-index">{r.n}</span>
-                <span className="editorial-kicker">{r.kicker}</span>
-                <h3>{r.title}</h3>
-                <p>{r.text}</p>
-              </div>
-            ))}
           </Reveal>
         </div>
       </section>
