@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Date** | 2026-07-07 — BUILD COMPLETE (pre-merge); owner Preview → merge → `/close` pending |
+| **Date** | 2026-07-07 built · 2026-07-08 Codex-reviewed (2 Mediums fixed) — BUILD COMPLETE (pre-merge); owner Preview → merge → `/close` pending |
 | **Branch / PR** | `claude/sprint-dr3-1-model-v3` (from `main` @ `5397f8b`) · PR pending |
 | **Goal** | Rebuild the `/model` body (the five sections under the v3 photo hero) to the owner's own section mockups — premium, editorial, flawless 320px→desktop — with copy adopted from those mockups (owner decision) and the owner's real photography via the existing asset pipeline. First page of the DR3 series. |
 
@@ -31,6 +31,15 @@ Executed live in the session from the plan at `~/.claude/plans/ok-please-execute
 - **Path-guard:** clean of `workspace/ · admin/ · ui/ · middleware · next.config · supabase/ · api/ · env · package*`. The **footer chrome edit (`site-footer.tsx`, `globals.css .phx-footer-cta*`) is the one owner-authorized, in-scope exception** (the closing-CTA decision).
 - **Assets:** every shipped jpg < 500 KB; the branch PNG keyed to true transparency; loose `Section*` masters deleted, never committed; masters only under gitignored `docs/source-assets/`.
 
+### Codex review (2026-07-08, pre-merge)
+
+Independent Codex review of the branch diff = **request changes** on two Mediums, both **fixed on-branch** (commit `9613b3d`), zero blocking / zero AGENTS.md gating-check failures:
+
+1. **Footer "See our support" outline CTA cascade** — the v3 public-shell outline-button restyle (`v3.css` `:is(.ph-page,…)[data-slot="button"][data-variant="outline"]`, specificity 0,3,0) out-ranked `.phx-footer-cta-support` (0,1,0), so the shared footer button rendered as the cream secondary instead of the gold outline on **every public page**. Fixed by re-scoping to `.ph-page .phx-footer-cta-support[data-slot="button"][data-variant="outline"]` (0,4,0). Verified in-browser: gold outline restored.
+2. **§2 terracotta arch AA** — `#ac5f3b` + cream-100 body (`--text-ui` = 14px normal → AA 4.5:1) computed to **4.13:1**. Deepened the sampled fill to `#9c5230` → ~5.0:1. Verified.
+
+Codex confirmed: footer stays a Server Component; `EmbassyGallery` is the only new client component (interval cleanup + reduced-motion static fallback + no hydration mismatch); assets optimized/<500 KB; no tracked `docs/source-assets`, no loose `Section*`.
+
 ## Deviations & learnings
 
 - **Two false starts, both owner-corrected:** the hero was swapped (owner had picked "swap" when asked, then said keep it — reverted); §1 was first built as a photo-stack because the owner's §1 example PNG had an accented "café" filename my tools couldn't open, and it was then deleted with the Section folders — so §1 was designed blind and missed. The owner re-shared the folders; §1 was rebuilt to match exactly. **Lesson:** never delete the owner's example refs before every dependent section is built; copy accented-name refs to an ASCII path up front.
@@ -42,7 +51,7 @@ Executed live in the session from the plan at `~/.claude/plans/ok-please-execute
 
 ## Follow-ups
 
-- **Optional independent Codex review** before merge (prompt provided at sprint end) — recommended because this sprint touches shared footer chrome.
+- **Independent Codex review = DONE** (2026-07-08) — 2 Mediums fixed on-branch (see above); ready for owner Preview → merge → `/close`.
 - Update the canonical `docs/page-copy/01-public-pages/model.md` (OneDrive) to the new mockup-matched copy.
 - The green "decoration" master and the dabke photo were not needed (owner chose calm-light §4); they remain in the owner's drop only.
 - Continue the DR3 series page-by-page (`/experience`, `/bring-ph`, …), each built to the owner's mockups like `/model`.
