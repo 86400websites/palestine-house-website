@@ -25,6 +25,24 @@ export const PHOTO_SOURCES = {
   "ph-photo-stage-plan": "/assets/photos/ph-photo-stage-plan.jpg",
   "ph-photo-stage-build": "/assets/photos/ph-photo-stage-build.jpg",
   "ph-photo-stage-cafe": "/assets/photos/ph-photo-stage-cafe.jpg",
+  /* DR3.1 — /model body. §1 "cultural embassy" collage: 4 photos per category
+     (café · venue · community) that rotate through big + thumb slots; plus the
+     tatreez side-strip, the closing-band invite, and the "what this is" still-life. */
+  "ph-photo-embassy-cafe-1": "/assets/photos/ph-photo-embassy-cafe-1.jpg",
+  "ph-photo-embassy-cafe-2": "/assets/photos/ph-photo-embassy-cafe-2.jpg",
+  "ph-photo-embassy-cafe-3": "/assets/photos/ph-photo-embassy-cafe-3.jpg",
+  "ph-photo-embassy-cafe-4": "/assets/photos/ph-photo-embassy-cafe-4.jpg",
+  "ph-photo-embassy-venue-1": "/assets/photos/ph-photo-embassy-venue-1.jpg",
+  "ph-photo-embassy-venue-2": "/assets/photos/ph-photo-embassy-venue-2.jpg",
+  "ph-photo-embassy-venue-3": "/assets/photos/ph-photo-embassy-venue-3.jpg",
+  "ph-photo-embassy-venue-4": "/assets/photos/ph-photo-embassy-venue-4.jpg",
+  "ph-photo-embassy-community-1": "/assets/photos/ph-photo-embassy-community-1.jpg",
+  "ph-photo-embassy-community-2": "/assets/photos/ph-photo-embassy-community-2.jpg",
+  "ph-photo-embassy-community-3": "/assets/photos/ph-photo-embassy-community-3.jpg",
+  "ph-photo-embassy-community-4": "/assets/photos/ph-photo-embassy-community-4.jpg",
+  "ph-photo-embassy-tatreez": "/assets/photos/ph-photo-embassy-tatreez.jpg",
+  "ph-photo-model-invite": "/assets/photos/ph-photo-model-invite.jpg",
+  "ph-photo-model-still": "/assets/photos/ph-photo-model-still.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;
@@ -39,6 +57,8 @@ export const ART_SOURCES = {
   "ph-art-branch-2": "/assets/art/ph-art-branch-2.png",
   "ph-art-branch-3": "/assets/art/ph-art-branch-3.png",
   "ph-art-branch-4": "/assets/art/ph-art-branch-4.png",
+  /* DR3.1 — gold line-art olive branch for the /model dark bands */
+  "ph-art-model-branch": "/assets/art/ph-art-model-branch.png",
 } as const;
 
 export type ArtId = keyof typeof ART_SOURCES;

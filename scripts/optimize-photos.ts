@@ -52,6 +52,7 @@ const SRC = path.join(ROOT, "docs", "source-assets", "design-refs", "v3");
 const OUT_PHOTOS = path.join(ROOT, "public", "assets", "photos");
 const OUT_ART = path.join(ROOT, "public", "assets", "art");
 const OUT_LOGO = path.join(ROOT, "public", "assets", "logo");
+const OUT_PARTNERS = path.join(ROOT, "public", "assets", "partners");
 
 const exists = async (p: string): Promise<boolean> =>
   fs.access(p).then(() => true, () => false);
@@ -78,6 +79,26 @@ const PHOTOS: { src: string; out: string; width: number; height: number }[] = [
   { src: "stage-plan.png", out: "ph-photo-stage-plan.jpg", width: 1600, height: 1600 },
   { src: "stage-build.png", out: "ph-photo-stage-build.jpg", width: 1600, height: 1600 },
   { src: "stage-cafe.png", out: "ph-photo-stage-cafe.jpg", width: 1600, height: 1600 },
+  /* DR3.1 — /model body. The §1 "cultural embassy" collage: 4 photos per
+     category (café · venue · community) that rotate through a big + 3-thumb
+     layout; plus the closing-band invite and the "what this is" still-life
+     (owner masters, 2026-07-07). The hero (ph-photo-model) is left unchanged. */
+  { src: "embassy-cafe-1.jpg", out: "ph-photo-embassy-cafe-1.jpg", width: 1200, height: 1200 },
+  { src: "embassy-cafe-2.jpg", out: "ph-photo-embassy-cafe-2.jpg", width: 1200, height: 1200 },
+  { src: "embassy-cafe-3.jpg", out: "ph-photo-embassy-cafe-3.jpg", width: 1200, height: 1200 },
+  { src: "embassy-cafe-4.jpg", out: "ph-photo-embassy-cafe-4.jpg", width: 1200, height: 1200 },
+  { src: "embassy-venue-1.jpg", out: "ph-photo-embassy-venue-1.jpg", width: 1200, height: 1200 },
+  { src: "embassy-venue-2.jpg", out: "ph-photo-embassy-venue-2.jpg", width: 1200, height: 1200 },
+  { src: "embassy-venue-3.jpg", out: "ph-photo-embassy-venue-3.jpg", width: 1200, height: 1200 },
+  { src: "embassy-venue-4.jpg", out: "ph-photo-embassy-venue-4.jpg", width: 1200, height: 1200 },
+  { src: "embassy-community-1.jpg", out: "ph-photo-embassy-community-1.jpg", width: 1200, height: 1200 },
+  { src: "embassy-community-2.jpg", out: "ph-photo-embassy-community-2.jpg", width: 1200, height: 1200 },
+  { src: "embassy-community-3.jpg", out: "ph-photo-embassy-community-3.jpg", width: 1200, height: 1200 },
+  { src: "embassy-community-4.jpg", out: "ph-photo-embassy-community-4.jpg", width: 1200, height: 1200 },
+  { src: "model-invite.jpg", out: "ph-photo-model-invite.jpg", width: 2000, height: 2000 },
+  { src: "model-still.jpg", out: "ph-photo-model-still.jpg", width: 1400, height: 1400 },
+  /* the §1 green tatreez side-strip (opaque → jpeg); a narrow decorative band */
+  { src: "embassy-tatreez.png", out: "ph-photo-embassy-tatreez.jpg", width: 500, height: 2400 },
 ];
 
 /** DR2 decorative masters (in SRC/art) -> keyed transparent PNGs in OUT_ART.
@@ -88,6 +109,9 @@ const ART: { src: string; out: string; width: number; height: number }[] = [
   { src: "olive-branch-2.png", out: "ph-art-branch-2.png", width: 1200, height: 1200 },
   { src: "olive-branch-3.png", out: "ph-art-branch-3.png", width: 1200, height: 1200 },
   { src: "olive-branch-4.png", out: "ph-art-branch-4.png", width: 1200, height: 1200 },
+  /* DR3.1 — the gold line-art olive branch for /model (baked light-checkerboard
+     background, keyed adaptively to transparency like the DR2 branches). */
+  { src: "model-branch.png", out: "ph-art-model-branch.png", width: 900, height: 900 },
 ];
 
 const kb = (n: number) => `${Math.round(n / 1024)} KB`;
@@ -279,13 +303,57 @@ async function writeLogoCrop(
   console.log(`logo   ${outName}  ${meta.width}x${meta.height}  ${kb(buf.length)}`);
 }
 
+/**
+ * DR3.1 — the Aswātna partner seal for the /model "three layers" arch. The master is
+ * the studio's orange line-seal on a white ground. Key the white ground out to
+ * transparent and recolor the orange line-art to cream, so it reads as a single quiet
+ * monochrome mark on the terracotta arch (per the owner's mockup — never the raw
+ * saturated orange). Trim to the mark, bound to 400px.
+ */
+async function encodeAswatnaMark(): Promise<void> {
+  const srcPath = path.join(SRC, "logo", "aswatna-master.png");
+  const outPath = path.join(OUT_PARTNERS, "aswatna-mark.png");
+  if (!(await exists(srcPath))) {
+    console.log("skip   aswatna-mark.png (master absent)");
+    return;
+  }
+  const { data, info } = await sharp(srcPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const [CR, CG, CB] = [246, 239, 228]; // --cream-100
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const sat = Math.max(r, g, b) - Math.min(r, g, b);
+    if (a < 8 || (lum >= 210 && sat < 40)) {
+      data[i + 3] = 0; // transparent margin + white ground -> out
+    } else {
+      data[i] = CR; data[i + 1] = CG; data[i + 2] = CB; // orange line-art -> cream (alpha kept)
+    }
+  }
+  const box = bbox(data, info.width, info.height, (_r, _g, _b, a) => a > 8);
+  const pad = 8;
+  const left = Math.max(0, box.left - pad);
+  const top = Math.max(0, box.top - pad);
+  const cw = Math.min(info.width, box.right + pad + 1) - left;
+  const ch = Math.min(info.height, box.bottom + pad + 1) - top;
+  const buf = await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+    .extract({ left, top, width: cw, height: ch })
+    .resize({ width: 400, height: 400, fit: "inside", withoutEnlargement: true })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+  await fs.writeFile(outPath, buf);
+  const meta = await sharp(buf).metadata();
+  console.log(`logo   aswatna-mark.png  ${meta.width}x${meta.height}  ${kb(buf.length)}`);
+}
+
 async function main(): Promise<void> {
   await fs.mkdir(OUT_PHOTOS, { recursive: true });
   await fs.mkdir(OUT_ART, { recursive: true });
   await fs.mkdir(OUT_LOGO, { recursive: true });
+  await fs.mkdir(OUT_PARTNERS, { recursive: true });
 
   for (const entry of PHOTOS) await encodePhoto(entry);
   for (const entry of ART) await encodeArt(entry);
+  await encodeAswatnaMark();
 
   if (await exists(path.join(SRC, "logo", "logo-master.png"))) {
     const raw = await keyOutBackground(path.join(SRC, "logo", "logo-master.png"));
