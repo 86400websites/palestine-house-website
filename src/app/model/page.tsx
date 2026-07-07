@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ART_SOURCES, Photo } from "@/components/shared/photo";
 import { PageDivider } from "@/components/shared/page-divider";
+import { TatreezDivider } from "@/components/shared/tatreez-divider";
 import { PageHero } from "@/components/sections/page-hero";
 import { EmbassyGallery } from "@/components/sections/model/embassy-gallery";
 import { FadeIn, Reveal } from "@/components/motion/reveal";
@@ -261,6 +262,57 @@ export default function ModelPage() {
           </div>
           <p className="model-leads">Culture leads.</p>
         </Reveal>
+      </section>
+
+      {/* 7 — Could your city hold the next Palestine House? (closing band) */}
+      <section className="model-invite" aria-labelledby="model-invite-h">
+        <div className="model-invite-inner">
+          <Photo
+            assetId="ph-photo-model-invite"
+            alt="Guests gathered at a warm, plant-draped doorway of a Palestine House in the evening."
+            sizes="(max-width: 880px) 100vw, 40vw"
+            className="model-invite-photo"
+          />
+          <Reveal className="model-invite-content">
+            <h2 id="model-invite-h" className="model-invite-h">
+              Could your city hold the next Palestine House?
+            </h2>
+            <span className="model-invite-rule" aria-hidden="true" />
+            <div className="model-invite-cta-row">
+              <p className="model-invite-lead">
+                If you have the venue, the commitment, and the community, we’ll
+                help you build the standard.
+              </p>
+              <div className="model-invite-buttons">
+                <Button asChild size="lg" className="v3-cta model-invite-apply">
+                  <Link href="/apply">
+                    Apply to bring a House
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="v3-cta model-invite-support"
+                >
+                  <Link href="/our-support">
+                    See our support
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </Reveal>
+          {/* eslint-disable-next-line @next/next/no-img-element -- decorative branch */}
+          <img
+            className="model-invite-branch"
+            src={ART_SOURCES["ph-art-model-branch"]}
+            alt=""
+            aria-hidden="true"
+          />
+        </div>
+        <TatreezDivider width="100%" opacity={0.5} palette="v3" />
       </section>
     </>
   );

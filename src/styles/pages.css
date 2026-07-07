@@ -1126,6 +1126,130 @@
   }
 }
 
+/* Could your city… — closing invite band (DR3.1). Green sampled from the §5
+   mockup; terracotta apply + gold outline support; gold branch + tatreez foot.
+   Full-bleed: the photo bleeds to the left edge (not inside .ph-container). */
+.model-invite {
+  position: relative;
+  background: #272c12;
+  overflow: hidden;
+}
+.model-invite-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 30rem;
+}
+.model-invite-photo {
+  /* definite height so next/image `fill` resolves (grid stretch stays indefinite) */
+  height: clamp(22rem, 34vw, 30rem);
+}
+.model-invite-content {
+  align-self: center;
+  max-width: 46rem;
+  padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.5rem, 6vw, 5rem);
+}
+.model-invite-h {
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: clamp(1.9rem, 2.2vw + 1rem, 2.9rem);
+  line-height: var(--leading-tight);
+  color: var(--cream-50);
+}
+.model-invite-rule {
+  display: block;
+  position: relative;
+  width: 13rem;
+  height: 1px;
+  margin: var(--space-6) 0;
+  background: var(--copper-300);
+  opacity: 0.6;
+}
+.model-invite-rule::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--copper-300);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.model-invite-cta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+  align-items: center;
+}
+.model-invite-lead {
+  max-width: 20rem;
+  padding-right: var(--space-6);
+  border-right: 1px solid rgba(200, 154, 106, 0.3);
+  font: var(--text-lead);
+  color: var(--cream-100);
+}
+.model-invite-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.model-invite-buttons > * {
+  width: 100%;
+}
+/* terracotta apply + gold outline support, overriding the default v3 button;
+   arrow sits at the far edge (space-between) per the mockup */
+.model-invite-apply {
+  justify-content: space-between;
+  background: #924721;
+  color: var(--cream-50);
+}
+.model-invite-apply:hover {
+  background: #7d3c1b;
+}
+.model-invite-support {
+  justify-content: space-between;
+  border-color: var(--copper-300);
+  background: transparent;
+  color: var(--copper-300);
+}
+.model-invite-support:hover {
+  background: rgba(200, 154, 106, 0.12);
+  color: var(--copper-300);
+}
+.model-invite-branch {
+  position: absolute;
+  right: -2%;
+  bottom: -6%;
+  width: clamp(160px, 20vw, 300px);
+  height: auto;
+  opacity: 0.7;
+  transform: rotate(4deg);
+  pointer-events: none;
+}
+@container page (max-width: 880px) {
+  .model-invite-inner {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .model-invite-photo {
+    min-height: 15rem;
+    aspect-ratio: 16 / 10;
+  }
+  .model-invite-cta-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  .model-invite-lead {
+    max-width: none;
+    padding-right: 0;
+    border-right: 0;
+  }
+  .model-invite-branch {
+    width: 130px;
+  }
+}
+
 /* ===========================================================================
    Experience (/experience) — page-specific (Experience.html)
    ======================================================================== */
