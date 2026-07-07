@@ -677,11 +677,17 @@
 }
 .phx-footer-cta-support {
   justify-content: space-between;
+}
+/* Gold outline on the dark footer — must out-specify the v3 outline-button
+   restyle (`v3.css` `:is(.ph-page,…)[data-slot=button][data-variant=outline]`,
+   0,3,0) which would otherwise make it the cream secondary. */
+.ph-page .phx-footer-cta-support[data-slot="button"][data-variant="outline"] {
   border-color: var(--copper-300);
   background: transparent;
   color: var(--copper-300);
 }
-.phx-footer-cta-support:hover {
+.ph-page .phx-footer-cta-support[data-slot="button"][data-variant="outline"]:hover {
+  border-color: var(--copper-300);
   background: rgba(200, 154, 106, 0.12);
   color: var(--copper-300);
 }

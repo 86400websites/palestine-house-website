@@ -868,7 +868,9 @@
   color: var(--char-900);
 }
 .model-arch--terra {
-  background: #ac5f3b;
+  /* deepened one step from the sampled #ac5f3b so the cream title + body clear
+     AA 4.5:1 (was 4.13:1) — cream-100 on #9c5230 ≈ 5.0:1 */
+  background: #9c5230;
   color: var(--cream-100);
 }
 .model-arch-arrow {
