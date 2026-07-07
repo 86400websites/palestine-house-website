@@ -4,7 +4,8 @@ import { Artwork } from "@/components/shared/artwork";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { PageHero } from "@/components/sections/page-hero";
-import { Reveal } from "@/components/motion/reveal";
+import { EmbassyGallery } from "@/components/sections/model/embassy-gallery";
+import { FadeIn, Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
 /* The Model (/model) — copy verbatim from docs/page-copy/01-public-pages/model.md;
@@ -61,8 +62,8 @@ export default function ModelPage() {
       {/* 1 — v3 photo hero (DR1-9) */}
       <PageHero
         photo="ph-photo-model"
-        alt="Hands embroidering red tatreez patterns at a workshop table."
-        position="50% 55%"
+        alt="A musician plays to a seated audience in the warm, arched room of a Palestine House."
+        position="50% 66%"
         eyebrow="The Model"
         title="One name. Many Houses. One standard."
         lead="Every Palestine House is owned and run by people who know their own city. What holds the network together is a shared way of working — here’s how it fits."
@@ -76,10 +77,10 @@ export default function ModelPage() {
         </Button>
       </PageHero>
 
-      {/* 2 — A cultural embassy (feature row) */}
+      {/* 2 — A cultural embassy (feature row + living gallery) */}
       <section className="ph-section-lg">
-        <Reveal className="ph-container feature-row is-reverse">
-          <div className="feature-row-copy">
+        <div className="ph-container feature-row is-reverse">
+          <Reveal className="feature-row-copy">
             <p className="ph-eyebrow">What a House carries</p>
             <h2 className="model-h2">A cultural embassy, not a themed café.</h2>
             <p>
@@ -91,16 +92,11 @@ export default function ModelPage() {
               Every plate served, every dabke night, every exhibition is a small
               act of permanence.
             </p>
-          </div>
-          <div className="feature-row-art">
-            <Artwork
-              assetId="PH-FOOD-01"
-              alt="An arched passage into the House, a kilim runner leading the way in."
-              ratio="4 / 5"
-              sizes="(max-width: 880px) 100vw, 50vw"
-            />
-          </div>
-        </Reveal>
+          </Reveal>
+          <FadeIn className="feature-row-art">
+            <EmbassyGallery />
+          </FadeIn>
+        </div>
       </section>
 
       {/* 3 — Three layers, one team (artwork section — white per owner scheme) */}
