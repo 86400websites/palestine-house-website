@@ -109,12 +109,8 @@ const ART: { src: string; out: string; width: number; height: number }[] = [
   { src: "olive-branch-2.png", out: "ph-art-branch-2.png", width: 1200, height: 1200 },
   { src: "olive-branch-3.png", out: "ph-art-branch-3.png", width: 1200, height: 1200 },
   { src: "olive-branch-4.png", out: "ph-art-branch-4.png", width: 1200, height: 1200 },
-];
-
-/** DR3.1 — art masters that ALREADY carry real transparency (gold line-art olive
- *  branch for /model). Optimized as-is: trim the transparent margins + bound the size;
- *  the adaptive background keyer above would wrongly un-blend already-clean edges. */
-const DIRECT_ART: { src: string; out: string; width: number; height: number; trim?: boolean }[] = [
+  /* DR3.1 — the gold line-art olive branch for /model (baked light-checkerboard
+     background, keyed adaptively to transparency like the DR2 branches). */
   { src: "model-branch.png", out: "ph-art-model-branch.png", width: 900, height: 900 },
 ];
 
@@ -307,26 +303,6 @@ async function writeLogoCrop(
   console.log(`logo   ${outName}  ${meta.width}x${meta.height}  ${kb(buf.length)}`);
 }
 
-/** DR3.1 — optimize an already-transparent art master: trim the transparent border,
- *  bound the size, keep the existing alpha untouched (no keying / un-blend). */
-async function encodeDirectArt(entry: (typeof DIRECT_ART)[number]): Promise<void> {
-  const srcPath = path.join(SRC, "art", entry.src);
-  const outPath = path.join(OUT_ART, entry.out);
-  if (!(await exists(srcPath))) {
-    console.log(`skip   ${entry.out} (master absent)`);
-    return;
-  }
-  let pipe = sharp(srcPath).ensureAlpha();
-  if (entry.trim !== false) pipe = pipe.trim();
-  const buf = await pipe
-    .resize({ width: entry.width, height: entry.height, fit: "inside", withoutEnlargement: true })
-    .png({ compressionLevel: 9, palette: true }) // few-color line-art quantizes tiny
-    .toBuffer();
-  await fs.writeFile(outPath, buf);
-  const meta = await sharp(buf).metadata();
-  console.log(`art    ${entry.out}  ${meta.width}x${meta.height}  ${kb(buf.length)}`);
-}
-
 /**
  * DR3.1 — the Aswātna partner seal for the /model "three layers" arch. The master is
  * the studio's orange line-seal on a white ground. Key the white ground out to
@@ -377,7 +353,6 @@ async function main(): Promise<void> {
 
   for (const entry of PHOTOS) await encodePhoto(entry);
   for (const entry of ART) await encodeArt(entry);
-  for (const entry of DIRECT_ART) await encodeDirectArt(entry);
   await encodeAswatnaMark();
 
   if (await exists(path.join(SRC, "logo", "logo-master.png"))) {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, House, Key } from "lucide-react";
+import { ArrowRight, Handshake, House, Key, ShieldCheck, Users } from "lucide-react";
 import { ART_SOURCES } from "@/components/shared/photo";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
@@ -142,16 +142,41 @@ export default function ModelPage() {
         </div>
       </section>
 
-      {/* 4 — Run under license */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container model-license">
-          <p className="ph-eyebrow">The agreement</p>
-          <p className="model-license-line">
-            HQ licenses the brand to partners it has vetted.{" "}
-            <span>You run your House.</span> HQ makes sure every House meets the
-            same standard — so the name means the same thing in every city.
-          </p>
-        </Reveal>
+      {/* 4 — The shared promise (dark moss band) */}
+      <section className="model-promise">
+        <div className="ph-container model-promise-grid">
+          <Reveal className="model-promise-head">
+            <p className="ph-eyebrow">The agreement</p>
+            <h2 className="model-promise-h">The shared promise.</h2>
+            {/* eslint-disable-next-line @next/next/no-img-element -- decorative branch */}
+            <img
+              className="model-promise-branch"
+              src={ART_SOURCES["ph-art-model-branch"]}
+              alt=""
+              aria-hidden="true"
+            />
+          </Reveal>
+          <Reveal className="model-promise-cols">
+            <div className="model-promise-col">
+              <span className="model-promise-icon">
+                <Handshake aria-hidden="true" />
+              </span>
+              <p>You run your House.</p>
+            </div>
+            <div className="model-promise-col">
+              <span className="model-promise-icon">
+                <ShieldCheck aria-hidden="true" />
+              </span>
+              <p>HQ protects the name.</p>
+            </div>
+            <div className="model-promise-col">
+              <span className="model-promise-icon">
+                <Users aria-hidden="true" />
+              </span>
+              <p>Together, every House meets the same standard.</p>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       <PageDivider />

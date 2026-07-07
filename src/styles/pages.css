@@ -904,21 +904,90 @@
   }
 }
 
-/* Run under license — quiet editorial line */
-.model-license {
-  max-width: 50rem;
+/* The shared promise — full-bleed dark moss band (DR3.1). Green sampled from the
+   §3 mockup; gold accents = copper-300; the branch reuses ph-art-model-branch. */
+.model-promise {
+  background: #2f321b;
+  color: var(--cream-100);
+  padding-block: clamp(3.5rem, 5vw + 2rem, 6rem);
 }
-.model-license-line {
-  margin-top: var(--space-5);
+.model-promise-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 2fr);
+  gap: var(--space-10) var(--space-16);
+  align-items: center;
+}
+.model-promise .ph-eyebrow {
+  color: var(--copper-300);
+}
+.model-promise-h {
+  margin-top: var(--space-4);
   font-family: var(--font-display);
-  font-weight: var(--weight-medium);
-  font-size: clamp(var(--text-xl), 1.6vw + 1rem, var(--text-3xl));
-  line-height: var(--leading-snug);
-  letter-spacing: var(--tracking-tight);
-  color: var(--muted-foreground);
+  font-weight: var(--weight-regular);
+  font-size: clamp(2rem, 2.4vw + 1rem, 2.9rem);
+  line-height: var(--leading-tight);
+  color: var(--cream-50);
 }
-.model-license-line span {
-  color: var(--foreground);
+.model-promise-branch {
+  display: block;
+  width: clamp(150px, 16vw, 220px);
+  height: auto;
+  margin-top: var(--space-6);
+  opacity: 0.9;
+}
+.model-promise-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.model-promise-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 var(--space-4);
+  border-left: 1px solid rgba(200, 154, 106, 0.35);
+}
+.model-promise-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  margin-bottom: var(--space-6);
+  border: 1.5px solid var(--copper-300);
+  border-radius: var(--radius-full);
+  color: var(--copper-300);
+}
+.model-promise-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke-width: 1.4;
+}
+.model-promise-col p {
+  max-width: 12rem;
+  font: var(--text-lead);
+  color: var(--cream-100);
+}
+@container page (max-width: 880px) {
+  .model-promise-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+}
+@container page (max-width: 560px) {
+  .model-promise-cols {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .model-promise-col {
+    border-left: 0;
+    border-top: 1px solid rgba(200, 154, 106, 0.3);
+    padding-top: var(--space-8);
+  }
+  .model-promise-col:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
 }
 
 /* What it is / isn't */
