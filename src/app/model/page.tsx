@@ -62,8 +62,8 @@ export default function ModelPage() {
       {/* 1 — v3 photo hero (DR1-9) */}
       <PageHero
         photo="ph-photo-model"
-        alt="A musician plays to a seated audience in the warm, arched room of a Palestine House."
-        position="50% 66%"
+        alt="Hands embroidering red tatreez patterns at a workshop table."
+        position="50% 55%"
         eyebrow="The Model"
         title="One name. Many Houses. One standard."
         lead="Every Palestine House is owned and run by people who know their own city. What holds the network together is a shared way of working — here’s how it fits."
