@@ -86,7 +86,6 @@ export default function ModelPage() {
 
       {/* 2 — A cultural embassy (café · venue · community collage) */}
       <section className="ph-section-lg model-embassy">
-        <div className="model-embassy-strip" aria-hidden="true" />
         <div className="ph-container model-embassy-grid">
           <Reveal className="model-embassy-copy">
             <p className="ph-eyebrow">What a House carries</p>
@@ -123,7 +122,7 @@ export default function ModelPage() {
       </section>
 
       {/* 3 — Three layers, one team (the network arches) */}
-      <section className="ph-section-lg">
+      <section className="ph-section-lg model-network">
         <div className="ph-container">
           <Reveal className="sec-head">
             <p className="ph-eyebrow">How the network works</p>

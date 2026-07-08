@@ -600,21 +600,24 @@
   color: var(--white);
 }
 
-.phx-footer-apply {
-  border-bottom: var(--border-width) solid rgba(255, 255, 255, 0.12);
-}
+/* DR3.1.1: the old white hairline border-bottom here read as a stray white line
+   under the CTA photo — removed; the tatreez band (last child) is now the
+   divider between the CTA and the footer columns. */
 /* Rich closing CTA at the top of the footer card (DR3.1). The photo bleeds to
    the card's rounded edge (the card is overflow:hidden). Terracotta apply +
    gold outline support; gold branch. */
 .phx-footer-cta {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 0.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr);
   align-items: stretch;
 }
 .phx-footer-cta-photo {
-  /* definite height so next/image `fill` resolves inside the grid cell */
-  height: clamp(20rem, 30vw, 26rem);
+  /* min-height (not a fixed height) so grid `align-items:stretch` grows the photo
+     to the full content-row height (long + prominent, per the owner's reference)
+     while next/image `fill` still resolves against the stretched height; the
+     inherited `object-fit:cover` fills the panel edge-to-edge (DR3.1.1). */
+  min-height: clamp(24rem, 34vw, 34rem);
 }
 .phx-footer-cta-content {
   align-self: center;
@@ -707,6 +710,8 @@
   }
   .phx-footer-cta-photo {
     height: auto;
+    /* clear the desktop min-height floor so the 16/10 crop wins when stacked */
+    min-height: 0;
     aspect-ratio: 16 / 10;
   }
   .phx-footer-cta-row {
@@ -721,6 +726,21 @@
   .phx-footer-cta-branch {
     width: 120px;
   }
+}
+
+/* Horizontal ornamental tatreez band (DR3.1.1) — the ornate green/gold motif
+   (formerly the vertical embassy side-strip) reworked as a full-bleed horizontal
+   divider. One seamless tile (scripts/make-tatreez-band.ts) repeated across the
+   width. Used on /model between sections and at the base of the footer CTA. */
+.tatreez-band {
+  height: clamp(2.75rem, 3.4vw, 3.4rem);
+  background: url("/assets/photos/ph-photo-embassy-tatreez-band.jpg") repeat-x center / auto 100%;
+  overflow: hidden;
+}
+.tatreez-band--frieze {
+  height: auto;
+  background: none;
+  padding-block: var(--space-3);
 }
 
 .phx-footer-grid {

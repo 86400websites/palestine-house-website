@@ -676,25 +676,29 @@
 
 /* Cultural embassy (DR3.1) — a three-column collage (café · venue · community),
    each column a big image over three thumbnails that slowly rotate through the
-   slots (embassy-gallery.tsx). Left copy column + a green tatreez side-strip. */
+   slots (embassy-gallery.tsx). Left copy column. The ornate tatreez motif that
+   used to run as a vertical side-strip here is now a horizontal band after the
+   section (DR3.1.1 — TatreezBand). */
 .model-embassy {
   position: relative;
   overflow: hidden;
 }
-.model-embassy-strip {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: clamp(22px, 3.5vw, 60px);
-  background: url("/assets/photos/ph-photo-embassy-tatreez.jpg") center / cover;
-  opacity: 0.9;
-  pointer-events: none;
+/* DR3.1.1 — collapse the join to the next section (two stacked ph-section-lg
+   paddings used to sum to ~12rem of empty space) around the horizontal tatreez
+   band that now sits between them. The double-class selectors out-specify the
+   globals `.ph-section-lg` (0,1,0), so they win regardless of cascade order. */
+.model-embassy.ph-section-lg {
+  padding-bottom: var(--space-10);
+}
+.model-network.ph-section-lg {
+  padding-top: var(--space-10);
 }
 .model-embassy-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 2.18fr);
-  gap: var(--space-10) var(--space-16);
+  /* DR3.1.1 — give the gallery more width so the photos read bigger; the 15rem
+     floor keeps the copy column from ever being starved/cut off. */
+  grid-template-columns: minmax(15rem, 0.7fr) minmax(0, 2.45fr);
+  gap: var(--space-10);
   align-items: start;
 }
 .model-embassy-copy {
@@ -726,24 +730,31 @@
 .embassy {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 .embassy-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  /* DR3.1.1 — a subtle CREAM card (matches the section wash, not stark white)
+     so each set (café / venue / community) reads as a grouped unit. */
+  padding: var(--space-3) var(--space-3) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--cream-100);
+  border: 1px solid rgba(42, 36, 30, 0.05);
+  box-shadow: 0 16px 36px -28px rgba(42, 36, 30, 0.4);
 }
 .embassy-big,
 .embassy-thumb {
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: var(--cream-200);
-  box-shadow: 0 10px 26px -18px rgba(42, 36, 30, 0.5);
+  background: var(--cream-100);
+  box-shadow: 0 10px 26px -18px rgba(42, 36, 30, 0.45);
 }
 .embassy-big {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
   border-radius: var(--radius-md);
 }
 .embassy-big img,
@@ -752,13 +763,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  /* fill each frame edge-to-edge (owner, 2026-07-08 — cleaner than the
+     original-ratio matte); portrait sources crop only slightly in the 4/5 frame */
   object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-.embassy-big img.is-active,
-.embassy-thumb img.is-active {
-  opacity: 1;
 }
 .embassy-thumbs {
   display: grid;
@@ -768,12 +775,12 @@
   margin-top: var(--space-2);
 }
 .embassy-thumb {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   border-radius: var(--radius-sm);
 }
 .embassy-orn {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   margin-top: var(--space-5);
   color: var(--copper-700);
 }
@@ -794,9 +801,6 @@
   .model-embassy-grid {
     grid-template-columns: 1fr;
     gap: var(--space-8);
-  }
-  .model-embassy-strip {
-    display: none;
   }
 }
 @container page (max-width: 760px) {
