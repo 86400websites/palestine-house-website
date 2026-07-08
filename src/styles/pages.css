@@ -750,8 +750,6 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  /* cream matte behind each photo (matches the card) so the contain-letterbox of
-     mixed portrait/landscape photos blends in seamlessly (DR3.1.1) */
   background: var(--cream-100);
   box-shadow: 0 10px 26px -18px rgba(42, 36, 30, 0.45);
 }
@@ -765,9 +763,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  /* show each photo whole, at its ORIGINAL ratio — never cropped (owner,
-     2026-07-08); the cream letterbox blends into the card matte */
-  object-fit: contain;
+  /* fill each frame edge-to-edge (owner, 2026-07-08 — cleaner than the
+     original-ratio matte); portrait sources crop only slightly in the 4/5 frame */
+  object-fit: cover;
 }
 .embassy-thumbs {
   display: grid;
@@ -783,9 +781,7 @@
 .embassy-orn {
   width: 20px;
   height: 20px;
-  /* push the caption to the card bottom so titles align across all three cards */
-  margin-top: auto;
-  padding-top: var(--space-5);
+  margin-top: var(--space-5);
   color: var(--copper-700);
 }
 .embassy-col-title {

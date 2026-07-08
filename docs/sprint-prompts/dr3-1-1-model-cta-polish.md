@@ -23,7 +23,7 @@ Owner-gated sub-steps **1a…1f** plus several mid-flight owner refinements, pus
 - **Removed the tatreez band from the embassy section** — the owner wanted the ornament **only at the footer** (kept there). The gap-collapse padding stayed, so the join is still tight.
 - **Subtle "card" per set** — each column (café / venue / community) is a subtle card so they read grouped; recolored to a warm **cream** (`--cream-100`) "matching the background," not stark white.
 - **Rosette ornament** — the 8-point star column ornament was swapped for a copper **tatreez rosette** (eight teardrop petals + center), matching the owner's reference.
-- **All photos at their original ratios** — `object-fit: contain` on a cream (collage) / transparent-moss (footer) matte, **never cropped**. Uniform 4/5 frames keep the columns aligned; the **venue set was reordered** so its hero is a portrait shot (fills like café/community). The footer invite photo likewise shows whole (contain) and its letterbox blends into the moss footer; its column was widened.
+- **Photos fill their frames edge-to-edge** (`object-fit: cover`) in uniform 4/5 frames inside the cream cards; the **venue set was reordered** so its hero is a portrait shot (crops least). The footer invite photo fills its (taller, wider) panel edge-to-edge too. *(An original-ratio `contain` pass — cream/moss matte, no crop — was built first at the owner's request, but the letterbox on the mixed portrait/landscape sources looked wrong ("absurd"), so the owner reverted to edge-to-edge fills — the final state.)*
 
 ## Prompt used
 
@@ -37,8 +37,8 @@ Executed live in the session from the plan at `~/.claude/plans/please-execute-sp
 
 ## Deviations & learnings
 
-- **The image-ratio brief evolved live.** First pass matched the owner's card mockup with `object-fit: cover` (uniform crop); the owner then insisted (emphatically) on **original ratios, never cropped**. Cover → contain. Learning: when a reference mockup shows cropped fills but the owner says "original ratios," honor the words — the mockup itself was a crop.
-- **Mixed portrait/landscape sources are the crux.** The embassy photos are a mix of 800×1200 and 1200×800. `contain` in a uniform frame keeps columns aligned but letterboxes the off-orientation images; native ratios (no frame) avoid letterbox but stagger the rows (esp. the venue set, which has both orientations). Chose **contain + uniform 4/5 frames + a cream matte that blends the letterbox + a venue reorder so all three heroes are portrait**. **Known tradeoff:** some landscape *thumbnails* still carry a subtle cream matte — flagged to the owner with an offer to switch to edge-to-edge fills.
+- **The image-ratio brief round-tripped.** cover (matched the card mockup) → the owner asked emphatically for **original ratios, never cropped** → `contain` on a cream/moss matte → the owner saw it and said it "looks absurd" → **back to `object-fit: cover` (edge-to-edge fills), the final state.** Learning: with mixed portrait/landscape sources there's no clean uniform "no-crop" layout — `contain` letterboxes, native ratios stagger the rows — so edge-to-edge `cover` (crop-to-fill) is what reads clean; show the owner the `contain` result quickly rather than assuming it's what "original ratios" will look like.
+- **Mixed portrait/landscape sources are the crux.** The embassy photos are a mix of 800×1200 and 1200×800. Uniform 4/5 frames + `cover` keep the collage aligned and filled; reordering the venue set to a portrait hero minimizes its crop (a landscape hero in a 4/5 frame crops heavily).
 - **Seamless photo-tile band:** a flat green+gold graphic tiles cleanly with `repeat-x` if the crop edges land in the solid-green gaps between motifs — verified by rasterizing/compositing test bands before shipping.
 - **`next/image fill` under grid-stretch** resolves fine (a stretched grid item has a definite block size); the footer photo fills without a fixed height.
 - **Don't run `pnpm build` while `pnpm dev` is live** — the production build clobbers dev's `.next` chunks (`Cannot find module './###.js'`); build at the gate with dev stopped.
@@ -47,6 +47,6 @@ Executed live in the session from the plan at `~/.claude/plans/please-execute-sp
 ## Follow-ups
 
 - **Independent Codex review** — optional; prompt provided at sprint end (frontend/design only, so low-risk).
-- **Owner decision pending:** keep the subtle cream matte on landscape thumbnails/footer (cost of never cropping) or switch those to edge-to-edge fills.
+- **Image fit — RESOLVED:** edge-to-edge `cover` fills (owner, 2026-07-08), after trying and rejecting the original-ratio `contain` matte.
 - The `frieze` variant of `TatreezBand` is available (one prop) if the owner ever prefers the lighter vector divider over the ornate band.
 - Carryover from DR3.1: update the canonical `docs/page-copy/01-public-pages/model.md` (OneDrive) — the shipped page is the source of truth.

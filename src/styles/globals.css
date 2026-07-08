@@ -615,15 +615,9 @@
 .phx-footer-cta-photo {
   /* min-height (not a fixed height) so grid `align-items:stretch` grows the photo
      to the full content-row height (long + prominent, per the owner's reference)
-     while next/image `fill` still resolves against the stretched height (DR3.1.1). */
-  min-height: clamp(22rem, 30vw, 28rem);
-  /* transparent so the dark footer shows through the contain letterbox */
-  background: transparent;
-}
-.phx-footer-cta-photo > img {
-  /* show the whole invite photo at its ORIGINAL ratio, never cropped
-     (owner, 2026-07-08); the letterbox blends into the moss footer */
-  object-fit: contain;
+     while next/image `fill` still resolves against the stretched height; the
+     inherited `object-fit:cover` fills the panel edge-to-edge (DR3.1.1). */
+  min-height: clamp(24rem, 34vw, 34rem);
 }
 .phx-footer-cta-content {
   align-self: center;
