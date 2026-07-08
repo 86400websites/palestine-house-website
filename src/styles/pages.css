@@ -695,8 +695,10 @@
 }
 .model-embassy-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 2.18fr);
-  gap: var(--space-10) var(--space-16);
+  /* DR3.1.1 — give the gallery more width so the photos read bigger; the 15rem
+     floor keeps the copy column from ever being starved/cut off. */
+  grid-template-columns: minmax(15rem, 0.7fr) minmax(0, 2.45fr);
+  gap: var(--space-10);
   align-items: start;
 }
 .model-embassy-copy {
@@ -728,7 +730,7 @@
 .embassy {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 .embassy-col {
   display: flex;
