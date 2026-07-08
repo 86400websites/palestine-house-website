@@ -86,7 +86,6 @@ export default function ModelPage() {
 
       {/* 2 — A cultural embassy (café · venue · community collage) */}
       <section className="ph-section-lg model-embassy">
-        <div className="model-embassy-strip" aria-hidden="true" />
         <div className="ph-container model-embassy-grid">
           <Reveal className="model-embassy-copy">
             <p className="ph-eyebrow">What a House carries</p>

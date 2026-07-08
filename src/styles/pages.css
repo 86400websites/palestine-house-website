@@ -676,20 +676,12 @@
 
 /* Cultural embassy (DR3.1) — a three-column collage (café · venue · community),
    each column a big image over three thumbnails that slowly rotate through the
-   slots (embassy-gallery.tsx). Left copy column + a green tatreez side-strip. */
+   slots (embassy-gallery.tsx). Left copy column. The ornate tatreez motif that
+   used to run as a vertical side-strip here is now a horizontal band after the
+   section (DR3.1.1 — TatreezBand). */
 .model-embassy {
   position: relative;
   overflow: hidden;
-}
-.model-embassy-strip {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: clamp(22px, 3.5vw, 60px);
-  background: url("/assets/photos/ph-photo-embassy-tatreez.jpg") center / cover;
-  opacity: 0.9;
-  pointer-events: none;
 }
 .model-embassy-grid {
   display: grid;
@@ -794,9 +786,6 @@
   .model-embassy-grid {
     grid-template-columns: 1fr;
     gap: var(--space-8);
-  }
-  .model-embassy-strip {
-    display: none;
   }
 }
 @container page (max-width: 760px) {
