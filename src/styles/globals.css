@@ -600,21 +600,24 @@
   color: var(--white);
 }
 
-.phx-footer-apply {
-  border-bottom: var(--border-width) solid rgba(255, 255, 255, 0.12);
-}
+/* DR3.1.1: the old white hairline border-bottom here read as a stray white line
+   under the CTA photo — removed; the tatreez band (last child) is now the
+   divider between the CTA and the footer columns. */
 /* Rich closing CTA at the top of the footer card (DR3.1). The photo bleeds to
    the card's rounded edge (the card is overflow:hidden). Terracotta apply +
    gold outline support; gold branch. */
 .phx-footer-cta {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 0.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.48fr) minmax(0, 1fr);
   align-items: stretch;
 }
 .phx-footer-cta-photo {
-  /* definite height so next/image `fill` resolves inside the grid cell */
-  height: clamp(20rem, 30vw, 26rem);
+  /* min-height (not a fixed height) so grid `align-items:stretch` grows the photo
+     to the full content-row height — bigger photo, no dark strip/white line
+     beneath — while next/image `fill` still resolves against the stretched
+     (definite) height (DR3.1.1) */
+  min-height: clamp(20rem, 30vw, 26rem);
 }
 .phx-footer-cta-content {
   align-self: center;
@@ -707,6 +710,8 @@
   }
   .phx-footer-cta-photo {
     height: auto;
+    /* clear the desktop min-height floor so the 16/10 crop wins when stacked */
+    min-height: 0;
     aspect-ratio: 16 / 10;
   }
   .phx-footer-cta-row {

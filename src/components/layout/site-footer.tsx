@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import { ART_SOURCES, Photo } from "@/components/shared/photo";
+import { TatreezBand } from "@/components/shared/tatreez-band";
 import { Button } from "@/components/ui/button";
 
 /* Locked public footer — v3 refresh (DR2-5: owner footer mockup + the
@@ -60,6 +61,8 @@ export function SiteFooter() {
             aria-hidden="true"
           />
         </div>
+        {/* horizontal tatreez band anchoring the base of the CTA (DR3.1.1) */}
+        <TatreezBand />
       </div>
 
       <div className="ph-container phx-footer-grid">
