@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { ART_SOURCES, Photo } from "@/components/shared/photo";
 import { PageDivider } from "@/components/shared/page-divider";
-import { TatreezBand } from "@/components/shared/tatreez-band";
 import { PageHero } from "@/components/sections/page-hero";
 import { EmbassyGallery } from "@/components/sections/model/embassy-gallery";
 import { FadeIn, Reveal } from "@/components/motion/reveal";
@@ -121,9 +120,6 @@ export default function ModelPage() {
           </FadeIn>
         </div>
       </section>
-
-      {/* horizontal tatreez band — divider/anchor after the embassy section */}
-      <TatreezBand />
 
       {/* 3 — Three layers, one team (the network arches) */}
       <section className="ph-section-lg model-network">

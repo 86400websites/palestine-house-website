@@ -730,13 +730,20 @@
 .embassy {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 .embassy-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  /* DR3.1.1 — a subtle card so each set (café / venue / community) reads as a
+     grouped unit, per the owner's reference. */
+  padding: var(--space-3) var(--space-3) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid rgba(42, 36, 30, 0.06);
+  box-shadow: 0 16px 36px -28px rgba(42, 36, 30, 0.45);
 }
 .embassy-big,
 .embassy-thumb {
@@ -747,7 +754,9 @@
   box-shadow: 0 10px 26px -18px rgba(42, 36, 30, 0.5);
 }
 .embassy-big {
-  aspect-ratio: 4 / 3;
+  /* a touch taller than 4/3 so more of each photo shows, per the owner's
+     reference; cover keeps every image undistorted (DR3.1.1) */
+  aspect-ratio: 5 / 4;
   border-radius: var(--radius-md);
 }
 .embassy-big img,
@@ -757,12 +766,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-.embassy-big img.is-active,
-.embassy-thumb img.is-active {
-  opacity: 1;
 }
 .embassy-thumbs {
   display: grid;
@@ -776,8 +779,8 @@
   border-radius: var(--radius-sm);
 }
 .embassy-orn {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   margin-top: var(--space-5);
   color: var(--copper-700);
 }

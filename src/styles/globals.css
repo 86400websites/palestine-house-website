@@ -616,8 +616,9 @@
   /* min-height (not a fixed height) so grid `align-items:stretch` grows the photo
      to the full content-row height — bigger photo, no dark strip/white line
      beneath — while next/image `fill` still resolves against the stretched
-     (definite) height (DR3.1.1) */
-  min-height: clamp(20rem, 30vw, 26rem);
+     (definite) height. Taller floor per the owner's reference so the photo reads
+     long + prominent (DR3.1.1). */
+  min-height: clamp(24rem, 38vw, 36rem);
 }
 .phx-footer-cta-content {
   align-self: center;
