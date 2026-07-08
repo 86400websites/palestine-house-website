@@ -32,10 +32,11 @@ const COLUMNS: Column[] = [
     key: "venue",
     title: "A real venue.",
     subtitle: "For art, music, film, literature, ideas, and gatherings.",
+    // portrait shot first so the hero fills the 4/5 frame like café/community
     photos: [
+      "ph-photo-embassy-venue-3",
       "ph-photo-embassy-venue-1",
       "ph-photo-embassy-venue-2",
-      "ph-photo-embassy-venue-3",
       "ph-photo-embassy-venue-4",
     ],
   },

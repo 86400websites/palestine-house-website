@@ -737,26 +737,26 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  /* DR3.1.1 — a subtle card so each set (café / venue / community) reads as a
-     grouped unit, per the owner's reference. */
+  /* DR3.1.1 — a subtle CREAM card (matches the section wash, not stark white)
+     so each set (café / venue / community) reads as a grouped unit. */
   padding: var(--space-3) var(--space-3) var(--space-6);
   border-radius: var(--radius-lg);
-  background: var(--card);
-  border: 1px solid rgba(42, 36, 30, 0.06);
-  box-shadow: 0 16px 36px -28px rgba(42, 36, 30, 0.45);
+  background: var(--cream-100);
+  border: 1px solid rgba(42, 36, 30, 0.05);
+  box-shadow: 0 16px 36px -28px rgba(42, 36, 30, 0.4);
 }
 .embassy-big,
 .embassy-thumb {
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: var(--cream-200);
-  box-shadow: 0 10px 26px -18px rgba(42, 36, 30, 0.5);
+  /* cream matte behind each photo (matches the card) so the contain-letterbox of
+     mixed portrait/landscape photos blends in seamlessly (DR3.1.1) */
+  background: var(--cream-100);
+  box-shadow: 0 10px 26px -18px rgba(42, 36, 30, 0.45);
 }
 .embassy-big {
-  /* a touch taller than 4/3 so more of each photo shows, per the owner's
-     reference; cover keeps every image undistorted (DR3.1.1) */
-  aspect-ratio: 5 / 4;
+  aspect-ratio: 4 / 5;
   border-radius: var(--radius-md);
 }
 .embassy-big img,
@@ -765,7 +765,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* show each photo whole, at its ORIGINAL ratio — never cropped (owner,
+     2026-07-08); the cream letterbox blends into the card matte */
+  object-fit: contain;
 }
 .embassy-thumbs {
   display: grid;
@@ -775,13 +777,15 @@
   margin-top: var(--space-2);
 }
 .embassy-thumb {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   border-radius: var(--radius-sm);
 }
 .embassy-orn {
   width: 20px;
   height: 20px;
-  margin-top: var(--space-5);
+  /* push the caption to the card bottom so titles align across all three cards */
+  margin-top: auto;
+  padding-top: var(--space-5);
   color: var(--copper-700);
 }
 .embassy-col-title {
