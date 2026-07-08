@@ -723,6 +723,21 @@
   }
 }
 
+/* Horizontal ornamental tatreez band (DR3.1.1) — the ornate green/gold motif
+   (formerly the vertical embassy side-strip) reworked as a full-bleed horizontal
+   divider. One seamless tile (scripts/make-tatreez-band.ts) repeated across the
+   width. Used on /model between sections and at the base of the footer CTA. */
+.tatreez-band {
+  height: clamp(2.75rem, 3.4vw, 3.4rem);
+  background: url("/assets/photos/ph-photo-embassy-tatreez-band.jpg") repeat-x center / auto 100%;
+  overflow: hidden;
+}
+.tatreez-band--frieze {
+  height: auto;
+  background: none;
+  padding-block: var(--space-3);
+}
+
 .phx-footer-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;

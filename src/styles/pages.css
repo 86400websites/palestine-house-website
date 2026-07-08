@@ -683,6 +683,16 @@
   position: relative;
   overflow: hidden;
 }
+/* DR3.1.1 — collapse the join to the next section (two stacked ph-section-lg
+   paddings used to sum to ~12rem of empty space) around the horizontal tatreez
+   band that now sits between them. The double-class selectors out-specify the
+   globals `.ph-section-lg` (0,1,0), so they win regardless of cascade order. */
+.model-embassy.ph-section-lg {
+  padding-bottom: var(--space-10);
+}
+.model-network.ph-section-lg {
+  padding-top: var(--space-10);
+}
 .model-embassy-grid {
   display: grid;
   grid-template-columns: minmax(0, 0.82fr) minmax(0, 2.18fr);
