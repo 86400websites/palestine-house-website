@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeOrigin, safeNextPath } from "@/lib/safe-redirect";
 import { upsertContact } from "@/lib/mailchimp/client";
+import { sendEmail } from "@/lib/resend/client";
+import { SITE_URL } from "@/lib/site";
 
 /* Server Actions for auth (run server-side so the browser never calls
    supabase.co directly — CSP connect-src stays 'self'). Sign-in + sign-out
@@ -248,6 +250,35 @@ export async function applyAction(
     console.error(
       "[mailchimp] apply tag failed (continuing):",
       tagError instanceof Error ? tagError.message : tagError,
+    );
+  }
+
+  // Best-effort application-received emails (E1) — same posture as the tag
+  // above: the account + application are already saved, so an email failure
+  // must NEVER block sign-up. Skipped on the idempotent-retry path above (that
+  // applicant was emailed on their first apply). The HQ notification needs
+  // RESEND_TO_EMAIL; the applicant confirmation needs only the sending pair.
+  // Both copy bodies are owner-approved (E1-1 gate, 2026-07-09).
+  try {
+    const hq = process.env.RESEND_TO_EMAIL;
+    if (hq) {
+      await sendEmail({
+        to: hq,
+        replyTo: email,
+        subject: `New application: ${name} — ${city}`,
+        text: `A new partner application just arrived.\n\nName: ${name}\nEmail: ${email}\nCity: ${city}\nOrganisation: ${organisation ?? "—"}\n\nWhy they want to bring a Palestine House:\n${why}\n\nReview and decide here:\n${SITE_URL}/admin/approvals\n\n— Palestine House website`,
+      });
+    }
+    await sendEmail({
+      to: email,
+      replyTo: process.env.RESEND_TO_EMAIL,
+      subject: "We received your application — Palestine House",
+      text: `Hello ${name},\n\nThank you for applying to bring a Palestine House. Your application is in, and it is now under review.\n\nYou can check its status any time by signing in:\n\n${SITE_URL}/dashboard\n\nWe read every application with care, and we will email you as soon as there is a decision. If you would like to add anything in the meantime, reach us here:\n\n${SITE_URL}/contact\n\n— Palestine House HQ`,
+    });
+  } catch (mailError) {
+    console.error(
+      "[resend] apply emails failed (continuing):",
+      mailError instanceof Error ? mailError.message : mailError,
     );
   }
 
