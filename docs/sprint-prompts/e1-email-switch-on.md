@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date built** | 2026-07-09 — BUILD COMPLETE (pre-merge); PR pending owner review + merge. |
-| **Branch / PR** | `claude/sprint-e1-email-switch-on` / PR — *(fill on merge)* |
+| **Date merged** | 2026-07-09 — **PR #55** (merge `4d68f09`); independent **Codex review (post-merge, on `main`) = GO — zero blocking, zero non-blocking, no fix PR**. Same day the owner executed the switch-on: Resend domain `palestine-house.com` **verified** (GoDaddy DNS done; Resend receiving intentionally OFF — Microsoft 365 owns the inbox) + the three `RESEND_*` vars added in Vercel **Production + Preview** (`from`/`to` = `info@palestine-house.com`). |
+| **Branch / PR** | `claude/sprint-e1-email-switch-on` / **#55** (merge `4d68f09`; 3 commits `f9178cf` → `e265bee` → `3651c30`) |
 | **Goal** | Complete the site's email automation and sign off every email task: finalize the live email set as **Resend-only, 4 flows** (Mailchimp dormant by owner decision), add the one missing flow (**application received → HQ + applicant**), close the outstanding S12 copy-sign-off carryover, and rewrite the owner switch-on runbook so going live is keys + DNS + a redeploy. |
 
 ## Owner decisions (2026-07-09, AskUserQuestion gates)
@@ -37,6 +37,12 @@ typecheck ✅ · lint ✅ · build ✅ (46 routes, unchanged — no route added/
 - **OneDrive canonical copy set** should gain the two new email bodies (owner side; shipped code is the source of truth, DR3.1 precedent).
 - **Emailed links follow `NEXT_PUBLIC_SITE_URL`** — until the pending domain cutover they carry working `…vercel.app` links; recommended: do the cutover first or in the same sitting (checklist header notes this).
 
+## Independent review (Codex, 2026-07-09, post-merge on `main` at `4d68f09`)
+
+**GO — zero blocking, zero non-blocking, no fix PR needed.** Confirmed: env names consistent (`RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL`, no mismatches, no client-side exposure, Resend imported only via the server-only helper); all six email paths correctly sequenced (DB/RPC writes before email, failures never block the user/admin flow, `redirect("/dashboard")` outside the email try/catch); links from `SITE_URL` (vercel.app links work until the domain cutover; Preview falls back to localhost per the checklist caveat); `pnpm run typecheck`/`lint`/`build` all passed on merged `main`; no test script exists (none run — correct). Explicitly confirmed a **Production redeploy is required** for the new env vars, and endorsed the checklist Part 4 live QA matrix. Full prompt + verdict: `docs/code-reviews/e1-email-switch-on.md`.
+
 ## Switch-on (owner, post-merge)
 
 Everything is in `docs/EMAIL-SETUP-CHECKLIST.md`: Resend account → add `palestine-house.com` → paste the records at GoDaddy → Verified → API key → the three `RESEND_*` vars in Vercel (Production + Preview, server-only) → redeploy → run the Part 4 live test matrix.
+
+**Status (2026-07-09):** account + domain **verified** ✅ · GoDaddy DNS **done** ✅ · three vars in **Production + Preview** ✅ (`info@palestine-house.com` from/to) · Resend receiving intentionally OFF (Microsoft 365 owns the inbox) ✅. **Remaining:** redeploy Production (env vars only take effect after a redeploy — Codex-confirmed) → run the Part 4 live test matrix (contact · support · apply pair · approve · decline · reply-to · link domains · one spam check).
