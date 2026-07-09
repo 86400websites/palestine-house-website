@@ -65,7 +65,7 @@ MAILCHIMP_API_KEY=
 MAILCHIMP_SERVER_PREFIX=
 MAILCHIMP_AUDIENCE_ID=
 RESEND_API_KEY=
-RESEND_FROM_EMAIL=hello@[PRODUCTION_DOMAIN]
+RESEND_FROM_EMAIL=info@palestine-house.com
 RESEND_TO_EMAIL=
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
@@ -177,7 +177,7 @@ The classic failure mode: a password-reset or signup-confirmation email created 
 
 ## Email integrations — Mailchimp + Resend (S12)
 
-The site wires **Mailchimp** (booklet lead magnets, newsletter, apply tagging) and **Resend** (contact + support + the approval/decline email) as honest no-op placeholders: each no-ops cleanly when its env vars are absent and switches on by adding the keys (and, for Resend, verifying the sending domain) — no code change. All six are **server-only** (never `NEXT_PUBLIC_`); the names already appear in the `.env.local` block and the Vercel matrix above. Format / where to find each:
+The site wires **Resend** (contact + support + the application-received pair (E1) + the approval/decline email) and **Mailchimp** (apply tagging — **dormant by owner decision, E1 2026-07-09**; the booklet lead magnet it once served was removed in DR1-8) as honest no-op placeholders: each no-ops cleanly when its env vars are absent and switches on by adding the keys (and, for Resend, verifying the sending domain) — no code change. All six are **server-only** (never `NEXT_PUBLIC_`); the names already appear in the `.env.local` block and the Vercel matrix above. Format / where to find each:
 
 | Variable | Format / where to find it |
 |---|---|
@@ -185,8 +185,8 @@ The site wires **Mailchimp** (booklet lead magnets, newsletter, apply tagging) a
 | `MAILCHIMP_SERVER_PREFIX` | The region suffix on the API key (the part after the `-`), e.g. `us1`, `us21`, `eu1`. |
 | `MAILCHIMP_AUDIENCE_ID` | Mailchimp → Audience → Settings → *Audience name and defaults* → Audience ID. |
 | `RESEND_API_KEY` | Resend → API Keys. Server-only. |
-| `RESEND_FROM_EMAIL` | The from address, on the **verified** sending domain (e.g. `hello@your-domain`). |
-| `RESEND_TO_EMAIL` | The inbox that receives contact + support messages. |
+| `RESEND_FROM_EMAIL` | The from address, on the **verified** sending domain — `info@palestine-house.com`. |
+| `RESEND_TO_EMAIL` | The inbox that receives contact + support + new-application notifications. |
 
 Switch-on is env-vars-only: set these in Vercel (Production, plus Preview if you want to test there) and **redeploy**. No real-delivery test is required to ship the sprint — verify once the keys + domain exist.
 
@@ -196,8 +196,8 @@ Switch-on is env-vars-only: set these in Vercel (Production, plus Preview if you
 
 `RESEND_FROM_EMAIL` must be on a domain Resend has verified, or sends fail (the helper logs the error and the public forms fail closed in Production). One-time setup, once the domain exists:
 
-1. Resend → **Domains** → **Add Domain** → enter the sending domain (the custom domain, or a subdomain such as `mail.your-domain`).
-2. Resend shows DNS records to add at your DNS provider:
+1. Resend → **Domains** → **Add Domain** → `palestine-house.com` (DNS is at GoDaddy — nameservers `ns11/ns12.domaincontrol.com`, confirmed 2026-07-09).
+2. Resend shows DNS records to add at your DNS provider. They target a `send.` subdomain (SPF + bounce MX) and `resend._domainkey` (DKIM), so the root domain's MX (the Microsoft 365 `info@` mailbox) and its existing SPF record are **not** modified:
    - **SPF** — a `TXT` record authorising Resend to send for the domain.
    - **DKIM** — `CNAME` (or `TXT`) record(s) that sign outgoing mail.
    - **DMARC** — a `TXT` record at `_dmarc.<domain>` (start with `v=DMARC1; p=none;` to monitor, tighten later).

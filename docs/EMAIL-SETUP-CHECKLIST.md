@@ -1,96 +1,97 @@
 # Email setup checklist — Palestine House
 
-Follow this **once** to switch the email automation on. Until you do, every form
-still works and shows its success message — it just quietly sends nothing, and
-nothing is lost. **None of this touches the code** — it is all keys + settings.
+> **Rewritten for E1 (2026-07-09).** The lead-magnet/booklet capture was removed
+> from the site in DR1-8 (2026-07-02), and the owner decided (E1, 2026-07-09)
+> that **Mailchimp stays dormant** — so live email is **Resend only**. The old
+> Mailchimp Part 1 of this checklist is retired; a short dormant-Mailchimp
+> appendix survives at the bottom.
 
-The system has **two independent halves**. Do either one first; each works on its
-own:
+Follow this **once** to switch the site's email on. Until you do, every form
+still works and shows its success message — it just quietly sends nothing on
+local/Preview, and the **public contact form fails closed (a soft error) on
+real Production** so a message is never silently lost. **None of this touches
+the code** — it is all keys + DNS + a redeploy.
 
-- **Mailchimp** → the free-booklet sign-up forms (and tags every applicant).
-- **Resend** → the contact form, the support form, and the approve/decline
-  emails sent to applicants.
+**What it turns on — the four flows (all Resend, all plain-text):**
 
-> Technical reference (env names, format hints, DNS): `docs/SUPABASE-VERCEL-SETUP.md` → "Email integrations — Mailchimp + Resend".
+1. **Contact form** (`/contact`) → emails **you** (`RESEND_TO_EMAIL`), Reply goes to the sender.
+2. **Support form** (signed-in partners) → emails **you**, Reply goes to the partner.
+3. **Application received** (`/apply`) → emails **you** (name, email, city, organisation, why + a link to `/admin/approvals`) **and** emails **the applicant** a "we received your application" confirmation.
+4. **Approve / decline** (`/admin/approvals`) → emails **the applicant** the approved ("sign in") or declined ("contact us") notice.
 
----
+> Technical reference (env names, format hints, DNS): `docs/SUPABASE-VERCEL-SETUP.md` → "Email integrations".
 
-## Part 1 — Mailchimp (applicant tagging)
-
-> **⚠️ UPDATE (2026-07-02, DR1-8 — owner decision):** the **booklet lead-magnet
-> capture was removed from the site entirely** (the home-hero dialog, the form,
-> and the `/api/mailchimp/booklet-capture` route are deleted; the hero's second
-> CTA links to The Model instead). Everything about `lead-booklet-a/b` tags and
-> the booklet-delivery automation (step 5 below, and the lead-form test in
-> Part 3) is **obsolete — skip it**. Mailchimp now does one thing: tags every
-> new **applicant** `applicant`, so steps 1–4 still apply if you want that.
-
-**Turns on:** every new applicant is tagged `applicant` in your Mailchimp
-audience.
-
-- [ ] **1.** Create a Mailchimp account (free is fine) and create one **Audience**.
-- [ ] **2.** Get your **API key** — Mailchimp → your profile (bottom-left) → **Account & billing** → **Extras** → **API keys** → **Create A Key**. Copy it. → this is `MAILCHIMP_API_KEY`.
-- [ ] **3.** Note your **server prefix** — it is the part after the dash at the end of the API key (a key ending `-us21` means the prefix is `us21`). → this is `MAILCHIMP_SERVER_PREFIX`.
-- [ ] **4.** Get your **Audience ID** — Mailchimp → **Audience** → **Settings** → **Audience name and defaults** → copy the **Audience ID** (looks like `a1b2c3d4e5`). → this is `MAILCHIMP_AUDIENCE_ID`.
-- [ ] **5.** ⚠️ **To actually deliver the booklet:** in Mailchimp, build a simple **automation** — "when a contact is tagged `lead-booklet-a`, send them an email with the booklet link" (and the same for `lead-booklet-b`). **Without this, the email is captured and tagged but no booklet is sent** — the website only tags the contact; Mailchimp does the sending. The two booklet PDFs are public, so just link to them in the automation email.
-
-→ You now have three values. Go to **Part 3**.
+**Recommended ordering:** do the still-pending **custom-domain cutover first**
+(Vercel `NEXT_PUBLIC_SITE_URL` + Supabase auth Site URL — `PROJECT-STATUS.md`
+§1/§4) — every emailed link (`/login`, `/contact`, `/dashboard`,
+`/admin/approvals`) is built from `NEXT_PUBLIC_SITE_URL`, so until then emails
+carry working but off-brand `…vercel.app` links. Email works either way.
 
 ---
 
-## Part 2 — Resend (contact, support, approval emails)
+## Part 1 — Verify the sending domain in Resend
 
-**Turns on:** the contact form emails you · the support form emails you ·
-approving/declining an applicant emails the applicant.
+Resend can only send from a domain you have verified. Ours is
+**`palestine-house.com`** (DNS is at **GoDaddy** — nameservers
+`ns11/ns12.domaincontrol.com`, confirmed 2026-07-09).
 
-> ⚠️ Resend can only send from a **domain you have verified**. If you do not have
-> the custom domain yet, this half waits until you do (the custom domain is part
-> of **S14**) — or verify any domain you already own now. The Mailchimp half
-> (Part 1) does **not** need a domain and can go live first.
+> **Your `info@palestine-house.com` inbox is safe.** Resend's records go on a
+> `send.palestine-house.com` subdomain (SPF + MX for bounces) and
+> `resend._domainkey` (DKIM) — the root domain's MX (Microsoft 365) and its
+> SPF record are **not** modified. Copy exactly what the Resend dashboard
+> shows; the dashboard is authoritative.
 
-- [ ] **1.** Create a **Resend** account.
-- [ ] **2.** **Add + verify your sending domain** — Resend → **Domains** → **Add Domain** → add the DNS records it shows (SPF, DKIM, DMARC) at your domain registrar → click **Verify** until it shows **Verified**. (Step-by-step in `docs/SUPABASE-VERCEL-SETUP.md` → "Resend sending-domain verification".)
-- [ ] **3.** Get your **API key** — Resend → **API Keys** → **Create API Key**. Copy it. → this is `RESEND_API_KEY`.
-- [ ] **4.** Pick the two addresses:
-  - **From** → an address on the verified domain, e.g. `hello@yourdomain`. → this is `RESEND_FROM_EMAIL`.
-  - **To** → the inbox where contact + support messages should land (your normal email is fine; this one does **not** need to be on the verified domain). → this is `RESEND_TO_EMAIL`.
+- [ ] **1.** Create a **Resend** account (the free tier — 100 emails/day, 3,000/month — is ample).
+- [ ] **2.** Resend → **Domains** → **Add Domain** → `palestine-house.com` (pick the closest region).
+- [ ] **3.** In **GoDaddy** (My Products → your domain → **DNS** → Add New Record), add each record Resend lists. Enter only the host part in *Name* (e.g. `send`, `resend._domainkey`) — GoDaddy appends the domain. Default TTL is fine.
+- [ ] **4.** Back in Resend, click **Verify** until the domain shows **Verified** (usually minutes; can take up to 48 h). **Don't add the Vercel keys until it's Verified.**
 
-→ You now have three values. Go to **Part 3**.
+## Part 2 — API key + the three addresses
 
----
+- [ ] **1.** Resend → **API Keys** → **Create API Key** (sending access only). Copy it once. → `RESEND_API_KEY`
+- [ ] **2.** **From:** `info@palestine-house.com` (on the verified domain). → `RESEND_FROM_EMAIL`
+- [ ] **3.** **To:** the inbox where contact/support/application notifications land — `info@palestine-house.com` (default; any inbox works, it does **not** need to be on the verified domain). → `RESEND_TO_EMAIL`
+
+> ⚠️ **All three are required.** The first two make sending possible; without
+> `RESEND_TO_EMAIL` the contact form still fails closed in Production and the
+> support/application notifications to you are skipped.
 
 ## Part 3 — Add the keys to Vercel, then redeploy
 
-- [ ] **1.** Vercel → your project → **Settings** → **Environment Variables**.
-- [ ] **2.** Add each value you have, scoped to **Production** (and **Preview** too if you want to test there). **All six are server-only** — never expose them to the browser, never rename one with a `NEXT_PUBLIC_` prefix.
-  - `MAILCHIMP_API_KEY` · `MAILCHIMP_SERVER_PREFIX` · `MAILCHIMP_AUDIENCE_ID`
-  - `RESEND_API_KEY` · `RESEND_FROM_EMAIL` · `RESEND_TO_EMAIL`
-- [ ] **3.** **Redeploy** — Vercel → **Deployments** → ⋯ on the latest → **Redeploy**. Env-var changes only take effect after a redeploy.
-
-> You can add Mailchimp's three now and Resend's later (or the reverse) — each
-> half lights up on its own.
-
----
+- [ ] **1.** Vercel → `palestine-house-website` → **Settings** → **Environment Variables**.
+- [ ] **2.** Add all three, scoped to **Production and Preview** (Preview lets you test with real sends before touching Production). **All server-only** — never expose to the browser, never a `NEXT_PUBLIC_` prefix. Mark the API key *Sensitive*.
+  - `RESEND_API_KEY` · `RESEND_FROM_EMAIL=info@palestine-house.com` · `RESEND_TO_EMAIL=info@palestine-house.com`
+- [ ] **3.** **Redeploy** — Vercel → **Deployments** → ⋯ on the latest → **Redeploy**. Env-var changes only take effect after a redeploy. (Preview picks them up on the next push.)
 
 ## Part 4 — Test it live (after the redeploy)
 
-- [ ] **Lead form** (Home or footer): enter an email → you see "the booklet is on its way" → the contact appears in Mailchimp with the `lead-booklet-*` tag (and receives the booklet if you built the automation in Part 1 step 5).
-- [ ] **Contact form** (`/contact`): send a message → it lands in your `RESEND_TO_EMAIL` inbox, and **Reply** goes straight to the sender.
-- [ ] **Support form** (signed in as an approved partner): submit → it lands in your inbox.
-- [ ] **Approvals** (`/admin/approvals`): approve an application → the applicant gets the "you're approved" email; decline another → the applicant gets the "not moving forward — contact us" email.
-- [ ] **Declined applicant** signs in → sees the "we're not moving forward right now" message with a working link to `/contact`.
+- [ ] **Contact** (`/contact`): send a message → it lands in `info@`; **Reply** addresses the sender.
+- [ ] **Support** (signed in as an approved partner): submit → lands in `info@`; **Reply** addresses the partner.
+- [ ] **Apply** (`/apply`, use a test email you control): sign-up still lands on the pending dashboard → `info@` gets the **"New application"** notification (all fields present) → the test inbox gets the **"We received your application"** confirmation → both emails' links open the right pages.
+- [ ] **Approve** (`/admin/approvals`): approve the test application → the applicant gets **"You're approved"** with a working sign-in link.
+- [ ] **Decline**: create a second test application, decline it → the applicant gets the **"not moving forward — contact us"** email; signing in shows the declined notice linking `/contact`.
+- [ ] Spot-check **spam placement** on at least one non-Gmail inbox. If it lands in spam, add the optional DMARC record (`_dmarc` TXT, `v=DMARC1; p=none;`) and retest.
 
 ---
 
 ## Good to know
 
-- **Nothing breaks before you do this.** With the keys absent, every form still
-  works and shows its success message. On Preview/local it is an honest no-op; on
-  real production a public form returns a soft error rather than silently losing a
-  message.
-- **The two booklet PDFs are the only public files** — safe to link in a Mailchimp
-  email.
-- **Spam/abuse protection** (rate-limiting + a Turnstile challenge) for the public
-  forms is **S14**, not part of this setup.
-- **You do not need to test delivery to merge S12** — the placeholders are review-
-  approved and ship safely without any keys.
+- **Nothing breaks before you do this.** Keys absent = honest no-op on
+  local/Preview; on real Production the public contact form fails closed
+  (soft error) and everything else stores/works — emails are simply skipped.
+- **Observability:** every attempt (and rejection) shows in the Resend
+  dashboard → **Emails**; server-side failures are logged in the Vercel
+  function logs (`[resend] …`).
+- **Spam/abuse protection** (rate-limiting + Turnstile) for the public forms
+  is in the Post-MVP hardening backlog (`ROADMAP.md` §A) — required before
+  scale, not for this switch-on.
+
+## Appendix — Mailchimp (dormant by owner decision, 2026-07-09)
+
+The Mailchimp integration (tagging each new applicant `applicant` in an
+audience) remains in the code as a clean no-op and is **intentionally off** —
+no account, no keys. The booklet lead magnet it once served was removed in
+DR1-8. If it is ever wanted: create a Mailchimp account + one Audience, add
+`MAILCHIMP_API_KEY` + `MAILCHIMP_SERVER_PREFIX` + `MAILCHIMP_AUDIENCE_ID`
+(server-only) in Vercel and redeploy — applicants start being tagged; nothing
+else changes.

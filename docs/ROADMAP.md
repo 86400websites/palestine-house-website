@@ -16,7 +16,7 @@
 - [x] `/live` Live Programming — *real session data + `/live/[id]` watch view (youtube-nocookie) + interactive `?mode=` filters shipped in S9 (9a–9c)*  **[public hero feature]**
 - [x] `/apply` — *live (S3c): sign-up → pending account + application record (zod-validated); single "Your name" field per D5 + an owner-approved Password field (§4). Rate-limit + Turnstile live in the **Post-MVP backlog hardening pass** (ex-S14, retired un-started 2026-07-02; required before scale) — see `PROJECT-STATUS.md` §7*
 - [x] `/about`, `/contact` (form UI built; sends via Resend in S12), `/focus-areas` (secondary route, linked from page bodies), `/privacy`, `/terms` (placeholder legal copy, counsel before launch)
-- [ ] Lead magnets: the two public booklets (*The House Promise*, *Operating Model & Governance*) — *capture forms built (Stage 0, honest no-op); Mailchimp tags `lead-booklet-a` / `lead-booklet-b` in S12*
+- ~~Lead magnets: the two public booklets (*The House Promise*, *Operating Model & Governance*)~~ — **removed in DR1-8 (owner decision, 2026-07-02):** the capture dialog/forms + `/api/mailchimp/booklet-capture` were deleted; the two booklet PDFs remain the only public files
 - [x] SEO: per-route metadata, `sitemap.ts`, `robots.ts`, OG image, JSON-LD (Organization, WebSite)
 
 ### Auth & access
@@ -41,7 +41,7 @@
 
 ### Platform plumbing
 - [x] Database: `profiles`, `applications`, `admins`, `elements`, `checklist_items`, `checklist_progress`, `programming_sessions`, `resources`, `academy_modules` — RLS default-deny, hardened `SECURITY DEFINER` RPCs, anon-safe public projections — *S2/S5; S6 adds the download/account/support writes (migrations 0017–0019). Test ✓; prod apply of 0016–0019 pending owner*
-- [ ] Email: Mailchimp (lead magnets, newsletter, apply tagging) + Resend (contact, transactional/approval notifications), verified sending domain — *wired as no-op placeholders in **S12**; live when the owner adds keys + verifies the Resend domain*
+- [x] Email: Resend live — 4 flows (contact · support · application-received pair · approve/decline), verified sending domain `palestine-house.com` — *wired as no-op placeholders in **S12**; application-received pair added + switch-on runbook finalized in **E1** (2026-07-09, `docs/EMAIL-SETUP-CHECKLIST.md`); owner executes keys + DNS. Mailchimp (apply tagging) **dormant by owner decision** (E1) — code stays no-op, no keys planned*
 - [ ] Hardening: Upstash rate limiting, Turnstile, security headers + CSP (embed origin only), fail-closed production forms — *moved to the Post-MVP backlog (S14 retired 2026-07-02); **required before scale***
 - [ ] CI (typecheck, lint, build, gitleaks) + branch protection + Vercel Preview/Production
 
