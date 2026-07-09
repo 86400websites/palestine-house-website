@@ -41,7 +41,7 @@
 
 ### Platform plumbing
 - [x] Database: `profiles`, `applications`, `admins`, `elements`, `checklist_items`, `checklist_progress`, `programming_sessions`, `resources`, `academy_modules` — RLS default-deny, hardened `SECURITY DEFINER` RPCs, anon-safe public projections — *S2/S5; S6 adds the download/account/support writes (migrations 0017–0019). Test ✓; prod apply of 0016–0019 pending owner*
-- [x] Email: Resend live — 4 flows (contact · support · application-received pair · approve/decline), verified sending domain `palestine-house.com` — *wired as no-op placeholders in **S12**; application-received pair added + switch-on runbook finalized in **E1** (2026-07-09, `docs/EMAIL-SETUP-CHECKLIST.md`); owner executes keys + DNS. Mailchimp (apply tagging) **dormant by owner decision** (E1) — code stays no-op, no keys planned*
+- [x] Email: Resend, 4 flows (contact · support · application-received pair · approve/decline) — **build-side complete in E1** (2026-07-09): code + owner-approved copy + runbook all done; **goes live when the owner executes `docs/EMAIL-SETUP-CHECKLIST.md`** (verify `palestine-house.com` in Resend via GoDaddy DNS + the three `RESEND_*` vars + redeploy) — *wired as no-op placeholders in **S12**; the application-received pair added in E1. Mailchimp (apply tagging) **dormant by owner decision** (E1) — code stays no-op, no keys planned*
 - [ ] Hardening: Upstash rate limiting, Turnstile, security headers + CSP (embed origin only), fail-closed production forms — *moved to the Post-MVP backlog (S14 retired 2026-07-02); **required before scale***
 - [ ] CI (typecheck, lint, build, gitleaks) + branch protection + Vercel Preview/Production
 

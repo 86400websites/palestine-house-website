@@ -63,6 +63,11 @@ Resend can only send from a domain you have verified. Ours is
   - `RESEND_API_KEY` · `RESEND_FROM_EMAIL=info@palestine-house.com` · `RESEND_TO_EMAIL=info@palestine-house.com`
 - [ ] **3.** **Redeploy** — Vercel → **Deployments** → ⋯ on the latest → **Redeploy**. Env-var changes only take effect after a redeploy. (Preview picks them up on the next push.)
 
+> **Preview-test caveat:** emails sent from a **Preview** deployment carry
+> `http://localhost:3000` links — `NEXT_PUBLIC_SITE_URL` is set for Production
+> only, so Preview falls back to the localhost default. That's expected; use
+> Preview to confirm **delivery**, and verify the **links** on Production.
+
 ## Part 4 — Test it live (after the redeploy)
 
 - [ ] **Contact** (`/contact`): send a message → it lands in `info@`; **Reply** addresses the sender.
@@ -79,9 +84,10 @@ Resend can only send from a domain you have verified. Ours is
 - **Nothing breaks before you do this.** Keys absent = honest no-op on
   local/Preview; on real Production the public contact form fails closed
   (soft error) and everything else stores/works — emails are simply skipped.
-- **Observability:** every attempt (and rejection) shows in the Resend
-  dashboard → **Emails**; server-side failures are logged in the Vercel
-  function logs (`[resend] …`).
+- **Observability:** sends that reach Resend (including API rejections, e.g.
+  an unverified domain) show in the Resend dashboard → **Emails**.
+  Unconfigured skips and network failures never reach Resend — those appear
+  only in the Vercel function logs (`[resend] …`).
 - **Spam/abuse protection** (rate-limiting + Turnstile) for the public forms
   is in the Post-MVP hardening backlog (`ROADMAP.md` §A) — required before
   scale, not for this switch-on.

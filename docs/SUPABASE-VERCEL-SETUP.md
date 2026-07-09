@@ -190,11 +190,11 @@ The site wires **Resend** (contact + support + the application-received pair (E1
 
 Switch-on is env-vars-only: set these in Vercel (Production, plus Preview if you want to test there) and **redeploy**. No real-delivery test is required to ship the sprint — verify once the keys + domain exist.
 
-> **Public-write hardening (Upstash rate-limiting + Turnstile) on the lead-magnet and contact routes is deferred to S14** (a known, owner-accepted deferral — `PROJECT-STATUS.md` §5/§7). Until then these routes ship with zod-validation + fail-closed-in-Production only.
+> **Public-write hardening (Upstash rate-limiting + Turnstile) on the public writes (`/apply`, contact) sits in the Post-MVP backlog** (ex-S14, retired un-started 2026-07-02 — `ROADMAP.md` §A, **required before scale**; owner-accepted, `PROJECT-STATUS.md` §5/§7). Until then these routes ship zod-validation (the contact route additionally fails closed in Production).
 
 ### Resend sending-domain verification (SPF / DKIM / DMARC)
 
-`RESEND_FROM_EMAIL` must be on a domain Resend has verified, or sends fail (the helper logs the error and the public forms fail closed in Production). One-time setup, once the domain exists:
+`RESEND_FROM_EMAIL` must be on a domain Resend has verified, or sends fail (the helper logs the error; the public **contact form fails closed** in Production, while the apply/support/approval emails degrade gracefully — the data is saved, the email is skipped). One-time setup, once the domain exists:
 
 1. Resend → **Domains** → **Add Domain** → `palestine-house.com` (DNS is at GoDaddy — nameservers `ns11/ns12.domaincontrol.com`, confirmed 2026-07-09).
 2. Resend shows DNS records to add at your DNS provider. They target a `send.` subdomain (SPF + bounce MX) and `resend._domainkey` (DKIM), so the root domain's MX (the Microsoft 365 `info@` mailbox) and its existing SPF record are **not** modified:

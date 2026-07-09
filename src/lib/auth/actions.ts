@@ -266,7 +266,7 @@ export async function applyAction(
         to: hq,
         replyTo: email,
         subject: `New application: ${name} — ${city}`,
-        text: `A new partner application just arrived.\n\nName: ${name}\nEmail: ${email}\nCity: ${city}\nOrganisation: ${organisation ?? "—"}\n\nWhy they want to bring a Palestine House:\n${why}\n\nReview and decide here:\n${SITE_URL}/admin/approvals\n\n— Palestine House website`,
+        text: `A new partner application just arrived.\n\nName: ${name}\nEmail: ${email}\nCity: ${city}\nOrganisation: ${organisation || "—"}\n\nWhy they want to bring a Palestine House:\n${why}\n\nReview and decide here:\n${SITE_URL}/admin/approvals\n\n— Palestine House website`,
       });
     }
     await sendEmail({
