@@ -419,9 +419,10 @@ img.phx-brand-mark {
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* The Experience day-figure photo (4:5 like its Artwork twin beside it). */
+/* The Experience day/night pair — both owner photos since LH1, landscape 3:2
+   side-by-side per the mockup (the 4:5 Artwork-twin ratio is retired). */
 .exp-mood-photo {
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 2;
 }
 
 /* --- v3 cream / photo split ("Culture deserves more than a moment.") ------ */

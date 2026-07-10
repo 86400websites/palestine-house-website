@@ -1382,6 +1382,13 @@
   margin-top: var(--space-3);
 }
 
+/* LH1 — the "A home, not a moment" permanence band reuses the v3-split recipe
+   (v3.css) with a wider photo column (~57%, per the owner mockup; the default
+   split is 53%). Stacks photo-first at ≤880px like every v3-split. */
+.exp-home-split {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+}
+
 /* ===========================================================================
    Live Programming (/live) — page-specific (Live.html)
    ======================================================================== */

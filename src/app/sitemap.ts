@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     /* No lastModified: a per-build timestamp would falsely mark every page
        as freshly changed on every deploy. */
     url: `${SITE_URL}${route === "/" ? "" : route}`,
-    changeFrequency: route === "/live" ? "daily" : "monthly",
+    changeFrequency: "monthly",
     priority: route === "/" ? 1 : route === "/apply" ? 0.9 : 0.7,
   }));
 }

@@ -11,14 +11,14 @@ export const SITE_TAGLINE =
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-/* Every public route, for sitemap.ts. */
+/* Every public route, for sitemap.ts. (/live left in LH1 — it's the gated
+   members-only Live hub now, noindexed by the workspace layout.) */
 export const PUBLIC_ROUTES = [
   "/",
   "/model",
   "/experience",
   "/bring-ph",
   "/our-support",
-  "/live",
   "/apply",
   "/focus-areas",
   "/about",

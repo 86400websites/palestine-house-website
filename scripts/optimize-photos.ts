@@ -99,6 +99,12 @@ const PHOTOS: { src: string; out: string; width: number; height: number }[] = [
   { src: "model-still.jpg", out: "ph-photo-model-still.jpg", width: 1400, height: 1400 },
   /* the §1 green tatreez side-strip (opaque → jpeg); a narrow decorative band */
   { src: "embassy-tatreez.png", out: "ph-photo-embassy-tatreez.jpg", width: 500, height: 2400 },
+  /* LH1 — /experience body: the day/night pair (§2, landscape crops) + the
+     "A home, not a moment" permanence split photo (§5, portrait master)
+     (owner masters, 2026-07-10). */
+  { src: "exp-cafe-day.jpg", out: "ph-photo-exp-cafe-day.jpg", width: 2000, height: 2000 },
+  { src: "exp-stage-night.jpg", out: "ph-photo-exp-stage-night.jpg", width: 2000, height: 2000 },
+  { src: "exp-home.jpg", out: "ph-photo-exp-home.jpg", width: 1600, height: 2000 },
 ];
 
 /** DR2 decorative masters (in SRC/art) -> keyed transparent PNGs in OUT_ART.

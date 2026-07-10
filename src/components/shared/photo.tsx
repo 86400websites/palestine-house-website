@@ -43,6 +43,11 @@ export const PHOTO_SOURCES = {
   "ph-photo-embassy-tatreez": "/assets/photos/ph-photo-embassy-tatreez.jpg",
   "ph-photo-model-invite": "/assets/photos/ph-photo-model-invite.jpg",
   "ph-photo-model-still": "/assets/photos/ph-photo-model-still.jpg",
+  /* LH1 — /experience body: the §2 day/night pair + the §5 "A home, not a
+     moment" permanence split photo. */
+  "ph-photo-exp-cafe-day": "/assets/photos/ph-photo-exp-cafe-day.jpg",
+  "ph-photo-exp-stage-night": "/assets/photos/ph-photo-exp-stage-night.jpg",
+  "ph-photo-exp-home": "/assets/photos/ph-photo-exp-home.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;
