@@ -4,11 +4,12 @@ import type { LiveSession, LiveStatus } from "@/lib/live/types";
 import { formatSessionWhen } from "@/lib/live/format";
 import { youTubeEmbedUrl } from "@/lib/live/youtube";
 
-/* The ONE shared session card (DESIGN §6) — used on /live (Upcoming + Past
-   grids) and the Experience live strip; never a second implementation. It
-   renders an anon-safe LiveSession (S9 9a) into the Stage-0 `.live-card` recipe
-   and links to the /live/[id] watch view (wired in 9c). A Server Component: no
-   interactivity, so date formatting stays server-side and hydration-safe.
+/* The ONE shared session card (DESIGN §6) — used across the members-only Live
+   hub grids (LH1); never a second implementation. It renders a LiveSession
+   (S9 9a) into the Stage-0 `.live-card` recipe and links to the /live/[id]
+   watch view. A "Yours" tag marks the caller's own sessions (is_mine, derived
+   server-side by the 0025 RPC). A Server Component: no interactivity, so date
+   formatting stays server-side and hydration-safe.
 
    Covers are deferred in S9 (no partner Storage bucket yet — D-S9-a follow-up),
    so cards render text-first; the cover-thumb slot lands when uploads ship. */
@@ -46,6 +47,7 @@ export function SessionCard({ session }: { session: LiveSession }) {
         <div className="live-card-tags">
           <StatusBadge status={session.status} />
           {session.mode ? <span className="live-tag">{session.mode}</span> : null}
+          {session.is_mine ? <span className="live-tag">Yours</span> : null}
         </div>
         <h3>{session.title}</h3>
         {session.summary ? <p>{session.summary}</p> : null}

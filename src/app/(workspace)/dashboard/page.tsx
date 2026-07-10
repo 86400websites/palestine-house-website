@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock,
   MessageCircle,
+  Radio,
   Users,
 } from "lucide-react";
 import { FadeIn, Stagger } from "@/components/motion/reveal";
@@ -21,10 +22,10 @@ import {
 /* /dashboard (docs/page-copy/03-member-workspace/dashboard.md) — the Welcome
    page. Two states:
    - pending: the calm "under review" notice (S10 10-3);
-   - approved: a minimal premium dashboard of four nav cards (Plan · Build ·
-     Operate · Program) — each an icon (an image can drop into the art slot
-     later), a one-liner, and a link to that page, with the live Design & Build
-     % on the Build card (S10 10-10).
+   - approved: a minimal premium dashboard of five nav cards (Plan · Build ·
+     Operate · Program · Live) — each an icon (an image can drop into the art
+     slot later), a one-liner, and a link to that page, with the live Design &
+     Build % on the Build card (S10 10-10; Live card added in LH1).
    Approval is read live (cached), so it flips without a re-login. */
 
 export const metadata: Metadata = { title: "Welcome" };
@@ -133,6 +134,14 @@ export default async function DashboardPage() {
       line: "Your cultural programming and the guests who walk in.",
       href: "/program",
       cta: "Open Program",
+    },
+    {
+      key: "live",
+      title: "Live",
+      Icon: Radio,
+      line: "Watch what other Houses are running — and publish your own.",
+      href: "/live",
+      cta: "Open Live",
     },
   ];
 
