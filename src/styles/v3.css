@@ -420,9 +420,11 @@ img.phx-brand-mark {
 }
 
 /* The Experience day/night pair — both owner photos since LH1, landscape 3:2
-   side-by-side per the mockup (the 4:5 Artwork-twin ratio is retired). */
+   side-by-side with rounded corners per the mockup (the 4:5 Artwork-twin
+   ratio is retired). .v3-photo's overflow:hidden clips the radius. */
 .exp-mood-photo {
   aspect-ratio: 3 / 2;
+  border-radius: var(--radius-lg);
 }
 
 /* --- v3 cream / photo split ("Culture deserves more than a moment.") ------ */

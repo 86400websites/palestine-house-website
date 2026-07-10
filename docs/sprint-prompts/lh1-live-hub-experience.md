@@ -38,6 +38,8 @@ The committed self-contained brief `docs/sprint-prompts/lh1-live-hub-experience-
 
 Three owner asks after the verdict — Permanence center gradient · closing section removal · §2 mockup-match + mobile pass — built by the engine and put through a **3-lens adversarial verification workflow** (correctness / mockup-fidelity / scope, every finding independently verified). 2 confirmed findings, both fixed in `c9a23b3`: **(1)** `.exp-home-split`'s column rule was **dead in the cascade** (pages.css loads before v3.css, equal-specificity tie lost to `.v3-split` — the recurring import-order gotcha) → bumped to `.v3-split.exp-home-split` + re-asserted the ≤880px single-column stack the bump would otherwise break; **(2)** the mockup's small eyebrow mark on the Permanence panel was missing → added (`.exp-orn--eyebrow`). 0 refuted-as-real findings shipped.
 
+**Owner Preview pass (final polish):** §2 photos gained the mockup's rounded corners (`--radius-lg`) and the closing line dropped the display `statement-line` style for quiet body type; the Permanence band + its blend switched from `--cream-100` to **`var(--background)`** (= cream-50 in the v3 shell) — the mockup's panel is the *page* background, so the band and its now-wider dissolve (`clamp(10rem, 24vw, 20rem)`; gradient ends in `transparent`, no hardcoded color twin) disappear seamlessly into the page.
+
 ## Deviations & learnings
 
 - **The role-swap experiment collapsed on cost, not quality.** Codex Sol 6's Task-0 output (SQL drafts) audited correct, but one setup task burned ~42% of a 5-hour usage window. Lesson: keep Codex as the reviewer (its strong role here) unless its economics change.

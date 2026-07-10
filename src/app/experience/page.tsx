@@ -116,7 +116,7 @@ export default function ExperiencePage() {
             </figure>
           </Reveal>
           <Reveal>
-            <p className="exp-daynight-close statement-line">
+            <p className="exp-daynight-close">
               One room, doing the work of a dozen places.
             </p>
           </Reveal>
