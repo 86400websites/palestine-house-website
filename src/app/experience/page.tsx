@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Artwork } from "@/components/shared/artwork";
 import { Photo } from "@/components/shared/photo";
 import { PageDivider } from "@/components/shared/page-divider";
-import { ApplyCta } from "@/components/sections/apply-cta";
 import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,9 @@ import { Button } from "@/components/ui/button";
    docs/page-copy/01-public-pages/experience.md; §2 + §5 imagery/layout from the
    owner's LH1 mockups (docs/source-assets/design-refs/v3/mockups/). The S9
    live strip is gone: sessions are members-only since LH1 (0025), so the public
-   page carries zero session data and renders fully static. */
+   page carries zero session data and renders fully static. The old closing
+   "The first step" section is retired too (owner, 2026-07-10) — the footer's
+   site-wide premium CTA (DR3.1) is the one closing invitation. */
 
 export const metadata: Metadata = {
   title: "Experience",
@@ -82,6 +83,10 @@ export default function ExperiencePage() {
           <Reveal className="sec-head is-center">
             <p className="ph-eyebrow">One room, two moods</p>
             <h2>A café by day. A stage by night.</h2>
+            {/* the mockup's line-and-diamond mark under the heading (LH1) */}
+            <span className="exp-orn" aria-hidden="true">
+              <span />
+            </span>
           </Reveal>
           <Reveal className="exp-daynight">
             {/* LH1 — both moods are owner photos of the same room (landscape
@@ -166,6 +171,10 @@ export default function ExperiencePage() {
         <div className="v3-split-panel">
           <Reveal>
             <p className="ph-eyebrow">Permanence</p>
+            {/* the mockup's small hairline-and-diamond mark under the eyebrow */}
+            <span className="exp-orn exp-orn--eyebrow" aria-hidden="true">
+              <span />
+            </span>
             <h2>A home, not a moment.</h2>
             <p className="ph-lead">
               Pop-ups close. A House stays — open every day, at the same
@@ -181,27 +190,6 @@ export default function ExperiencePage() {
             sizes="(max-width: 880px) 100vw, 60vw"
           />
         </div>
-      </section>
-
-      <PageDivider />
-
-      {/* 6 — Closing */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">The first step</p>
-          <h2 className="statement-line exp-statement-h">
-            Every House started with one person.
-          </h2>
-          <p className="statement-sub">
-            Someone who knew their city was ready, and was willing to do the
-            work to open the door.
-          </p>
-          <p className="statement-sub">
-            If that sounds like you, apply — every application is reviewed by
-            HQ.
-          </p>
-          <ApplyCta secondaryHref="/bring-ph" secondaryLabel="See what it takes" />
-        </Reveal>
       </section>
     </>
   );

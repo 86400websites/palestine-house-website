@@ -38,4 +38,10 @@ Full task-level spec: `docs/sprint-prompts/lh1-live-hub-experience-codex-prompt.
 
 ---
 
-*Verdict + findings get appended below after the review.*
+## Codex review verdict (2026-07-10)
+
+**Verdict: APPROVE — no serious or blocking findings; prioritized findings: none.**
+
+Codex verified: approval checks precede Live page data reads and `notFound()`; migration 0025 + rollback satisfy the gating contract; public Live surfaces and data references are removed; CSP, middleware, dependencies, admin routes, secrets, and source masters are untouched; typecheck, lint, and build pass; `/experience` is static while `/live` and `/live/[id]` are dynamic; the worktree remained clean.
+
+**Post-review owner delta (same day, reviewed by the engine + a 3-lens verification pass):** the Permanence split gained the mockup's center gradient blend (photo edge dissolving into the cream panel, with a stacked-mobile variant); the "The first step" closing section was removed (the DR3.1 footer CTA is the one closing invitation site-wide); §2 gained the mockup's line-and-diamond ornament under the heading and centered captions; the dead `.exp-statement-h` rule was removed.
