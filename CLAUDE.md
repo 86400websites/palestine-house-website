@@ -6,8 +6,8 @@
 
 **Palestine House** is a global network of Palestinian cultural spaces. This site is **two shells behind one gate**:
 
-- A **public shell** — calm, premium, editorial marketing pages whose single conversion is the green **Apply** button ("Apply to bring a House" · *Every application is reviewed by HQ.*). Public routes: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/live`, `/apply`, `/about`, `/contact`, `/focus-areas`, legal, auth.
-- A **private partner reference platform** — approval-gated (`profiles.is_approved`). Apply = sign-up: one form creates a pending account + application; HQ approval via `/admin/approvals` unlocks the platform. Gated routes: `/dashboard`, `/plan`, `/build`, `/operate`, `/elements/[slug]` (×30), `/live` partner tools, `/resources`, `/tools` (coming soon), `/academy`, `/account`, `/support`.
+- A **public shell** — calm, premium, editorial marketing pages whose single conversion is the green **Apply** button ("Apply to bring a House" · *Every application is reviewed by HQ.*). Public routes: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/apply`, `/about`, `/contact`, `/focus-areas`, legal, auth. (`/live` moved into the gated workspace in LH1, 2026-07-10.)
+- A **private partner reference platform** — approval-gated (`profiles.is_approved`). Apply = sign-up: one form creates a pending account + application; HQ approval via `/admin/approvals` unlocks the platform. Gated routes: `/dashboard`, `/plan`, `/build`, `/operate`, `/elements/[slug]` (×30), `/live` (the members-only Live hub — watch + publish, LH1), `/resources`, `/tools` (coming soon), `/academy`, `/account`, `/support`.
 
 **It is a reference, not a course** — no quizzes, no certificate, no daily-ops tooling. The only per-user interactivity is saved checklist progress in Stages › Design & Build. **Proof numbers are fixed: 10 focus areas · 30 topics · 200+ checklist items · 267 templates · a 120-day launch.**
 
@@ -80,7 +80,7 @@ If the on-disk reality disagrees with this list, **trust the code** (especially 
 - **Public projections are anon-safe** and expose titles/overviews/session metadata only.
 - **Templates** are served from a private Storage bucket via server-issued signed URLs to approved users only. The two booklet PDFs are the only public files.
 - **Public writes** (`/apply`, contact, lead magnet, newsletter): zod + rate limit + Turnstile, fail closed in Production.
-- **`programming_sessions`:** public reads anon-safe; partner writes owner-scoped under RLS.
+- **`programming_sessions`:** members-only reads via the approved-gated `member_programming_sessions()` projection (LH1, migration 0025 — no anon read path exists); partner writes owner-scoped under RLS.
 
 ### Handle server / client boundaries correctly
 
