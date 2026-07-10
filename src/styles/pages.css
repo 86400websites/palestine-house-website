@@ -738,8 +738,9 @@
   align-items: center;
   text-align: center;
   /* DR3.1.1 — a subtle CREAM card (matches the section wash, not stark white)
-     so each set (café / venue / community) reads as a grouped unit. */
-  padding: var(--space-3) var(--space-3) var(--space-6);
+     so each set (café / venue / community) reads as a grouped unit.
+     LH1 — a wider mat (space-4) per the owner's collage-sizes mockup. */
+  padding: var(--space-4) var(--space-4) var(--space-6);
   border-radius: var(--radius-lg);
   background: var(--cream-100);
   border: 1px solid rgba(42, 36, 30, 0.05);
@@ -753,9 +754,12 @@
   background: var(--cream-100);
   box-shadow: 0 10px 26px -18px rgba(42, 36, 30, 0.45);
 }
+/* LH1 — hero vs thumb proportions rebalanced to the owner's collage-sizes
+   mockup: a near-square hero (much more visible image field than the old 4/5)
+   over tidier 5/7 portrait thumbs, with a slightly wider thumb gap. */
 .embassy-big {
-  aspect-ratio: 4 / 5;
-  border-radius: var(--radius-md);
+  aspect-ratio: 1 / 1.05;
+  border-radius: var(--radius-lg);
 }
 .embassy-big img,
 .embassy-thumb img {
@@ -764,19 +768,20 @@
   width: 100%;
   height: 100%;
   /* fill each frame edge-to-edge (owner, 2026-07-08 — cleaner than the
-     original-ratio matte); portrait sources crop only slightly in the 4/5 frame */
+     original-ratio matte); portrait sources crop gently in the near-square
+     hero and 5/7 thumb frames (LH1 sizes) */
   object-fit: cover;
 }
 .embassy-thumbs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-2);
+  gap: var(--space-3);
   width: 100%;
-  margin-top: var(--space-2);
+  margin-top: var(--space-3);
 }
 .embassy-thumb {
-  aspect-ratio: 4 / 5;
-  border-radius: var(--radius-sm);
+  aspect-ratio: 5 / 7;
+  border-radius: var(--radius-md);
 }
 .embassy-orn {
   width: 20px;
