@@ -252,6 +252,12 @@
     max-width: 34rem;
   }
 }
+/* LH1 — the /focus-areas hero photo frame (replaced the cover-cropped
+   PH-EXP-02a Artwork, owner fix 2026-07-10) */
+.fa-hero-photo {
+  aspect-ratio: 16 / 11;
+  border-radius: var(--radius-lg);
+}
 
 /* Feature row: large painted art beside generous editorial copy; alternates. */
 .feature-row {

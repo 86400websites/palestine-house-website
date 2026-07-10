@@ -75,15 +75,29 @@ type PhotoProps = {
   sizes: string;
   className?: string;
   rounded?: boolean;
+  /** Above-the-fold callers only (LCP) — e.g. the /focus-areas hero (LH1). */
+  priority?: boolean;
 };
 
 /** Fills its own positioned frame — the parent (or className) sets the
- *  aspect-ratio / dimensions. (All current uses are below the fold — add a
- *  priority prop only when an above-the-fold caller actually needs it.) */
-export function Photo({ assetId, alt, sizes, className, rounded }: PhotoProps) {
+ *  aspect-ratio / dimensions. */
+export function Photo({
+  assetId,
+  alt,
+  sizes,
+  className,
+  rounded,
+  priority,
+}: PhotoProps) {
   return (
     <div className={cn("v3-photo", rounded && "v3-photo--rounded", className)}>
-      <Image src={PHOTO_SOURCES[assetId]} alt={alt} fill sizes={sizes} />
+      <Image
+        src={PHOTO_SOURCES[assetId]}
+        alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+      />
     </div>
   );
 }
