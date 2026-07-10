@@ -79,7 +79,9 @@ export function SiteFooter() {
           <span className="phx-footer-col-title">Explore</span>
           <Link href="/model">The Model</Link>
           <Link href="/experience">Experience</Link>
-          <Link href="/live">Live Programming</Link>
+          {/* The Live Programming link retired in LH1 (owner-authorized chrome
+              edit): /live is members-only now — a public link would promise
+              content the public can never see. */}
         </div>
         <div className="phx-footer-col">
           <span className="phx-footer-col-title">Bring a House</span>

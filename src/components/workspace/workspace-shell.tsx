@@ -54,7 +54,7 @@ const GROUPS: SidebarGroup[] = [
       { key: "build", label: "Build", Icon: CheckCircle2, href: "/build" },
       { key: "operate", label: "Operate", Icon: Clock, href: "/operate" },
       { key: "program", label: "Program", Icon: Users, href: "/program" },
-      { key: "live", label: "Live Programming", Icon: Calendar, href: "/programming" },
+      { key: "live", label: "Live Programming", Icon: Calendar, href: "/live" },
     ],
   },
   {

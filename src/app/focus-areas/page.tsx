@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Lock, LockOpen } from "lucide-react";
-import { Artwork } from "@/components/shared/artwork";
+import { Photo } from "@/components/shared/photo";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 
@@ -153,11 +153,13 @@ export default function FocusAreasPage() {
             </p>
           </Reveal>
           <Reveal className="art-hero-art">
-            <Artwork
-              assetId="PH-EXP-02a"
-              alt="An ink-wash illustration of people working and meeting at the long table of a House, beneath a tall arched window."
-              ratio="16 / 11"
-              objectPosition="50% 56%"
+            {/* LH1 (owner fix): the old PH-EXP-02a Artwork cover-cropped badly
+                here (and its alt described a retired illustration) — replaced
+                with a full-frame v3 Photo that fits the 16:11 box. */}
+            <Photo
+              assetId="ph-photo-tatreez-workshop"
+              alt="Hands at work over tatreez embroidery at a House workshop table."
+              className="fa-hero-photo"
               sizes="(max-width: 900px) 100vw, 55vw"
               priority
             />

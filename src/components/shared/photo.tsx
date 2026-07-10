@@ -43,6 +43,11 @@ export const PHOTO_SOURCES = {
   "ph-photo-embassy-tatreez": "/assets/photos/ph-photo-embassy-tatreez.jpg",
   "ph-photo-model-invite": "/assets/photos/ph-photo-model-invite.jpg",
   "ph-photo-model-still": "/assets/photos/ph-photo-model-still.jpg",
+  /* LH1 — /experience body: the §2 day/night pair + the §5 "A home, not a
+     moment" permanence split photo. */
+  "ph-photo-exp-cafe-day": "/assets/photos/ph-photo-exp-cafe-day.jpg",
+  "ph-photo-exp-stage-night": "/assets/photos/ph-photo-exp-stage-night.jpg",
+  "ph-photo-exp-home": "/assets/photos/ph-photo-exp-home.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;
@@ -70,15 +75,29 @@ type PhotoProps = {
   sizes: string;
   className?: string;
   rounded?: boolean;
+  /** Above-the-fold callers only (LCP) — e.g. the /focus-areas hero (LH1). */
+  priority?: boolean;
 };
 
 /** Fills its own positioned frame — the parent (or className) sets the
- *  aspect-ratio / dimensions. (All current uses are below the fold — add a
- *  priority prop only when an above-the-fold caller actually needs it.) */
-export function Photo({ assetId, alt, sizes, className, rounded }: PhotoProps) {
+ *  aspect-ratio / dimensions. */
+export function Photo({
+  assetId,
+  alt,
+  sizes,
+  className,
+  rounded,
+  priority,
+}: PhotoProps) {
   return (
     <div className={cn("v3-photo", rounded && "v3-photo--rounded", className)}>
-      <Image src={PHOTO_SOURCES[assetId]} alt={alt} fill sizes={sizes} />
+      <Image
+        src={PHOTO_SOURCES[assetId]}
+        alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+      />
     </div>
   );
 }

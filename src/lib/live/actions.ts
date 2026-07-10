@@ -13,7 +13,8 @@ import { parseYouTubeId } from "./youtube";
    - deleteSessionAction -> a direct delete under the owner-scoped delete_own RLS
      policy (0013), so a partner can only remove its OWN rows.
    Both do cheap shape validation, map failures to neutral brand-voice copy, and
-   revalidate the public feed (/live + /experience) plus the tool (/programming). */
+   revalidate the members-only Live hub (/live — the one surface that renders
+   sessions since LH1). */
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -106,13 +107,11 @@ export async function publishSessionAction(
   }
 
   revalidatePath("/live");
-  revalidatePath("/experience");
-  revalidatePath("/programming");
   return {
     ok: true,
     message: parsed.data.sessionId
       ? "Saved."
-      : "Published — it’s on the public Live page.",
+      : "Published — every House can see it now.",
   };
 }
 
@@ -130,6 +129,4 @@ export async function deleteSessionAction(formData: FormData): Promise<void> {
   await supabase.from("programming_sessions").delete().eq("id", id);
 
   revalidatePath("/live");
-  revalidatePath("/experience");
-  revalidatePath("/programming");
 }

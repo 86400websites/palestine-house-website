@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { publishSessionAction, type PublishState } from "@/lib/live/actions";
 import type { LiveSession } from "@/lib/live/types";
 
-/* Publish/edit form for the gated /programming tool (S9 9f). One form for both:
-   `initial` null = create, non-null = edit (a hidden sessionId routes the RPC to
-   an owner-scoped update). Times are kept in UTC end-to-end (the field is
-   labelled UTC and the public pages display UTC), so there's no timezone
-   conversion. New strings follow brand voice — flagged for owner sign-off. */
+/* Publish/edit form for the members-only Live hub (S9 9f; lives on /live since
+   LH1). One form for both: `initial` null = create, non-null = edit (a hidden
+   sessionId routes the RPC to an owner-scoped update). Times are kept in UTC
+   end-to-end (the field is labelled UTC and the hub displays UTC), so there's
+   no timezone conversion. New strings follow brand voice. */
 
 const INITIAL: PublishState = { ok: false, message: null };
 
@@ -169,7 +169,7 @@ export function ProgrammingForm({ initial }: { initial: LiveSession | null }) {
         </Button>
         {editing ? (
           <Button asChild variant="ghost">
-            <Link href="/programming">Cancel</Link>
+            <Link href="/live#publish">Cancel</Link>
           </Button>
         ) : null}
       </div>
