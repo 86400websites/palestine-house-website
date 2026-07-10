@@ -3,23 +3,23 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { GroupedSessions, LiveFilter, LiveSession } from "./types";
 
-/* Server data layer for the public Live Programming feed (S9 9a). Same shape as
-   src/lib/workspace/content.ts: React-cached (one round-trip per request even
-   when /live and the Experience strip both read it), run anon-safe under the
-   publishable-key server client, and fail-closed to [] so a transient error
-   degrades to the approved empty states — never a crash. public_programming_
-   sessions() (0013) is the ONE anon-callable RPC and already strips created_by +
-   internal timestamps. `server-only` makes an accidental client import a build
-   error. */
+/* Server data layer for the members-only Live hub (S9 9a; gated since LH1).
+   Same shape as src/lib/workspace/content.ts: React-cached (one round-trip per
+   request), run under the caller's session on the server client, and fail-closed
+   to [] so a transient error — or a database that hasn't received 0025 yet —
+   degrades to the empty states, never a crash. member_programming_sessions()
+   (0025) is approved-members-only: anon can't execute it and a pending caller
+   gets zero rows; it strips created_by + internal timestamps and derives
+   is_mine. `server-only` makes an accidental client import a build error. */
 
 export const getLiveSessions = cache(async (): Promise<LiveSession[]> => {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("public_programming_sessions");
+  const { data, error } = await supabase.rpc("member_programming_sessions");
   if (error || !data) return [];
   return data as LiveSession[];
 });
 
-/* Pure: bucket the feed into the three /live sections by status. The RPC orders
+/* Pure: bucket the feed into the three hub sections by status. The RPC orders
    newest-first (starts_at DESC nulls last); Upcoming reads better soonest-first,
    so re-sort that bucket ascending. Live + Past keep the RPC order. */
 export function groupSessions(sessions: LiveSession[]): GroupedSessions {
