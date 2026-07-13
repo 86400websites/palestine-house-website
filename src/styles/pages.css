@@ -1736,8 +1736,8 @@
 }
 .bring-why {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: var(--space-12);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-10);
   align-items: center;
 }
 .bring-why-line {
@@ -1752,7 +1752,7 @@
   max-width: 32rem;
 }
 .bring-why-visual {
-  max-width: 20rem;
+  max-width: 29rem;
   width: 100%;
   margin-inline: auto;
 }
