@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { Check } from "lucide-react";
-import { Artwork } from "@/components/shared/artwork";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { PageDivider } from "@/components/shared/page-divider";
-import { ApplyCta } from "@/components/sections/apply-cta";
+import { Photo, ART_SOURCES } from "@/components/shared/photo";
+import { SparkMark, SprigMark, StarMark } from "@/components/shared/ornament";
 import { PageHero } from "@/components/sections/page-hero";
 import { StageCards } from "@/components/sections/stage-cards";
 import { Reveal } from "@/components/motion/reveal";
@@ -11,7 +12,8 @@ import { Button } from "@/components/ui/button";
 
 /* Bring a House (/bring-ph) — absorbs the old How It Works (stage triptych +
    gates timeline). Copy verbatim from docs/page-copy/01-public-pages/
-   bring-a-house.md; layout from docs/page-designs/public/BringAHouse.app.jsx. */
+   bring-a-house.md; §2/3/5/6/7 layout matches the owner's editorial mockups
+   (public/assets/Bring a House/), built on the shared ornament marks. */
 
 export const metadata: Metadata = {
   title: "Bring a House",
@@ -69,7 +71,14 @@ const BRING_RULES = [
 
 export default function BringAHousePage() {
   return (
-    <>
+    <div className="bring-page">
+      {/* One shared arch clip for the framed photos (§7). */}
+      <svg width="0" height="0" aria-hidden="true" className="bring-defs">
+        <clipPath id="phArch" clipPathUnits="objectBoundingBox">
+          <path d="M0.04 1 V0.42 C0.04 0.17 0.25 0 0.5 0 C0.75 0 0.96 0.17 0.96 0.42 V1 Z" />
+        </clipPath>
+      </svg>
+
       {/* 1 — v3 photo hero (DR1-9). The master is framed chest-down on the
           pour by composition — the crop centers the dallah + cups so it reads
           as an intentional detail shot. */}
@@ -90,66 +99,80 @@ export default function BringAHousePage() {
         </Button>
       </PageHero>
 
-      {/* 2 — Why bring one */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">Why bring one</p>
-          <p className="statement-line">
-            Your city has the people, the culture, and the appetite. What it
-            doesn’t have yet is the address — a fixed place where all of it
-            lives, year-round, instead of in scattered moments.
-          </p>
-          <p className="statement-sub">
-            A House gives the culture a permanent home, and gives you a serious
-            thing to build and run.
-          </p>
+      {/* 2 — Why bring one (statement · arch illustration) */}
+      <section className="ph-section-lg bring-why-section">
+        <Reveal className="ph-container bring-why">
+          <div className="bring-why-copy">
+            <div className="bring-eyebrow">
+              <SprigMark className="bring-eyebrow-sprig" />
+              <span className="ph-eyebrow">Why bring one</span>
+              <span className="bring-eyebrow-line" />
+              <SparkMark className="bring-eyebrow-spark" />
+            </div>
+            <p className="statement-line bring-why-line">
+              Your city has the people, the culture, and the appetite. What it
+              doesn’t have yet is the address — a fixed place where all of it
+              lives, year-round, instead of in scattered moments.
+            </p>
+            <span className="exp-orn bring-why-rule">
+              <span />
+            </span>
+            <p className="statement-sub bring-why-sub">
+              A House gives the culture a permanent home, and gives you a serious
+              thing to build and run.
+            </p>
+          </div>
+          <div className="bring-why-visual">
+            <Image
+              src={ART_SOURCES["ph-art-why-bring-arch"]}
+              alt=""
+              aria-hidden="true"
+              width={702}
+              height={941}
+              className="bring-why-illus"
+              sizes="(max-width: 860px) 78vw, 420px"
+            />
+          </div>
         </Reveal>
       </section>
 
-      {/* 3 — Who brings what (artwork section — white per owner scheme) */}
+      {/* 3 — Who brings what (one bordered split card) */}
       <section className="ph-section-lg">
         <div className="ph-container">
-          <Reveal className="sec-head is-center">
-            <p className="ph-eyebrow">The partnership</p>
+          <Reveal className="sec-head is-center bring-head">
+            <StarMark className="bring-head-orn" />
+            <p className="ph-eyebrow bring-eyebrow-ink">The partnership</p>
             <h2>Who brings what.</h2>
+            <span className="exp-orn">
+              <span />
+            </span>
             <p className="ph-lead">
               This is a partnership, set down in a license. The split is clear
               from the start.
             </p>
           </Reveal>
-          <Reveal className="bring-split-art">
-            <Artwork
-              assetId="PH-BRING-02"
-              alt="A performer opens the night to a full room at a House."
-              ratio="16 / 7"
-              /* 10%: the performer's head sits near the frame top — the old
-                 32% cropped it in the 16:7 window (DR1 final polish) */
-              objectPosition="50% 10%"
-              sizes="(max-width: 992px) 100vw, 992px"
-            />
-          </Reveal>
-          <Reveal className="bring-split">
-            <div className="ph-card bring-panel">
+          <Reveal className="bring-who-card">
+            <div className="bring-who-half">
+              <SprigMark className="bring-half-orn" />
+              <span className="bring-half-rule" />
               <h3>You bring</h3>
-              <ul className="bring-list">
+              <ul className="bring-who-list">
                 {BRING_YOU.map((t) => (
                   <li key={t}>
-                    <span className="bring-li-icon">
-                      <Check size={18} aria-hidden="true" />
-                    </span>
+                    <SparkMark className="bring-spark" />
                     <span>{t}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="ph-card bring-panel">
+            <div className="bring-who-half">
+              <StarMark className="bring-half-orn bring-half-orn--star" />
+              <span className="bring-half-rule" />
               <h3>We bring</h3>
-              <ul className="bring-list">
+              <ul className="bring-who-list">
                 {BRING_WE.map((t) => (
                   <li key={t}>
-                    <span className="bring-li-icon">
-                      <Check size={18} aria-hidden="true" />
-                    </span>
+                    <SparkMark className="bring-spark" />
                     <span>{t}</span>
                   </li>
                 ))}
@@ -189,27 +212,36 @@ export default function BringAHousePage() {
       {/* 5 — The 120-day launch: milestone timeline */}
       <section className="ph-section-lg" id="checkpoints">
         <div className="ph-container">
-          <Reveal className="sec-head">
+          <Reveal className="sec-head is-center bring-head">
+            <StarMark className="bring-head-orn" />
             <p className="ph-eyebrow">The 120-day launch</p>
             <h2>No guesswork about whether you’re ready.</h2>
+            <span className="exp-orn">
+              <span />
+            </span>
             <p className="ph-lead">A clear path, milestone by milestone.</p>
           </Reveal>
           <Reveal>
-            <ol className="bring-gates">
-              {BRING_GATES.map((g) => (
-                <li key={g.day} className="bring-gate">
-                  <span className="bring-gate-node" aria-hidden="true">
-                    <Check size={14} />
+            <ol className="bring-miles">
+              {BRING_GATES.map((g, i) => (
+                <li key={g.day} className="bring-mile">
+                  <span className="bring-mile-medallion">
+                    <StarMark className="bring-mile-star" />
+                    <span className="bring-mile-num">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
                   </span>
-                  <span className="bring-gate-day">{g.day}</span>
-                  <h3>{g.name}.</h3>
+                  <span className="bring-mile-day">{g.day}</span>
+                  <h3 className="bring-mile-title">{g.name}.</h3>
                   <p>{g.text}</p>
                 </li>
               ))}
+              <span className="bring-mile-spark bring-mile-spark--a" aria-hidden="true" />
+              <span className="bring-mile-spark bring-mile-spark--b" aria-hidden="true" />
             </ol>
           </Reveal>
           <Reveal>
-            <p className="bring-gates-note">
+            <p className="bring-miles-note">
               The soft opening sits at Day 108, leaving the rest of the 120 days
               as a deliberate buffer before your full public launch.
             </p>
@@ -217,24 +249,38 @@ export default function BringAHousePage() {
         </div>
       </section>
 
-      {/* 6 — Three rules, no exceptions */}
-      <section className="ph-section-lg ph-section-dark">
+      {/* 6 — Three rules, no exceptions (light cream, per the mockup) */}
+      <section className="ph-section-lg">
         <div className="ph-container">
-          <Reveal className="sec-head">
-            <p className="ph-eyebrow">The commitments</p>
+          <Reveal className="sec-head is-center bring-head">
+            <StarMark className="bring-head-orn" />
+            <p className="ph-eyebrow bring-eyebrow-flank">
+              <SprigMark className="bring-flank-sprig bring-flank-sprig--l" />
+              The commitments
+              <SprigMark className="bring-flank-sprig bring-flank-sprig--r" />
+            </p>
             <h2>Three rules, no exceptions.</h2>
-            <p className="ph-lead">Every House holds the same three commitments:</p>
+            <span className="exp-orn">
+              <span />
+            </span>
+            <p className="ph-lead">
+              Every House holds the same three commitments:
+            </p>
           </Reveal>
-          <Reveal className="editorial-cols">
+          <Reveal className="bring-rules-grid">
             {BRING_RULES.map((r) => (
-              <div key={r.n} className="editorial-col">
-                <span className="editorial-index">{r.n}</span>
+              <div key={r.n} className="bring-rule-card">
+                <span className="bring-rule-medallion">{r.n}</span>
+                <SparkMark className="bring-rule-spark" />
                 <h3>{r.title}</h3>
                 <p>{r.text}</p>
               </div>
             ))}
           </Reveal>
-          <Reveal>
+          <Reveal className="bring-rules-outro">
+            <span className="bring-sprig-divider">
+              <SprigMark />
+            </span>
             <p className="bring-rules-close">
               If that’s how you want to work, we’d like to hear from you.
             </p>
@@ -242,24 +288,83 @@ export default function BringAHousePage() {
         </div>
       </section>
 
-      {/* 7 — Ready to apply? */}
+      {/* 7 — Ready to apply? (CTA · arch photo) */}
       <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">The next step</p>
-          <h2 className="statement-line bring-statement-h">Ready to apply?</h2>
-          <p className="statement-sub">
-            If you’re serious about opening a House, apply. Every application is
-            reviewed by HQ — not to rank you against others, but to make sure a
-            House will work where you are, and that we can support it well.
-            Questions first?{" "}
-            <Link className="bring-contact-link" href="/contact">
-              Contact
-            </Link>{" "}
-            us.
-          </p>
-          <ApplyCta secondaryHref="/our-support" secondaryLabel="See our support" />
+        <Reveal className="ph-container bring-apply">
+          <div className="bring-apply-copy">
+            <div className="bring-eyebrow">
+              <SprigMark className="bring-eyebrow-sprig" />
+              <span className="ph-eyebrow">The next step</span>
+              <span className="bring-eyebrow-line" />
+              <SparkMark className="bring-eyebrow-spark" />
+            </div>
+            <h2 className="statement-line bring-apply-h">Ready to apply?</h2>
+            <span className="exp-orn bring-apply-rule">
+              <span />
+            </span>
+            <p className="bring-apply-body">
+              If you’re serious about opening a House, apply. Every application is
+              reviewed by HQ — not to rank you against others, but to make sure a
+              House will work where you are, and that we can support it well.
+              Questions first?{" "}
+              <Link className="bring-contact-link" href="/contact">
+                Contact
+              </Link>{" "}
+              us.
+            </p>
+            <div className="bring-apply-ctas">
+              <Button asChild size="lg" className="bring-cta-primary">
+                <Link href="/apply">
+                  Apply to bring a House
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="bring-cta-secondary">
+                <Link href="/our-support">
+                  See our support
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+            <p className="bring-apply-reassure">
+              <ShieldCheck size={18} aria-hidden="true" />
+              Every application is reviewed by HQ.
+            </p>
+          </div>
+          <div className="bring-apply-visual">
+            <div className="bring-arch">
+              <Photo
+                assetId="ph-photo-ready-apply"
+                alt="The lantern-lit entrance arch of a Palestine House at dusk, opening onto a planted courtyard café."
+                sizes="(max-width: 860px) 100vw, 40vw"
+                className="bring-arch-photo"
+              />
+              <svg
+                className="bring-arch-outline"
+                viewBox="0 0 100 128"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 128 V53.8 C4 21.8 25 0 50 0 C75 0 96 21.8 96 53.8 V128 Z"
+                  fill="none"
+                  stroke="var(--copper-700)"
+                  strokeWidth="1"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+            </div>
+            <Image
+              src={ART_SOURCES["ph-art-model-branch"]}
+              alt=""
+              aria-hidden="true"
+              width={220}
+              height={340}
+              className="bring-arch-sprig"
+            />
+          </div>
         </Reveal>
       </section>
-    </>
+    </div>
   );
 }

@@ -48,6 +48,8 @@ export const PHOTO_SOURCES = {
   "ph-photo-exp-cafe-day": "/assets/photos/ph-photo-exp-cafe-day.jpg",
   "ph-photo-exp-stage-night": "/assets/photos/ph-photo-exp-stage-night.jpg",
   "ph-photo-exp-home": "/assets/photos/ph-photo-exp-home.jpg",
+  /* Bring-a-House redesign — the §7 "Ready to apply" arch photo */
+  "ph-photo-ready-apply": "/assets/photos/ph-photo-ready-apply.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;
@@ -64,6 +66,9 @@ export const ART_SOURCES = {
   "ph-art-branch-4": "/assets/art/ph-art-branch-4.png",
   /* DR3.1 — gold line-art olive branch for the /model dark bands */
   "ph-art-model-branch": "/assets/art/ph-art-model-branch.png",
+  /* Bring-a-House redesign — the §2 "Why bring one" arch illustration
+     (cropped from the owner's mockup; carries its own warm-cream ground) */
+  "ph-art-why-bring-arch": "/assets/art/ph-art-why-bring-arch.png",
 } as const;
 
 export type ArtId = keyof typeof ART_SOURCES;
