@@ -2074,9 +2074,12 @@
   gap: var(--space-3);
   margin-top: var(--space-8);
 }
-/* §7 secondary: forest border + text, matching the mockup's outlined button
-   (the shared cream-secondary outline is too faint here). Scoped to this button. */
-.bring-cta-secondary {
+/* §7 secondary: forest border + text, matching the mockup's outlined button.
+   The shared v3.css outline rule is `:is(.ph-page,…) [data-slot=button][data-variant=outline]`
+   (0,3,0) and loads AFTER pages.css, so this must out-specify it — including hover. */
+.bring-page .bring-cta-secondary[data-slot="button"][data-variant="outline"],
+.bring-page
+  .bring-cta-secondary[data-slot="button"][data-variant="outline"]:hover {
   border-color: var(--forest-800);
   color: var(--forest-800);
 }
