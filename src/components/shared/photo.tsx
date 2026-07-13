@@ -69,6 +69,9 @@ export const ART_SOURCES = {
   /* Bring-a-House redesign — the §2 "Why bring one" arch illustration
      (cropped from the owner's mockup; carries its own warm-cream ground) */
   "ph-art-why-bring-arch": "/assets/art/ph-art-why-bring-arch.png",
+  /* The Palestine House star-logo mark, keyed from the owner's star-logo photo
+     to a transparent copper seal — the section-head / wordmark ornament. */
+  "ph-art-star-logo": "/assets/art/ph-art-star-logo.png",
 } as const;
 
 export type ArtId = keyof typeof ART_SOURCES;

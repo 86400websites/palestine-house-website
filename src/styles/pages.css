@@ -1708,16 +1708,12 @@
   flex: none;
 }
 
-/* Centered section head ornament (§3 · §5 · §6): the khatam seal star. */
+/* Centered section head ornament (§3 · §5 · §6): the star-logo mark (raster). */
 .bring-head-orn {
   display: block;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: auto;
   margin: 0 auto var(--space-3);
-  color: var(--copper-700);
-  fill: none;
-  stroke: var(--copper-700);
-  stroke-width: 1;
 }
 .bring-head .exp-orn {
   justify-content: center;
@@ -1746,17 +1742,17 @@
 }
 .bring-why-line {
   text-align: left;
-  margin-top: var(--space-4);
-  max-width: 24ch;
-  font-size: clamp(var(--text-lg), 0.8vw + 0.9rem, var(--text-xl));
-  line-height: 1.32;
+  margin-top: var(--space-5);
+  max-width: 22ch;
+  font-size: clamp(var(--text-2xl), 1.6vw + 0.9rem, var(--text-3xl));
+  line-height: var(--leading-snug);
 }
 .bring-why-sub {
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
   max-width: 32rem;
 }
 .bring-why-visual {
-  max-width: 17rem;
+  max-width: 20rem;
   width: 100%;
   margin-inline: auto;
 }
@@ -1798,13 +1794,9 @@
 }
 .bring-half-orn {
   display: block;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: auto;
   margin: 0 auto var(--space-4);
-  color: var(--copper-700);
-  fill: none;
-  stroke: var(--copper-700);
-  stroke-width: 1;
 }
 .bring-half-olive {
   display: block;
@@ -2109,12 +2101,8 @@
   margin-bottom: var(--space-8);
 }
 .bring-wordmark-seal {
-  width: 46px;
-  height: 46px;
-  color: var(--copper-700);
-  fill: none;
-  stroke: var(--copper-700);
-  stroke-width: 1;
+  width: 50px;
+  height: auto;
 }
 .bring-wordmark-text {
   font-family: var(--font-display);

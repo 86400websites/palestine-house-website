@@ -22,18 +22,19 @@ export function StarMark({ className }: MarkProps) {
   );
 }
 
-/* The full seal: the rounded 8-point star with a smaller concentric star
-   rotated 22.5° inside it — the star-logo mark. Section-head ornaments,
-   "We bring", and the §7 wordmark lockup use this. */
-export function SealMark({ className }: MarkProps) {
+/* The Palestine House star-logo mark (keyed from the owner's star-logo photo to
+   a transparent copper seal). The prominent decorative stars — section heads,
+   "We bring", and the §7 wordmark lockup — render this actual logo. */
+export function StarLogo({ className }: MarkProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d={STAR_PATH} />
-      <path
-        d={STAR_PATH}
-        transform="translate(12 12) rotate(22.5) scale(0.52) translate(-12 -12)"
-      />
-    </svg>
+    <Image
+      src={ART_SOURCES["ph-art-star-logo"]}
+      alt=""
+      aria-hidden="true"
+      width={360}
+      height={376}
+      className={className}
+    />
   );
 }
 

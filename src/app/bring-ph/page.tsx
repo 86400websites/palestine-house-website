@@ -6,8 +6,8 @@ import { PageDivider } from "@/components/shared/page-divider";
 import { Photo, ART_SOURCES } from "@/components/shared/photo";
 import {
   OliveBranch,
-  SealMark,
   SparkMark,
+  StarLogo,
   StarMark,
 } from "@/components/shared/ornament";
 import { PageHero } from "@/components/sections/page-hero";
@@ -145,7 +145,7 @@ export default function BringAHousePage() {
       <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head is-center bring-head">
-            <SealMark className="bring-head-orn" />
+            <StarLogo className="bring-head-orn" />
             <p className="ph-eyebrow bring-eyebrow-ink">The partnership</p>
             <h2>Who brings what.</h2>
             <span className="exp-orn">
@@ -171,7 +171,7 @@ export default function BringAHousePage() {
               </ul>
             </div>
             <div className="bring-who-half">
-              <SealMark className="bring-half-orn bring-half-orn--star" />
+              <StarLogo className="bring-half-orn bring-half-orn--star" />
               <span className="bring-half-rule" />
               <h3>We bring</h3>
               <ul className="bring-who-list">
@@ -218,7 +218,7 @@ export default function BringAHousePage() {
       <section className="ph-section-lg" id="checkpoints">
         <div className="ph-container">
           <Reveal className="sec-head is-center bring-head">
-            <SealMark className="bring-head-orn" />
+            <StarLogo className="bring-head-orn" />
             <p className="ph-eyebrow">The 120-day launch</p>
             <h2>No guesswork about whether you’re ready.</h2>
             <span className="exp-orn">
@@ -258,7 +258,7 @@ export default function BringAHousePage() {
       <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head is-center bring-head">
-            <SealMark className="bring-head-orn" />
+            <StarLogo className="bring-head-orn" />
             <p className="ph-eyebrow bring-eyebrow-flank">
               <OliveBranch flip className="bring-flank-olive" />
               The commitments
@@ -298,7 +298,7 @@ export default function BringAHousePage() {
         <Reveal className="ph-container bring-apply">
           <div className="bring-apply-copy">
             <div className="bring-wordmark">
-              <SealMark className="bring-wordmark-seal" />
+              <StarLogo className="bring-wordmark-seal" />
               <span className="bring-wordmark-text">
                 Palestine
                 <br />
