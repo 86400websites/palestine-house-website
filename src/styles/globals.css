@@ -205,6 +205,12 @@
   --moss-700: #393C29; /* stage-card plate green (arch-notch panels) */
   --moss-900: #20230E; /* olive proof-band background */
   --moss-950: #1B1E14; /* footer green-black */
+
+  /* --- Bring-a-House redesign: the deep forest-green display heading, sampled
+         from the owner's bring-ph mockups (#2E351A across all sections). Scoped
+         to /bring-ph via .bring-page; other v3 pages keep charcoal headings. */
+  --forest-800: #2E351A;
+
   --header-h: 72px;
 }
 

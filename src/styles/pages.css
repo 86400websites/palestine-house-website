@@ -1172,14 +1172,18 @@
   margin-inline: auto;
   text-align: center;
 }
+/* Both section closing lines share one display style, centered, for
+   consistency (owner request — "One room…" now matches "Different every
+   week…"). */
 .exp-daynight-close {
   display: block;
   margin: var(--space-12) auto 0;
   text-align: center;
   max-width: 40rem;
-  /* the mockup's quiet closing line — body type, not the display statement
-     (the statement-line class was retired here in LH1) */
-  font: var(--weight-regular) var(--text-lg) / 1.6 var(--font-body);
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
   color: var(--foreground);
 }
 @container page (max-width: 760px) {
@@ -1207,10 +1211,14 @@
   color: var(--muted-foreground);
 }
 .exp-pillars-close {
-  margin-top: var(--space-12);
+  display: block;
+  margin: var(--space-12) auto 0;
+  text-align: center;
+  max-width: 40rem;
   font-family: var(--font-display);
   font-weight: var(--weight-medium);
   font-size: var(--text-xl);
+  line-height: var(--leading-snug);
   color: var(--foreground);
 }
 @container page (max-width: 1020px) {
@@ -1646,49 +1654,192 @@
    Bring a House (/bring-ph) — page-specific (BringAHouse.html)
    ======================================================================== */
 
-/* Who brings what — balanced two-panel split beneath the artwork */
-.bring-split-art {
+/* --- Page scaffolding: forest-green headings (sampled #2E351A), the mockup
+   terracotta Apply button, and the §2 warm-cream ground (matches the cropped
+   arch illustration's own cream). All scoped to /bring-ph. §4 "What it takes"
+   keeps the site-standard charcoal heading (it is not `.bring-head`). ------ */
+.bring-page {
+  --bring-cream: #faeee1; /* the arch crop's ground — blends the rectangle away */
+  --bring-cta: #a94e2d; /* sampled terracotta from the "Ready to apply" mockup */
+  --bring-cta-hover: #92401f;
+}
+.bring-page :is(.bring-head h2, .statement-line, .bring-who-half h3,
+  .bring-mile-title, .bring-rule-card h3) {
+  color: var(--forest-800);
+}
+.bring-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+/* (B) terracotta Apply CTA — one element remap; shadcn reads bg-primary =
+   var(--primary), hover = var(--brand-primary-hover). Delete to revert to olive. */
+.bring-cta-primary {
+  --primary: var(--bring-cta);
+  --brand-primary-hover: var(--bring-cta-hover);
+}
+
+/* Shared eyebrow row (§2 · §7): sprig · label · flex hairline · sparkle. */
+.bring-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.bring-eyebrow .ph-eyebrow {
+  color: var(--char-900);
+  white-space: nowrap;
+}
+.bring-eyebrow-olive {
+  width: 42px;
+  height: auto;
+  flex: none;
+}
+.bring-eyebrow-line {
+  flex: 1;
+  height: 1px;
+  background: var(--copper-700);
+  opacity: 0.4;
+}
+.bring-eyebrow-spark {
+  width: 11px;
+  height: 11px;
+  color: var(--copper-700);
+  flex: none;
+}
+
+/* Centered section head ornament (§3 · §5 · §6): the star-logo mark (raster). */
+.bring-head-orn {
+  display: block;
+  width: 40px;
+  height: auto;
+  margin: 0 auto var(--space-3);
+}
+.bring-head .exp-orn {
+  justify-content: center;
+}
+/* .bring-page prefix (0,2,0) beats .ph-eyebrow (globals.css, loaded after
+   pages.css) so these per-section eyebrow colors actually win. */
+.bring-page .bring-eyebrow-ink {
+  color: var(--char-900);
+}
+
+/* ---- §2 Why bring one (statement · arch illustration) ---- */
+.bring-why-section {
+  background: var(--bring-cream);
+}
+/* Compact so the whole section fits within one viewport (owner: it was cut
+   off) — smaller statement, tighter gap, a smaller arch illustration. The
+   .bring-page prefix (0,2,0) beats .ph-section-lg's padding (globals, later). */
+.bring-page .bring-why-section {
+  padding-block: clamp(2.5rem, 5vw, 4rem);
+}
+.bring-why {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-10);
+  align-items: center;
+}
+.bring-why-line {
+  text-align: left;
+  margin-top: var(--space-5);
+  max-width: 22ch;
+  font-size: clamp(var(--text-2xl), 1.6vw + 0.9rem, var(--text-3xl));
+  line-height: var(--leading-snug);
+}
+.bring-why-sub {
+  margin-top: var(--space-5);
+  max-width: 32rem;
+}
+.bring-why-visual {
+  max-width: 29rem;
+  width: 100%;
+  margin-inline: auto;
+}
+.bring-why-illus {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---- §3 Who brings what (one bordered split card) ---- */
+.bring-who-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   max-width: 62rem;
   margin: var(--space-12) auto 0;
+  background: var(--cream-100);
+  border: var(--border-width) solid var(--line-warm);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
-.bring-split {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-6);
-  max-width: 62rem;
-  margin: var(--space-8) auto 0;
+.bring-who-half {
+  padding: var(--space-10) var(--space-10) var(--space-12);
+  text-align: center;
 }
-.bring-panel {
-  padding: var(--space-8);
+.bring-who-half + .bring-who-half {
+  border-left: var(--border-width) solid var(--line-warm);
 }
-.bring-panel h3 {
-  font-size: var(--text-xl);
+.bring-who-card::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--copper-700);
+  z-index: 1;
 }
-.bring-list {
+.bring-half-orn {
+  display: block;
+  width: 36px;
+  height: auto;
+  margin: 0 auto var(--space-4);
+}
+.bring-half-olive {
+  display: block;
+  width: 52px;
+  height: auto;
+  margin: 0 auto var(--space-4);
+}
+.bring-half-rule {
+  display: block;
+  width: 46px;
+  height: 1px;
+  margin: 0 auto var(--space-5);
+  background: var(--copper-700);
+  opacity: 0.5;
+}
+.bring-who-half h3 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-2xl);
+}
+.bring-who-list {
   list-style: none;
-  margin: var(--space-5) 0 0;
+  margin: var(--space-6) auto 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
+  text-align: left;
+  max-width: 22rem;
 }
-.bring-list li {
+.bring-who-list li {
   display: flex;
   gap: var(--space-3);
   align-items: flex-start;
   color: var(--ink-700);
   line-height: var(--leading-normal);
 }
-.bring-li-icon {
-  display: inline-flex;
+.bring-spark {
   flex: none;
-  color: var(--brand-primary);
-  margin-top: 2px;
-}
-@container page (max-width: 760px) {
-  .bring-split {
-    grid-template-columns: 1fr;
-  }
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  color: var(--copper-700);
 }
 
 /* The three stages — Home's v3 stage photo-cards via the shared StageCards
@@ -1705,101 +1856,370 @@
   max-width: 38rem;
 }
 
-/* Gates timeline — calm horizontal progression */
-.bring-gates {
+/* ---- §5 The 120-day launch (star-medallion timeline) ---- */
+.bring-miles {
   list-style: none;
+  position: relative;
+  padding: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-8);
-  margin: var(--space-12) 0 0;
-  padding: 0;
-  position: relative;
+  margin: var(--space-16) 0 0;
+  text-align: center;
 }
-.bring-gates::before {
+.bring-miles::before {
   content: "";
   position: absolute;
-  top: 14px;
-  left: 14px;
-  right: 18%;
-  height: var(--border-width);
-  background: var(--border-strong);
+  top: 27px;
+  left: 16%;
+  right: 16%;
+  height: 1px;
+  background: var(--copper-700);
+  opacity: 0.4;
 }
-.bring-gate {
+.bring-mile {
   position: relative;
-  padding-right: var(--space-6);
+  padding-inline: var(--space-4);
 }
-.bring-gate-node {
+.bring-mile-medallion {
   position: relative;
   z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
   border-radius: var(--radius-full);
-  background: var(--brand-primary);
-  color: var(--white);
+  border: 1px solid var(--copper-700);
+  background: var(--background);
 }
-.bring-gate-day {
+.bring-mile-star {
+  position: absolute;
+  inset: 8px;
+  width: auto;
+  height: auto;
+  fill: none;
+  stroke: var(--copper-700);
+  stroke-width: 0.9;
+  opacity: 0.9;
+}
+.bring-mile-num {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  color: var(--forest-800);
+}
+.bring-mile-day {
   display: block;
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
   font-family: var(--font-body);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--brand-accent);
+  color: var(--copper-700);
 }
-.bring-gate h3 {
+.bring-mile-title {
   margin-top: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
   font-size: var(--text-xl);
 }
-.bring-gate p {
+.bring-mile p {
   margin-top: var(--space-2);
   color: var(--muted-foreground);
-  max-width: 22rem;
+  max-width: 20rem;
+  margin-inline: auto;
 }
-.bring-gates-note {
-  margin-top: var(--space-10);
+.bring-mile-spark {
+  position: absolute;
+  top: 27px;
+  width: 9px;
+  height: 9px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--copper-700);
+}
+.bring-mile-spark--a {
+  left: 33.33%;
+}
+.bring-mile-spark--b {
+  left: 66.66%;
+}
+.bring-miles-note {
+  max-width: 60rem;
+  margin: var(--space-12) auto 0;
+  text-align: center;
+  padding: var(--space-6) var(--space-8);
+  border: var(--border-width) solid var(--line-warm);
+  border-radius: var(--radius-lg);
+  background: var(--cream-100);
   font: var(--text-lead);
   color: var(--muted-foreground);
-  max-width: 38rem;
+}
+
+/* ---- §6 The commitments (light cream, three medallion cards) ---- */
+.bring-page .bring-eyebrow-flank {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--forest-800);
+}
+.bring-flank-olive {
+  width: 36px;
+  height: auto;
+  flex: none;
+}
+.bring-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+  margin-top: var(--space-12);
+}
+.bring-rule-card {
+  padding: var(--space-10) var(--space-8) var(--space-8);
+  text-align: center;
+  background: var(--cream-100);
+  border: var(--border-width) solid var(--line-warm);
+  border-radius: var(--radius-lg);
+}
+.bring-rule-medallion {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--copper-700);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  color: var(--copper-700);
+}
+.bring-rule-spark {
+  display: block;
+  width: 12px;
+  height: 12px;
+  margin: var(--space-4) auto var(--space-3);
+  color: var(--copper-700);
+}
+.bring-rule-card h3 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-xl);
+}
+.bring-rule-card p {
+  margin-top: var(--space-3);
+  color: var(--muted-foreground);
+}
+.bring-rules-outro {
+  margin-top: var(--space-12);
+  text-align: center;
+}
+.bring-sprig-divider {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--copper-700);
+}
+.bring-sprig-divider::before,
+.bring-sprig-divider::after {
+  content: "";
+  width: 60px;
+  height: 1px;
+  background: var(--copper-700);
+  opacity: 0.4;
+}
+.bring-divider-olive {
+  width: 42px;
+  height: auto;
+}
+.bring-rules-close {
+  margin-top: var(--space-5);
+  text-align: center;
+  font: var(--text-lead);
+  color: var(--muted-foreground);
+}
+
+/* ---- §7 Ready to apply? (CTA · arch photo) ---- */
+.bring-apply {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: var(--space-16);
+  align-items: center;
+}
+.bring-apply-h {
+  text-align: left;
+  margin-top: var(--space-5);
+  font-size: clamp(2.6rem, 2.4vw + 1.4rem, 4rem);
+}
+.bring-why-rule {
+  margin-top: var(--space-5);
+}
+.bring-apply-rule {
+  margin-top: var(--space-4);
+}
+.bring-apply-rule::before,
+.bring-apply-rule::after {
+  width: 46px;
+}
+.bring-apply-body {
+  margin-top: var(--space-5);
+  max-width: 34rem;
+  font: var(--text-lead);
+  color: var(--muted-foreground);
+}
+.bring-apply-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+/* §7 secondary: forest border + text, matching the mockup's outlined button.
+   The shared v3.css outline rule is `:is(.ph-page,…) [data-slot=button][data-variant=outline]`
+   (0,3,0) and loads AFTER pages.css, so this must out-specify it — including hover. */
+.bring-page .bring-cta-secondary[data-slot="button"][data-variant="outline"],
+.bring-page
+  .bring-cta-secondary[data-slot="button"][data-variant="outline"]:hover {
+  border-color: var(--forest-800);
+  color: var(--forest-800);
+}
+.bring-apply-reassure {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+.bring-apply-reassure svg {
+  color: var(--olive-600);
+  flex: none;
+}
+/* §7 PALESTINE HOUSE lockup (seal star above the wordmark), per the mockup. */
+.bring-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+.bring-wordmark-seal {
+  width: 50px;
+  height: auto;
+}
+.bring-wordmark-text {
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-lg);
+  line-height: 1.06;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--forest-800);
+}
+.bring-apply-visual {
+  position: relative;
+  max-width: 26rem;
+  width: 100%;
+  margin-inline: auto;
+}
+.bring-arch {
+  position: relative;
+  aspect-ratio: 100 / 128;
+}
+/* .bring-page prefix (0,2,0) so this beats .v3-photo (0,1,0) in v3.css, which
+   loads AFTER pages.css and would otherwise re-assert position:relative. */
+.bring-page .bring-arch-photo {
+  position: absolute;
+  inset: 14px;
+  clip-path: url(#phArch);
+  border-radius: 0;
+}
+.bring-arch-outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* §7: the olive-branch flourish down the arch's right edge, and the small
+   sparkle floating just outside the arch's upper-left (both per the mockup). */
+.bring-arch-sprig {
+  position: absolute;
+  right: -16px;
+  bottom: 4%;
+  width: clamp(96px, 11vw, 148px);
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.bring-arch-diamond {
+  position: absolute;
+  top: 8%;
+  left: -4px;
+  width: 15px;
+  height: 15px;
+  color: var(--copper-700);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ---- Bring-a-House responsive (two-column sections stack; timeline vertical) ---- */
+@container page (max-width: 860px) {
+  .bring-why,
+  .bring-apply {
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+  .bring-why-visual,
+  .bring-apply-visual {
+    max-width: 22rem;
+  }
+  .bring-arch-sprig {
+    right: -12px;
+  }
+}
+@container page (max-width: 820px) {
+  .bring-rules-grid {
+    grid-template-columns: 1fr;
+  }
 }
 @container page (max-width: 760px) {
-  .bring-gates {
+  .bring-who-card {
     grid-template-columns: 1fr;
-    gap: var(--space-8);
   }
-  .bring-gates::before {
-    top: 14px;
-    bottom: 14px;
-    left: 14px;
+  .bring-who-half + .bring-who-half {
+    border-left: none;
+    border-top: var(--border-width) solid var(--line-warm);
+  }
+  .bring-miles {
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+    text-align: left;
+  }
+  .bring-miles::before {
+    top: 27px;
+    bottom: 27px;
+    left: 27px;
     right: auto;
-    width: var(--border-width);
+    width: 1px;
     height: auto;
   }
-  .bring-gate {
-    padding-left: var(--space-10);
-    padding-right: 0;
+  .bring-mile {
+    padding-left: var(--space-16);
   }
-  .bring-gate-node {
+  .bring-mile-medallion {
     position: absolute;
     left: 0;
     top: 0;
   }
-  .bring-gate-day {
+  .bring-mile-day {
     margin-top: 0;
   }
-}
-
-/* Three rules close + statement heading */
-.bring-rules-close {
-  margin-top: var(--space-10);
-  font: var(--text-lead);
-  color: var(--muted-foreground);
-}
-.bring-statement-h {
-  margin-top: var(--space-3);
+  .bring-mile p {
+    margin-inline: 0;
+  }
+  .bring-mile-spark {
+    display: none;
+  }
 }
 .bring-contact-link {
   color: var(--brand-primary);
