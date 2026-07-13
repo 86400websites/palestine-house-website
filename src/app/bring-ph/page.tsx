@@ -4,7 +4,12 @@ import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { PageDivider } from "@/components/shared/page-divider";
 import { Photo, ART_SOURCES } from "@/components/shared/photo";
-import { SparkMark, SprigMark, StarMark } from "@/components/shared/ornament";
+import {
+  OliveBranch,
+  SealMark,
+  SparkMark,
+  StarMark,
+} from "@/components/shared/ornament";
 import { PageHero } from "@/components/sections/page-hero";
 import { StageCards } from "@/components/sections/stage-cards";
 import { Reveal } from "@/components/motion/reveal";
@@ -104,7 +109,7 @@ export default function BringAHousePage() {
         <Reveal className="ph-container bring-why">
           <div className="bring-why-copy">
             <div className="bring-eyebrow">
-              <SprigMark className="bring-eyebrow-sprig" />
+              <OliveBranch className="bring-eyebrow-olive" />
               <span className="ph-eyebrow">Why bring one</span>
               <span className="bring-eyebrow-line" />
               <SparkMark className="bring-eyebrow-spark" />
@@ -140,7 +145,7 @@ export default function BringAHousePage() {
       <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head is-center bring-head">
-            <StarMark className="bring-head-orn" />
+            <SealMark className="bring-head-orn" />
             <p className="ph-eyebrow bring-eyebrow-ink">The partnership</p>
             <h2>Who brings what.</h2>
             <span className="exp-orn">
@@ -153,7 +158,7 @@ export default function BringAHousePage() {
           </Reveal>
           <Reveal className="bring-who-card">
             <div className="bring-who-half">
-              <SprigMark className="bring-half-orn" />
+              <OliveBranch className="bring-half-olive" />
               <span className="bring-half-rule" />
               <h3>You bring</h3>
               <ul className="bring-who-list">
@@ -166,7 +171,7 @@ export default function BringAHousePage() {
               </ul>
             </div>
             <div className="bring-who-half">
-              <StarMark className="bring-half-orn bring-half-orn--star" />
+              <SealMark className="bring-half-orn bring-half-orn--star" />
               <span className="bring-half-rule" />
               <h3>We bring</h3>
               <ul className="bring-who-list">
@@ -213,7 +218,7 @@ export default function BringAHousePage() {
       <section className="ph-section-lg" id="checkpoints">
         <div className="ph-container">
           <Reveal className="sec-head is-center bring-head">
-            <StarMark className="bring-head-orn" />
+            <SealMark className="bring-head-orn" />
             <p className="ph-eyebrow">The 120-day launch</p>
             <h2>No guesswork about whether you’re ready.</h2>
             <span className="exp-orn">
@@ -253,11 +258,11 @@ export default function BringAHousePage() {
       <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head is-center bring-head">
-            <StarMark className="bring-head-orn" />
+            <SealMark className="bring-head-orn" />
             <p className="ph-eyebrow bring-eyebrow-flank">
-              <SprigMark className="bring-flank-sprig bring-flank-sprig--l" />
+              <OliveBranch flip className="bring-flank-olive" />
               The commitments
-              <SprigMark className="bring-flank-sprig bring-flank-sprig--r" />
+              <OliveBranch className="bring-flank-olive" />
             </p>
             <h2>Three rules, no exceptions.</h2>
             <span className="exp-orn">
@@ -279,7 +284,7 @@ export default function BringAHousePage() {
           </Reveal>
           <Reveal className="bring-rules-outro">
             <span className="bring-sprig-divider">
-              <SprigMark />
+              <OliveBranch className="bring-divider-olive" />
             </span>
             <p className="bring-rules-close">
               If that’s how you want to work, we’d like to hear from you.
@@ -292,8 +297,16 @@ export default function BringAHousePage() {
       <section className="ph-section-lg">
         <Reveal className="ph-container bring-apply">
           <div className="bring-apply-copy">
+            <div className="bring-wordmark">
+              <SealMark className="bring-wordmark-seal" />
+              <span className="bring-wordmark-text">
+                Palestine
+                <br />
+                House
+              </span>
+            </div>
             <div className="bring-eyebrow">
-              <SprigMark className="bring-eyebrow-sprig" />
+              <OliveBranch className="bring-eyebrow-olive" />
               <span className="ph-eyebrow">The next step</span>
               <span className="bring-eyebrow-line" />
               <SparkMark className="bring-eyebrow-spark" />
@@ -332,6 +345,7 @@ export default function BringAHousePage() {
             </p>
           </div>
           <div className="bring-apply-visual">
+            <SparkMark className="bring-arch-diamond" />
             <div className="bring-arch">
               <Photo
                 assetId="ph-photo-ready-apply"
@@ -354,14 +368,7 @@ export default function BringAHousePage() {
                 />
               </svg>
             </div>
-            <Image
-              src={ART_SOURCES["ph-art-model-branch"]}
-              alt=""
-              aria-hidden="true"
-              width={220}
-              height={340}
-              className="bring-arch-sprig"
-            />
+            <OliveBranch className="bring-arch-sprig" />
           </div>
         </Reveal>
       </section>
