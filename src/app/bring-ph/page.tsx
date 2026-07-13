@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
-import { PageDivider } from "@/components/shared/page-divider";
 import { Photo, ART_SOURCES } from "@/components/shared/photo";
 import {
   OliveBranch,
@@ -211,8 +210,6 @@ export default function BringAHousePage() {
           </Reveal>
         </div>
       </section>
-
-      <PageDivider />
 
       {/* 5 — The 120-day launch: milestone timeline */}
       <section className="ph-section-lg" id="checkpoints">
