@@ -146,21 +146,60 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      <PageDivider />
-
-      {/* 3 — Standards */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">The standard</p>
-          <h2 className="statement-line sup-statement-h">
-            Standards that make the name mean something.
-          </h2>
-          <p className="statement-sub">
-            A guest should feel the same care in any House, in any city. HQ sets
-            that bar and keeps it — so the name you’re opening under already
-            carries trust, and your House inherits it from day one.
-          </p>
-        </Reveal>
+      {/* 3 — The Standard: copy · three arched photos · PH lockup (DR3.3) */}
+      <section className="ph-section-lg support-standard">
+        <div className="ph-container support-standard-grid">
+          <Reveal className="support-standard-copy">
+            <h2 className="support-standard-h">
+              Standards that make the name mean something.
+            </h2>
+            <span className="support-orn" aria-hidden="true" />
+            <p className="support-standard-body">
+              Wherever a guest walks in, they feel the same level of care,
+              quality, and professionalism. Local character, shared standard.
+            </p>
+          </Reveal>
+          <Reveal className="support-standard-arches">
+            <div className="support-standard-arch">
+              <Photo
+                assetId="ph-photo-support-standard-1"
+                alt="A candlelit café table set with red carnations."
+                sizes="(max-width: 980px) 30vw, 200px"
+              />
+            </div>
+            <span className="support-standard-star" aria-hidden="true" />
+            <div className="support-standard-arch">
+              <Photo
+                assetId="ph-photo-support-standard-2"
+                alt="A stage set with instruments and woven rugs before a performance."
+                sizes="(max-width: 980px) 30vw, 200px"
+              />
+            </div>
+            <span className="support-standard-star" aria-hidden="true" />
+            <div className="support-standard-arch">
+              <Photo
+                assetId="ph-photo-support-standard-3"
+                alt="A guest listening intently during a House gathering."
+                sizes="(max-width: 980px) 30vw, 200px"
+              />
+            </div>
+          </Reveal>
+          <Reveal className="support-standard-seal">
+            {/* eslint-disable-next-line @next/next/no-img-element -- brand lockup, fixed aspect */}
+            <img
+              className="support-standard-lockup"
+              src="/assets/logo/ph-logo-lockup.png"
+              alt="Palestine House — Our Culture Embassy"
+            />
+            <p className="support-standard-tagline">
+              One name.
+              <br />
+              One shared standard.
+              <br />
+              Local character.
+            </p>
+          </Reveal>
+        </div>
       </section>
 
       {/* 4 — Aswātna */}
