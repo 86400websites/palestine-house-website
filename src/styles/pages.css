@@ -2314,48 +2314,8 @@
   margin-top: var(--space-3);
 }
 
-/* Three stages, named lightly — the detail lives on Bring a House */
-.sup-stages {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-6);
-  margin-top: var(--space-10);
-}
-.sup-stage-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-4);
-}
-.sup-stage {
-  font-family: var(--font-display);
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-xl);
-  color: var(--foreground);
-}
-.sup-stage-sep {
-  color: var(--brand-primary);
-  font-size: var(--text-lg);
-}
-.sup-gates-link {
-  font: var(--text-ui);
-  font-weight: var(--weight-semibold);
-  color: var(--brand-primary);
-  min-height: var(--tap-target);
-  display: inline-flex;
-  align-items: center;
-}
-.sup-gates-link:hover {
-  color: var(--brand-primary-hover);
-}
-.sup-after {
-  margin-top: var(--space-10);
-  font: var(--text-lead);
-  color: var(--muted-foreground);
-  max-width: 40rem;
-}
+/* (The old .sup-stages / .sup-gates-link / .sup-after rules were removed in
+   DR3.3 — the three-stage chips became the numbered timeline in §5.) */
 
 /* ===========================================================================
    Our Support v3 body (DR3.3) — hero · standard · aswatna · backing · duties.
