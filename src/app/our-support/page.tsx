@@ -3,15 +3,22 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
+  BarChart3,
+  BookOpen,
   Bookmark,
+  CalendarDays,
   CheckCircle2,
+  CircleCheck,
   Download,
+  FileText,
   Info,
+  Infinity as InfinityIcon,
+  LayoutGrid,
   Play,
+  UtensilsCrossed,
 } from "lucide-react";
-import { PageDivider } from "@/components/shared/page-divider";
-import { ApplyCta } from "@/components/sections/apply-cta";
-import { PageHero } from "@/components/sections/page-hero";
+import { Photo } from "@/components/shared/photo";
+import { StarMark } from "@/components/shared/ornament";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +31,66 @@ export const metadata: Metadata = {
   description:
     "What HQ gives every partner — the full playbook (10 focus areas, 30 topics, 267 templates), the standards, Aswātna, and support from first decision to open doors.",
 };
+
+/* Hero proof row — the canonical numbers, shown under the lead (mockup). */
+const SUP_PROOF = [
+  { icon: BookOpen, n: "10", label: "focus areas" },
+  { icon: LayoutGrid, n: "30", label: "topics" },
+  { icon: FileText, n: "267", label: "templates" },
+  { icon: CalendarDays, n: "120", label: "day launch plan" },
+] as const;
+
+/* Aswātna — how the cultural partner shows up across the launch (mockup). */
+const SUP_ASWATNA = [
+  {
+    assetId: "ph-photo-support-aswatna-1",
+    alt: "A singer and guitarist performing together at a House.",
+    label: "Before opening",
+    text: "We help shape your launch programming and cultural direction.",
+  },
+  {
+    assetId: "ph-photo-support-aswatna-2",
+    alt: "A packed audience filming a candlelit night of live music.",
+    label: "At launch",
+    text: "We provide artists, events, partnerships, and opening-week support.",
+  },
+  {
+    assetId: "ph-photo-support-aswatna-3",
+    alt: "Guests dancing at a House celebration beside a keyboard player.",
+    label: "After launch",
+    text: "We continue curating and supporting creative quality over time.",
+  },
+] as const;
+
+/* "What you're responsible for" — the ongoing-support topics + the who-brings
+   -what split, from the mockup. */
+const SUP_ONGOING = [
+  { icon: CalendarDays, title: "Programming", text: "Plan a coherent cultural calendar." },
+  { icon: UtensilsCrossed, title: "Food & Hospitality", text: "Maintain quality and consistency." },
+  { icon: InfinityIcon, title: "Membership & Community", text: "Build long-term relationships." },
+  { icon: BarChart3, title: "Finance & Operations", text: "Use systems that keep your House sustainable." },
+] as const;
+
+const SUP_YOU_BRING = [
+  "The venue",
+  "The team",
+  "Local relationships",
+  "Daily commitment",
+] as const;
+
+const SUP_WE_ENSURE = [
+  "You know what to do",
+  "You have the right tools",
+  "You follow a clear standard",
+  "You are not building alone",
+] as const;
+
+/* The Backing — the three-stage, 120-day launch path as a numbered timeline. */
+const SUP_STAGES = [
+  { n: "01", name: "Plan & Prepare", text: "Venue, company, governance, budget." },
+  { n: "02", name: "Design & Build", text: "Fit-out, suppliers, systems, permissions." },
+  { n: "03", name: "Operate & Program", text: "Team, launch, programming, daily operations." },
+] as const;
 
 /* Every topic ships the same six artefacts — shown as documents, not icons. */
 const SUP_ARTEFACTS = [
@@ -62,20 +129,35 @@ const SUP_ARTEFACTS = [
 export default function OurSupportPage() {
   return (
     <>
-      {/* 1 — v3 photo hero (DR1-9) */}
-      <PageHero
-        photo="ph-photo-our-support"
-        alt="Women in embroidered thobes dancing together at a House gathering."
-        position="50% 22%"
-        eyebrow="Our Support"
-        title="You’re not doing this alone."
-        lead="A House is yours to run — but the standard, the tools, and the people behind it are shared across the whole network. Here’s exactly what comes with that."
-        support="Every application is reviewed by HQ."
-      >
-        <Button asChild size="lg" className="v3-cta">
-          <Link href="/apply">Apply to bring a House</Link>
-        </Button>
-      </PageHero>
+      {/* 1 — v3 split hero (DR3.3): cream copy + proof row · flag photo right */}
+      <section className="support-hero">
+        <Reveal className="support-hero-copy">
+          <p className="ph-eyebrow">Our Support</p>
+          <h1 className="support-hero-h1">You’re not doing this alone.</h1>
+          <p className="support-hero-lead">
+            Every House is backed by a complete toolkit, clear standards,
+            cultural guidance from Aswātna, and a 120-day launch plan. From your
+            first decision to your first open doors — we’re with you.
+          </p>
+          <ul className="support-hero-proof">
+            {SUP_PROOF.map((s) => (
+              <li key={s.label} className="support-hero-stat">
+                <s.icon className="support-hero-stat-icon" aria-hidden="true" />
+                <span className="support-hero-stat-n">{s.n}</span>
+                <span className="support-hero-stat-l">{s.label}</span>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+        <div className="support-hero-photo">
+          <Photo
+            assetId="ph-photo-support-hero"
+            alt="A woman waving a Palestinian flag as a House gathering claps her on."
+            sizes="(max-width: 880px) 100vw, 55vw"
+            priority
+          />
+        </div>
+      </section>
 
       {/* 2 — The full playbook */}
       <section className="ph-section-lg">
@@ -92,15 +174,19 @@ export default function OurSupportPage() {
           </Reveal>
           <Reveal className="sup-artefacts">
             {SUP_ARTEFACTS.map((a) => (
-              <div key={a.name} className="ph-card sup-artefact">
+              <Link
+                key={a.name}
+                href="/focus-areas"
+                className="ph-card sup-artefact"
+              >
                 <span className="sup-artefact-icon">
-                  <a.icon size={20} aria-hidden="true" />
+                  <a.icon size={22} aria-hidden="true" />
                 </span>
                 <div>
                   <h3>{a.name}</h3>
                   <p>{a.text}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </Reveal>
           <Reveal className="sup-templates">
@@ -109,7 +195,7 @@ export default function OurSupportPage() {
               rotas, budgets — so you’re adapting proven documents, not starting
               from a blank page.
             </p>
-            <Button asChild variant="outline">
+            <Button asChild size="lg">
               <Link href="/focus-areas">
                 See the full map
                 <ArrowRight aria-hidden="true" />
@@ -119,112 +205,204 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      <PageDivider />
-
-      {/* 3 — Standards */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">The standard</p>
-          <h2 className="statement-line sup-statement-h">
-            Standards that make the name mean something.
-          </h2>
-          <p className="statement-sub">
-            A guest should feel the same care in any House, in any city. HQ sets
-            that bar and keeps it — so the name you’re opening under already
-            carries trust, and your House inherits it from day one.
-          </p>
-        </Reveal>
-      </section>
-
-      {/* 4 — Aswātna */}
-      <section className="ph-section-lg ph-section-dark">
-        <div className="ph-container split is-centered">
-          <Reveal className="split-a sec-head">
-            <p className="ph-eyebrow">Aswātna</p>
-            <h2>A cultural partner, not just a brand.</h2>
-          </Reveal>
-          <Reveal className="split-copy">
-            <p>
-              Programming is what brings people back — and you don’t shape it
-              alone.
-            </p>
-            <p>
-              Aswātna, the network’s cultural-programming partner, helps curate
-              your launch and keeps the creative standard high — so your
-              calendar is strong from the first night, not a year in.
+      {/* 3 — The Standard: copy · three arched photos · PH lockup (DR3.3) */}
+      <section className="ph-section-lg support-standard">
+        <div className="ph-container support-standard-grid">
+          <Reveal className="support-standard-copy">
+            <h2 className="support-standard-h">
+              Standards that make the name mean something.
+            </h2>
+            <span className="support-orn" aria-hidden="true" />
+            <p className="support-standard-body">
+              Wherever a guest walks in, they feel the same level of care,
+              quality, and professionalism. Local character, shared standard.
             </p>
           </Reveal>
-        </div>
-      </section>
-
-      {/* 5 — From first decision to open doors */}
-      <section className="ph-section-lg">
-        <div className="ph-container">
-          <Reveal className="sec-head">
-            <p className="ph-eyebrow">The backing</p>
-            <h2>Support from first decision to open doors.</h2>
-            <p className="ph-lead">
-              The platform walks you through the launch in order, across three
-              stages and a 120-day plan, so you always know what’s next and when
-              you’re ready to move on.
-            </p>
-          </Reveal>
-          <Reveal className="sup-stages">
-            <div className="sup-stage-row">
-              <span className="sup-stage">Plan &amp; Prepare</span>
-              <span className="sup-stage-sep" aria-hidden="true">
-                →
-              </span>
-              <span className="sup-stage">Design &amp; Build</span>
-              <span className="sup-stage-sep" aria-hidden="true">
-                →
-              </span>
-              <span className="sup-stage">Operate &amp; Program</span>
+          <Reveal className="support-standard-arches">
+            <div className="support-standard-arch">
+              <Photo
+                assetId="ph-photo-support-standard-1"
+                alt="A candlelit café table set with red carnations."
+                sizes="(max-width: 620px) 240px, (max-width: 980px) 30vw, 200px"
+              />
             </div>
-            <Link className="sup-gates-link" href="/bring-ph#checkpoints">
-              The 120-day launch, in detail →
-            </Link>
+            <span className="support-standard-star" aria-hidden="true" />
+            <div className="support-standard-arch">
+              <Photo
+                assetId="ph-photo-support-standard-2"
+                alt="A stage set with instruments and woven rugs before a performance."
+                sizes="(max-width: 620px) 240px, (max-width: 980px) 30vw, 200px"
+              />
+            </div>
+            <span className="support-standard-star" aria-hidden="true" />
+            <div className="support-standard-arch">
+              <Photo
+                assetId="ph-photo-support-standard-3"
+                alt="A guest listening intently during a House gathering."
+                sizes="(max-width: 620px) 240px, (max-width: 980px) 30vw, 200px"
+              />
+            </div>
           </Reveal>
-          <Reveal>
-            <p className="sup-after">
-              And it doesn’t stop at opening. The same thirty topics become your
-              day-to-day reference for running the House — programming, food,
-              membership, finance, all of it — with every template a click away.
+          <Reveal className="support-standard-seal">
+            {/* eslint-disable-next-line @next/next/no-img-element -- brand lockup, fixed aspect */}
+            <img
+              className="support-standard-lockup"
+              src="/assets/logo/ph-logo-lockup.png"
+              alt="Palestine House — Our Culture Embassy"
+            />
+            <p className="support-standard-tagline">
+              One name.
+              <br />
+              One shared standard.
+              <br />
+              Local character.
             </p>
           </Reveal>
         </div>
       </section>
 
-      <PageDivider />
-
-      {/* 6 — The honest counterweight */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">What you’re responsible for</p>
-          <p className="statement-line">
-            Support is real, but it isn’t a substitute for the work.
-          </p>
-          <p className="statement-sub">
-            You bring the venue, the team, the local relationships, and the
-            daily commitment to run a real business. We make sure you’re never
-            guessing how.
-          </p>
-        </Reveal>
+      {/* 4 — Aswātna: muted-red band + gold seal · three captioned photos (DR3.3) */}
+      <section className="ph-section-lg support-aswatna">
+        <div className="ph-container support-aswatna-grid">
+          <Reveal className="support-aswatna-intro">
+            <h2 className="support-aswatna-name">Aswātna</h2>
+            <p className="support-aswatna-tag">
+              A cultural partner. Not just a brand.
+            </p>
+            <p className="support-aswatna-body">
+              Aswātna helps curate your launch and supports ongoing programming
+              so your House starts strong and stays culturally alive.
+            </p>
+            {/* eslint-disable-next-line @next/next/no-img-element -- partner seal, fixed size */}
+            <img
+              className="support-aswatna-seal"
+              src="/assets/partners/aswatna-mark-gold.png"
+              alt="Aswātna Studio"
+            />
+          </Reveal>
+          <Reveal className="support-aswatna-cols">
+            {SUP_ASWATNA.map((c) => (
+              <div key={c.label} className="support-aswatna-col">
+                <div className="support-aswatna-photo">
+                  <Photo
+                    assetId={c.assetId}
+                    alt={c.alt}
+                    sizes="(max-width: 620px) 100vw, (max-width: 980px) 33vw, 260px"
+                  />
+                </div>
+                <div className="support-aswatna-cap">
+                  <p className="support-aswatna-col-label">{c.label}</p>
+                  <p className="support-aswatna-col-text">{c.text}</p>
+                </div>
+              </div>
+            ))}
+          </Reveal>
+        </div>
       </section>
 
-      {/* 7 — Closing CTA (page closer) */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">Behind every House</p>
-          <h2 className="statement-line sup-statement-h">
-            This is what’s behind every House.
-          </h2>
-          <p className="statement-sub">
-            If you’re ready to open one in your city, apply — every application
-            is reviewed by HQ.
-          </p>
-          <ApplyCta secondaryHref="/bring-ph" secondaryLabel="See what it takes" />
-        </Reveal>
+      {/* 5 — The Backing: copy + button · horizontal numbered timeline (DR3.3) */}
+      <section className="ph-section-lg support-backing">
+        <div className="ph-container support-backing-grid">
+          <Reveal className="support-backing-copy">
+            <h2 className="support-backing-h">
+              Support from first decision to open doors.
+            </h2>
+            <span className="support-orn" aria-hidden="true" />
+            <p className="support-backing-body">
+              A 120-day path with clear milestones and constant guidance.
+            </p>
+            <Button
+              asChild
+              variant="outline"
+              className="support-backing-cta"
+            >
+              <Link href="/bring-ph#checkpoints">
+                View the 120-day launch
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </Reveal>
+          <Reveal className="support-backing-timeline">
+            <ol className="support-timeline">
+              {SUP_STAGES.map((s) => (
+                <li key={s.n} className="support-timeline-step">
+                  <span className={`support-timeline-node is-${s.n}`}>
+                    {s.n}
+                  </span>
+                  <div className="support-timeline-body">
+                    <p className="support-timeline-name">{s.name}</p>
+                    <p className="support-timeline-text">{s.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="support-timeline-caption">
+              You always know where you are, what comes next, and what is ready.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 6 — What you're responsible for: ongoing-support band + who-brings-what
+          split (DR3.3) */}
+      <section className="support-duties">
+        <div className="support-duties-band">
+          <div className="ph-container support-duties-band-grid">
+            <Reveal className="support-duties-intro">
+              <h2 className="support-duties-h">
+                Opening day is not the finish line.
+              </h2>
+              <p className="support-duties-sub">
+                We keep supporting you long after the doors open.
+              </p>
+            </Reveal>
+            <Reveal className="support-duties-topics">
+              {SUP_ONGOING.map((t) => (
+                <div key={t.title} className="support-duties-topic">
+                  <t.icon className="support-duties-topic-icon" aria-hidden="true" />
+                  <p className="support-duties-topic-title">{t.title}</p>
+                  <p className="support-duties-topic-text">{t.text}</p>
+                </div>
+              ))}
+            </Reveal>
+          </div>
+        </div>
+        <div className="support-duties-split">
+          <div className="support-duties-photo">
+            <Photo
+              assetId="ph-photo-support-responsibility"
+              alt="The lantern-lit entrance of a Palestine House at dusk."
+              sizes="(max-width: 860px) 100vw, 42vw"
+            />
+          </div>
+          <Reveal className="support-duties-lists">
+            <div className="support-duties-list">
+              <p className="support-duties-list-head">You bring</p>
+              <ul>
+                {SUP_YOU_BRING.map((i) => (
+                  <li key={i}>
+                    <CircleCheck aria-hidden="true" />
+                    {i}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <span className="support-duties-divider" aria-hidden="true">
+              <StarMark className="support-duties-star" />
+            </span>
+            <div className="support-duties-list">
+              <p className="support-duties-list-head">We make sure</p>
+              <ul>
+                {SUP_WE_ENSURE.map((i) => (
+                  <li key={i}>
+                    <CircleCheck aria-hidden="true" />
+                    {i}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+        </div>
       </section>
     </>
   );

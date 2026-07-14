@@ -50,6 +50,16 @@ export const PHOTO_SOURCES = {
   "ph-photo-exp-home": "/assets/photos/ph-photo-exp-home.jpg",
   /* Bring-a-House redesign — the §7 "Ready to apply" arch photo */
   "ph-photo-ready-apply": "/assets/photos/ph-photo-ready-apply.jpg",
+  /* DR3.3 — /our-support body: the split-hero flag photo · the three "Standard"
+     arch photos · the three Aswātna column photos · the "you bring" doorway. */
+  "ph-photo-support-hero": "/assets/photos/ph-photo-support-hero.jpg",
+  "ph-photo-support-standard-1": "/assets/photos/ph-photo-support-standard-1.jpg",
+  "ph-photo-support-standard-2": "/assets/photos/ph-photo-support-standard-2.jpg",
+  "ph-photo-support-standard-3": "/assets/photos/ph-photo-support-standard-3.jpg",
+  "ph-photo-support-aswatna-1": "/assets/photos/ph-photo-support-aswatna-1.jpg",
+  "ph-photo-support-aswatna-2": "/assets/photos/ph-photo-support-aswatna-2.jpg",
+  "ph-photo-support-aswatna-3": "/assets/photos/ph-photo-support-aswatna-3.jpg",
+  "ph-photo-support-responsibility": "/assets/photos/ph-photo-support-responsibility.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;

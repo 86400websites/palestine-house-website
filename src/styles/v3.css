@@ -398,6 +398,11 @@ img.phx-brand-mark {
   position: relative;
   z-index: 1;
   flex: 1;
+  /* fill the flex line so the .ph-container reaches its full centered width;
+     without this it shrink-wraps to the copy + margin-auto centers it, pushing
+     the copy to mid-page. The copy then sits at the container's left edge
+     (owner direction 2026-07-14: hero copy left-aligned on the inner pages). */
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
