@@ -176,7 +176,7 @@ export default function OurSupportPage() {
             {SUP_ARTEFACTS.map((a) => (
               <div key={a.name} className="ph-card sup-artefact">
                 <span className="sup-artefact-icon">
-                  <a.icon size={20} aria-hidden="true" />
+                  <a.icon size={22} aria-hidden="true" />
                 </span>
                 <div>
                   <h3>{a.name}</h3>
