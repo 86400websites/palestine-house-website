@@ -2366,12 +2366,14 @@
   max-width: 34rem;
 }
 .support-hero-proof {
-  /* 4 columns that never wrap — the "120 day launch plan" stat stays on the
-     same row as the others down to 320px (owner, 2026-07-14) */
+  /* a <ul> of stats; 4 columns that never wrap so the "120 day launch plan"
+     stat stays on the same row down to 320px (owner, 2026-07-14) */
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(0.75rem, 2vw, 2rem);
-  margin-top: clamp(2rem, 4vw, 3.25rem);
+  margin: clamp(2rem, 4vw, 3.25rem) 0 0;
+  padding: 0;
+  list-style: none;
 }
 .support-hero-stat {
   display: flex;
@@ -2769,7 +2771,9 @@
   background: #8e3f18;
 }
 .support-timeline-node.is-03 {
-  background: #9e6a1e;
+  /* deepened from the sampled #9e6a1e so the cream numeral clears AA 4.5:1
+     (cream-50 on #8f5d18 ≈ 5.0:1; the sampled gold was ~4.3:1) */
+  background: #8f5d18;
 }
 .support-timeline-name {
   font-family: var(--font-body);

@@ -139,15 +139,15 @@ export default function OurSupportPage() {
             cultural guidance from Aswātna, and a 120-day launch plan. From your
             first decision to your first open doors — we’re with you.
           </p>
-          <dl className="support-hero-proof">
+          <ul className="support-hero-proof">
             {SUP_PROOF.map((s) => (
-              <div key={s.label} className="support-hero-stat">
+              <li key={s.label} className="support-hero-stat">
                 <s.icon className="support-hero-stat-icon" aria-hidden="true" />
-                <dd className="support-hero-stat-n">{s.n}</dd>
-                <dt className="support-hero-stat-l">{s.label}</dt>
-              </div>
+                <span className="support-hero-stat-n">{s.n}</span>
+                <span className="support-hero-stat-l">{s.label}</span>
+              </li>
             ))}
-          </dl>
+          </ul>
         </Reveal>
         <div className="support-hero-photo">
           <Photo
@@ -223,7 +223,7 @@ export default function OurSupportPage() {
               <Photo
                 assetId="ph-photo-support-standard-1"
                 alt="A candlelit café table set with red carnations."
-                sizes="(max-width: 980px) 30vw, 200px"
+                sizes="(max-width: 620px) 240px, (max-width: 980px) 30vw, 200px"
               />
             </div>
             <span className="support-standard-star" aria-hidden="true" />
@@ -231,7 +231,7 @@ export default function OurSupportPage() {
               <Photo
                 assetId="ph-photo-support-standard-2"
                 alt="A stage set with instruments and woven rugs before a performance."
-                sizes="(max-width: 980px) 30vw, 200px"
+                sizes="(max-width: 620px) 240px, (max-width: 980px) 30vw, 200px"
               />
             </div>
             <span className="support-standard-star" aria-hidden="true" />
@@ -239,7 +239,7 @@ export default function OurSupportPage() {
               <Photo
                 assetId="ph-photo-support-standard-3"
                 alt="A guest listening intently during a House gathering."
-                sizes="(max-width: 980px) 30vw, 200px"
+                sizes="(max-width: 620px) 240px, (max-width: 980px) 30vw, 200px"
               />
             </div>
           </Reveal>

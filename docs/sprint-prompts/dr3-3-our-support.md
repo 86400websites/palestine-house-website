@@ -39,6 +39,15 @@ Part of the DR public-page-to-v3 stream. Planned via `/sprint-prompt` (plan-mode
 - `scripts/optimize-photos.ts` extended: 8 `PHOTOS[]` entries + a new `encodeAswatnaMarkGold()` (keys the white ground out, **keeps** the gold — vs the cream `encodeAswatnaMark` for the `/model` terracotta arch) → `public/assets/partners/aswatna-mark-gold.png`. Ran `pnpm tsx scripts/optimize-photos.ts`; all photos < 500 KB.
 - 8 ids registered in `PHOTO_SOURCES` (`photo.tsx`).
 
+## Independent Codex review (2026-07-14)
+Verdict: **no blocking issues, path-guard passes exactly** — request-changes on **4 Mediums**, all fixed on-branch:
+1. **AA — gold timeline node** `is-03` (`#9e6a1e`) cream numeral ≈ 4.30:1 (< 4.5:1) → **deepened to `#8f5d18`** (≈ 5:1), numerals stay cream.
+2. **Standard photo `sizes`** advertised only 30vw when the arches stack larger on mobile → **mobile-first `sizes="(max-width: 620px) 240px, (max-width: 980px) 30vw, 200px"`** so the stacked arches pick a sharp source.
+3. **Hero proof `<dl>` semantics** (svg + dd-before-dt) → **remodelled as a `<ul>` of `<li>`** (icon + `<span>` number + `<span>` label; `list-style:none; padding:0`).
+4. **DESIGN.md §12** wrongly said the closing `.statement` CTA was kept → corrected (only the toolkit grid was kept; the closer was removed).
+
+Codex confirmed: no overflow 320→1440; red-band AA (≈6.63:1 head / 5.21 body / 4.95 small); green-band AA (≈11.56:1 / ≥7.31); toolkit cards are named anchors with no nested interactives; the Backing CTA copper rules beat the v3 outline cascade; only `/our-support` gets the solid header; the shared page-hero width works on `/model` `/experience` `/bring-ph` and leaves Home's `.v3-hero` untouched; `tsc`/ESLint/build all pass. (Missing: Vercel Preview + `/apply` render, which needs Supabase env locally.)
+
 ## Files
 `src/app/our-support/page.tsx`, `src/styles/pages.css` (new `.support-*` blocks; dead `.sup-stages`/`.sup-gates-link`/`.sup-after` pruned), `src/styles/v3.css` (the page-hero-inner fill), `src/components/shared/photo.tsx` (8 ids), `scripts/optimize-photos.ts` (8 photos + gold seal), `src/components/layout/site-header.tsx` (one line: `/our-support` out of `OVERLAY_ROUTES`), + 9 assets under `public/assets/`.
 
