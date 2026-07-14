@@ -13,7 +13,6 @@ import {
   LayoutGrid,
   Play,
 } from "lucide-react";
-import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { Photo } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
@@ -57,6 +56,13 @@ const SUP_ASWATNA = [
     label: "After launch",
     text: "We continue curating and supporting creative quality over time.",
   },
+] as const;
+
+/* The Backing — the three-stage, 120-day launch path as a numbered timeline. */
+const SUP_STAGES = [
+  { n: "01", name: "Plan & Prepare", text: "Venue, company, governance, budget." },
+  { n: "02", name: "Design & Build", text: "Fit-out, suppliers, systems, permissions." },
+  { n: "03", name: "Operate & Program", text: "Team, launch, programming, daily operations." },
 ] as const;
 
 /* Every topic ships the same six artefacts — shown as documents, not icons. */
@@ -263,45 +269,48 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      {/* 5 — From first decision to open doors */}
-      <section className="ph-section-lg">
-        <div className="ph-container">
-          <Reveal className="sec-head">
-            <p className="ph-eyebrow">The backing</p>
-            <h2>Support from first decision to open doors.</h2>
-            <p className="ph-lead">
-              The platform walks you through the launch in order, across three
-              stages and a 120-day plan, so you always know what’s next and when
-              you’re ready to move on.
+      {/* 5 — The Backing: copy + button · horizontal numbered timeline (DR3.3) */}
+      <section className="ph-section-lg support-backing">
+        <div className="ph-container support-backing-grid">
+          <Reveal className="support-backing-copy">
+            <h2 className="support-backing-h">
+              Support from first decision to open doors.
+            </h2>
+            <span className="support-orn" aria-hidden="true" />
+            <p className="support-backing-body">
+              A 120-day path with clear milestones and constant guidance.
             </p>
+            <Button
+              asChild
+              variant="outline"
+              className="support-backing-cta"
+            >
+              <Link href="/bring-ph#checkpoints">
+                View the 120-day launch
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
           </Reveal>
-          <Reveal className="sup-stages">
-            <div className="sup-stage-row">
-              <span className="sup-stage">Plan &amp; Prepare</span>
-              <span className="sup-stage-sep" aria-hidden="true">
-                →
-              </span>
-              <span className="sup-stage">Design &amp; Build</span>
-              <span className="sup-stage-sep" aria-hidden="true">
-                →
-              </span>
-              <span className="sup-stage">Operate &amp; Program</span>
-            </div>
-            <Link className="sup-gates-link" href="/bring-ph#checkpoints">
-              The 120-day launch, in detail →
-            </Link>
-          </Reveal>
-          <Reveal>
-            <p className="sup-after">
-              And it doesn’t stop at opening. The same thirty topics become your
-              day-to-day reference for running the House — programming, food,
-              membership, finance, all of it — with every template a click away.
+          <Reveal className="support-backing-timeline">
+            <ol className="support-timeline">
+              {SUP_STAGES.map((s) => (
+                <li key={s.n} className="support-timeline-step">
+                  <span className={`support-timeline-node is-${s.n}`}>
+                    {s.n}
+                  </span>
+                  <div className="support-timeline-body">
+                    <p className="support-timeline-name">{s.name}</p>
+                    <p className="support-timeline-text">{s.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="support-timeline-caption">
+              You always know where you are, what comes next, and what is ready.
             </p>
           </Reveal>
         </div>
       </section>
-
-      <PageDivider />
 
       {/* 6 — The honest counterweight */}
       <section className="ph-section-lg">

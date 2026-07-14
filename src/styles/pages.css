@@ -2700,6 +2700,162 @@
   }
 }
 
+/* 4 — The Backing: copy + outline button · horizontal numbered timeline.
+   Node fills + connecting line sampled from the mockup. */
+.support-backing-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 2fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: center;
+}
+.support-backing-h {
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: clamp(1.15rem, 0.5vw + 1rem, 1.5rem);
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+.support-backing-body {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 0.4vw + 0.95rem, 1.25rem);
+  line-height: 1.55;
+  color: var(--char-900);
+  max-width: 22ch;
+  margin-bottom: var(--space-6);
+}
+/* copper outline to match the page accent — must out-specify the (0,3,0) v3
+   outline-button rule (pages.css loads before v3.css, so a tie would lose) */
+.support-backing .support-backing-cta[data-slot="button"][data-variant="outline"] {
+  border-color: color-mix(in oklab, var(--copper-700) 55%, transparent);
+  color: var(--copper-700);
+}
+.support-backing
+  .support-backing-cta[data-slot="button"][data-variant="outline"]:hover {
+  border-color: var(--copper-700);
+  background: color-mix(in oklab, var(--copper-700) 8%, transparent);
+  color: var(--copper-800);
+}
+.support-timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 2rem);
+}
+/* the connecting line, node-centre height, from the first node centre (1/6)
+   to the last (5/6); the opaque nodes cover it at their positions */
+.support-timeline::before {
+  content: "";
+  position: absolute;
+  top: 1.5rem;
+  left: 16.667%;
+  right: 16.667%;
+  height: 2px;
+  background: #b3543a;
+  opacity: 0.9;
+}
+.support-timeline-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.support-timeline-node {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  margin-bottom: var(--space-5);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-md);
+  color: var(--cream-50);
+}
+.support-timeline-node.is-01 {
+  background: #2e3320;
+}
+.support-timeline-node.is-02 {
+  background: #8e3f18;
+}
+.support-timeline-node.is-03 {
+  background: #9e6a1e;
+}
+.support-timeline-name {
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+.support-timeline-text {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--muted-foreground);
+  max-width: 18ch;
+}
+.support-timeline-caption {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--char-900);
+  max-width: 34rem;
+  margin-inline: auto;
+}
+@container page (max-width: 980px) {
+  .support-backing-grid {
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vw, 2.75rem);
+  }
+  .support-backing-copy {
+    max-width: 40rem;
+  }
+}
+@container page (max-width: 620px) {
+  /* horizontal timeline -> vertical: a per-step connector from each node centre
+     down to the next (a single top/bottom line would overrun the last node) */
+  .support-timeline {
+    --tl-gap: clamp(1.5rem, 5vw, 2rem);
+    grid-template-columns: 1fr;
+    gap: var(--tl-gap);
+    max-width: 22rem;
+    margin-inline: auto;
+  }
+  .support-timeline::before {
+    display: none;
+  }
+  .support-timeline-step {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+    gap: var(--space-4);
+  }
+  .support-timeline-step:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 1.5rem;
+    top: 1.5rem;
+    height: calc(100% + var(--tl-gap));
+    width: 2px;
+    transform: translateX(-50%);
+    background: #b3543a;
+    opacity: 0.9;
+  }
+  .support-timeline-node {
+    margin-bottom: 0;
+  }
+  .support-timeline-text {
+    max-width: none;
+  }
+}
+
 /* ===========================================================================
    Focus Areas (/focus-areas) — page-specific (FocusAreas.html)
    ======================================================================== */
