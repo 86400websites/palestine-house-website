@@ -3,18 +3,22 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
+  BarChart3,
   BookOpen,
   Bookmark,
   CalendarDays,
   CheckCircle2,
+  CircleCheck,
   Download,
   FileText,
   Info,
+  Infinity as InfinityIcon,
   LayoutGrid,
   Play,
 } from "lucide-react";
 import { ApplyCta } from "@/components/sections/apply-cta";
 import { Photo } from "@/components/shared/photo";
+import { StarMark } from "@/components/shared/ornament";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -56,6 +60,29 @@ const SUP_ASWATNA = [
     label: "After launch",
     text: "We continue curating and supporting creative quality over time.",
   },
+] as const;
+
+/* "What you're responsible for" — the ongoing-support topics + the who-brings
+   -what split, from the mockup. */
+const SUP_ONGOING = [
+  { icon: CalendarDays, title: "Programming", text: "Plan a coherent cultural calendar." },
+  { icon: AlertTriangle, title: "Food & Hospitality", text: "Maintain quality and consistency." },
+  { icon: InfinityIcon, title: "Membership & Community", text: "Build long-term relationships." },
+  { icon: BarChart3, title: "Finance & Operations", text: "Use systems that keep your House sustainable." },
+] as const;
+
+const SUP_YOU_BRING = [
+  "The venue",
+  "The team",
+  "Local relationships",
+  "Daily commitment",
+] as const;
+
+const SUP_WE_ENSURE = [
+  "You know what to do",
+  "You have the right tools",
+  "You follow a clear standard",
+  "You are not building alone",
 ] as const;
 
 /* The Backing — the three-stage, 120-day launch path as a numbered timeline. */
@@ -312,19 +339,66 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      {/* 6 — The honest counterweight */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">What you’re responsible for</p>
-          <p className="statement-line">
-            Support is real, but it isn’t a substitute for the work.
-          </p>
-          <p className="statement-sub">
-            You bring the venue, the team, the local relationships, and the
-            daily commitment to run a real business. We make sure you’re never
-            guessing how.
-          </p>
-        </Reveal>
+      {/* 6 — What you're responsible for: ongoing-support band + who-brings-what
+          split (DR3.3) */}
+      <section className="support-duties">
+        <div className="support-duties-band">
+          <div className="ph-container support-duties-band-grid">
+            <Reveal className="support-duties-intro">
+              <h2 className="support-duties-h">
+                Opening day is not the finish line.
+              </h2>
+              <p className="support-duties-sub">
+                We keep supporting you long after the doors open.
+              </p>
+            </Reveal>
+            <Reveal className="support-duties-topics">
+              {SUP_ONGOING.map((t) => (
+                <div key={t.title} className="support-duties-topic">
+                  <t.icon className="support-duties-topic-icon" aria-hidden="true" />
+                  <p className="support-duties-topic-title">{t.title}</p>
+                  <p className="support-duties-topic-text">{t.text}</p>
+                </div>
+              ))}
+            </Reveal>
+          </div>
+        </div>
+        <div className="support-duties-split">
+          <div className="support-duties-photo">
+            <Photo
+              assetId="ph-photo-support-responsibility"
+              alt="The lantern-lit entrance of a Palestine House at dusk."
+              sizes="(max-width: 860px) 100vw, 42vw"
+            />
+          </div>
+          <Reveal className="support-duties-lists">
+            <div className="support-duties-list">
+              <p className="support-duties-list-head">You bring</p>
+              <ul>
+                {SUP_YOU_BRING.map((i) => (
+                  <li key={i}>
+                    <CircleCheck aria-hidden="true" />
+                    {i}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <span className="support-duties-divider" aria-hidden="true">
+              <StarMark className="support-duties-star" />
+            </span>
+            <div className="support-duties-list">
+              <p className="support-duties-list-head">We make sure</p>
+              <ul>
+                {SUP_WE_ENSURE.map((i) => (
+                  <li key={i}>
+                    <CircleCheck aria-hidden="true" />
+                    {i}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       {/* 7 — Closing CTA (page closer) */}
