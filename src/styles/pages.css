@@ -2592,6 +2592,114 @@
   }
 }
 
+/* 3 — Aswātna: full muted-red band (sampled #9b361e; cream text clears AA ~8:1)
+   with the gold seal on the left + three captioned photos on the right. */
+.support-aswatna {
+  --support-red: #9b361e;
+  background: var(--support-red);
+  color: var(--cream-100);
+}
+.support-aswatna-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 2fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: start;
+}
+.support-aswatna-name {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: clamp(1.8rem, 1.5vw + 1.3rem, 2.6rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cream-50);
+}
+.support-aswatna-tag {
+  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: clamp(1.05rem, 0.5vw + 0.9rem, 1.35rem);
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--cream-100);
+}
+.support-aswatna-body {
+  margin-top: var(--space-5);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: color-mix(in oklab, var(--cream-100) 88%, transparent);
+  max-width: 26rem;
+}
+.support-aswatna-seal {
+  display: block;
+  margin-top: var(--space-8);
+  width: clamp(4.5rem, 8vw, 6rem);
+  height: auto;
+}
+.support-aswatna-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+.support-aswatna-col {
+  display: flex;
+  flex-direction: column;
+}
+.support-aswatna-photo {
+  position: relative;
+  aspect-ratio: 16 / 11;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: color-mix(in oklab, #000 18%, var(--support-red));
+}
+.support-aswatna-photo .v3-photo {
+  position: absolute;
+  inset: 0;
+}
+.support-aswatna-cap {
+  margin-top: var(--space-5);
+}
+.support-aswatna-col:not(:first-child) .support-aswatna-cap {
+  border-left: 1px solid color-mix(in oklab, var(--cream-100) 22%, transparent);
+  padding-left: clamp(1rem, 2.5vw, 2rem);
+  margin-left: calc(clamp(1rem, 2.5vw, 2rem) / -2);
+}
+.support-aswatna-col-label {
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--cream-50);
+}
+.support-aswatna-col-text {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: color-mix(in oklab, var(--cream-100) 85%, transparent);
+}
+@container page (max-width: 980px) {
+  .support-aswatna-grid {
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vw, 2.75rem);
+  }
+  .support-aswatna-intro {
+    max-width: 42rem;
+  }
+}
+@container page (max-width: 620px) {
+  .support-aswatna-cols {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    max-width: 26rem;
+  }
+  .support-aswatna-col:not(:first-child) .support-aswatna-cap {
+    border-left: 0;
+    padding-left: 0;
+    margin-left: 0;
+  }
+}
+
 /* ===========================================================================
    Focus Areas (/focus-areas) — page-specific (FocusAreas.html)
    ======================================================================== */

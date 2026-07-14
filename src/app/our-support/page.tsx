@@ -37,6 +37,28 @@ const SUP_PROOF = [
   { icon: CalendarDays, n: "120", label: "day launch plan" },
 ] as const;
 
+/* Aswātna — how the cultural partner shows up across the launch (mockup). */
+const SUP_ASWATNA = [
+  {
+    assetId: "ph-photo-support-aswatna-1",
+    alt: "A singer and guitarist performing together at a House.",
+    label: "Before opening",
+    text: "We help shape your launch programming and cultural direction.",
+  },
+  {
+    assetId: "ph-photo-support-aswatna-2",
+    alt: "A packed audience filming a candlelit night of live music.",
+    label: "At launch",
+    text: "We provide artists, events, partnerships, and opening-week support.",
+  },
+  {
+    assetId: "ph-photo-support-aswatna-3",
+    alt: "Guests dancing at a House celebration beside a keyboard player.",
+    label: "After launch",
+    text: "We continue curating and supporting creative quality over time.",
+  },
+] as const;
+
 /* Every topic ships the same six artefacts — shown as documents, not icons. */
 const SUP_ARTEFACTS = [
   {
@@ -202,23 +224,41 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      {/* 4 — Aswātna */}
-      <section className="ph-section-lg ph-section-dark">
-        <div className="ph-container split is-centered">
-          <Reveal className="split-a sec-head">
-            <p className="ph-eyebrow">Aswātna</p>
-            <h2>A cultural partner, not just a brand.</h2>
+      {/* 4 — Aswātna: muted-red band + gold seal · three captioned photos (DR3.3) */}
+      <section className="ph-section-lg support-aswatna">
+        <div className="ph-container support-aswatna-grid">
+          <Reveal className="support-aswatna-intro">
+            <h2 className="support-aswatna-name">Aswātna</h2>
+            <p className="support-aswatna-tag">
+              A cultural partner. Not just a brand.
+            </p>
+            <p className="support-aswatna-body">
+              Aswātna helps curate your launch and supports ongoing programming
+              so your House starts strong and stays culturally alive.
+            </p>
+            {/* eslint-disable-next-line @next/next/no-img-element -- partner seal, fixed size */}
+            <img
+              className="support-aswatna-seal"
+              src="/assets/partners/aswatna-mark-gold.png"
+              alt="Aswātna Studio"
+            />
           </Reveal>
-          <Reveal className="split-copy">
-            <p>
-              Programming is what brings people back — and you don’t shape it
-              alone.
-            </p>
-            <p>
-              Aswātna, the network’s cultural-programming partner, helps curate
-              your launch and keeps the creative standard high — so your
-              calendar is strong from the first night, not a year in.
-            </p>
+          <Reveal className="support-aswatna-cols">
+            {SUP_ASWATNA.map((c) => (
+              <div key={c.label} className="support-aswatna-col">
+                <div className="support-aswatna-photo">
+                  <Photo
+                    assetId={c.assetId}
+                    alt={c.alt}
+                    sizes="(max-width: 620px) 100vw, (max-width: 980px) 33vw, 260px"
+                  />
+                </div>
+                <div className="support-aswatna-cap">
+                  <p className="support-aswatna-col-label">{c.label}</p>
+                  <p className="support-aswatna-col-text">{c.text}</p>
+                </div>
+              </div>
+            ))}
           </Reveal>
         </div>
       </section>
