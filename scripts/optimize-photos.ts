@@ -105,6 +105,17 @@ const PHOTOS: { src: string; out: string; width: number; height: number }[] = [
   { src: "exp-cafe-day.jpg", out: "ph-photo-exp-cafe-day.jpg", width: 2000, height: 2000 },
   { src: "exp-stage-night.jpg", out: "ph-photo-exp-stage-night.jpg", width: 2000, height: 2000 },
   { src: "exp-home.jpg", out: "ph-photo-exp-home.jpg", width: 1600, height: 2000 },
+  /* DR3.3 — /our-support body. The split-hero flag photo · the three "Standard"
+     arch photos · the three Aswātna column photos · the "you bring" doorway
+     (owner masters, 2026-07-14). */
+  { src: "support-hero.jpg", out: "ph-photo-support-hero.jpg", width: 2000, height: 2000 },
+  { src: "support-standard-1.jpg", out: "ph-photo-support-standard-1.jpg", width: 1400, height: 1600 },
+  { src: "support-standard-2.jpg", out: "ph-photo-support-standard-2.jpg", width: 1400, height: 1600 },
+  { src: "support-standard-3.jpg", out: "ph-photo-support-standard-3.jpg", width: 1400, height: 1600 },
+  { src: "support-aswatna-1.jpg", out: "ph-photo-support-aswatna-1.jpg", width: 1400, height: 1400 },
+  { src: "support-aswatna-2.jpg", out: "ph-photo-support-aswatna-2.jpg", width: 1400, height: 1400 },
+  { src: "support-aswatna-3.jpg", out: "ph-photo-support-aswatna-3.jpg", width: 1400, height: 1400 },
+  { src: "support-responsibility.png", out: "ph-photo-support-responsibility.jpg", width: 1600, height: 2000 },
 ];
 
 /** DR2 decorative masters (in SRC/art) -> keyed transparent PNGs in OUT_ART.
@@ -351,6 +362,43 @@ async function encodeAswatnaMark(): Promise<void> {
   console.log(`logo   aswatna-mark.png  ${meta.width}x${meta.height}  ${kb(buf.length)}`);
 }
 
+/**
+ * DR3.3 — the GOLD Aswātna seal for the /our-support muted-red band. The master is
+ * the studio's gold line-seal on a white ground. Unlike encodeAswatnaMark (which
+ * recolors to cream for the /model terracotta arch), here we KEEP the original gold
+ * and only key the white ground to transparent, so the seal reads gold-on-red per
+ * the owner's mockup. Trim to the mark, bound to 500px.
+ */
+async function encodeAswatnaMarkGold(): Promise<void> {
+  const srcPath = path.join(SRC, "logo", "aswatna-gold-master.png");
+  const outPath = path.join(OUT_PARTNERS, "aswatna-mark-gold.png");
+  if (!(await exists(srcPath))) {
+    console.log("skip   aswatna-mark-gold.png (master absent)");
+    return;
+  }
+  const { data, info } = await sharp(srcPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const sat = Math.max(r, g, b) - Math.min(r, g, b);
+    if (a < 8 || (lum >= 210 && sat < 40)) data[i + 3] = 0; // white ground -> out; gold kept
+  }
+  const box = bbox(data, info.width, info.height, (_r, _g, _b, a) => a > 8);
+  const pad = 8;
+  const left = Math.max(0, box.left - pad);
+  const top = Math.max(0, box.top - pad);
+  const cw = Math.min(info.width, box.right + pad + 1) - left;
+  const ch = Math.min(info.height, box.bottom + pad + 1) - top;
+  const buf = await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+    .extract({ left, top, width: cw, height: ch })
+    .resize({ width: 500, height: 500, fit: "inside", withoutEnlargement: true })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+  await fs.writeFile(outPath, buf);
+  const meta = await sharp(buf).metadata();
+  console.log(`logo   aswatna-mark-gold.png  ${meta.width}x${meta.height}  ${kb(buf.length)}`);
+}
+
 async function main(): Promise<void> {
   await fs.mkdir(OUT_PHOTOS, { recursive: true });
   await fs.mkdir(OUT_ART, { recursive: true });
@@ -360,6 +408,7 @@ async function main(): Promise<void> {
   for (const entry of PHOTOS) await encodePhoto(entry);
   for (const entry of ART) await encodeArt(entry);
   await encodeAswatnaMark();
+  await encodeAswatnaMarkGold();
 
   if (await exists(path.join(SRC, "logo", "logo-master.png"))) {
     const raw = await keyOutBackground(path.join(SRC, "logo", "logo-master.png"));
