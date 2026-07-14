@@ -15,8 +15,8 @@ import {
   Infinity as InfinityIcon,
   LayoutGrid,
   Play,
+  UtensilsCrossed,
 } from "lucide-react";
-import { ApplyCta } from "@/components/sections/apply-cta";
 import { Photo } from "@/components/shared/photo";
 import { StarMark } from "@/components/shared/ornament";
 import { Reveal } from "@/components/motion/reveal";
@@ -66,7 +66,7 @@ const SUP_ASWATNA = [
    -what split, from the mockup. */
 const SUP_ONGOING = [
   { icon: CalendarDays, title: "Programming", text: "Plan a coherent cultural calendar." },
-  { icon: AlertTriangle, title: "Food & Hospitality", text: "Maintain quality and consistency." },
+  { icon: UtensilsCrossed, title: "Food & Hospitality", text: "Maintain quality and consistency." },
   { icon: InfinityIcon, title: "Membership & Community", text: "Build long-term relationships." },
   { icon: BarChart3, title: "Finance & Operations", text: "Use systems that keep your House sustainable." },
 ] as const;
@@ -174,7 +174,11 @@ export default function OurSupportPage() {
           </Reveal>
           <Reveal className="sup-artefacts">
             {SUP_ARTEFACTS.map((a) => (
-              <div key={a.name} className="ph-card sup-artefact">
+              <Link
+                key={a.name}
+                href="/focus-areas"
+                className="ph-card sup-artefact"
+              >
                 <span className="sup-artefact-icon">
                   <a.icon size={22} aria-hidden="true" />
                 </span>
@@ -182,7 +186,7 @@ export default function OurSupportPage() {
                   <h3>{a.name}</h3>
                   <p>{a.text}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </Reveal>
           <Reveal className="sup-templates">
@@ -191,7 +195,7 @@ export default function OurSupportPage() {
               rotas, budgets — so you’re adapting proven documents, not starting
               from a blank page.
             </p>
-            <Button asChild variant="outline">
+            <Button asChild size="lg">
               <Link href="/focus-areas">
                 See the full map
                 <ArrowRight aria-hidden="true" />
@@ -399,21 +403,6 @@ export default function OurSupportPage() {
             </div>
           </Reveal>
         </div>
-      </section>
-
-      {/* 7 — Closing CTA (page closer) */}
-      <section className="ph-section-lg">
-        <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">Behind every House</p>
-          <h2 className="statement-line sup-statement-h">
-            This is what’s behind every House.
-          </h2>
-          <p className="statement-sub">
-            If you’re ready to open one in your city, apply — every application
-            is reviewed by HQ.
-          </p>
-          <ApplyCta secondaryHref="/bring-ph" secondaryLabel="See what it takes" />
-        </Reveal>
       </section>
     </>
   );

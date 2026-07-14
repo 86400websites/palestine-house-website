@@ -2243,7 +2243,9 @@
   margin-top: var(--space-12);
 }
 /* Premium vertical cards (owner sample, 2026-07-14): a sage icon chip on top,
-   a serif title, then the body — white rounded card via .ph-card. */
+   a serif title, then the body — white rounded card via .ph-card. Now links to
+   /focus-areas (whole card clickable); a constant min-height keeps every card
+   the same size regardless of text length (esp. the mobile 1-col stack). */
 .sup-artefact {
   display: flex;
   flex-direction: column;
@@ -2251,6 +2253,16 @@
   gap: var(--space-4);
   padding: clamp(1.5rem, 2.5vw, 2rem);
   border-radius: var(--radius-lg);
+  min-height: 12.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform var(--duration) var(--ease-out),
+    box-shadow var(--duration) var(--ease-out);
+}
+.sup-artefact:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 .sup-artefact-icon {
   display: inline-flex;
@@ -2309,10 +2321,6 @@
   color: var(--foreground);
 }
 
-/* Statement headings on this page */
-.sup-statement-h {
-  margin-top: var(--space-3);
-}
 
 /* (The old .sup-stages / .sup-gates-link / .sup-after rules were removed in
    DR3.3 — the three-stage chips became the numbered timeline in §5.) */
@@ -2358,9 +2366,11 @@
   max-width: 34rem;
 }
 .support-hero-proof {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(1.25rem, 2.5vw, 2rem) clamp(1.5rem, 3.2vw, 3rem);
+  /* 4 columns that never wrap — the "120 day launch plan" stat stays on the
+     same row as the others down to 320px (owner, 2026-07-14) */
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.75rem, 2vw, 2rem);
   margin-top: clamp(2rem, 4vw, 3.25rem);
 }
 .support-hero-stat {
@@ -2368,7 +2378,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
-  min-width: 4rem;
+  min-width: 0;
 }
 .support-hero-stat-icon {
   width: 1.5rem;
@@ -2550,6 +2560,21 @@
   .support-standard-seal {
     align-items: center;
     text-align: center;
+  }
+}
+@container page (max-width: 620px) {
+  /* stack the arches as full cards, one below the other (owner, 2026-07-14) —
+     three-across was too small to read on a phone; the copper stars become
+     centred separators between the stacked arches */
+  .support-standard-arches {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+  }
+  .support-standard-arch {
+    flex: none;
+    width: 100%;
+    max-width: 15rem;
   }
 }
 

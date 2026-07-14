@@ -26,6 +26,14 @@ Part of the DR public-page-to-v3 stream. Planned via `/sprint-prompt` (plan-mode
 5. The Standard: larger arches + centred lockup/tagline.
 6. Full **mobile designer pass** (320→1440) — premium + zero overflow; no further fixes required.
 
+## Owner feedback round 2 (2026-07-14, post-exit-gate)
+1. **Hero proof row stays one line** — `.support-hero-proof` switched from `flex-wrap` to a `grid repeat(4, minmax(0,1fr))` so the "120 day launch plan" stat no longer wraps to a second row (down to 320px).
+2. **Toolkit cards constant size + linked** — a `min-height:12.5rem` keeps every card the same height (esp. the mobile 1-col stack; desktop equalises via grid stretch already, so unchanged); each card is now a `<Link href="/focus-areas">` (whole-card clickable) with a hover lift.
+3. **"See the full map"** promoted from outline → **filled olive** `size="lg"` button (was low-contrast).
+4. **Standard arches stack on mobile** — under 620px `.support-standard-arches` goes `flex-direction:column` so the three arches read as large stacked cards (copper stars become centred separators) instead of a tiny 3-across row.
+5. **Food & Hospitality icon** → `UtensilsCrossed` (was the mockup's `AlertTriangle`, which read like a warning).
+6. **"Behind every House" closing section removed** — the site-wide footer CTA is the single page closer (matches the DR3.1 pattern); `ApplyCta` import + the dead `.sup-statement-h` rule dropped.
+
 ## Assets / pipeline (DR3.3-1)
 - 8 masters (hero · standard-1/2/3 · aswatna-1/2/3 · responsibility) + the gold Aṣwātna seal + 5 mockup PNGs relocated from `public/assets/Our Support/` (owner drop) into gitignored `docs/source-assets/design-refs/v3/{photos,logo,mockups}/`; the loose `public/assets/Our Support/` folder deleted (never committed).
 - `scripts/optimize-photos.ts` extended: 8 `PHOTOS[]` entries + a new `encodeAswatnaMarkGold()` (keys the white ground out, **keeps** the gold — vs the cream `encodeAswatnaMark` for the `/model` terracotta arch) → `public/assets/partners/aswatna-mark-gold.png`. Ran `pnpm tsx scripts/optimize-photos.ts`; all photos < 500 KB.
