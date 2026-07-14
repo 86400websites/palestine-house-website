@@ -3,15 +3,19 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
+  BookOpen,
   Bookmark,
+  CalendarDays,
   CheckCircle2,
   Download,
+  FileText,
   Info,
+  LayoutGrid,
   Play,
 } from "lucide-react";
 import { PageDivider } from "@/components/shared/page-divider";
 import { ApplyCta } from "@/components/sections/apply-cta";
-import { PageHero } from "@/components/sections/page-hero";
+import { Photo } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +28,14 @@ export const metadata: Metadata = {
   description:
     "What HQ gives every partner — the full playbook (10 focus areas, 30 topics, 267 templates), the standards, Aswātna, and support from first decision to open doors.",
 };
+
+/* Hero proof row — the canonical numbers, shown under the lead (mockup). */
+const SUP_PROOF = [
+  { icon: BookOpen, n: "10", label: "focus areas" },
+  { icon: LayoutGrid, n: "30", label: "topics" },
+  { icon: FileText, n: "267", label: "templates" },
+  { icon: CalendarDays, n: "120", label: "day launch plan" },
+] as const;
 
 /* Every topic ships the same six artefacts — shown as documents, not icons. */
 const SUP_ARTEFACTS = [
@@ -62,20 +74,35 @@ const SUP_ARTEFACTS = [
 export default function OurSupportPage() {
   return (
     <>
-      {/* 1 — v3 photo hero (DR1-9) */}
-      <PageHero
-        photo="ph-photo-our-support"
-        alt="Women in embroidered thobes dancing together at a House gathering."
-        position="50% 22%"
-        eyebrow="Our Support"
-        title="You’re not doing this alone."
-        lead="A House is yours to run — but the standard, the tools, and the people behind it are shared across the whole network. Here’s exactly what comes with that."
-        support="Every application is reviewed by HQ."
-      >
-        <Button asChild size="lg" className="v3-cta">
-          <Link href="/apply">Apply to bring a House</Link>
-        </Button>
-      </PageHero>
+      {/* 1 — v3 split hero (DR3.3): cream copy + proof row · flag photo right */}
+      <section className="support-hero">
+        <Reveal className="support-hero-copy">
+          <p className="ph-eyebrow">Our Support</p>
+          <h1 className="support-hero-h1">You’re not doing this alone.</h1>
+          <p className="support-hero-lead">
+            Every House is backed by a complete toolkit, clear standards,
+            cultural guidance from Aswātna, and a 120-day launch plan. From your
+            first decision to your first open doors — we’re with you.
+          </p>
+          <dl className="support-hero-proof">
+            {SUP_PROOF.map((s) => (
+              <div key={s.label} className="support-hero-stat">
+                <s.icon className="support-hero-stat-icon" aria-hidden="true" />
+                <dd className="support-hero-stat-n">{s.n}</dd>
+                <dt className="support-hero-stat-l">{s.label}</dt>
+              </div>
+            ))}
+          </dl>
+        </Reveal>
+        <div className="support-hero-photo">
+          <Photo
+            assetId="ph-photo-support-hero"
+            alt="A woman waving a Palestinian flag as a House gathering claps her on."
+            sizes="(max-width: 880px) 100vw, 55vw"
+            priority
+          />
+        </div>
+      </section>
 
       {/* 2 — The full playbook */}
       <section className="ph-section-lg">

@@ -64,7 +64,6 @@ const OVERLAY_ROUTES: string[] = [
   "/model",
   "/experience",
   "/bring-ph",
-  "/our-support",
   "/apply",
 ];
 

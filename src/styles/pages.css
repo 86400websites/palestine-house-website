@@ -2350,6 +2350,99 @@
 }
 
 /* ===========================================================================
+   Our Support v3 body (DR3.3) — hero · standard · aswatna · backing · duties.
+   New .support-* classes; all breakpoints @container page (the .ph-page shell).
+   ======================================================================== */
+
+/* 1 — Split hero: cream copy + proof row · flag photo bleeding to the right */
+.support-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  align-items: stretch;
+  background: var(--background);
+}
+.support-hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: clamp(2.5rem, 6vw, 5.5rem);
+  /* left edge lines up with .ph-container's content edge (like .v3-split-panel) */
+  padding-left: max(var(--gutter), calc((100cqw - var(--content-max)) / 2 + var(--gutter)));
+  padding-right: clamp(1.5rem, 4vw, 4rem);
+}
+.support-hero-h1 {
+  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: clamp(2.1rem, 2.2vw + 1.5rem, 3.3rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+  max-width: 14ch;
+}
+.support-hero-lead {
+  margin-top: var(--space-5);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--muted-foreground);
+  max-width: 34rem;
+}
+.support-hero-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1.25rem, 2.5vw, 2rem) clamp(1.5rem, 3.2vw, 3rem);
+  margin-top: clamp(2rem, 4vw, 3.25rem);
+}
+.support-hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 4rem;
+}
+.support-hero-stat-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--brand-accent);
+  stroke-width: 1.5;
+}
+.support-hero-stat-n {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: clamp(1.55rem, 0.9vw + 1.3rem, 2.05rem);
+  line-height: 1;
+  color: var(--foreground);
+}
+.support-hero-stat-l {
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  color: var(--muted-foreground);
+  max-width: 8ch;
+}
+.support-hero-photo {
+  position: relative;
+  min-height: 22rem;
+}
+.support-hero-photo .v3-photo {
+  position: absolute;
+  inset: 0;
+}
+@container page (max-width: 880px) {
+  .support-hero {
+    grid-template-columns: 1fr;
+  }
+  .support-hero-photo {
+    order: -1;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+  .support-hero-copy {
+    padding-inline: var(--gutter);
+    padding-block: clamp(2rem, 7vw, 3rem);
+  }
+}
+
+/* ===========================================================================
    Focus Areas (/focus-areas) — page-specific (FocusAreas.html)
    ======================================================================== */
 .fa-stats {
