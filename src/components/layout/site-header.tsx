@@ -58,13 +58,14 @@ const NAV_LINKS = [
 
 /* Routes whose hero pulls under a TRANSPARENT header (v3 photo heroes:
    the Home hero + the PageHero pages, DR1-9). The header solidifies on
-   scroll or when the mobile menu opens. */
+   scroll or when the mobile menu opens. (/apply left the list on 2026-07-15
+   when its hero became a cream split — like /our-support and /focus-areas,
+   the cream-bar header sits above it.) */
 const OVERLAY_ROUTES: string[] = [
   "/",
   "/model",
   "/experience",
   "/bring-ph",
-  "/apply",
 ];
 
 export function SiteHeader() {

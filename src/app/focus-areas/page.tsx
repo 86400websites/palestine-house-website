@@ -139,38 +139,18 @@ const FA_CAPS = ["Overview", "Guide", "Checklist", "Video", "Templates"] as cons
 export default function FocusAreasPage() {
   return (
     <>
-      {/* 1 — Art-led hero */}
-      <section className="art-hero">
-        <div className="ph-container art-hero-grid">
-          <Reveal className="art-hero-copy">
-            <p className="ph-eyebrow">The full map</p>
-            <h1>Everything it takes to run a House.</h1>
-            <p className="ph-lead">
-              The playbook is organised into ten focus areas and thirty topics —
-              each with an overview, a plain-language guide, a checklist, a
-              “watch out for”, a video, and ready-to-use templates. Here’s the
-              full map. The full depth opens to approved partners.
-            </p>
-          </Reveal>
-          <Reveal className="art-hero-art">
-            {/* LH1 (owner fix): the old PH-EXP-02a Artwork cover-cropped badly
-                here (and its alt described a retired illustration) — replaced
-                with a full-frame v3 Photo that fits the 16:11 box. */}
-            <Photo
-              assetId="ph-photo-tatreez-workshop"
-              alt="Hands at work over tatreez embroidery at a House workshop table."
-              className="fa-hero-photo"
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-            />
-          </Reveal>
-        </div>
-      </section>
-
-      {/* 2 — Proof line (dark band, matching the Home proof strip) */}
-      <section className="fa-stats ph-section-dark">
-        <Reveal className="ph-container">
-          <dl className="stat-strip is-center">
+      {/* 1 — Split hero (owner mockup, 2026-07-15): cream copy · eyebrow hairline
+          · the folded dark stats card · the green-door courtyard photo in a
+          rounded panel. The former standalone dark proof band is now this card. */}
+      <section className="fa-hero">
+        <Reveal className="fa-hero-copy">
+          <p className="ph-eyebrow fa-hero-eyebrow">The full map</p>
+          <h1 className="fa-hero-h1">Everything it takes to run a House.</h1>
+          <p className="fa-hero-lead">
+            A practical playbook to help you start, operate, and grow with
+            confidence — built from real experience.
+          </p>
+          <dl className="fa-hero-stats stat-strip">
             {FA_STATS.map((s) => (
               <div key={s.label} className="stat-item">
                 <dt>{s.label}</dt>
@@ -179,6 +159,14 @@ export default function FocusAreasPage() {
             ))}
           </dl>
         </Reveal>
+        <div className="fa-hero-photo">
+          <Photo
+            assetId="ph-photo-focus-hero"
+            alt="The green door of a Palestine House, open to a sunlit courtyard café."
+            sizes="(max-width: 880px) 100vw, 55vw"
+            priority
+          />
+        </div>
       </section>
 
       {/* 3 — How to read this map */}

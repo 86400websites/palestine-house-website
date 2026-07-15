@@ -252,12 +252,6 @@
     max-width: 34rem;
   }
 }
-/* LH1 — the /focus-areas hero photo frame (replaced the cover-cropped
-   PH-EXP-02a Artwork, owner fix 2026-07-10) */
-.fa-hero-photo {
-  aspect-ratio: 16 / 11;
-  border-radius: var(--radius-lg);
-}
 
 /* Feature row: large painted art beside generous editorial copy; alternates. */
 .feature-row {
@@ -666,9 +660,6 @@
 }
 .ph-section-dark .fa-topic-title {
   color: var(--white);
-}
-.ph-section-dark.fa-stats {
-  border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 /* ===========================================================================
@@ -3038,13 +3029,139 @@
 /* ===========================================================================
    Focus Areas (/focus-areas) — page-specific (FocusAreas.html)
    ======================================================================== */
-.fa-stats {
-  padding-block: var(--space-12);
+/* 1 — Split hero (owner mockup, 2026-07-15): cream copy · eyebrow hairline ·
+   the folded dark stats card · the green-door courtyard photo in a rounded
+   panel. Models .support-hero; the former standalone dark .fa-stats proof band
+   now lives inside the hero as the .fa-hero-stats card. */
+.fa-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  min-height: min(74svh, 38rem);
+  background: var(--surface-hero);
   border-bottom: var(--border-width) solid var(--border);
+  overflow: hidden;
 }
-@container page (min-width: 861px) {
-  .fa-stats .stat-strip {
-    grid-template-columns: repeat(5, 1fr);
+.fa-hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: clamp(2.5rem, 5vw, 4rem);
+  /* left edge lines up with .ph-container's content edge (like .support-hero-copy) */
+  padding-left: max(var(--gutter), calc((100cqw - var(--content-max)) / 2 + var(--gutter)));
+  padding-right: clamp(1.5rem, 4vw, 3.5rem);
+}
+.fa-hero-eyebrow {
+  position: relative;
+  padding-bottom: var(--space-3);
+}
+.fa-hero-eyebrow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(20rem, 85%);
+  height: 1px;
+  background: var(--copper-500);
+  opacity: 0.5;
+}
+.fa-hero-h1 {
+  margin-top: var(--space-4);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: clamp(2.1rem, 2.2vw + 1.5rem, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+  max-width: 20ch;
+}
+.fa-hero-lead {
+  margin-top: var(--space-4);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--muted-foreground);
+  max-width: 34rem;
+}
+/* The folded dark stats card — 5 stats separated by hairline dividers; numbers
+   above labels via the shared .stat-item column-reverse. */
+.fa-hero-stats.stat-strip {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+  padding: clamp(1.1rem, 2.2vw, 1.6rem) clamp(1.25rem, 2.4vw, 1.9rem);
+  background: var(--char-900);
+  border-radius: var(--radius-lg);
+  text-align: left;
+}
+.fa-hero-stats .stat-item {
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding-inline: clamp(0.55rem, 1.4vw, 1.15rem);
+}
+.fa-hero-stats .stat-item:first-child {
+  padding-left: 0;
+}
+.fa-hero-stats .stat-item + .stat-item {
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+.fa-hero-stats .stat-item dd {
+  color: var(--white);
+  font-size: clamp(1.5rem, 1vw + 1.15rem, 2.05rem);
+}
+.fa-hero-stats .stat-item dt {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--text-xs);
+}
+/* rounded, full-height photo panel on the right (mirrors .support-hero-photo) */
+.fa-hero-photo {
+  position: relative;
+  align-self: stretch;
+  margin-block: clamp(1.5rem, 3.5vw, 2.75rem);
+  margin-right: max(var(--gutter), calc((100cqw - var(--content-max)) / 2 + var(--gutter)));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  min-height: 18rem;
+}
+.fa-hero-photo .v3-photo {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+@container page (max-width: 880px) {
+  .fa-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    align-items: stretch;
+  }
+  .fa-hero-photo {
+    order: -1;
+    align-self: auto;
+    margin: var(--gutter) var(--gutter) 0;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+  .fa-hero-copy {
+    padding-inline: var(--gutter);
+    padding-block: clamp(1.75rem, 6vw, 2.5rem);
+  }
+}
+/* Stats wrap on narrow screens — drop the vertical dividers and space with gap. */
+@container page (max-width: 560px) {
+  .fa-hero-stats.stat-strip {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5) var(--space-4);
+  }
+  .fa-hero-stats .stat-item,
+  .fa-hero-stats .stat-item:first-child {
+    padding-inline: 0;
+  }
+  .fa-hero-stats .stat-item + .stat-item {
+    border-left: 0;
+  }
+}
+@container page (max-width: 360px) {
+  .fa-hero-stats.stat-strip {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -3345,6 +3462,73 @@
 /* ===========================================================================
    Apply (/apply) — page-specific (Apply.html)
    ======================================================================== */
+/* 1 — Split hero (owner mockup, 2026-07-15): cream copy + a short copper rule ·
+   the House-entrance photo bleeding full to the right edge (no rounding). /apply
+   left OVERLAY_ROUTES so the cream-bar header sits above it. Models .support-hero. */
+.apply-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  align-items: stretch;
+  min-height: min(74svh, 38rem);
+  background: var(--surface-hero);
+  border-bottom: var(--border-width) solid var(--border);
+  overflow: hidden;
+}
+.apply-hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: clamp(2.5rem, 6vw, 5rem);
+  /* left edge lines up with .ph-container's content edge (like .support-hero-copy) */
+  padding-left: max(var(--gutter), calc((100cqw - var(--content-max)) / 2 + var(--gutter)));
+  padding-right: clamp(1.5rem, 4vw, 3.5rem);
+}
+.apply-hero-h1 {
+  margin-top: var(--space-4);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: clamp(2.3rem, 2.2vw + 1.6rem, 3.6rem);
+  line-height: 1.03;
+  letter-spacing: -0.015em;
+  color: var(--foreground);
+  max-width: 15ch;
+}
+/* widen the shared copper rule for the hero (base .v3-rule-head::after is 56px) */
+.apply-hero-h1.v3-rule-head::after {
+  width: clamp(7rem, 38%, 12rem);
+}
+.apply-hero-lead {
+  margin-top: var(--space-5);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--muted-foreground);
+  max-width: 32rem;
+}
+.apply-hero-photo {
+  position: relative;
+  align-self: stretch;
+  min-height: 20rem;
+}
+.apply-hero-photo .v3-photo {
+  position: absolute;
+  inset: 0;
+}
+@container page (max-width: 880px) {
+  .apply-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .apply-hero-photo {
+    order: -1;
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+  .apply-hero-copy {
+    padding-inline: var(--gutter);
+    padding-block: clamp(1.75rem, 6vw, 2.5rem);
+  }
+}
+
 .apply-grid {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
