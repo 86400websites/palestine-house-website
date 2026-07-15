@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TatreezDivider } from "@/components/shared/tatreez-divider";
-import { PageHero } from "@/components/sections/page-hero";
+import { Photo } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 import { ApplyForm } from "@/components/sections/apply-form";
 import { createClient } from "@/lib/supabase/server";
@@ -60,15 +60,30 @@ export default async function ApplyPage() {
 
   return (
     <>
-      {/* 1 — v3 photo hero (DR1-9, consistent with the other public pages) */}
-      <PageHero
-        photo="ph-photo-apply"
-        alt="A singer smiling at a microphone beside a keyboard, mid-performance."
-        position="55% 30%"
-        eyebrow="Apply"
-        title="Apply to bring a House to your city."
-        lead="This is the one step. Submitting this form creates your account and sends your application to HQ. There’s no separate sign-up — applying and creating an account are the same thing."
-      />
+      {/* 1 — v3 split hero (owner mockup, 2026-07-15): cream copy + short copper
+          rule · the House-entrance photo bleeding to the right edge. /apply left
+          OVERLAY_ROUTES so the cream-bar header sits above it. Copy verbatim. */}
+      <section className="apply-hero">
+        <Reveal className="apply-hero-copy">
+          <p className="ph-eyebrow">Apply</p>
+          <h1 className="apply-hero-h1 v3-rule-head">
+            Apply to bring a House to your city.
+          </h1>
+          <p className="apply-hero-lead">
+            This is the one step. Submitting this form creates your account and
+            sends your application to HQ. There’s no separate sign-up — applying
+            and creating an account are the same thing.
+          </p>
+        </Reveal>
+        <div className="apply-hero-photo">
+          <Photo
+            assetId="ph-photo-apply-hero"
+            alt="A House entrance hall — an arched doorway, framed tatreez, and a bench dressed in embroidered cushions."
+            sizes="(max-width: 880px) 100vw, 52vw"
+            priority
+          />
+        </div>
+      </section>
 
       {/* 2–5 — Context + the form */}
       <section className="ph-section-lg">

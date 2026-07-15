@@ -60,6 +60,11 @@ export const PHOTO_SOURCES = {
   "ph-photo-support-aswatna-2": "/assets/photos/ph-photo-support-aswatna-2.jpg",
   "ph-photo-support-aswatna-3": "/assets/photos/ph-photo-support-aswatna-3.jpg",
   "ph-photo-support-responsibility": "/assets/photos/ph-photo-support-responsibility.jpg",
+  /* Focus-areas + Apply hero redesign (owner mockups, 2026-07-15) — the two
+     split-hero photos: the riad House-entrance hall (/apply) + the green-door
+     courtyard (/focus-areas). */
+  "ph-photo-apply-hero": "/assets/photos/ph-photo-apply-hero.jpg",
+  "ph-photo-focus-hero": "/assets/photos/ph-photo-focus-hero.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;

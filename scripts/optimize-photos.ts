@@ -116,6 +116,11 @@ const PHOTOS: { src: string; out: string; width: number; height: number }[] = [
   { src: "support-aswatna-2.jpg", out: "ph-photo-support-aswatna-2.jpg", width: 1400, height: 1400 },
   { src: "support-aswatna-3.jpg", out: "ph-photo-support-aswatna-3.jpg", width: 1400, height: 1400 },
   { src: "support-responsibility.png", out: "ph-photo-support-responsibility.jpg", width: 1600, height: 2000 },
+  /* Focus-areas + Apply hero redesign — the two owner split-hero photos: the
+     riad House-entrance hall (/apply) and the green-door courtyard (/focus-areas)
+     (owner masters, 2026-07-15). */
+  { src: "apply-hero.png", out: "ph-photo-apply-hero.jpg", width: 1600, height: 1600 },
+  { src: "focus-hero.png", out: "ph-photo-focus-hero.jpg", width: 1600, height: 1600 },
 ];
 
 /** DR2 decorative masters (in SRC/art) -> keyed transparent PNGs in OUT_ART.
