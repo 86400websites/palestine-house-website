@@ -101,7 +101,19 @@ checks + rollback-only role sims: admin k3 upsert OK, l1/L rejected, non-admin
   OK, l1 + L rejected 22023, non-admin 42501, pending 0 rows, direct-insert
   check_violation) · zero K rows persisted after the sim (leave-no-trace
   confirmed by re-query) · counts unchanged 30/728/30/269.
-- _(FA11-4…FA11-7 appended as they complete.)_
+- **FA11-4** — `--pack food` mode added to `scripts/ingest-content.ts`
+  (default full-run behaviour untouched; hard guards 3/30-per-topic/30/0-WTW-
+  missing). Dry-run exact (3 · 90 · 3 · 30 · 0; K1 bodies 4266/18100/28377
+  chars). Live TEST ingest clean (30/30 storage uploads). Parser fix folded in:
+  the section-strip regex now also handles the food docx `SECTION:` headers
+  (no letter token) so K group labels read clean like A–J; re-ran the pack —
+  **idempotency proven** (identical K element ids, counts stable 33/818/33/299,
+  0 labels left with a SECTION prefix, K1 = 6 sections × 5 items). Full role
+  matrix passes (9/9): approved 33 elements / 818 checklist / 30 K resources /
+  k1 bodies / K signed-URL payload · pending 0 rows ×3 · anon permission
+  denied. `.env.local` with TEST ingest vars placed by the owner in the
+  worktree (gitignored, never staged).
+- _(FA11-5…FA11-7 appended as they complete.)_
 
 ## Follow-ups / open decisions created by this sprint
 

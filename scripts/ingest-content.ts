@@ -397,9 +397,11 @@ async function parseChecklist(file: string): Promise<ChecklistItem[]> {
       const nonEmpty = cells.filter(Boolean);
       if (nonEmpty.length === 0) continue;
 
-      // Section header (one spanning cell starting with SECTION)
+      // Section header (one spanning cell starting with SECTION). Strip the
+      // "SECTION A:" / "SECTION:" prefix (the FA11 food docx carry no letter
+      // token) so group labels stay clean across packs.
       if (nonEmpty.length === 1 && /^section\b/i.test(nonEmpty[0])) {
-        currentSection = nonEmpty[0].replace(/^section\s+[a-z0-9]+\s*[:\-—]\s*/i, "").trim() || nonEmpty[0].trim();
+        currentSection = nonEmpty[0].replace(/^section\s*[a-z0-9]*\s*[:\-—]\s*/i, "").trim() || nonEmpty[0].trim();
         continue;
       }
       // Skip completion-gate / how-to rows
