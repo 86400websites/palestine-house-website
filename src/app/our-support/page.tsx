@@ -61,8 +61,9 @@ const SUP_ASWATNA = [
   },
 ] as const;
 
-/* "What you're responsible for" — the ongoing-support topics + the who-brings
-   -what split, from the mockup. */
+/* "Support does not end on opening day" — the ongoing-support topics. (The
+   who-brings-what split that used to close this page was removed in the
+   2026-07-17 copy overhaul: it already lives on Bring a House.) */
 const SUP_ONGOING = [
   {
     icon: CalendarDays,
@@ -351,9 +352,9 @@ export default function OurSupportPage() {
               Clear milestones. The right decisions in the right order.
             </h2>
             <span className="support-orn" aria-hidden="true" />
-            <p className="support-backing-body">
-              A 120-day path with clear milestones and constant guidance.
-            </p>
+            {/* the old lead ("A 120-day path with clear milestones and constant
+                guidance.") is retired: the doc promoted that information into
+                the eyebrow + heading above, so it now only stutters. */}
             <Button
               asChild
               variant="outline"

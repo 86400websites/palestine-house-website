@@ -1046,7 +1046,8 @@
   }
 }
 
-/* Three things, never negotiable — numbered cream cards (DR3.1) */
+/* Three commitments every House shares — numbered cream cards (DR3.1;
+   renamed from "Three things, never negotiable" in the 2026-07-17 overhaul) */
 .model-never-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
