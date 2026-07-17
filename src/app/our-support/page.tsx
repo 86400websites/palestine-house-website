@@ -233,6 +233,7 @@ export default function OurSupportPage() {
       <section className="ph-section-lg support-standard">
         <div className="ph-container support-standard-grid">
           <Reveal className="support-standard-copy">
+            <p className="ph-eyebrow">Shared standards</p>
             <h2 className="support-standard-h">
               One name. A consistent level of care.
             </h2>
@@ -293,6 +294,10 @@ export default function OurSupportPage() {
       <section className="ph-section-lg support-aswatna">
         <div className="ph-container support-aswatna-grid">
           <Reveal className="support-aswatna-intro">
+            {/* the doc's section label is "Cultural support from Aswātna" — the
+                "from Aswātna" half is carried by the wordmark directly below,
+                so the eyebrow states the rest without stuttering the name. */}
+            <p className="ph-eyebrow">Cultural support from</p>
             <h2 className="support-aswatna-name">Aswātna</h2>
             <p className="support-aswatna-tag">
               Cultural direction that continues beyond launch.
@@ -341,6 +346,7 @@ export default function OurSupportPage() {
       <section className="ph-section-lg support-backing">
         <div className="ph-container support-backing-grid">
           <Reveal className="support-backing-copy">
+            <p className="ph-eyebrow">The 120-day path</p>
             <h2 className="support-backing-h">
               Clear milestones. The right decisions in the right order.
             </h2>

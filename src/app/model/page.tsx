@@ -7,7 +7,6 @@ import {
   House,
   Key,
   ShieldCheck,
-  Users,
 } from "lucide-react";
 import { ART_SOURCES, Photo } from "@/components/shared/photo";
 import { PageDivider } from "@/components/shared/page-divider";
@@ -116,10 +115,10 @@ export default function ModelPage() {
               and the joy of sharing it generously.
             </p>
             <p className="model-embassy-lead">
-              Every meal served, every concert, workshop, film, and conversation
-              contributes to a permanent Palestinian cultural presence. Culture
-              is not decoration here. It shapes the food, the programme, the
-              atmosphere, and the way people are welcomed.
+              Every meal served, every concert, every workshop, every film, and
+              every conversation contributes to a permanent Palestinian cultural
+              presence. Culture is not decoration here. It shapes the food, the
+              programme, the atmosphere, and the way people are welcomed.
             </p>
           </Reveal>
           <FadeIn className="model-embassy-gallery">
@@ -221,15 +220,18 @@ export default function ModelPage() {
               </span>
               <p>HQ gives you the tools, standards, guidance, and ongoing support to build it well.</p>
             </div>
-            <div className="model-promise-col">
-              <span className="model-promise-icon">
-                <Users aria-hidden="true" />
-              </span>
-              <p>Local ownership. Shared standards. Cultural integrity.</p>
-            </div>
           </Reveal>
         </div>
-        <Reveal className="ph-container">
+        {/* The doc frames the principle as the ONE thing the agreement binds
+            every partner to — so it closes the band rather than sitting as a
+            third peer responsibility. */}
+        <Reveal className="ph-container model-promise-close">
+          <p className="model-promise-principle-intro">
+            The agreement connects all partners around one principle:
+          </p>
+          <p className="model-promise-principle">
+            Local ownership. Shared standards. Cultural integrity.
+          </p>
           <p className="model-promise-note">
             Each House has its own personality and responds to its own city, but
             the quality of care, hospitality, cultural representation, and
@@ -299,7 +301,7 @@ export default function ModelPage() {
             </p>
             <p className="model-plainly-aside-text">
               Palestine House brings together local ownership, cultural
-              expertise and a shared operating system so that Palestinian
+              expertise, and a shared operating system so that Palestinian
               culture can have a permanent home in cities around the world.
             </p>
             <ul className="model-reciprocity">
