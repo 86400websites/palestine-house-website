@@ -1,9 +1,11 @@
 # FA11 — Food focus area: "Café & Culinary Experience" (K) + /food workspace section
 
-> **Status: IN PROGRESS** (owner-gated FA11-0…FA11-7, push-per-step, branch
-> `claude/sprint-fa11-food-focus-area` in an isolated worktree off `main`
-> `1c8191c` — the main checkout is occupied by a parallel public-copy session).
-> This record is stamped final at the exit gate.
+> **Status: BUILD COMPLETE (pre-merge, 2026-07-17)** — owner-gated FA11-0…FA11-7,
+> push-per-step, branch `claude/sprint-fa11-food-focus-area` in an isolated
+> worktree off `main` `1c8191c` (the main checkout was occupied by the parallel
+> `claude/public-copy-overhaul` session; zero public-page files in this diff).
+> Remaining after merge: the owner's prod runbook below (0026 + prod ingest),
+> then the deferred public refresh (PROJECT-STATUS §5 D-FA11-a/b).
 
 ## Goal
 
@@ -129,7 +131,31 @@ checks + rollback-only role sims: admin k3 upsert OK, l1/L rejected, non-admin
   typecheck/lint/build green (47 routes, `/food` ƒ gated). Anon smoke test on
   the prod build: `/food` response is byte-shape identical to `/plan`
   (streamed NEXT_REDIRECT → login), `/resources/k` same posture.
-- _(FA11-7 appended at the exit gate.)_
+- **FA11-7 (exit gate)** — full-diff self-review of all 14 files (every string
+  matches the approved copy table; order + gating verified; one stale-count
+  comment fixed in `workspace-shell.tsx` while in-diff). **Path-guard CLEAN:**
+  no public pages, no `site-header`/`site-footer`, no `middleware`/
+  `next.config`/`package.json`/lockfile/`src/lib/supabase`/`globals.css`/
+  `pages.css`, no `docs/source-assets/**` or `.env*` in the diff; secret-scan
+  of the full range clean. typecheck/lint/build green (47 routes). Trackers
+  updated in-branch: PROJECT-STATUS §1 (active sprint / next action / last
+  updated) + §2 board row + §5 **D-FA11-a** (deferred public refresh
+  11 · 33 · 297 + map) and **D-FA11-b** (OneDrive canon `_index.md` + full-run
+  ingest guard bumps) · ROADMAP §B FA11 row. This record stamped final.
+
+## Files changed (14)
+
+`supabase/sql/migrations/0026_focus_area_k.{up,down}.sql` ·
+`supabase/sql/verification/0026_verify_{TEST_db_only,PROD_safe_readonly}.sql` ·
+`scripts/ingest-content.ts` · `src/lib/admin/content-actions.ts` ·
+`src/app/(workspace)/food/page.tsx` (new) ·
+`src/app/(workspace)/{academy,dashboard}/page.tsx` ·
+`src/app/(workspace)/resources/[category]/page.tsx` ·
+`src/app/admin/content/resources/page.tsx` ·
+`src/components/workspace/workspace-shell.tsx` ·
+`src/components/layout/site-chrome.tsx` (GATED_PREFIXES only) ·
+`docs/sprint-prompts/fa11-food-focus-area.md` (+ tracker edits in
+`docs/PROJECT-STATUS.md`, `docs/ROADMAP.md`).
 
 ## Follow-ups / open decisions created by this sprint
 

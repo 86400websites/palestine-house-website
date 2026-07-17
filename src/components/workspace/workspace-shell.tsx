@@ -25,7 +25,7 @@ import { signOutAction } from "@/lib/auth/actions";
 
 /* Gated workspace shell (docs/page-designs/shared/workspace-chrome.jsx) —
    one sidebar + top bar reused on every gated page. Pre-approval, everything
-   except the always-on items is Locked. The 30 topics never sit in the sidebar.
+   except the always-on items is Locked. The 33 topics never sit in the sidebar.
 
    S10: the sidebar is the simplified flat menu — Welcome · Plan · Build ·
    Operate · Food · Program · Live Programming, then Resources (Videos · Tools &
