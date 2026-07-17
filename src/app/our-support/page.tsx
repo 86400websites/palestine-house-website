@@ -36,7 +36,7 @@ const SUP_PROOF = [
   { icon: BookOpen, n: "10", label: "focus areas" },
   { icon: LayoutGrid, n: "30", label: "core topics" },
   { icon: FileText, n: "267", label: "ready-to-use templates" },
-  { icon: CalendarDays, n: "120", label: "guided launch plan" },
+  { icon: CalendarDays, n: "120", label: "day guided launch plan" },
 ] as const;
 
 /* Aswātna — how the cultural partner shows up across the launch (mockup). */
@@ -193,6 +193,7 @@ export default function OurSupportPage() {
               practical topics, so you can concentrate on the decisions that
               matter now without losing sight of what comes next.
             </p>
+            <p className="sup-artefacts-intro">Every topic includes:</p>
           </Reveal>
           <Reveal className="sup-artefacts">
             {SUP_ARTEFACTS.map((a) => (

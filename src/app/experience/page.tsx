@@ -69,7 +69,7 @@ export default function ExperiencePage() {
         position="50% 32%"
         eyebrow="Experience"
         title="Step inside a Palestine House."
-        lead="A place that feels familiar, even on your first visit. Come for Palestinian coffee and food made from recipes carried across generations. Stay for a concert, a film, a reading, or a conversation that changes the way you see something — somewhere to meet, work, listen, eat, learn, and return to throughout the year."
+        lead="A place that feels familiar, even on your first visit. Come for Palestinian coffee and food made from recipes carried across generations. Stay for a concert, a film, a reading, or a conversation that changes the way you see something — somewhere to meet, work, listen, eat, learn, and return to throughout the week and throughout the year."
         support="Every application is reviewed by HQ."
       >
         <Button asChild size="lg" className="v3-cta">
@@ -100,8 +100,9 @@ export default function ExperiencePage() {
               />
               <figcaption className="exp-mood-cap">
                 By day, the House is open for everyday life. People arrive for
-                coffee, lunch, conversation, reading, or simply a place to
-                pause. Some stay twenty minutes; others, the whole afternoon.
+                coffee, lunch, conversation, reading, working, or simply a place
+                to pause. Some stay for twenty minutes. Others remain for the
+                afternoon.
               </figcaption>
             </figure>
             <figure className="exp-mood">

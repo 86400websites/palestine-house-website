@@ -1176,6 +1176,24 @@
   line-height: var(--leading-normal);
   color: var(--muted-foreground);
 }
+/* the doc's closing reciprocity pair — the last words on the page */
+.model-reciprocity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.model-reciprocity li {
+  font: var(--text-ui);
+  line-height: var(--leading-normal);
+  color: var(--char-900);
+}
+.model-reciprocity strong {
+  font-weight: var(--weight-semibold);
+  color: var(--olive-700);
+}
 .model-plainly-photo {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -2352,11 +2370,21 @@
    ======================================================================== */
 
 /* The six artefacts every topic ships with — document-like rows, not icons-as-decor */
+/* the doc's framing line introducing the six artefact cards (2026-07-17) */
+.sup-artefacts-intro {
+  margin-top: var(--space-6);
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-md);
+  color: var(--char-900);
+}
 .sup-artefacts {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-5);
-  margin-top: var(--space-12);
+  /* tightened from space-12: the "Every topic includes:" lead-in now sits
+     directly above the grid and should read as attached to it */
+  margin-top: var(--space-8);
 }
 /* Premium vertical cards (owner sample, 2026-07-14): a sage icon chip on top,
    a serif title, then the body — white rounded card via .ph-card. Now links to

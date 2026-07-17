@@ -34,7 +34,7 @@ const HOME_PROOF = [
   { n: "30", label: "Core topics" },
   { n: "200+", label: "Checklist actions" },
   { n: "267", label: "Ready-to-use templates" },
-  { n: "120", label: "A guided launch plan" },
+  { n: "120", label: "Day guided launch plan" },
 ] as const;
 
 

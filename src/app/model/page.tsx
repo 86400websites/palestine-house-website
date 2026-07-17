@@ -302,6 +302,17 @@ export default function ModelPage() {
               expertise and a shared operating system so that Palestinian
               culture can have a permanent home in cities around the world.
             </p>
+            <ul className="model-reciprocity">
+              <li>
+                <strong>You bring</strong> the commitment, the local
+                relationships, and the daily leadership.
+              </li>
+              <li>
+                <strong>We bring</strong> the name, the system, the guidance,
+                and the cultural partnership to help you build something
+                meaningful and sustain it.
+              </li>
+            </ul>
             <Photo
               assetId="ph-photo-model-culture"
               alt="A cup of Palestinian coffee and a decorated vase on an embroidered tatreez cloth."
