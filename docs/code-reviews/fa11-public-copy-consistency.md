@@ -61,6 +61,30 @@ the diff is 4 frontend files (3 pages + 1 CSS comment) and 6 docs.
 - **Build:** `pnpm install --frozen-lockfile` · `pnpm run typecheck` ·
   `pnpm run lint` · `pnpm run build` green.
 
-## Review verdict
+## Review verdict (Codex, 2026-07-18)
 
-_(to be appended)_
+**Recommendation: REQUEST CHANGES — zero blocking; one Medium non-blocking.**
+Public copy + code confirmed correct and complete (built-HTML sweep = no
+remaining user-visible 10/30/267; metadata/OG/Twitter = 11/33/297; JSON-LD/OG
+image carry no counts; 200+/120 unchanged; `FA_AREAS` = 11 unique A–K entries /
+33 topic rows with the K titles verbatim in the generated HTML; path-guard
+clean; typecheck/lint/build green). **The gap: the governance-doc consistency
+pass was incomplete** — 8 *current authoritative* statements still asserted the
+retired counts (distinct from the exempt historical logs + the deferred
+D-FA11-b package/ingest refs):
+`AGENTS.md`, `docs/README.md` summary, `docs/WORKFLOW.md` exit gate,
+`docs/DESIGN.md` /our-support description, `docs/SECURITY-CHECKLIST.md`
+(267 templates), `CLAUDE.md` (`/elements/[slug]` ×30),
+`docs/TECH-ARCHITECTURE.md` (×30 / 30 elements), `docs/ROADMAP.md` §A feature
+list (10 areas / A1–J3 / 267).
+
+**Resolution (same day, on-branch):** all 8 fixed to 11 · 33 · 297 /
+A1–K3 / ×33, **plus the two tracked skill files** `.claude/skills/sprint-prompt`
+and `.claude/skills/close` (they embed the proof-number check and would
+otherwise propagate the old numbers into every future sprint prompt / close).
+Re-swept: every current-authoritative statement now reads 11 · 33 · 297; the
+only remaining old-count hits are historical sprint/review logs and the
+D-FA11-b-deferred ingest references (`supabase/sql/README`, retired S13/S14
+briefs), left by design. typecheck/lint/build re-run green; path-guard clean
+(copy + docs + skills only). **Blocking = none; the requested change is
+applied → APPROVE.**

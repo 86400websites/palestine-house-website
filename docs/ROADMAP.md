@@ -31,9 +31,9 @@
 - [x] Gated shell: persistent left sidebar + pending/locked state — *S4 (S6 destinations inert until built)*
 - [x] `/dashboard` Welcome as a Partner (orientation by stage; "current stage" snapshot — Design & Build % hidden until Build starts) — *S6 6a*
 - [x] `/plan` Plan & Prepare (reference) · `/operate` Operate & Program / Managing & Operating (one page, two entry points) — *S6 6b*
-- [x] `/build` Design & Build — launch checklist: 200+ items, **saved per-user progress** (the only per-user interactivity) — *S6 6c (grouped by the 10 focus areas; milestone gates retired site-wide, D-S8-c)*
-- [x] `/elements/[slug]` — tabbed canonical element page component × 30 (A1–J3), MDX bodies — *S6 6d (DB markdown, sanitized server-side)*
-- [x] `/resources` + `/resources/[category]` — guides, 267 templates, tools; private Storage bucket + server-issued signed URLs — *S6 6e (migration 0017)*
+- [x] `/build` Design & Build — launch checklist: 200+ items, **saved per-user progress** (the only per-user interactivity) — *S6 6c (grouped by the 11 focus areas; milestone gates retired site-wide, D-S8-c)*
+- [x] `/elements/[slug]` — tabbed canonical element page component × 33 (A1–K3), MDX bodies — *S6 6d (DB markdown, sanitized server-side)*
+- [x] `/resources` + `/resources/[category]` — guides, 297 templates, tools; private Storage bucket + server-issued signed URLs — *S6 6e (migration 0017)*
 - [x] `/academy` + `/academy/[slug]` — optional video reference library (no progress, no quizzes, no certificate) — *S6 6f: `/academy` library shipped; `/academy/[slug]` not built at MVP (each topic's Video tab + card link covers it, §3)*
 - [x] `/live` partner tools — publish a YouTube link + event metadata from the gated `/programming` tool → populates the public listing — *S9 9f (migrations 0020/0021; owner-scoped, approval-gated)*
 - [x] `/tools` House Applications — coming-soon placeholder — *S6 6g*

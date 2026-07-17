@@ -1,11 +1,15 @@
 # FA11-COPY — Public copy consistency for Focus Area 11
 
-> **Status: BUILD COMPLETE (pre-merge, 2026-07-18).** Branch
+> **Status: BUILD COMPLETE + REVIEWED — READY TO MERGE (2026-07-18).** Branch
 > `claude/sprint-fa11-public-copy-consistency`, fresh worktree off the fully-
 > merged `main` `aba8b1b`. The **D-FA11-a** follow-up: bring the public
 > marketing site into line now that Focus Area 11 ("Café & Culinary
 > Experience", K/k1–k3) is live for members (FA11, PR #65, prod-deployed
-> 2026-07-18). Owner: PR → Preview → merge → delete branch. No DB/deploy step.
+> 2026-07-18). **Independent Codex review = zero blocking; one Medium (incomplete
+> governance-doc pass) — RESOLVED on-branch: 8 more current-authoritative doc
+> statements + 2 tracked skill files updated to 11·33·297; gates re-run green.
+> Verdict + resolution: `docs/code-reviews/fa11-public-copy-consistency.md`.**
+> Owner: PR → Preview → merge → delete branch. No DB/deploy step.
 
 ## Goal
 
@@ -48,10 +52,22 @@ consistency and resolves D-FA11-a.
 - `src/styles/pages.css` — the "/* 267 templates line */" hook comment → 297
   (adjacent to the our-support edit; kept internally consistent).
 
-**Authoritative governance docs (so future sessions don't flag a contradiction):**
-- `CLAUDE.md`, `docs/PROJECT-STATUS.md` §4 locked-decisions line, `docs/README.md`,
-  `docs/ROADMAP.md` Stage-0 exit gate, `docs/DESIGN.md` — the proof-number
-  invariant line moved to 11 · 33 · 200+ · 297 · 120, each noting the FA11 origin.
+**Authoritative governance docs (so future sessions don't flag a contradiction).**
+First pass: `CLAUDE.md` proof line, `docs/PROJECT-STATUS.md` §4, `docs/README.md`
+guardrail (line 98), `docs/ROADMAP.md` Stage-0 exit gate, `docs/DESIGN.md` §
+guardrail. Codex-review round (the reviewer caught the pass was incomplete —
+8 more current-authoritative statements + 2 tracked skill files):
+`AGENTS.md`; `docs/README.md` summary (line 5); `docs/WORKFLOW.md` exit gate;
+`docs/DESIGN.md` /our-support description; `docs/SECURITY-CHECKLIST.md`
+(267→297 templates); `CLAUDE.md` route summary (`/elements/[slug]` ×30→×33);
+`docs/TECH-ARCHITECTURE.md` (route ×30→×33 + `elements` 30→33); `docs/ROADMAP.md`
+§A feature list (10→11 areas, A1–J3→A1–K3 ×33, 267→297 templates); and
+`.claude/skills/sprint-prompt/SKILL.md` + `.claude/skills/close/SKILL.md` (the
+proof-number checks these skills embed). All → 11 · 33 · 200+ · 297 · 120.
+**Left by design:** historical `docs/code-reviews/*` + `docs/sprint-prompts/*`
+records; the D-FA11-b-deferred ingest/package references (`supabase/sql/README`,
+`docs/PROJECT-STATUS.md` §3 content-package line, `docs/README.md` source-assets
+line, retired S13/S14 briefs).
 
 **Deliberately NOT changed:** Model/Experience/Bring/Apply/About/Contact/footer/
 OG image/JSON-LD/`site.ts` (carry no counts — verified) · the gated/admin

@@ -2,7 +2,7 @@
 
 The operating manual for building **palestinehouse** — the public face of Palestine House and the private, approval-gated reference platform for its partners — with a disciplined, safe, AI-assisted workflow, in **stages and sprints, never all at once**.
 
-**What we're building (one paragraph):** a thin, premium public shell (Home · The Model · Experience · Bring a House · Our Support · Live Programming, single CTA: **Apply**) in front of a private partner reference platform unlocked by HQ approval (`/apply` = sign-up → pending account → `/admin/approvals` → unlock). The platform is a trusted reference organised by stage (Plan & Prepare · Design & Build · Operate & Program) — **not a course** (no quizzes, no certificate) and not an ops tool. Proof numbers are fixed: **10 focus areas · 30 topics · 200+ checklist items · 267 templates · a 120-day launch.**
+**What we're building (one paragraph):** a thin, premium public shell (Home · The Model · Experience · Bring a House · Our Support · Live Programming, single CTA: **Apply**) in front of a private partner reference platform unlocked by HQ approval (`/apply` = sign-up → pending account → `/admin/approvals` → unlock). The platform is a trusted reference organised by stage (Plan & Prepare · Design & Build · Operate & Program) — **not a course** (no quizzes, no certificate) and not an ops tool. Proof numbers: **11 focus areas · 33 topics · 200+ checklist items · 297 templates · a 120-day launch** (updated from 10 · 30 · 267 with Focus Area 11, FA11 2026-07-18).
 
 ---
 
