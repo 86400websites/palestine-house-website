@@ -145,10 +145,13 @@ export default function FocusAreasPage() {
       <section className="fa-hero">
         <Reveal className="fa-hero-copy">
           <p className="ph-eyebrow fa-hero-eyebrow">The full map</p>
-          <h1 className="fa-hero-h1">Everything it takes to run a House.</h1>
+          <h1 className="fa-hero-h1">
+            Everything you need to build and run a House.
+          </h1>
           <p className="fa-hero-lead">
-            A practical playbook to help you start, operate, and grow with
-            confidence — built from real experience.
+            A practical, step-by-step playbook designed to help you plan, launch,
+            operate, and grow with confidence — built from real experience and
+            ready to use.
           </p>
           <dl className="fa-hero-stats stat-strip">
             {FA_STATS.map((s) => (
@@ -248,11 +251,15 @@ export default function FocusAreasPage() {
       {/* 5 — Closing */}
       <section className="ph-section-lg">
         <Reveal className="ph-container statement">
-          <p className="ph-eyebrow">Open the full playbook</p>
-          <h2 className="fa-close-h">The full playbook opens once HQ approves.</h2>
+          <p className="ph-eyebrow">Access the full playbook</p>
+          <h2 className="fa-close-h">
+            The full playbook becomes available once your application is approved
+            by HQ.
+          </h2>
           <p className="statement-sub">
-            You’ve seen the map. The guides, checklists, videos, and templates
-            behind every topic open to approved partners.
+            You have seen the map. Approved partners gain access to the practical
+            guides, step-by-step checklists, videos, and ready-to-use templates
+            behind every topic.
           </p>
           <ApplyCta />
         </Reveal>

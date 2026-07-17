@@ -23,17 +23,17 @@ const APPLY_STEPS = [
   {
     n: "01",
     title: "You apply",
-    text: "One form — it creates your account and sends your application to HQ.",
+    text: "Complete one form to create your account and send your application directly to HQ.",
   },
   {
     n: "02",
-    title: "HQ reviews",
-    text: "Until then, your account sits in a pending state — you’ll see a short “under review” page when you sign in.",
+    title: "HQ reviews your application",
+    text: "While your application is being reviewed, your account will remain pending. When you sign in, you will see a simple update confirming that the review is in progress.",
   },
   {
     n: "03",
-    title: "The platform opens",
-    text: "Once you’re approved, the full platform opens: the playbook, the toolkit, and the Academy, with no second sign-up.",
+    title: "The full platform opens",
+    text: "Once approved, you will receive access to the complete platform, including the playbook, toolkit, and Academy. There is no additional registration or second sign-up process.",
   },
 ] as const;
 
@@ -67,12 +67,13 @@ export default async function ApplyPage() {
         <Reveal className="apply-hero-copy">
           <p className="ph-eyebrow">Apply</p>
           <h1 className="apply-hero-h1 v3-rule-head">
-            Apply to bring a House to your city.
+            Bring a Palestine House to your city.
           </h1>
           <p className="apply-hero-lead">
-            This is the one step. Submitting this form creates your account and
-            sends your application to HQ. There’s no separate sign-up — applying
-            and creating an account are the same thing.
+            Complete one application to introduce your vision, create your
+            account, and send your proposal directly to HQ. There is no separate
+            sign-up process — your application and account are created together
+            in one simple step.
           </p>
         </Reveal>
         <div className="apply-hero-photo">
@@ -93,19 +94,24 @@ export default async function ApplyPage() {
               <p className="ph-eyebrow">Who brings what</p>
               <p>
                 You bring the venue, the team, the local relationships, and the
-                daily commitment to running a real business. We bring the brand,
-                the standards, the toolkit, and the support to do it well —
-                under a license that holds every House to the same bar.
+                daily commitment required to run a successful cultural business.
+                We bring the Palestine House identity, shared standards,
+                complete toolkit, and ongoing support to help you build and
+                operate it well. Every House works under a clear licence that
+                protects the quality, integrity, and meaning of the Palestine
+                House name.
               </p>
             </div>
 
             <div className="apply-context-block">
               <p className="ph-eyebrow">Before you apply</p>
               <p>
-                Every House holds three rules: <strong>no politics</strong>,{" "}
-                <strong>HQ-approved brand use</strong>, and{" "}
-                <strong>honest reporting</strong>. If that fits how you want to
-                work, apply.
+                Every Palestine House shares three core commitments:{" "}
+                <strong>cultural independence</strong>,{" "}
+                <strong>responsible use of the brand</strong>, and{" "}
+                <strong>honest, transparent reporting</strong>. If these
+                principles reflect how you want to work, we would be glad to
+                hear from you.
               </p>
             </div>
 
@@ -127,9 +133,9 @@ export default async function ApplyPage() {
                 ))}
               </ol>
               <p className="apply-questions">
-                Just have a question first?{" "}
-                <Link href="/contact">Contact us</Link> — you don’t need to
-                apply to ask.
+                Have a question before applying?{" "}
+                <Link href="/contact">Contact us</Link>. You do not need to
+                submit an application to get in touch.
               </p>
             </div>
           </Reveal>
