@@ -94,7 +94,14 @@ checks + rollback-only role sims: admin k3 upsert OK, l1/L rejected, non-admin
   full copy table approved by the owner.
 - **FA11-2** — migration 0026 up/down + TEST/PROD verify scripts drafted; this
   record opened with the approved copy.
-- _(FA11-3…FA11-7 appended as they complete.)_
+- **FA11-3** — 0026 applied on TEST via the `supabase-test` MCP
+  (`apply_migration`, 2026-07-17). Full verify: constraint defs widened ×3 ·
+  both RPC bodies carry the new regexes with the old forms gone · privileges
+  anon=false/authenticated=true ×2 · all six role sims pass (admin k3 upsert
+  OK, l1 + L rejected 22023, non-admin 42501, pending 0 rows, direct-insert
+  check_violation) · zero K rows persisted after the sim (leave-no-trace
+  confirmed by re-query) · counts unchanged 30/728/30/269.
+- _(FA11-4…FA11-7 appended as they complete.)_
 
 ## Follow-ups / open decisions created by this sprint
 
