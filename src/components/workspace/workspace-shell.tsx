@@ -18,19 +18,20 @@ import {
   Play,
   User,
   Users,
+  UtensilsCrossed,
 } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { signOutAction } from "@/lib/auth/actions";
 
 /* Gated workspace shell (docs/page-designs/shared/workspace-chrome.jsx) —
    one sidebar + top bar reused on every gated page. Pre-approval, everything
-   except the always-on items is Locked. The 30 topics never sit in the sidebar.
+   except the always-on items is Locked. The 33 topics never sit in the sidebar.
 
    S10: the sidebar is the simplified flat menu — Welcome · Plan · Build ·
-   Operate · Program · Live Programming, then Resources (Videos · Tools &
+   Operate · Food · Program · Live Programming, then Resources (Videos · Tools &
    Templates), then Account (+ Support in the footer). Every destination is
    built; the workspace search targets the V1 /search route, so it is omitted
-   until it ships. */
+   until it ships. (Food added in FA11 — the Focus Area K section.) */
 
 type SidebarItem = {
   key: string;
@@ -53,6 +54,7 @@ const GROUPS: SidebarGroup[] = [
       { key: "plan", label: "Plan", Icon: Bookmark, href: "/plan" },
       { key: "build", label: "Build", Icon: CheckCircle2, href: "/build" },
       { key: "operate", label: "Operate", Icon: Clock, href: "/operate" },
+      { key: "food", label: "Food", Icon: UtensilsCrossed, href: "/food" },
       { key: "program", label: "Program", Icon: Users, href: "/program" },
       { key: "live", label: "Live Programming", Icon: Calendar, href: "/live" },
     ],

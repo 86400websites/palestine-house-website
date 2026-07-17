@@ -48,7 +48,7 @@ export default async function ResourcesAdminPage({
     <div>
       <h1 className="adm-h1">Resources.</h1>
       <p className="adm-intro">
-        The 267 templates and 2 booklets. Edit a resource’s details — the file
+        The 297 templates and 2 booklets. Edit a resource’s details — the file
         itself is managed through the content ingest, not here.
       </p>
       <ResourcesAdmin rows={rows} elements={elements} selected={selected} />
