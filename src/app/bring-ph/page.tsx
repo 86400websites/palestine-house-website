@@ -7,10 +7,9 @@ import {
   OliveBranch,
   SparkMark,
   StarLogo,
-  StarMark,
 } from "@/components/shared/ornament";
 import { PageHero } from "@/components/sections/page-hero";
-import { StageCards } from "@/components/sections/stage-cards";
+import { StageCards, type StageCopy } from "@/components/sections/stage-cards";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -22,54 +21,85 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Bring a House",
   description:
-    "Why bring Palestine House to your city, and what it honestly takes — the partnership, the three stages, the 120-day launch, and the three rules.",
+    "Why bring Palestine House to your city, and what it takes — the partnership, the three stages, the 120-day launch, and the three commitments every House shares.",
 };
 
 const BRING_YOU = [
-  "The venue, and the city knowledge to choose it well.",
-  "The team, and the daily commitment to run a real business.",
-  "The local relationships that make a House belong.",
+  "A suitable venue and the local knowledge to choose it well.",
+  "A committed team with the experience and discipline to run the House.",
+  "Relationships with local communities, artists, organisations, and audiences.",
+  "The daily leadership required to build a trusted and sustainable institution.",
 ] as const;
 
 const BRING_WE = [
-  "The brand, and the standards every House is held to.",
-  "The full toolkit — the playbook, the templates, the training.",
-  "The support to open and operate, from first decision to launch and beyond.",
+  "The Palestine House identity and the shared standards that protect it.",
+  "A complete operating system — the playbook, templates, training, and partner platform.",
+  "Guidance across planning, design, launch, programming, finance, hospitality, and daily operations.",
+  "Continued support after opening, so you are not left to manage the journey alone.",
 ] as const;
+
+const BRING_STAGES: readonly StageCopy[] = [
+  {
+    name: "Plan & Prepare",
+    lead: "Build the foundation.",
+    text: "We help you assess the opportunity, establish the organisation, shape the budget, identify the right venue, and create a realistic plan for launch and long-term operation.",
+    photo: "ph-photo-stage-plan",
+    alt: "A planning studio wall of maps, sketches and tile samples for a new Palestine House.",
+  },
+  {
+    name: "Design & Build",
+    lead: "Create a space people want to return to.",
+    text: "We guide the development of a welcoming, functional, and culturally grounded House — from layout and atmosphere to suppliers, permissions, systems, and fit-out.",
+    photo: "ph-photo-stage-build",
+    alt: "A workshop of patterned tiles, timber and lanterns mid-build.",
+  },
+  {
+    name: "Operate & Program",
+    lead: "Bring the House to life.",
+    text: "We support you in building the team, opening the café and venue, launching the cultural programme, strengthening community relationships, and running the House sustainably.",
+    photo: "ph-photo-stage-cafe",
+    alt: "A candlelit café room set for an evening performance.",
+  },
+];
 
 const BRING_GATES = [
   {
-    day: "Day 30",
-    name: "Foundation",
-    text: "Governance live, venue shortlisted, budget approved.",
+    day: "30",
+    name: "The foundation is in place",
+    text: "Governance established, early budget approved, local team forming, and venue options under review.",
   },
   {
-    day: "Day 60",
-    name: "Engine working",
-    text: "Lease signed, entity set up, brand license active, fit-out underway.",
+    day: "60",
+    name: "The House is taking shape",
+    text: "Venue secured, legal structure active, brand agreement in place, suppliers confirmed, and fit-out underway.",
   },
   {
-    day: "Day 108",
-    name: "Ready to host",
-    text: "Permits secured, staff hired, systems live, soft opening passed.",
+    day: "108",
+    name: "Ready to welcome people",
+    text: "Permits secured, team trained, operating systems active, cultural programme prepared, and soft opening completed.",
+  },
+  {
+    day: "120",
+    name: "Public launch",
+    text: "The final twelve days create a deliberate buffer to resolve issues, strengthen the guest experience, and open with confidence.",
   },
 ] as const;
 
 const BRING_RULES = [
   {
     n: "01",
-    title: "No politics",
-    text: "culture leads; the House is not a campaign.",
+    title: "Cultural independence",
+    text: "A Palestine House does not endorse political parties, electoral candidates, or partisan organisations. It remains a space for Palestinian culture, artistic expression, learning, memory, conversation, and community.",
   },
   {
     n: "02",
-    title: "HQ-approved brand use",
-    text: "one standard, everywhere.",
+    title: "Responsible use of the Palestine House name",
+    text: "The brand is used consistently and with care. Major public uses are approved by HQ so that every House protects the meaning, quality, and trust carried by the name.",
   },
   {
     n: "03",
-    title: "Honest reporting",
-    text: "open books, on time.",
+    title: "Honest and transparent operation",
+    text: "Every House agrees to clear reporting, shared performance measures, and appropriate financial and operational transparency. These systems help identify challenges early and allow the network to support each House effectively.",
   },
 ] as const;
 
@@ -92,7 +122,7 @@ export default function BringAHousePage() {
         position="62% 58%"
         eyebrow="Bring a House"
         title="Bring Palestine House to your city."
-        lead="A House is a real business with real cultural weight — a café, a venue, and a home for the community, open every day. Here’s why people open one, and what it takes to do it well."
+        lead="A Palestine House is a permanent home for Palestinian culture: a café, a cultural venue, and a community gathering place under one roof. You bring the local knowledge, leadership, and commitment. We bring the model, tools, standards, and support to help you build something culturally grounded, professionally run, and made to last."
         support="Every application is reviewed by HQ."
       >
         <Button asChild size="lg" className="v3-cta">
@@ -113,18 +143,32 @@ export default function BringAHousePage() {
               <span className="bring-eyebrow-line" />
               <SparkMark className="bring-eyebrow-spark" />
             </div>
-            <p className="statement-line bring-why-line">
-              Your city has the people, the culture, and the appetite. What it
-              doesn’t have yet is the address — a fixed place where all of it
-              lives, year-round, instead of in scattered moments.
+            <h2 className="statement-line bring-why-line">
+              Give Palestinian culture a permanent address.
+            </h2>
+            <p className="statement-sub bring-why-sub">
+              Your city may already have the artists, audiences, organisers,
+              food, stories, and desire for connection. What it may not yet have
+              is one permanent place where all of that can live together,
+              throughout the year. A Palestine House turns scattered cultural
+              moments into a lasting presence — somewhere people can gather,
+              create, celebrate, learn, eat, listen, and return to.
             </p>
             <span className="exp-orn bring-why-rule">
               <span />
             </span>
-            <p className="statement-sub bring-why-sub">
-              A House gives the culture a permanent home, and gives you a serious
-              thing to build and run.
-            </p>
+            <ul className="bring-why-triad">
+              <li>
+                <strong>For the city,</strong> it becomes a cultural landmark.
+              </li>
+              <li>
+                <strong>For the community,</strong> it becomes a shared home.
+              </li>
+              <li>
+                <strong>For the local partner,</strong> it becomes a meaningful
+                institution to build and lead.
+              </li>
+            </ul>
           </div>
           <div className="bring-why-visual">
             <Image
@@ -146,13 +190,15 @@ export default function BringAHousePage() {
           <Reveal className="sec-head is-center bring-head">
             <StarLogo className="bring-head-orn" />
             <p className="ph-eyebrow bring-eyebrow-ink">The partnership</p>
-            <h2>Who brings what.</h2>
+            <h2>Local leadership. Shared support.</h2>
             <span className="exp-orn">
               <span />
             </span>
             <p className="ph-lead">
-              This is a partnership, set down in a license. The split is clear
-              from the start.
+              Every Palestine House is locally owned and operated, with the
+              backing of a wider cultural and operational network. The
+              partnership is defined clearly from the beginning so that everyone
+              understands their role, responsibility, and contribution.
             </p>
           </Reveal>
           <Reveal className="bring-who-card">
@@ -183,6 +229,14 @@ export default function BringAHousePage() {
               </ul>
             </div>
           </Reveal>
+          <Reveal>
+            <p className="bring-who-note">
+              <strong>Shared responsibility.</strong> You shape the House around
+              your city. We help ensure it carries the same level of cultural
+              care, hospitality, quality, and professionalism as every House in
+              the network.
+            </p>
+          </Reveal>
         </div>
       </section>
 
@@ -193,59 +247,71 @@ export default function BringAHousePage() {
         <div className="ph-container">
           <Reveal className="sec-head">
             <p className="ph-eyebrow">What it takes</p>
-            <h2>One path, three stages.</h2>
+            <h2>One clear path. Three stages.</h2>
             <p className="ph-lead">
-              Opening a House is a hundred decisions. The platform puts them in
-              order — three stages across a 120-day plan.
+              Opening a House involves hundreds of decisions. The Palestine House
+              system places them in the right order, giving you a clear view of
+              what matters now, what comes next, and what can wait. The journey
+              is organised across three stages within a guided 120-day launch
+              plan.
             </p>
           </Reveal>
           <div className="bring-stages-cards">
-            <StageCards sizes="(max-width: 860px) 100vw, 33vw" />
+            <StageCards
+              sizes="(max-width: 860px) 100vw, 33vw"
+              stages={BRING_STAGES}
+            />
           </div>
           <Reveal>
             <p className="bring-stages-close">
-              You won’t face it all at once. You see your current stage and the
-              next few moves — nothing more.
+              You do not face every decision at once. The platform shows you the
+              stage you are in, the tasks that matter now, and the next clear
+              steps.
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* 5 — The 120-day launch: milestone timeline */}
+      {/* 5 — The 120-day launch: arched-card timeline (copy overhaul
+          2026-07-17, rebuilt to the owner's "Redesign Example" mockup —
+          four DAY cards + a ribbon closing line). */}
       <section className="ph-section-lg" id="checkpoints">
         <div className="ph-container">
           <Reveal className="sec-head is-center bring-head">
             <StarLogo className="bring-head-orn" />
             <p className="ph-eyebrow">The 120-day launch</p>
-            <h2>No guesswork about whether you’re ready.</h2>
+            <h2>A launch plan built around readiness, not pressure.</h2>
             <span className="exp-orn">
               <span />
             </span>
-            <p className="ph-lead">A clear path, milestone by milestone.</p>
+            <p className="ph-lead">
+              The 120-day plan gives you clear milestones while leaving room for
+              the realities of opening a physical cultural space.
+            </p>
           </Reveal>
           <Reveal>
-            <ol className="bring-miles">
+            <ol className="bring-timeline">
               {BRING_GATES.map((g, i) => (
-                <li key={g.day} className="bring-mile">
-                  <span className="bring-mile-medallion">
-                    <StarMark className="bring-mile-star" />
-                    <span className="bring-mile-num">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
+                <li key={g.day} className="bring-arch-card">
+                  <span
+                    className={`bring-arch-day ${
+                      i % 2 === 0 ? "is-green" : "is-terra"
+                    }`}
+                  >
+                    <span className="bring-arch-day-label">Day</span>
+                    <span className="bring-arch-day-num">{g.day}</span>
                   </span>
-                  <span className="bring-mile-day">{g.day}</span>
-                  <h3 className="bring-mile-title">{g.name}.</h3>
-                  <p>{g.text}</p>
+                  <div className="bring-arch-body">
+                    <h3 className="bring-arch-title">{g.name}</h3>
+                    <p>{g.text}</p>
+                  </div>
                 </li>
               ))}
-              <span className="bring-mile-spark bring-mile-spark--a" aria-hidden="true" />
-              <span className="bring-mile-spark bring-mile-spark--b" aria-hidden="true" />
             </ol>
           </Reveal>
           <Reveal>
-            <p className="bring-miles-note">
-              The soft opening sits at Day 108, leaving the rest of the 120 days
-              as a deliberate buffer before your full public launch.
+            <p className="bring-timeline-ribbon">
+              The goal is not simply to open on time. It is to open well.
             </p>
           </Reveal>
         </div>
@@ -261,12 +327,13 @@ export default function BringAHousePage() {
               The commitments
               <OliveBranch className="bring-flank-olive" />
             </p>
-            <h2>Three rules, no exceptions.</h2>
+            <h2>Three commitments every House shares.</h2>
             <span className="exp-orn">
               <span />
             </span>
             <p className="ph-lead">
-              Every House holds the same three commitments:
+              These commitments protect the meaning of the Palestine House name
+              and create trust across the network.
             </p>
           </Reveal>
           <Reveal className="bring-rules-grid">
@@ -284,7 +351,8 @@ export default function BringAHousePage() {
               <OliveBranch className="bring-divider-olive" />
             </span>
             <p className="bring-rules-close">
-              If that’s how you want to work, we’d like to hear from you.
+              Shared standards do not erase local character. They help every
+              House earn trust.
             </p>
           </Reveal>
         </div>
@@ -308,15 +376,19 @@ export default function BringAHousePage() {
               <span className="bring-eyebrow-line" />
               <SparkMark className="bring-eyebrow-spark" />
             </div>
-            <h2 className="statement-line bring-apply-h">Ready to apply?</h2>
+            <h2 className="statement-line bring-apply-h">
+              Ready to build a permanent home for Palestinian culture?
+            </h2>
             <span className="exp-orn bring-apply-rule">
               <span />
             </span>
             <p className="bring-apply-body">
-              If you’re serious about opening a House, apply. Every application is
-              reviewed by HQ — not to rank you against others, but to make sure a
-              House will work where you are, and that we can support it well.
-              Questions first?{" "}
+              Opening a Palestine House is a serious commitment, but you will not
+              make the journey alone. Every application is reviewed to understand
+              your city, your team, your venue, and your vision — and to make
+              sure we can support the project responsibly. If there is a strong
+              fit, we will guide you through the next steps. Questions before
+              applying?{" "}
               <Link className="bring-contact-link" href="/contact">
                 Contact
               </Link>{" "}
@@ -331,7 +403,7 @@ export default function BringAHousePage() {
               </Button>
               <Button asChild variant="outline" size="lg" className="bring-cta-secondary">
                 <Link href="/our-support">
-                  See our support
+                  Explore our support
                   <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>

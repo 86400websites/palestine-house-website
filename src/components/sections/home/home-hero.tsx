@@ -9,24 +9,24 @@ import { PHOTO_SOURCES } from "@/components/shared/photo";
    the transparent header, per the owner's reference mockup (docs/source-assets/
    design-refs/v3/examples/home-page-hero-example.png). Headline/subline/
    mini-features are the owner-approved copy from that reference; the CTA pair
-   matches it too — Apply + "Explore the model" (the booklet lead magnet was
-   retired entirely at DR1-8, owner decision 2026-07-02). */
+   is Apply + "Explore how it works" (copy overhaul 2026-07-17; the booklet
+   lead magnet was retired entirely at DR1-8, owner decision 2026-07-02). */
 
 const HERO_FEATS = [
   {
     icon: Coffee,
-    title: "Café by day",
-    sub: "Gather, work, and share a meal.",
+    title: "A café by day",
+    sub: "Meet, work, eat, and stay awhile.",
   },
   {
     icon: Music,
-    title: "Stage by night",
-    sub: "Live music, film, poetry, and stories.",
+    title: "A cultural stage by night",
+    sub: "Music, film, poetry, talks, and storytelling.",
   },
   {
     icon: Users,
-    title: "Community every day",
-    sub: "Workshops, markets, and conversations.",
+    title: "A community every day",
+    sub: "Workshops, markets, gatherings, and conversation.",
   },
 ] as const;
 
@@ -67,15 +67,16 @@ export function HomeHero() {
         <Stagger className="v3-hero-copy">
           <h1>A home for Palestinian culture, in every city.</h1>
           <p className="v3-hero-sub">
-            Palestine House helps local partners build permanent spaces for
-            food, music, art, memory, and community.
+            Palestine House helps local communities create permanent cultural
+            homes where Palestinian food, music, art, memory, and everyday life
+            can be experienced, shared, and kept alive.
           </p>
           <div className="v3-hero-ctas">
             <Button asChild size="lg" className="v3-cta">
               <Link href="/apply">Apply to bring a House</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="v3-cta">
-              <Link href="/model">Explore the model</Link>
+              <Link href="/model">Explore how it works</Link>
             </Button>
           </div>
         </Stagger>

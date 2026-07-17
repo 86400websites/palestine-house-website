@@ -1,44 +1,57 @@
 import Image from "next/image";
 import { Reveal } from "@/components/motion/reveal";
-import { PHOTO_SOURCES } from "@/components/shared/photo";
+import { PHOTO_SOURCES, type PhotoId } from "@/components/shared/photo";
 
 /* "One path, three stages" photo cards — moss panels with arch-notch number
    plates (DR2-3 Home build; extracted to a shared section in DR2.1-4 so
    /bring-ph renders the same cards). Cards only: the Al-Aqsa line-art beside
-   Home's grid stays a Home-side flourish. Copy + photo alts are the
-   owner-approved DR2 copy table (2026-07-06), shared verbatim by both pages
-   (DR2.1-4 copy gate). */
-const STAGES = [
+   Home's grid stays a Home-side flourish.
+
+   Copy overhaul (2026-07-17): the two pages now carry different stage copy, so
+   the copy is a prop. The default below is Home's copy; /bring-ph passes its
+   own fuller set (with an optional bold lead line per stage). */
+export type StageCopy = {
+  name: string;
+  /** optional bold lead line above the description (/bring-ph) */
+  lead?: string;
+  text: string;
+  photo: PhotoId;
+  alt: string;
+};
+
+const STAGES: readonly StageCopy[] = [
   {
     name: "Plan & Prepare",
-    text: "We help you lay the foundation for a strong and sustainable House.",
+    text: "Understand the model, assess your city, build your team, and prepare a viable plan.",
     photo: "ph-photo-stage-plan",
     alt: "A planning studio wall of maps, sketches and tile samples for a new Palestine House.",
   },
   {
     name: "Design & Build",
-    text: "We guide the creation of a beautiful, functional and welcoming space.",
+    text: "Shape the space, secure suppliers and permissions, and follow a clear 120-day launch programme.",
     photo: "ph-photo-stage-build",
     alt: "A workshop of patterned tiles, timber and lanterns mid-build.",
   },
   {
     name: "Operate & Program",
-    text: "We support you to run meaningful programs and build lasting community.",
+    text: "Run the café, venue, team, finances, and cultural programme to the shared Palestine House standard.",
     photo: "ph-photo-stage-cafe",
     alt: "A candlelit café room set for an evening performance.",
   },
-] as const;
+];
 
 type StageCardsProps = {
   /** next/image sizes for the card photos — set per host layout (Home's grid
    *  shares its row with the line-art column; bring-ph runs full-width). */
   sizes: string;
+  /** copy override — defaults to Home's stage copy */
+  stages?: readonly StageCopy[];
 };
 
-export function StageCards({ sizes }: StageCardsProps) {
+export function StageCards({ sizes, stages = STAGES }: StageCardsProps) {
   return (
     <div className="v3-stages">
-      {STAGES.map((s, i) => (
+      {stages.map((s, i) => (
         <Reveal key={s.name} delay={i * 0.09}>
           <article className="v3-stage-card">
             <div className="v3-stage-photo">
@@ -49,6 +62,7 @@ export function StageCards({ sizes }: StageCardsProps) {
                 {String(i + 1).padStart(2, "0")}
               </span>
               <h3>{s.name}</h3>
+              {s.lead ? <p className="v3-stage-lead">{s.lead}</p> : null}
               <p>{s.text}</p>
             </div>
           </article>
