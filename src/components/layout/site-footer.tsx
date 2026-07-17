@@ -25,12 +25,13 @@ export function SiteFooter() {
             className="phx-footer-cta-photo"
           />
           <div className="phx-footer-cta-content">
-            <h2>Could your city hold the next Palestine House?</h2>
+            <h2>Ready to bring Palestine House to your city?</h2>
             <span className="phx-footer-cta-rule" aria-hidden="true" />
             <div className="phx-footer-cta-row">
               <p className="phx-footer-cta-lead">
-                If you have the venue, the commitment, and the community, we’ll
-                help you build the standard.
+                Explore the model, understand what it takes, and apply when
+                you’re ready to build a permanent home for Palestinian culture
+                in your community.
               </p>
               <div className="phx-footer-cta-buttons">
                 <Button asChild size="lg" className="v3-cta phx-footer-cta-apply">

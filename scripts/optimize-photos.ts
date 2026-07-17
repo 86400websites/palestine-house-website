@@ -121,6 +121,11 @@ const PHOTOS: { src: string; out: string; width: number; height: number }[] = [
      (owner masters, 2026-07-15). */
   { src: "apply-hero.png", out: "ph-photo-apply-hero.jpg", width: 1600, height: 1600 },
   { src: "focus-hero.png", out: "ph-photo-focus-hero.jpg", width: 1600, height: 1600 },
+  /* Copy overhaul (owner masters, 2026-07-17) — /model §6 "Culture leads" still
+     life (Palestinian coffee on tatreez) + /experience §6 "More than somewhere
+     to visit" (a House gathering raising the Palestinian flag). */
+  { src: "model-culture.png", out: "ph-photo-model-culture.jpg", width: 1600, height: 1600 },
+  { src: "exp-gather.jpg", out: "ph-photo-exp-gather.jpg", width: 2000, height: 2000 },
 ];
 
 /** DR2 decorative masters (in SRC/art) -> keyed transparent PNGs in OUT_ART.

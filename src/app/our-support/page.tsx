@@ -8,7 +8,6 @@ import {
   Bookmark,
   CalendarDays,
   CheckCircle2,
-  CircleCheck,
   Download,
   FileText,
   Info,
@@ -18,7 +17,6 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { Photo } from "@/components/shared/photo";
-import { StarMark } from "@/components/shared/ornament";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
@@ -32,12 +30,13 @@ export const metadata: Metadata = {
     "What HQ gives every partner — the full playbook (10 focus areas, 30 topics, 267 templates), the standards, Aswātna, and support from first decision to open doors.",
 };
 
-/* Hero proof row — the canonical numbers, shown under the lead (mockup). */
+/* Hero proof row — the canonical numbers, shown under the lead (mockup).
+   Labels per the owner copy overhaul (2026-07-17); numbers stay fixed. */
 const SUP_PROOF = [
   { icon: BookOpen, n: "10", label: "focus areas" },
-  { icon: LayoutGrid, n: "30", label: "topics" },
-  { icon: FileText, n: "267", label: "templates" },
-  { icon: CalendarDays, n: "120", label: "day launch plan" },
+  { icon: LayoutGrid, n: "30", label: "core topics" },
+  { icon: FileText, n: "267", label: "ready-to-use templates" },
+  { icon: CalendarDays, n: "120", label: "day guided launch plan" },
 ] as const;
 
 /* Aswātna — how the cultural partner shows up across the launch (mockup). */
@@ -46,83 +45,101 @@ const SUP_ASWATNA = [
     assetId: "ph-photo-support-aswatna-1",
     alt: "A singer and guitarist performing together at a House.",
     label: "Before opening",
-    text: "We help shape your launch programming and cultural direction.",
+    text: "We help define the programme, identify the right creative partners, and shape a launch that introduces the House with clarity and purpose.",
   },
   {
     assetId: "ph-photo-support-aswatna-2",
     alt: "A packed audience filming a candlelit night of live music.",
     label: "At launch",
-    text: "We provide artists, events, partnerships, and opening-week support.",
+    text: "We support opening-week programming through artists, performances, conversations, cultural partnerships, and event development.",
   },
   {
     assetId: "ph-photo-support-aswatna-3",
     alt: "Guests dancing at a House celebration beside a keyboard player.",
     label: "After launch",
-    text: "We continue curating and supporting creative quality over time.",
+    text: "We continue supporting the programme over time — helping the House maintain creative quality, cultural depth, and a coherent identity throughout the year.",
   },
 ] as const;
 
-/* "What you're responsible for" — the ongoing-support topics + the who-brings
-   -what split, from the mockup. */
+/* "Support does not end on opening day" — the ongoing-support topics. (The
+   who-brings-what split that used to close this page was removed in the
+   2026-07-17 copy overhaul: it already lives on Bring a House.) */
 const SUP_ONGOING = [
-  { icon: CalendarDays, title: "Programming", text: "Plan a coherent cultural calendar." },
-  { icon: UtensilsCrossed, title: "Food & Hospitality", text: "Maintain quality and consistency." },
-  { icon: InfinityIcon, title: "Membership & Community", text: "Build long-term relationships." },
-  { icon: BarChart3, title: "Finance & Operations", text: "Use systems that keep your House sustainable." },
-] as const;
-
-const SUP_YOU_BRING = [
-  "The venue",
-  "The team",
-  "Local relationships",
-  "Daily commitment",
-] as const;
-
-const SUP_WE_ENSURE = [
-  "You know what to do",
-  "You have the right tools",
-  "You follow a clear standard",
-  "You are not building alone",
+  {
+    icon: CalendarDays,
+    title: "Programming",
+    text: "Build a coherent cultural calendar that gives people regular reasons to return.",
+  },
+  {
+    icon: UtensilsCrossed,
+    title: "Food & Hospitality",
+    text: "Maintain consistency, quality, warmth, and a guest experience rooted in Palestinian hospitality.",
+  },
+  {
+    icon: InfinityIcon,
+    title: "Membership & Community",
+    text: "Turn first-time visitors into lasting relationships and build a community around the House.",
+  },
+  {
+    icon: BarChart3,
+    title: "Finance & Operations",
+    text: "Use clear systems, reporting, and practical tools to keep the House stable and sustainable.",
+  },
 ] as const;
 
 /* The Backing — the three-stage, 120-day launch path as a numbered timeline. */
 const SUP_STAGES = [
-  { n: "01", name: "Plan & Prepare", text: "Venue, company, governance, budget." },
-  { n: "02", name: "Design & Build", text: "Fit-out, suppliers, systems, permissions." },
-  { n: "03", name: "Operate & Program", text: "Team, launch, programming, daily operations." },
+  {
+    n: "01",
+    name: "Plan & Prepare",
+    lead: "Build the foundation.",
+    text: "Venue assessment, company structure, governance, early budgets, local partnerships, and launch planning.",
+  },
+  {
+    n: "02",
+    name: "Design & Build",
+    lead: "Turn the plan into a functioning House.",
+    text: "Fit-out, suppliers, permissions, brand implementation, operating systems, and guest experience.",
+  },
+  {
+    n: "03",
+    name: "Operate & Program",
+    lead: "Prepare the House to open and grow.",
+    text: "Team training, cultural programming, hospitality, daily operations, soft opening, and public launch.",
+  },
 ] as const;
 
 /* Every topic ships the same six artefacts — shown as documents, not icons. */
 const SUP_ARTEFACTS = [
   {
     icon: Info,
-    name: "Overview",
-    text: "What this topic covers, in one page.",
+    name: "A clear overview",
+    text: "Understand what the topic covers and why it matters.",
   },
   {
     icon: Bookmark,
-    name: "Plain-language guide",
-    text: "The how, written for a tired person on a phone.",
+    name: "A practical guide",
+    text: "Plain-language advice designed to be useful in real working conditions.",
   },
   {
     icon: CheckCircle2,
-    name: "Checklist",
-    text: "Every step, tickable, in order.",
+    name: "A step-by-step checklist",
+    text: "Every action placed in a clear order, with progress saved as you work.",
   },
   {
     icon: AlertTriangle,
-    name: "Watch out for",
-    text: "The mistakes others made, so you don’t.",
+    name: "What to watch for",
+    text: "Common mistakes, risks, and decisions that need extra attention.",
   },
   {
     icon: Play,
-    name: "Short video",
-    text: "The topic, walked through on screen.",
+    name: "A short walkthrough",
+    text: "A visual explanation you can return to whenever you need it.",
   },
   {
     icon: Download,
-    name: "Templates",
-    text: "Proven documents, ready to adapt.",
+    name: "Ready-to-use templates",
+    text: "Contracts, plans, rotas, budgets, policies, and working documents ready to adapt.",
   },
 ] as const;
 
@@ -133,11 +150,17 @@ export default function OurSupportPage() {
       <section className="support-hero">
         <Reveal className="support-hero-copy">
           <p className="ph-eyebrow">Our Support</p>
-          <h1 className="support-hero-h1">You’re not doing this alone.</h1>
+          <h1 className="support-hero-h1">
+            You bring the commitment. We help you build it well.
+          </h1>
           <p className="support-hero-lead">
-            Every House is backed by a complete toolkit, clear standards,
-            cultural guidance from Aswātna, and a 120-day launch plan. From your
-            first decision to your first open doors — we’re with you.
+            Opening a Palestine House involves hundreds of decisions — from
+            finding the right venue and building a team to shaping the
+            programme, managing the finances, and preparing to welcome your
+            first guests. You will not have to solve them alone. Every approved
+            partner receives a complete operating system, practical tools,
+            cultural guidance from Aswātna, and a clear 120-day path from first
+            decision to opening day.
           </p>
           <ul className="support-hero-proof">
             {SUP_PROOF.map((s) => (
@@ -164,13 +187,14 @@ export default function OurSupportPage() {
         <div className="ph-container">
           <Reveal className="sec-head">
             <p className="ph-eyebrow">The toolkit</p>
-            <h2>The full playbook, ready to use.</h2>
+            <h2>A complete operating system, ready when you need it.</h2>
             <p className="ph-lead">
-              Everything it takes to open and run a House is written down and
-              organised — ten focus areas, thirty topics. Each one comes with an
-              overview, a plain-language guide, a checklist, a “watch out for”,
-              a short video, and templates you can use straight away.
+              Everything required to plan, open, and run a House is organised in
+              one place. The system is divided into ten focus areas and thirty
+              practical topics, so you can concentrate on the decisions that
+              matter now without losing sight of what comes next.
             </p>
+            <p className="sup-artefacts-intro">Every topic includes:</p>
           </Reveal>
           <Reveal className="sup-artefacts">
             {SUP_ARTEFACTS.map((a) => (
@@ -191,9 +215,10 @@ export default function OurSupportPage() {
           </Reveal>
           <Reveal className="sup-templates">
             <p className="sup-templates-line">
-              That’s <strong>267 templates</strong> in all — contracts, plans,
-              rotas, budgets — so you’re adapting proven documents, not starting
-              from a blank page.
+              Start with proven tools, not a blank page. With{" "}
+              <strong>267 templates</strong> across the platform, your team can
+              spend less time creating documents from scratch and more time
+              building the House itself.
             </p>
             <Button asChild size="lg">
               <Link href="/focus-areas">
@@ -209,13 +234,18 @@ export default function OurSupportPage() {
       <section className="ph-section-lg support-standard">
         <div className="ph-container support-standard-grid">
           <Reveal className="support-standard-copy">
+            <p className="ph-eyebrow">Shared standards</p>
             <h2 className="support-standard-h">
-              Standards that make the name mean something.
+              One name. A consistent level of care.
             </h2>
             <span className="support-orn" aria-hidden="true" />
             <p className="support-standard-body">
-              Wherever a guest walks in, they feel the same level of care,
-              quality, and professionalism. Local character, shared standard.
+              Every Palestine House responds to its own city, community, and
+              local character. What remains consistent is the standard behind
+              the experience: thoughtful hospitality, cultural integrity,
+              professional operation, and attention to detail. A guest should
+              feel the same level of care wherever they enter a Palestine House —
+              without every location looking or feeling identical.
             </p>
           </Reveal>
           <Reveal className="support-standard-arches">
@@ -255,7 +285,7 @@ export default function OurSupportPage() {
               <br />
               One shared standard.
               <br />
-              Local character.
+              A House shaped by its city.
             </p>
           </Reveal>
         </div>
@@ -265,13 +295,20 @@ export default function OurSupportPage() {
       <section className="ph-section-lg support-aswatna">
         <div className="ph-container support-aswatna-grid">
           <Reveal className="support-aswatna-intro">
+            {/* the doc's section label is "Cultural support from Aswātna" — the
+                "from Aswātna" half is carried by the wordmark directly below,
+                so the eyebrow states the rest without stuttering the name. */}
+            <p className="ph-eyebrow">Cultural support from</p>
             <h2 className="support-aswatna-name">Aswātna</h2>
             <p className="support-aswatna-tag">
-              A cultural partner. Not just a brand.
+              Cultural direction that continues beyond launch.
             </p>
             <p className="support-aswatna-body">
-              Aswātna helps curate your launch and supports ongoing programming
-              so your House starts strong and stays culturally alive.
+              A strong Palestine House needs more than a busy events calendar.
+              Its programme should feel thoughtful, connected, and rooted in
+              Palestinian culture while responding meaningfully to the city
+              around it. Aswātna works alongside each House to shape that
+              cultural direction.
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element -- partner seal, fixed size */}
             <img
@@ -297,6 +334,12 @@ export default function OurSupportPage() {
               </div>
             ))}
           </Reveal>
+          <Reveal>
+            <p className="support-aswatna-note">
+              The goal is not simply to fill the calendar. It is to build a
+              cultural programme people trust and return to.
+            </p>
+          </Reveal>
         </div>
       </section>
 
@@ -304,13 +347,14 @@ export default function OurSupportPage() {
       <section className="ph-section-lg support-backing">
         <div className="ph-container support-backing-grid">
           <Reveal className="support-backing-copy">
+            <p className="ph-eyebrow">The 120-day path</p>
             <h2 className="support-backing-h">
-              Support from first decision to open doors.
+              Clear milestones. The right decisions in the right order.
             </h2>
             <span className="support-orn" aria-hidden="true" />
-            <p className="support-backing-body">
-              A 120-day path with clear milestones and constant guidance.
-            </p>
+            {/* the old lead ("A 120-day path with clear milestones and constant
+                guidance.") is retired: the doc promoted that information into
+                the eyebrow + heading above, so it now only stutters. */}
             <Button
               asChild
               variant="outline"
@@ -331,6 +375,7 @@ export default function OurSupportPage() {
                   </span>
                   <div className="support-timeline-body">
                     <p className="support-timeline-name">{s.name}</p>
+                    <p className="support-timeline-lead">{s.lead}</p>
                     <p className="support-timeline-text">{s.text}</p>
                   </div>
                 </li>
@@ -350,10 +395,14 @@ export default function OurSupportPage() {
           <div className="ph-container support-duties-band-grid">
             <Reveal className="support-duties-intro">
               <h2 className="support-duties-h">
-                Opening day is not the finish line.
+                Support does not end on opening day.
               </h2>
               <p className="support-duties-sub">
-                We keep supporting you long after the doors open.
+                Opening the doors is the beginning. The first public launch is an
+                important milestone, but a House succeeds through what happens in
+                the months and years that follow. We continue supporting you
+                across the areas that keep the House culturally meaningful,
+                operationally strong, and financially sustainable.
               </p>
             </Reveal>
             <Reveal className="support-duties-topics">
@@ -366,42 +415,6 @@ export default function OurSupportPage() {
               ))}
             </Reveal>
           </div>
-        </div>
-        <div className="support-duties-split">
-          <div className="support-duties-photo">
-            <Photo
-              assetId="ph-photo-support-responsibility"
-              alt="The lantern-lit entrance of a Palestine House at dusk."
-              sizes="(max-width: 860px) 100vw, 42vw"
-            />
-          </div>
-          <Reveal className="support-duties-lists">
-            <div className="support-duties-list">
-              <p className="support-duties-list-head">You bring</p>
-              <ul>
-                {SUP_YOU_BRING.map((i) => (
-                  <li key={i}>
-                    <CircleCheck aria-hidden="true" />
-                    {i}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <span className="support-duties-divider" aria-hidden="true">
-              <StarMark className="support-duties-star" />
-            </span>
-            <div className="support-duties-list">
-              <p className="support-duties-list-head">We make sure</p>
-              <ul>
-                {SUP_WE_ENSURE.map((i) => (
-                  <li key={i}>
-                    <CircleCheck aria-hidden="true" />
-                    {i}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
         </div>
       </section>
     </>
