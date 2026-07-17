@@ -107,6 +107,22 @@ independent Codex review ✅ (REQUEST CHANGES → 4 findings, all resolved) · *
 done — owner's step.** The three rebuilt sections and the fuller copy in tighter components were verified at code
 and HTML level only; no screenshot was possible in-session.
 
+**`/close` (2026-07-17) = GO on every verifiable gate, conditional on the owner's Preview pass.** Checked: build ✅ ·
+git hygiene ✅ (task branch, clean tree, 0 unpushed, `.env.local` untracked) · secret scan ✅ (the only
+`service_role` / `sb_secret_` / `NEXT_PUBLIC_SITE_URL` hits are **tracker prose** in the PROJECT-STATUS line this
+PR edits — zero in `src/` or `scripts/`) · trackers ✅ · proof numbers ✅ · no certificate ✅ (the one grep hit is a
+pre-existing comment in the gated Academy page asserting the rule) · locked header untouched ✅, footer changed by
+owner decision 2 ✅ (4 insertions / 3 deletions — the h2 + lead only) · SECURITY-CHECKLIST §15: **all seven
+invariants N/A** — the diff touches zero RPC/auth/gate/storage/write/admin surface; `/apply` was proven
+**copy-only** (zero logic lines changed; `ApplyForm` + `applyAction` untouched), and `/focus-areas`' A–J teaser
+index is untouched · WORKFLOW §14 Database **N/A** (no `supabase/sql/**`) · sprint record + Codex brief ✅.
+
+**Known non-blocking:** bare `pnpm run lint` FAILS on
+`.claude/worktrees/claude+sprint-fa11-food-focus-area/next-env.d.ts` — a **parallel session's worktree** physically
+inside this working copy. Proven outside the branch: not in the diff, untracked, excluded via `.git/info/exclude:7`,
+invisible to `git status`. CI clones fresh and will not see it; `eslint . --ignore-pattern ".claude/worktrees/**"`
+is clean. Fix belongs in repo hygiene, not this sprint.
+
 ## Micro-decisions (recorded so they are not rediscovered)
 
 - **Locked brand line kept:** "Every application is reviewed by HQ." verbatim site-wide. The docs' casual variants
