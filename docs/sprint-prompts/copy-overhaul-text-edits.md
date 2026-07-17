@@ -1,7 +1,14 @@
-# Copy overhaul — owner "TEXT EDITS" across the public site (2026-07-17)
+# Copy overhaul — owner "TEXT EDITS" across the public site
 
-> **Record.** Owner-directed ad-hoc sprint (same shape as the DR series). Branch
-> `claude/public-copy-overhaul`. Frontend copy + two photos only — no DB/auth/gate/CSP/routing/env change.
+| | |
+|---|---|
+| **Date merged** | *pending* — build complete + pushed 2026-07-17; record saved pre-merge at the owner's request |
+| **Branch / PR** | `claude/public-copy-overhaul` / *PR pending* |
+| **Code range** | `1c8191c..ee3c601` (8 commits, 20 files) + docs commits `c1e8d28`, `a6b5c9d`, `84d79b7` |
+| **Goal** | Apply the owner's seven per-page Word documents across all seven public pages on top of the existing v3 layouts, plus the shared footer CTA and three reference-built design pieces. |
+
+> Owner-directed ad-hoc sprint (same shape as the DR series). Frontend copy + two photos only — no
+> DB/auth/gate/CSP/routing/env change.
 
 ## What prompted it
 
@@ -53,6 +60,53 @@ its CSS — already covered on Bring a House).
 lead line, because the docs now give Home and `/bring-ph` **different** stage copy. Content-parametrisation only;
 the card layout is unchanged.
 
+## Prompt used
+
+**This sprint had no gated master prompt** — worth recording, because it deviates from the house pattern. The owner
+opened it in **plan mode** with a folder drop rather than a sprint ID, so the "prompt" was the owner's request plus
+the seven documents themselves. The plan was researched, put to the owner as three decisions (§ *Owner decisions*),
+approved via ExitPlanMode, then executed page-by-page in one session with a commit per page.
+
+<details><summary>The owner's opening request (verbatim)</summary>
+
+```text
+Ok I've added "TEXT EDITS" folder with all the text changes across the public pages with a few other
+changes (reference images and new images are provided and instructions are inside the relevant document)
+
+Lets complete this ensuring we dont miss any changes and also at the very end give me a list of all the
+changes that you did so that I can confirm (but please ensure I dont need to double check and I can trust you!!)
+```
+
+</details>
+
+<details><summary>Follow-up request (verbatim) — the review round</summary>
+
+```text
+ok please push and also give me the final codex review and it should also double check the accuracy of our copy
+so we ensure we covered everything
+
+so ensure the prompt is very detailed as we also have a new session working on a new branch in parallel session
+
+Also please fix the permenanace section as it looks weird, maybe we can revsie it to look like the section after
+it or do anything here as it looks weird and forced and unprofessional..
+```
+
+</details>
+
+**If this is re-run for another batch of owner copy docs, the prompt that matters is not an instruction list — it
+is the verification harness.** See § *Verification*: point independent agents at the owner's original `.docx`
+files, never at the engineer's transcription.
+
+## Checks & results
+
+typecheck ✅ · lint ✅ (clean via `eslint . --ignore-pattern ".claude/worktrees/**"`; the bare `pnpm run lint`
+FAIL is a **parallel session's worktree inside the repo**, outside this range) · build ✅ (45/45 static, zero route
+changes) · all 7 public routes 200 from `next start`, every rebuilt section verified in the shipped HTML ✅ ·
+path-guard ✅ (zero forbidden-path files) · proof numerals ✅ · locked HQ line ✅ · no tracked `TEXT EDITS` ✅ ·
+independent Codex review ✅ (REQUEST CHANGES → 4 findings, all resolved) · **Preview (desktop + 320px) ⛔ NOT yet
+done — owner's step.** The three rebuilt sections and the fuller copy in tighter components were verified at code
+and HTML level only; no screenshot was possible in-session.
+
 ## Micro-decisions (recorded so they are not rediscovered)
 
 - **Locked brand line kept:** "Every application is reviewed by HQ." verbatim site-wide. The docs' casual variants
@@ -87,9 +141,16 @@ shipped page — never against the engineer's transcription.
 - typecheck / lint / build green throughout; 45/45 static pages; all 7 public routes serve 200 from `next start`
   and every rebuilt section verified in the shipped HTML.
 
-**Lesson worth keeping:** verifying against *the owner's original file* rather than the engineer's reading is what
-caught 11 defects — several of which (a dropped closing statement, a flattened rhetorical device) would have read
-as deliberate editing and never been questioned.
+**Lesson worth keeping (the main deviation/learning of this sprint):** verifying against *the owner's original
+file* rather than the engineer's reading is what caught 11 defects — several of which (a dropped closing statement,
+a flattened rhetorical device) would have read as deliberate editing and never been questioned. The engineer who
+transcribes the copy cannot be the one who certifies it: a self-check inherits the same blind spots that caused the
+misses. **For any future owner-copy batch, budget for the docx-extraction verification harness up front — it is not
+optional polish, it found more than the build did.**
+
+A corollary for `/close` and for Codex: because `docs/source-assets/` is gitignored, a reviewer on a fresh clone has
+**no ground truth** and will "pass" copy blind. The Codex brief for this sprint therefore **embeds all seven
+documents verbatim** (machine-extracted). Do the same next time.
 
 ## Independent Codex review (2026-07-17) — REQUEST CHANGES → all resolved
 
