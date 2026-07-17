@@ -865,8 +865,9 @@
   font-weight: var(--weight-medium);
   font-size: 0.78rem;
   line-height: var(--leading-normal);
+  /* opaque: a prior 0.82 opacity dropped this small text to ~3.95:1 on the
+     terracotta arch, under AA 4.5:1 (Codex review, 2026-07-17) */
   color: inherit;
-  opacity: 0.82;
 }
 .model-arch-text {
   margin-top: var(--space-4);
@@ -1340,29 +1341,19 @@
   line-height: var(--leading-normal);
   color: var(--muted-foreground);
 }
-/* Permanence triad — the three "A place to…" lines (copy overhaul) */
-.exp-perm-triad {
-  list-style: none;
-  margin: var(--space-6) 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.exp-perm-triad li {
-  font-family: var(--font-display);
-  font-weight: var(--weight-medium);
-  font-size: var(--text-md);
-  line-height: var(--leading-snug);
-  color: var(--char-900);
-}
-/* §6 "More than somewhere to visit" — the closing beat before the footer CTA.
-   Copy left / gathering photo right (default .v3-split); a copper rule divides
-   the body from the "For some / others / everyone" triad. */
-.exp-gather-rule {
+/* The page's two closing beats — §5 "A home, not a moment." and §6 "More than
+   somewhere to visit." — share one recipe so they read as a deliberate pair
+   (owner, 2026-07-17): eyebrow + mark · heading · lead · body · copper rule ·
+   triad, copy left / photo right. They alternate ground only: §5 sits on the
+   page cream, §6 on the default .v3-split cream-100 card. */
+/* 0,2,0: the span carries `exp-orn exp-close-rule`, and .exp-orn's own
+   margin-top sits LATER in this file — a plain .exp-close-rule tie loses on
+   source order and the rule renders dead (the same cascade trap that produced
+   the .exp-home-split dead rule; caught here by the verify pass). */
+.exp-orn.exp-close-rule {
   margin-top: var(--space-7);
 }
-.exp-gather-triad {
+.exp-triad {
   list-style: none;
   margin: var(--space-6) 0 0;
   padding: 0;
@@ -1370,15 +1361,21 @@
   flex-direction: column;
   gap: var(--space-3);
 }
-.exp-gather-triad li {
+.exp-triad li {
   font-family: var(--font-display);
   font-weight: var(--weight-regular);
   font-size: var(--text-lg);
   line-height: var(--leading-snug);
   color: var(--char-900);
 }
-.exp-gather-triad strong {
+.exp-triad--lead strong {
   font-weight: var(--weight-semibold);
+}
+/* §5 keeps the page ground so the pair alternates rather than stacking as two
+   identical cards. 0,2,0 to out-rank .v3-split's cream-100 (pages.css loads
+   BEFORE v3.css, so a plain .exp-perm-split tie would lose). */
+.v3-split.exp-perm-split {
+  background: var(--background);
 }
 
 /* Live strip / listing — one shared card pattern (/live + Experience strip) */
@@ -1571,35 +1568,15 @@
   transform: rotate(45deg);
 }
 
-/* LH1 — the "A home, not a moment" permanence band reuses the v3-split recipe
-   (v3.css) with a wider photo column (~57%, per the owner mockup; the default
-   split is 53%). Selector is .v3-split.exp-home-split (0,2,0): pages.css loads
-   BEFORE v3.css, so a plain .exp-home-split tie LOSES to .v3-split by source
-   order — the delta-verify pass caught the dead rule. That bump also out-ranks
-   the v3.css ≤880px single-column stack, so the stack is re-asserted below.
-   The photo's inner edge dissolves into the cream panel (the mockup's center
-   blend): a gradient overlay from --cream-100 (#F6EFE4) to its transparent
-   twin. */
-.v3-split.exp-home-split {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
-  /* the mockup's panel IS the page background (--background = cream-50 in the
-     v3 shell), not the darker cream-100 card of the default split — so the
-     band and its blend disappear into the page (owner fix, 2026-07-10) */
-  background: var(--background);
-}
-.exp-home-split .v3-split-photo::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  /* wide, soft dissolve per the mockup (~40% of the photo column); the solid
-     end matches the band/page background exactly */
-  width: clamp(10rem, 24vw, 20rem);
-  background: linear-gradient(90deg, var(--background), transparent);
-  z-index: 1;
-  pointer-events: none;
-}
-/* the §5 panel's eyebrow mark (per the mockup): a single short hairline ending
-   in the diamond, flush left under "Permanence" */
+/* The LH1 permanence band (a wider photo column + a gradient dissolving the
+   photo's inner edge into the panel) was retired 2026-07-17 at the owner's
+   request: it was tuned for a one-line lead and read as forced once the fuller
+   copy landed. §5 now shares the §6 closing-beat recipe — see .exp-triad /
+   .v3-split.exp-perm-split above — and uses the plain .v3-split grid, so the
+   stack + blend overrides this block carried are no longer needed. */
+
+/* the §5/§6 panel eyebrow mark: a single short hairline ending in the diamond,
+   flush left under the eyebrow */
 .exp-orn--eyebrow {
   gap: var(--space-2);
   margin-top: var(--space-2);
@@ -1613,21 +1590,6 @@
 .exp-orn--eyebrow > span {
   width: 6px;
   height: 6px;
-}
-@container page (max-width: 880px) {
-  /* keep the photo-first single-column stack (the 0,2,0 bump above would
-     otherwise beat v3.css's .v3-split stack rule) */
-  .v3-split.exp-home-split {
-    grid-template-columns: 1fr;
-  }
-  /* stacked: the photo sits ABOVE the panel, so the blend moves to its bottom
-     edge and fades down into the page background */
-  .exp-home-split .v3-split-photo::before {
-    inset: auto 0 0 0;
-    width: auto;
-    height: clamp(4rem, 14vw, 7rem);
-    background: linear-gradient(180deg, transparent, var(--background));
-  }
 }
 
 /* ===========================================================================
@@ -2093,7 +2055,8 @@
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  opacity: 0.85;
+  /* opaque: a prior 0.85 opacity dropped "Day" to ~4.32:1 on the terracotta
+     Day 60/120 circles, under AA 4.5:1; opaque cream ≈ 5.32:1 (Codex review) */
 }
 .bring-arch-day-num {
   margin-top: 2px;

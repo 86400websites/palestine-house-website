@@ -1,5 +1,38 @@
 # Codex review brief — Copy overhaul ("TEXT EDITS"), 2026-07-17
 
+---
+
+## VERDICT (received 2026-07-17): **REQUEST CHANGES** → all findings resolved
+
+Codex reviewed the pinned range and returned **REQUEST CHANGES** on 4 items. **All 4 fixed on-branch**; the copy
+range was then re-verified. Recorded here so the next reader doesn't re-litigate them.
+
+| # | Severity | Finding | Resolution |
+|---|---|---|---|
+| 1 | wrong (copy) | `/experience` hero — the doc's final sentence lost its subject; it had been glued to the previous sentence with an em dash ("…see something — somewhere to meet…"). Not mere reflow. | **Fixed.** Restored as its own sentence: "A Palestine House is somewhere to meet, work, listen, eat, learn, and return to throughout the week and throughout the year." |
+| 2 | wrong (copy) | `/bring-ph` §7 CTA read "See our support"; the doc says **"Explore our support"**. (The author had kept the site-standard label as a documented micro-decision, but it was not on the accepted-decisions list, so the flag is legitimate.) | **Fixed.** §7 now reads "Explore our support". The §1 hero keeps "See our support" — the doc specifies no hero CTA label. **Owner: say the word if you'd rather both matched.** |
+| 3 | Medium (AA) | `.model-arch-role` used `opacity: 0.82` → ≈3.95:1 on the terracotta arch, under AA 4.5:1. | **Fixed.** Opacity removed; the label inherits the arch's opaque foreground. |
+| 4 | Medium (AA) | `.bring-arch-day-label` used `opacity: 0.85` → "Day" ≈4.32:1 on the terracotta Day 60/120 circles. | **Fixed.** Opacity removed; opaque cream ≈5.32:1. |
+
+**Also confirmed by Codex:** all gating checks PASS (typecheck · build 45/45 · path-guard zero hits · proof numerals
+· locked line at every call site · no tracked `TEXT EDITS` · no secrets · zero route changes); `StageCards`
+default/override, the timeline geometry and 4→2→1 responsive steps, the connector layering, the Experience cascade,
+longer-copy layouts, heading/list semantics and the removal cleanup were all reviewed and found **sound**.
+
+**The one FAIL was environmental, not this branch:** `pnpm run lint` trips on
+`.claude/worktrees/claude+sprint-fa11-food-focus-area/next-env.d.ts` — a **parallel session's worktree** living
+inside the repo, outside this range and excluded via `.git/info/exclude`.
+`pnpm exec eslint . --ignore-pattern ".claude/worktrees/**"` passes clean. Worth a repo-hygiene follow-up (add
+`.claude/worktrees/**` to the eslint ignores) — **not** part of this sprint.
+
+**Open item Codex re-confirmed (owner's call, not a defect):** `/model` §3 renders the three partners unnumbered
+while §5 keeps 01/02/03; the docs number both.
+
+**Owner-requested change in the same round (not a Codex finding):** `/experience` §5 "Permanence" looked *"weird
+and forced"* — it was recomposed to share §6's closing-beat recipe (see the sprint record).
+
+---
+
 > **Independent review request.** You are the second pair of eyes on an owner-directed copy overhaul of the
 > Palestine House **public** site. Claude built it; you review it. Give a clear verdict and only findings you can
 > substantiate from the code.

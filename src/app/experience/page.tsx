@@ -69,7 +69,7 @@ export default function ExperiencePage() {
         position="50% 32%"
         eyebrow="Experience"
         title="Step inside a Palestine House."
-        lead="A place that feels familiar, even on your first visit. Come for Palestinian coffee and food made from recipes carried across generations. Stay for a concert, a film, a reading, or a conversation that changes the way you see something — somewhere to meet, work, listen, eat, learn, and return to throughout the week and throughout the year."
+        lead="A place that feels familiar, even on your first visit. Come for Palestinian coffee and food made from recipes carried across generations. Stay for a concert, a film, a reading, or a conversation that changes the way you see something. A Palestine House is somewhere to meet, work, listen, eat, learn, and return to throughout the week and throughout the year."
         support="Every application is reviewed by HQ."
       >
         <Button asChild size="lg" className="v3-cta">
@@ -176,26 +176,32 @@ export default function ExperiencePage() {
         </div>
       </section>
 
-      {/* 5 — A home, not a moment (LH1: the statement band becomes a cream /
-          photo split per the owner mockup; copy verbatim). The S9 live strip
-          that sat before it is retired — sessions are members-only now. */}
-      <section className="v3-split exp-home-split">
+      {/* 5 — A home, not a moment. Recomposed 2026-07-17 to match §6 below, so
+          the page's two closing beats read as a deliberate pair: eyebrow + mark
+          · heading · lead · body · copper rule · triad. (The LH1 dissolve-band
+          treatment was tuned for a one-line lead and looked forced once the
+          owner's fuller copy landed — owner call.) */}
+      <section className="v3-split exp-perm-split">
         <div className="v3-split-panel">
           <Reveal>
             <p className="ph-eyebrow">Permanence</p>
-            {/* the mockup's small hairline-and-diamond mark under the eyebrow */}
             <span className="exp-orn exp-orn--eyebrow" aria-hidden="true">
               <span />
             </span>
             <h2>A home, not a moment.</h2>
             <p className="ph-lead">
               Temporary events can create powerful moments. A Palestine House
-              gives those moments somewhere to continue. It is open throughout
-              the year, at the same address — a place where Palestinian culture
-              can be encountered not occasionally, but as part of the everyday
-              life of a city.
+              gives those moments somewhere to continue.
             </p>
-            <ul className="exp-perm-triad">
+            <p className="v3-split-body">
+              It is open throughout the year, at the same address — a place
+              where Palestinian culture can be encountered not occasionally, but
+              as part of the everyday life of a city.
+            </p>
+            <span className="exp-orn exp-close-rule" aria-hidden="true">
+              <span />
+            </span>
+            <ul className="exp-triad">
               <li>A place to return to.</li>
               <li>A place to build relationships.</li>
               <li>A place where culture is visible, lived, and shared.</li>
@@ -229,10 +235,10 @@ export default function ExperiencePage() {
               People return for the food, the programme, the conversations, and
               the feeling of being welcomed into something meaningful.
             </p>
-            <span className="exp-orn exp-gather-rule" aria-hidden="true">
+            <span className="exp-orn exp-close-rule" aria-hidden="true">
               <span />
             </span>
-            <ul className="exp-gather-triad">
+            <ul className="exp-triad exp-triad--lead">
               <li>
                 <strong>For some,</strong> it is a connection to home.
               </li>

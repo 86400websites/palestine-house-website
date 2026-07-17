@@ -403,7 +403,7 @@ export default function BringAHousePage() {
               </Button>
               <Button asChild variant="outline" size="lg" className="bring-cta-secondary">
                 <Link href="/our-support">
-                  See our support
+                  Explore our support
                   <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>

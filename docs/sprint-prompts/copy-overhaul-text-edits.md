@@ -91,6 +91,41 @@ shipped page — never against the engineer's transcription.
 caught 11 defects — several of which (a dropped closing statement, a flattened rhetorical device) would have read
 as deliberate editing and never been questioned.
 
+## Independent Codex review (2026-07-17) — REQUEST CHANGES → all resolved
+
+Brief: `docs/code-reviews/copy-overhaul-text-edits.md` (pinned to `1c8191c..ee3c601`; because
+`docs/source-assets/` is gitignored, the brief **embeds all seven owner documents verbatim**, machine-extracted —
+otherwise the reviewer would have had no ground truth to check copy against and would have "passed" it blind).
+
+Codex found **4 items, all fixed on-branch**:
+1. **`/experience` hero** — the doc's last hero sentence had lost its subject (glued to the previous sentence with
+   an em dash). Restored as its own sentence.
+2. **`/bring-ph` §7 CTA** — doc says "Explore our support"; shipped "See our support". Applied. (The hero keeps
+   "See our support"; the doc specifies no hero CTA label — owner may want them matched.)
+3. **AA:** `.model-arch-role` `opacity: 0.82` → ≈3.95:1 on terracotta. Opacity removed.
+4. **AA:** `.bring-arch-day-label` `opacity: 0.85` → ≈4.32:1 on the terracotta Day circles. Opacity removed.
+
+Everything else PASSED, including all gating checks and the `StageCards`/timeline/cascade/semantics review. The one
+lint FAIL was **environmental** — a parallel session's worktree (`.claude/worktrees/…`) inside the repo, outside
+this range; `eslint . --ignore-pattern ".claude/worktrees/**"` is clean.
+
+**Lesson #2 worth keeping:** the two AA misses were both `opacity` on small text over a mid-tone brand surface —
+a shape that reads as "subtle" while quietly failing contrast. Prefer an opaque lighter colour over `opacity` for
+any text on the terracotta/red/moss bands.
+
+## Owner-requested design change (same round)
+
+`/experience` §5 **Permanence** read as *"weird and forced and unprofessional"* under the fuller copy. Cause: the
+LH1 band was tuned for a one-line lead — a wider photo column plus a gradient dissolving the photo's inner edge
+into the panel — and the owner's longer copy plus a bolted-on triad unbalanced it.
+
+**Fix:** §5 now shares §6's closing-beat recipe, so the page's two closing sections read as a deliberate pair:
+eyebrow + mark · heading · `.ph-lead` · `.v3-split-body` · copper rule (`.exp-close-rule`) · triad (`.exp-triad`;
+§6 adds `.exp-triad--lead` for its bold openers). The doc's Permanence copy was **redistributed to match the doc's
+own paragraph breaks** (lead / body / triad) — no word changed. The pair alternates ground only: §5 on the page
+cream (`.v3-split.exp-perm-split`), §6 on the default `.v3-split` cream-100 card. The `.exp-home-split` dissolve
+band + its wider column + its ≤880px re-assert are **retired** (dead after the recompose).
+
 ## Follow-ups (non-blocking)
 
 - `ph-photo-model-still.jpg` (the old `/model` §6 bonsai) and `ph-photo-support-responsibility.jpg` (the removed
@@ -99,3 +134,8 @@ as deliberate editing and never been questioned.
 - The canonical `docs/page-copy/01-public-pages/*.md` (OneDrive, gitignored) are now **stale** — the shipped pages
   and these seven docs are the source of truth. Owner to refresh when convenient.
 - `/model` §3 renders the three partners unnumbered while §5 keeps 01/02/03 — the docs number both. Owner's call.
+- **Repo hygiene (not this sprint):** `pnpm run lint` trips on a parallel session's worktree at
+  `.claude/worktrees/…/next-env.d.ts`. Consider adding `.claude/worktrees/**` to the eslint ignores so lint is
+  green for everyone regardless of who has a worktree checked out.
+- `/bring-ph` now says "See our support" in the hero and "Explore our support" in §7 (the doc specifies the §7
+  label only). Owner may want them matched.
