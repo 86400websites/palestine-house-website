@@ -32,6 +32,13 @@
  * Usage:
  *   pnpm tsx scripts/ingest-content.ts --dry-run   # parse + report only (no DB, no secret needed)
  *   pnpm tsx scripts/ingest-content.ts             # ingest into the DB pointed at by .env.local
+ *
+ * Packs (FA11): `--pack food` ingests ONLY Focus Area K ("Café & Culinary
+ * Experience", k1..k3) from `docs/source-assets/resources/2. Focus Areas/
+ * 11. Café & Culinary Experience/` — its `_pack.md` supplies the K titles +
+ * one-lines (docs/page-copy has no K rows yet). Additive and idempotent: the
+ * model contains only K, so A–J rows are never touched. No booklets. The
+ * default `--pack full` behaviour (all 30 topics from _index.md) is unchanged.
  */
 
 import { promises as fs } from "node:fs";
@@ -63,6 +70,15 @@ const BOOKLETS_DIR = path.join(SRC, "1. Playbook-Booklet");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
+// --pack full (default) | food — which content pack to build + ingest.
+const PACK: "full" | "food" = (() => {
+  const i = process.argv.indexOf("--pack");
+  if (i === -1) return "full";
+  const v = process.argv[i + 1];
+  if (v !== "full" && v !== "food") throw new Error(`Unknown --pack "${v}" (use: full | food)`);
+  return v;
+})();
+
 // Canonical focus-area names (docs/page-copy/01-public-pages/focus-areas.md, lines 24-33).
 const FOCUS_NAME: Record<string, string> = {
   A: "The House Promise",
@@ -75,6 +91,8 @@ const FOCUS_NAME: Record<string, string> = {
   H: "Finance, Reporting & Sustainability",
   I: "Quality Control & Continuous Improvement",
   J: "Appendices & Tools Library",
+  // FA11 (2026-07-17): Focus Area 11 — owner-approved name, folder prefix "11.".
+  K: "Café & Culinary Experience",
 };
 
 const RESOURCES_BUCKET = "resources"; // PRIVATE — the 267 templates
@@ -184,7 +202,8 @@ interface IndexEntry {
   slug: string; // a1
   title: string; // canonical title
   templateCount: number;
-  mdFile: string; // a1-....md
+  mdFile: string; // a1-....md ("" for pack entries — one_line is inline instead)
+  one_line?: string | null; // pack entries only (from _pack.md)
 }
 
 async function parseIndex(): Promise<IndexEntry[]> {
@@ -256,6 +275,63 @@ async function mapTopicFolders(index: IndexEntry[]): Promise<TopicFolder[]> {
   if (result.length !== 30)
     throw new Error(`Expected 30 topic folders, mapped ${result.length}`);
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// FA11 food pack: Focus Area K only. `_pack.md` inside the area folder plays
+// the `_index.md` role (K1..K3 code | title | template count | one-line) since
+// docs/page-copy carries no K rows yet. Same normalized-title folder matching
+// and duplicate/missing guards as the full run; throws unless exactly 3 topics.
+// ---------------------------------------------------------------------------
+async function parseFoodPack(): Promise<{ index: IndexEntry[]; folders: TopicFolder[] }> {
+  const areaDirs = (await listDirs(FOCUS_AREAS_DIR)).filter((d) => /^11\./.test(d));
+  if (areaDirs.length !== 1)
+    throw new Error(
+      `--pack food expects exactly one "11. …" folder under "${FOCUS_AREAS_DIR}", found ${areaDirs.length}`,
+    );
+  const areaDir = path.join(FOCUS_AREAS_DIR, areaDirs[0]);
+
+  const packMd = path.join(areaDir, "_pack.md");
+  if (!(await exists(packMd)))
+    throw new Error(`--pack food needs the K metadata file: "${packMd}"`);
+  const text = await fs.readFile(packMd, "utf8");
+
+  const index: IndexEntry[] = [];
+  for (const line of text.split("\n")) {
+    // | K1 | Title | 10 | one line |
+    const m = line.match(/^\|\s*(K[1-3])\s*\|\s*([^|]+?)\s*\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|/);
+    if (!m) continue;
+    const one_line = m[4].replace(/\s+/g, " ").trim();
+    if (!one_line) throw new Error(`_pack.md: ${m[1]} has an empty one-line`);
+    index.push({
+      code: m[1],
+      slug: m[1].toLowerCase(),
+      title: m[2].trim(),
+      templateCount: parseInt(m[3], 10),
+      mdFile: "",
+      one_line,
+    });
+  }
+  if (index.length !== 3)
+    throw new Error(`_pack.md: expected the 3 K1..K3 rows, parsed ${index.length}`);
+
+  const byNorm = new Map(index.map((e) => ["K|" + normTitle(e.title), e]));
+  const folders: TopicFolder[] = [];
+  const usedCodes = new Set<string>();
+  for (const td of await listDirs(areaDir)) {
+    const entry = byNorm.get("K|" + normTitle(td));
+    if (!entry) {
+      throw new Error(
+        `No K1..K3 match for topic folder "${td}" (normalized "${normTitle(td)}")`,
+      );
+    }
+    if (usedCodes.has(entry.code)) throw new Error(`Code ${entry.code} matched twice`);
+    usedCodes.add(entry.code);
+    folders.push({ code: entry.code, letter: "K", dir: path.join(areaDir, td) });
+  }
+  if (folders.length !== 3)
+    throw new Error(`Expected the 3 K topic folders, mapped ${folders.length}`);
+  return { index, folders };
 }
 
 // ---------------------------------------------------------------------------
@@ -396,9 +472,15 @@ interface Model {
 }
 
 async function buildModel(): Promise<Model> {
-  const index = await parseIndex();
+  let index: IndexEntry[];
+  let folders: TopicFolder[];
+  if (PACK === "food") {
+    ({ index, folders } = await parseFoodPack());
+  } else {
+    index = await parseIndex();
+    folders = await mapTopicFolders(index);
+  }
   const byCode = new Map(index.map((e) => [e.code, e]));
-  const folders = await mapTopicFolders(index);
 
   const elements: ElementRow[] = [];
   const checklistByCode = new Map<string, ChecklistItem[]>();
@@ -424,7 +506,7 @@ async function buildModel(): Promise<Model> {
     const watch_out_for_md = wtwF ? await docxToMarkdown(path.join(tf.dir, wtwF)) : null;
     if (!wtwF) wtwMissing.push(tf.code);
 
-    const one_line = await readOneLine(entry.mdFile);
+    const one_line = entry.one_line ?? (entry.mdFile ? await readOneLine(entry.mdFile) : null);
 
     elements.push({
       slug: entry.slug,
@@ -471,9 +553,9 @@ async function buildModel(): Promise<Model> {
     }
   }
 
-  // Booklets (public)
+  // Booklets (public) — full pack only; the food pack ships no booklets.
   const booklets: { absPath: string; fileName: string; title: string }[] = [];
-  if (await exists(BOOKLETS_DIR)) {
+  if (PACK === "full" && (await exists(BOOKLETS_DIR))) {
     for (const fn of (await listFiles(BOOKLETS_DIR)).filter((f) => /\.pdf$/i.test(f)).sort()) {
       const m = fn.match(/^Booklet_([A-Z])_(.+)\.pdf$/i);
       const title = m
@@ -650,13 +732,17 @@ async function ingest(model: Model): Promise<void> {
 // Report (dry-run + post-run summary)
 // ---------------------------------------------------------------------------
 function report(model: Model): void {
+  const ex =
+    PACK === "food"
+      ? { elements: "3", checklist: "90", academy: "3", templates: "30", booklets: "0" }
+      : { elements: "30", checklist: "200+", academy: "30", templates: "267", booklets: "2" };
   const checklistTotal = [...model.checklistByCode.values()].reduce((n, a) => n + a.length, 0);
   console.log("\n================ CONTENT MODEL ================");
-  console.log(`elements         : ${model.elements.length} (expect 30)`);
-  console.log(`checklist_items  : ${checklistTotal} (expect 200+)`);
-  console.log(`academy_modules  : ${model.academyByCode.size} (expect 30)`);
-  console.log(`templates        : ${model.templates.length} (expect 267)`);
-  console.log(`booklets         : ${model.booklets.length} (expect 2)`);
+  console.log(`elements         : ${model.elements.length} (expect ${ex.elements})`);
+  console.log(`checklist_items  : ${checklistTotal} (expect ${ex.checklist})`);
+  console.log(`academy_modules  : ${model.academyByCode.size} (expect ${ex.academy})`);
+  console.log(`templates        : ${model.templates.length} (expect ${ex.templates})`);
+  console.log(`booklets         : ${model.booklets.length} (expect ${ex.booklets})`);
   console.log(`WTW missing (-> null): ${model.wtwMissing.sort().join(", ") || "(none)"}`);
 
   console.log("\nPer-topic checklist counts:");
@@ -669,26 +755,41 @@ function report(model: Model): void {
     );
   }
 
-  const a1 = model.elements.find((e) => e.code === "A1");
-  if (a1) {
-    console.log("\nSpot-check A1:");
-    console.log(`  one_line: ${a1.one_line}`);
-    console.log(`  overview_md chars: ${a1.overview_md?.length ?? 0}`);
-    console.log(`  simple_guide_md chars: ${a1.simple_guide_md?.length ?? 0}`);
-    console.log(`  watch_out_for_md chars: ${a1.watch_out_for_md?.length ?? 0}`);
-    console.log(`  first checklist item: ${model.checklistByCode.get("A1")?.[0]?.item_text?.slice(0, 90)}`);
+  const spotCode = PACK === "food" ? "K1" : "A1";
+  const spot = model.elements.find((e) => e.code === spotCode);
+  if (spot) {
+    console.log(`\nSpot-check ${spotCode}:`);
+    console.log(`  one_line: ${spot.one_line}`);
+    console.log(`  overview_md chars: ${spot.overview_md?.length ?? 0}`);
+    console.log(`  simple_guide_md chars: ${spot.simple_guide_md?.length ?? 0}`);
+    console.log(`  watch_out_for_md chars: ${spot.watch_out_for_md?.length ?? 0}`);
+    console.log(`  first checklist item: ${model.checklistByCode.get(spotCode)?.[0]?.item_text?.slice(0, 90)}`);
   }
 }
 
 // ---------------------------------------------------------------------------
 async function main(): Promise<void> {
-  console.log(`S5 content ingestion — ${DRY_RUN ? "DRY RUN (no DB writes)" : "LIVE"}`);
+  console.log(
+    `S5 content ingestion — pack: ${PACK} — ${DRY_RUN ? "DRY RUN (no DB writes)" : "LIVE"}`,
+  );
   const model = await buildModel();
   report(model);
 
-  if (model.elements.length !== 30) throw new Error("Element count != 30");
-  if (model.templates.length !== 267)
-    console.warn(`WARNING: template count ${model.templates.length} != 267`);
+  if (PACK === "food") {
+    // The food pack is small and fully known: any mismatch is a hard error.
+    if (model.elements.length !== 3) throw new Error("Food pack: element count != 3");
+    for (const e of model.elements) {
+      const n = model.checklistByCode.get(e.code)?.length ?? 0;
+      if (n !== 30) throw new Error(`Food pack: ${e.code} checklist items ${n} != 30`);
+    }
+    if (model.templates.length !== 30) throw new Error("Food pack: template count != 30");
+    if (model.wtwMissing.length > 0)
+      throw new Error(`Food pack: What-To-Watch-Out-For missing for ${model.wtwMissing.join(", ")}`);
+  } else {
+    if (model.elements.length !== 30) throw new Error("Element count != 30");
+    if (model.templates.length !== 267)
+      console.warn(`WARNING: template count ${model.templates.length} != 267`);
+  }
 
   if (DRY_RUN) {
     console.log("\nDry run complete — no database or storage changes made.");
