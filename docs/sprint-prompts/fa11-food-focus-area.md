@@ -1,11 +1,18 @@
 # FA11 — Food focus area: "Café & Culinary Experience" (K) + /food workspace section
 
-> **Status: BUILD COMPLETE (pre-merge, 2026-07-17)** — owner-gated FA11-0…FA11-7,
-> push-per-step, branch `claude/sprint-fa11-food-focus-area` in an isolated
-> worktree off `main` `1c8191c` (the main checkout was occupied by the parallel
+> **Status: BUILD COMPLETE + REVIEWED — READY TO MERGE (PR #65, 2026-07-17).**
+> Owner-gated FA11-0…FA11-7, push-per-step, branch
+> `claude/sprint-fa11-food-focus-area` in an isolated worktree off `main`
+> `1c8191c` (the main checkout was occupied by the parallel
 > `claude/public-copy-overhaul` session; zero public-page files in this diff).
+> **Independent Codex review: all FA11 gating checks A–G PASS, zero
+> implementation findings; its one blocking (the tracker merge conflict after
+> the copy-overhaul merged as PR #64) was resolved on-branch — `origin/main`
+> merged in (`c936c3a`), trackers reconciled, gates re-run green. Verdict +
+> resolution: `docs/code-reviews/fa11-food-focus-area.md`.**
 > Remaining after merge: the owner's prod runbook below (0026 + prod ingest),
-> then the deferred public refresh (PROJECT-STATUS §5 D-FA11-a/b).
+> then Dependabot #62/#63, then the deferred public refresh (PROJECT-STATUS §5
+> D-FA11-a/b).
 
 ## Goal
 
@@ -143,7 +150,31 @@ checks + rollback-only role sims: admin k3 upsert OK, l1/L rejected, non-admin
   11 · 33 · 297 + map) and **D-FA11-b** (OneDrive canon `_index.md` + full-run
   ingest guard bumps) · ROADMAP §B FA11 row. This record stamped final.
 
-## Files changed (14)
+## Outcome, deviations & learnings
+
+- **Outcome:** everything in the plan shipped; TEST is fully loaded + verified;
+  prod = owner runbook post-merge. 9 commits: `2e7353f` (0026 drafts) ·
+  `ef7d2ad` (TEST apply record) · `0bb385a` (ingest pack mode) · `9d4b8ec`
+  (group-label fix + TEST ingest record) · `44ae2cc` (app widenings) ·
+  `21b2d6d` (Food section UI) · `b8cbbbc` (exit gate + trackers) · `39fcf70`
+  (Codex brief) · `c936c3a` (merge of main post-PR-#64 + reconciled trackers).
+- **Deviations from plan:** none of scope; three in-flight discoveries, all
+  fixed same-step: the raw Food drop's CP437 mojibake names (repaired in the
+  canonical pack), the food docx `SECTION:` headers needing a parser-regex
+  widening for clean group labels, and `/resources/[category]`'s hardcoded
+  `^[A-J]$` (found by the Plan agent pre-build, fixed FA11-5).
+- **Learnings for future sprints:** (1) parallel sessions → isolated worktree
+  + strict path separation worked; the only merge overlap was the two tracker
+  files, reconciled by re-applying the newer entries over `--theirs`. (2) The
+  gitignored asset folders don't exist in fresh worktrees/clones — the ingest
+  `.env.local` + pack folder must be placed per-machine. (3) `GATED_PREFIXES`
+  remains a per-new-gated-route trap (third occurrence: /live, /program-era
+  routes, now /food) — the structural fix (a (public) route-group layout) is
+  still worth a future sprint. (4) The MCP `execute_sql` discards an
+  unterminated transaction — verify sims still confirmed leave-no-trace by
+  re-query.
+
+## Files changed (14 + the merge)
 
 `supabase/sql/migrations/0026_focus_area_k.{up,down}.sql` ·
 `supabase/sql/verification/0026_verify_{TEST_db_only,PROD_safe_readonly}.sql` ·
