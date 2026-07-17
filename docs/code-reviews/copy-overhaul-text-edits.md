@@ -14,14 +14,20 @@ be discarded). Pin yourself to this range and nothing else.**
 
 - **Branch:** `claude/public-copy-overhaul`
 - **Merge base (`main` tip):** `1c8191c7403fe6764345de87ae4169b7c7bd91da`
-- **Branch HEAD:** `ee3c601bb9b28af206e009d1e5f8cfc7981982ab`
-- **The review range is exactly:** `git diff 1c8191c...ee3c601` — **8 commits, 20 files**
+- **End of the CODE range:** `ee3c601bb9b28af206e009d1e5f8cfc7981982ab`
+- **The code review range is exactly:** `git diff 1c8191c...ee3c601` — **8 commits, 20 files**
 
 ```bash
 git fetch origin
 git log --oneline 1c8191c..ee3c601          # must show exactly the 8 commits listed in §2
 git diff --stat 1c8191c...ee3c601           # must show exactly 20 files
 ```
+
+**On the branch tip vs. the code range:** the branch tip is **ahead of `ee3c601` by docs-only commits** — this brief
+itself (`docs/code-reviews/`), and any tracker touch-ups. That is expected and self-referential: reviewing
+`1c8191c...ee3c601` gives you every code and copy change. You may skim the docs-only commits
+(`git log --oneline ee3c601..origin/claude/public-copy-overhaul`) but they need no review. **All eight code commits
+end at `ee3c601`; if you see code changes after it, flag that — it would mean someone pushed to this branch.**
 
 **Do NOT review:** `origin/main`, `origin/dependabot/*`, or any other `claude/*` branch that may appear. If the
 commit list or file count does not match the above, **stop and say so** rather than reviewing something else.
