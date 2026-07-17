@@ -12,14 +12,14 @@ import { Reveal } from "@/components/motion/reveal";
 export const metadata: Metadata = {
   title: "Focus Areas",
   description:
-    "The full map of the playbook — ten focus areas, thirty topics, 267 templates. Every title and overview is public; the full depth opens to approved partners.",
+    "The full map of the playbook — eleven focus areas, thirty-three topics, 297 templates. Every title and overview is public; the full depth opens to approved partners.",
 };
 
 const FA_STATS = [
-  { n: "10", label: "focus areas" },
-  { n: "30", label: "topics" },
+  { n: "11", label: "focus areas" },
+  { n: "33", label: "topics" },
   { n: "200+", label: "checklist items" },
-  { n: "267", label: "real templates" },
+  { n: "297", label: "real templates" },
   { n: "120", label: "day launch" },
 ] as const;
 
@@ -132,6 +132,17 @@ const FA_AREAS = [
       ["Sustainability & Impact", "Sustainability and impact"],
     ],
   },
+  {
+    k: "K",
+    title: "Café & Culinary Experience",
+    blurb:
+      "Menu and Palestinian culinary identity, the coffee and tea program, and catering and culinary events.",
+    topics: [
+      ["Menu & Palestinian Culinary Identity", "Menu and culinary identity"],
+      ["Coffee, Tea & Beverage Program", "The coffee and tea program"],
+      ["Catering, Private Events & Culinary Programming", "Catering and culinary events"],
+    ],
+  },
 ] as const;
 
 const FA_CAPS = ["Overview", "Guide", "Checklist", "Video", "Templates"] as const;
@@ -178,7 +189,7 @@ export default function FocusAreasPage() {
           <div className="fa-read-copy">
             <p className="ph-eyebrow">How to read this map</p>
             <p className="fa-read-text">
-              Each focus area (A–J) opens to its topics. On the public site you
+              Each focus area (A–K) opens to its topics. On the public site you
               can see every title and a short overview. The full guides,
               checklists, videos, and templates open once you’re an approved
               partner.
@@ -207,7 +218,7 @@ export default function FocusAreasPage() {
       <section className="ph-section-lg ph-section-dark">
         <div className="ph-container">
           <Reveal className="sec-head fa-head-wide">
-            <p className="ph-eyebrow">Ten focus areas · Thirty topics</p>
+            <p className="ph-eyebrow">Eleven focus areas · Thirty-three topics</p>
             <h2>The full map of the playbook.</h2>
           </Reveal>
           <div className="fa-index">

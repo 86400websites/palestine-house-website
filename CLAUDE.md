@@ -7,9 +7,9 @@
 **Palestine House** is a global network of Palestinian cultural spaces. This site is **two shells behind one gate**:
 
 - A **public shell** — calm, premium, editorial marketing pages whose single conversion is the green **Apply** button ("Apply to bring a House" · *Every application is reviewed by HQ.*). Public routes: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/apply`, `/about`, `/contact`, `/focus-areas`, legal, auth. (`/live` moved into the gated workspace in LH1, 2026-07-10.)
-- A **private partner reference platform** — approval-gated (`profiles.is_approved`). Apply = sign-up: one form creates a pending account + application; HQ approval via `/admin/approvals` unlocks the platform. Gated routes: `/dashboard`, `/plan`, `/build`, `/operate`, `/elements/[slug]` (×30), `/live` (the members-only Live hub — watch + publish, LH1), `/resources`, `/tools` (coming soon), `/academy`, `/account`, `/support`.
+- A **private partner reference platform** — approval-gated (`profiles.is_approved`). Apply = sign-up: one form creates a pending account + application; HQ approval via `/admin/approvals` unlocks the platform. Gated routes: `/dashboard`, `/plan`, `/build`, `/operate`, `/elements/[slug]` (×33), `/live` (the members-only Live hub — watch + publish, LH1), `/resources`, `/tools` (coming soon), `/academy`, `/account`, `/support`.
 
-**It is a reference, not a course** — no quizzes, no certificate, no daily-ops tooling. The only per-user interactivity is saved checklist progress in Stages › Design & Build. **Proof numbers are fixed: 10 focus areas · 30 topics · 200+ checklist items · 267 templates · a 120-day launch.**
+**It is a reference, not a course** — no quizzes, no certificate, no daily-ops tooling. The only per-user interactivity is saved checklist progress in Stages › Design & Build. **Proof numbers: 11 focus areas · 33 topics · 200+ checklist items · 297 templates · a 120-day launch** (updated from 10 · 30 · 267 when Focus Area 11 "Café & Culinary Experience" shipped, FA11 2026-07-18; they move only when real content is added, never invented).
 
 GitHub is the source of truth. Vercel hosts Production and Preview. Claude Code is the primary build engine, working **one sprint at a time** from `ROADMAP.md`.
 

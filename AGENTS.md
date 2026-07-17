@@ -7,7 +7,7 @@
 - This repository is the **Palestine House** website on the locked Next.js 15 stack in `TECH-ARCHITECTURE.md`.
 - **Two shells, one gate:** a public marketing shell (single CTA: Apply) and a private, approval-gated partner reference platform. Apply = sign-up (one form → pending account → HQ approval via `profiles.is_approved` → unlock). Admin approval queue at `/admin/approvals` is server-checked via an `admins` table.
 - It is a **reference, not a course** — no quizzes, no certificate. The only per-user interactivity is saved checklist progress in `/build`.
-- Copy is **verbatim** from `/docs/page-copy/`; design follows `/docs/page-designs/` + the design tokens in `/docs/page-designs/design-system/`; the header/footer are locked and identical on every page. Proof numbers are fixed: **10 · 30 · 200+ · 267 · 120-day launch**.
+- Copy is **verbatim** from `/docs/page-copy/`; design follows `/docs/page-designs/` + the design tokens in `/docs/page-designs/design-system/`; the header/footer are locked and identical on every page. Proof numbers: **11 · 33 · 200+ · 297 · 120-day launch** (updated from 10 · 30 · 267 with Focus Area 11 "Café & Culinary Experience", FA11 2026-07-18; they move only when real content is added, never invented).
 - GitHub is the source of truth; `main` is protected and production-ready. Vercel hosts Production and Preview.
 - The project is built **one sprint at a time** per `ROADMAP.md`. Agents make **focused, reviewable** contributions inside the active sprint. Default mode is **review**, not large edits.
 - Only code that ships in a production build is in scope. Verify claims against the repo before acting.

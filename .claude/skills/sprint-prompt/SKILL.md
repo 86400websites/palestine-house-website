@@ -68,7 +68,7 @@ Locked inputs (never invent, never paraphrase):
 - Copy, verbatim: docs/page-copy/[exact file(s)]
 - Design: docs/page-designs/[exact mockup file(s)] + design-system tokens (values recorded in docs/DESIGN.md §3)
 - [If artwork: copy the needed PH-* files from docs/page-designs/assets/art/ into /public/assets/]
-- Proof numbers are fixed: 10 · 30 · 200+ · 267 · 120-day launch. Header/footer chrome is locked — never redesign per page.
+- Proof numbers: 11 · 33 · 200+ · 297 · 120-day launch (updated from 10 · 30 · 267 with Focus Area 11, FA11 2026-07-18). Header/footer chrome is locked — never redesign per page.
 
 Before editing:
 1. Inspect the repo (package.json, next.config.ts, src/app/) and read every locked input above.

@@ -11,10 +11,10 @@
 | Layer | Routes |
 |---|---|
 | Public | `/` · `/model` · `/experience` · `/bring-ph` · `/our-support` · `/live` (+ watch view) · `/apply` (= sign-up) · `/about` · `/contact` · `/focus-areas` (footer) · `/privacy` · `/terms` · `/login` · `/forgot-password` · `/update-password` |
-| Gated (`is_approved = true`) | `/dashboard` (renders pending state too) · `/plan` · `/build` (saved checklist) · `/operate` · `/elements/[slug]` (×30) · `/live` partner tools · `/resources` · `/resources/[category]` · `/tools` (coming soon) · `/academy` · `/academy/[slug]` · `/account` · `/support` · `/search` (V1) |
+| Gated (`is_approved = true`) | `/dashboard` (renders pending state too) · `/plan` · `/build` (saved checklist) · `/operate` · `/elements/[slug]` (×33) · `/live` partner tools · `/resources` · `/resources/[category]` · `/tools` (coming soon) · `/academy` · `/academy/[slug]` · `/account` · `/support` · `/search` (V1) |
 | Admin (server-checked `admins`) | `/admin/approvals` (MVP-critical) · `/admin/content` (V1) · `/admin/partner-interest` (later) |
 
-**Core data (Supabase):** `profiles` (incl. `is_approved`) · `applications` · `admins` · `elements` (30, MDX bodies) · `checklist_items` + per-user `checklist_progress` (200+ items) · `programming_sessions` (title, mode, status, venue, stream_url, recording_url, starts_at, cover — public read anon-safe, partner writes owner-scoped) · `resources` (metadata + private Storage bucket, signed URLs) · `academy_modules`. RLS default-deny on all; public projections via anon-safe RPCs expose titles/overviews only.
+**Core data (Supabase):** `profiles` (incl. `is_approved`) · `applications` · `admins` · `elements` (33, MDX bodies) · `checklist_items` + per-user `checklist_progress` (200+ items) · `programming_sessions` (title, mode, status, venue, stream_url, recording_url, starts_at, cover — public read anon-safe, partner writes owner-scoped) · `resources` (metadata + private Storage bucket, signed URLs) · `academy_modules`. RLS default-deny on all; public projections via anon-safe RPCs expose titles/overviews only.
 
 **Integrations in scope:** Supabase (auth + DB + Storage), Mailchimp (lead magnets `lead-booklet-a` / `lead-booklet-b`, newsletter, apply tagging), Resend (contact + transactional), Upstash (rate limiting), Turnstile (public forms), PostHog + Sentry (optional). Live Programming embeds via **YouTube** (resolved decision D1, `PROJECT-STATUS.md` §4 — extend CSP for the YouTube origin only).
 

@@ -27,15 +27,16 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Our Support",
   description:
-    "What HQ gives every partner — the full playbook (10 focus areas, 30 topics, 267 templates), the standards, Aswātna, and support from first decision to open doors.",
+    "What HQ gives every partner — the full playbook (11 focus areas, 33 topics, 297 templates), the standards, Aswātna, and support from first decision to open doors.",
 };
 
 /* Hero proof row — the canonical numbers, shown under the lead (mockup).
-   Labels per the owner copy overhaul (2026-07-17); numbers stay fixed. */
+   Labels per the owner copy overhaul (2026-07-17); counts updated to 11 · 33 ·
+   297 with Focus Area 11 (FA11, 2026-07-18, decision D-FA11-a). */
 const SUP_PROOF = [
-  { icon: BookOpen, n: "10", label: "focus areas" },
-  { icon: LayoutGrid, n: "30", label: "core topics" },
-  { icon: FileText, n: "267", label: "ready-to-use templates" },
+  { icon: BookOpen, n: "11", label: "focus areas" },
+  { icon: LayoutGrid, n: "33", label: "core topics" },
+  { icon: FileText, n: "297", label: "ready-to-use templates" },
   { icon: CalendarDays, n: "120", label: "day guided launch plan" },
 ] as const;
 
@@ -190,9 +191,9 @@ export default function OurSupportPage() {
             <h2>A complete operating system, ready when you need it.</h2>
             <p className="ph-lead">
               Everything required to plan, open, and run a House is organised in
-              one place. The system is divided into ten focus areas and thirty
-              practical topics, so you can concentrate on the decisions that
-              matter now without losing sight of what comes next.
+              one place. The system is divided into eleven focus areas and
+              thirty-three practical topics, so you can concentrate on the
+              decisions that matter now without losing sight of what comes next.
             </p>
             <p className="sup-artefacts-intro">Every topic includes:</p>
           </Reveal>
@@ -216,7 +217,7 @@ export default function OurSupportPage() {
           <Reveal className="sup-templates">
             <p className="sup-templates-line">
               Start with proven tools, not a blank page. With{" "}
-              <strong>267 templates</strong> across the platform, your team can
+              <strong>297 templates</strong> across the platform, your team can
               spend less time creating documents from scratch and more time
               building the House itself.
             </p>
