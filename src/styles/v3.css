@@ -643,6 +643,18 @@ img.phx-brand-mark {
   line-height: 1.55;
   color: var(--cream-100);
 }
+/* optional bold lead line above the description (/bring-ph copy, 2026-07-17) */
+.v3-stage-panel .v3-stage-lead {
+  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+  color: var(--white);
+}
+.v3-stage-panel .v3-stage-lead + p {
+  margin-top: var(--space-2);
+}
 .v3-stages-art img {
   width: 100%;
   height: auto;
