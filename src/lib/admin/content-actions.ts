@@ -53,9 +53,9 @@ async function adminGuard(): Promise<Guard> {
 // sort order) so the upsert never loses them.
 // ---------------------------------------------------------------------------
 const elementSchema = z.object({
-  slug: z.string().trim().regex(/^[a-j][1-3]$/i),
+  slug: z.string().trim().regex(/^[a-k][1-3]$/i),
   code: z.string().trim().min(1).max(16),
-  focusAreaCode: z.string().trim().regex(/^[A-J]$/i),
+  focusAreaCode: z.string().trim().regex(/^[A-K]$/i),
   focusAreaName: z.string().trim().min(1).max(120),
   title: z.string().trim().min(1).max(200),
   oneLine: z.string().trim().max(500).optional(),
@@ -107,6 +107,7 @@ export async function saveElementAction(
   revalidatePath(`/elements/${d.slug.toLowerCase()}`);
   revalidatePath("/plan");
   revalidatePath("/operate");
+  revalidatePath("/food");
   revalidatePath("/program");
   return { ok: true, message: "Saved." };
 }
@@ -117,7 +118,7 @@ export async function saveElementAction(
 // ---------------------------------------------------------------------------
 const academySchema = z.object({
   elementId: z.string().regex(UUID_RE),
-  elementSlug: z.string().trim().regex(/^[a-j][1-3]$/i).optional(),
+  elementSlug: z.string().trim().regex(/^[a-k][1-3]$/i).optional(),
   title: z.string().trim().min(1).max(200),
   oneLine: z.string().trim().max(500).optional(),
   length: z.string().trim().max(60).optional(),
@@ -180,7 +181,7 @@ const resourceSchema = z.object({
   id: z.string().regex(UUID_RE),
   title: z.string().trim().min(1).max(300),
   type: z.enum(["form", "script", "log", "report", "approval", "guide", "booklet"]),
-  focusAreaCode: z.string().trim().regex(/^[A-J]$/i).optional(),
+  focusAreaCode: z.string().trim().regex(/^[A-K]$/i).optional(),
   elementId: z.string().regex(UUID_RE).optional(),
   version: z.string().trim().max(40).optional(),
   sortOrder: z.coerce.number().int().min(0).max(100000).optional(),

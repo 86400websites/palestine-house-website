@@ -10,7 +10,7 @@ import { ResourceLibrary } from "../resource-library";
 
 /* /resources/[category] — a focus-area slice of the library
    (docs/page-copy/03-member-workspace/resources-category.md). Same data and
-   download mechanics as the hub, scoped to one focus area (A–J). Gated before
+   download mechanics as the hub, scoped to one focus area (A–K). Gated before
    any fetch; an approved session with an unknown category gets a workspace 404. */
 
 type Params = { params: Promise<{ category: string }> };
@@ -18,7 +18,7 @@ type Params = { params: Promise<{ category: string }> };
 // Resolve the focus-area name for a URL param, or null if it isn't a real area.
 async function resolveArea(param: string): Promise<{ code: string; name: string } | null> {
   const code = param.toUpperCase();
-  if (!/^[A-J]$/.test(code)) return null;
+  if (!/^[A-K]$/.test(code)) return null;
   const elements = await getElements();
   const name = elements.find((e) => e.focus_area_code === code)?.focus_area_name;
   return name ? { code, name } : null;
