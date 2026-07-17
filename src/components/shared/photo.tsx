@@ -65,6 +65,10 @@ export const PHOTO_SOURCES = {
      courtyard (/focus-areas). */
   "ph-photo-apply-hero": "/assets/photos/ph-photo-apply-hero.jpg",
   "ph-photo-focus-hero": "/assets/photos/ph-photo-focus-hero.jpg",
+  /* Copy overhaul (owner masters, 2026-07-17) — /model §6 "Culture leads" still
+     life + /experience §6 "More than somewhere to visit" gathering photo. */
+  "ph-photo-model-culture": "/assets/photos/ph-photo-model-culture.jpg",
+  "ph-photo-exp-gather": "/assets/photos/ph-photo-exp-gather.jpg",
 } as const;
 
 export type PhotoId = keyof typeof PHOTO_SOURCES;

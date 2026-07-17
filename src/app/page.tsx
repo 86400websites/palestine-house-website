@@ -27,14 +27,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-/* DR2-4 — label wording/casing owner-approved (copy table, 2026-07-06);
-   the numbers themselves are locked proof numbers. */
+/* Labels owner-approved (copy overhaul, 2026-07-17); the numbers themselves
+   are locked proof numbers and never change. */
 const HOME_PROOF = [
   { n: "10", label: "Focus areas" },
-  { n: "30", label: "Topics" },
-  { n: "200+", label: "Checklist items" },
-  { n: "267", label: "Templates" },
-  { n: "120", label: "Day launch plan" },
+  { n: "30", label: "Core topics" },
+  { n: "200+", label: "Checklist actions" },
+  { n: "267", label: "Ready-to-use templates" },
+  { n: "120", label: "A guided launch plan" },
 ] as const;
 
 
@@ -51,17 +51,18 @@ export default function HomePage() {
             <p className="ph-eyebrow">A living place</p>
             <h2>Culture deserves more than a moment.</h2>
             <p className="ph-lead">
-              We are building a global network of Palestine Houses—permanent
-              cultural homes that nourish identity, celebrate creativity, and
-              strengthen communities.
+              Palestinian culture is too rich to exist only through occasional
+              events, temporary pop-ups, or moments of attention. We are
+              building a global network of permanent Palestine Houses: living
+              cultural homes that nourish identity, support creativity, and
+              bring communities together.
             </p>
             <p className="v3-split-line">
-              Pop-ups end. Hashtags scroll past. A Palestine House stays.
+              A pop-up ends. A post disappears. A Palestine House stays.
             </p>
             <p className="v3-split-body">
-              It’s a real place, open every day — food, music, art, and a
-              living community under one roof. Not a protest. Not a campaign.
-              A home.
+              It is a real place, open throughout the year: a café, a venue, and
+              a home for culture and community under one roof.
             </p>
           </Reveal>
         </div>
@@ -84,9 +85,10 @@ export default function HomePage() {
       <section className="ph-section-lg v3-stages-section">
         <div className="ph-container">
           <Reveal className="sec-head is-center">
-            <h2>One path, three stages.</h2>
+            <h2>One path. Three clear stages.</h2>
             <p className="ph-lead">
-              A replicable blueprint. Local at heart. Global in spirit.
+              The Palestine House system guides you from your first idea to
+              opening day and supports you as the House grows.
             </p>
           </Reveal>
           <div className="v3-stages-layout">
@@ -166,10 +168,13 @@ export default function HomePage() {
               the desktop flanking sprigs were removed). */}
           <div className="home-proof-caption">
             <div className="home-proof-caption-text">
-              <h2 id="home-proof-title">A complete system, not a binder.</h2>{" "}
+              <h2 id="home-proof-title">
+                Everything you need, in one connected system.
+              </h2>{" "}
               <p className="ph-lead">
-                Everything it takes to open and run a House, in one place, with
-                your progress saved as you build.
+                From planning and permissions to staffing, programming, finance,
+                and launch, everything is organised in one place with your
+                progress saved as you build.
               </p>
             </div>
           </div>
@@ -196,27 +201,37 @@ export default function HomePage() {
           <Reveal className="home-split-copy">
             <h2>The work is real. So is the welcome.</h2>
             <p>
-              Every checklist and template carries the same standards used
-              across the network. A serious business that also carries real
-              cultural weight.
+              Every House must be financially responsible, professionally run,
+              and rooted in the same shared standards.
             </p>
             <p>
-              It isn’t charity. It isn’t a franchise you buy and forget. It’s a
-              House you build — and then keep.
+              But a Palestine House should never feel corporate or distant. It
+              should carry the warmth, generosity, and hospitality of a
+              Palestinian home.
+            </p>
+            <p>
+              A serious cultural business. A welcoming community space. A
+              permanent home built to last.
             </p>
           </Reveal>
           <Reveal delay={0.12}>
             <div className="ph-card home-platform-card">
               <h2 className="home-platform-title">
-                A private platform for partners.
+                The full system opens to approved partners.
               </h2>
               <p>
-                Palestine House isn’t open to the public — it’s built for the
-                people opening Houses. You apply, HQ reviews every application,
-                and once you’re approved the full playbook, the toolkit, and the
-                Academy open to you.
+                You can explore the Palestine House model freely and learn what
+                it takes to bring one to your city.
               </p>
-              <p>Not sure yet? Explore how it works — no account needed.</p>
+              <p>
+                When you are ready, submit an application. Every application is
+                reviewed by HQ to make sure the model, location, and partnership
+                are a strong fit.
+              </p>
+              <p>
+                Once approved, you receive access to the complete playbook,
+                toolkit, templates, training, and partner platform.
+              </p>
               <div className="home-platform-ctas">
                 <div>
                   <Button asChild>

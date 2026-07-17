@@ -19,37 +19,37 @@ const INSIDE_CARDS: {
   {
     id: "ph-photo-oud-night",
     title: "Friday oud night",
-    sub: "Live music that brings us together.",
+    sub: "Live music, shared closely, in a room that feels like home.",
     alt: "Two musicians playing the oud on a candlelit stage.",
   },
   {
     id: "ph-photo-tatreez-workshop",
     title: "Tatreez workshop",
-    sub: "Learning, sharing, keeping traditions alive.",
+    sub: "Hands, stories, and knowledge passed from one generation to another.",
     alt: "Hands stitching red tatreez embroidery at a workshop table.",
   },
   {
     id: "ph-photo-supper-club",
     title: "Palestinian supper club",
-    sub: "Food, stories and long tables.",
+    sub: "Long tables, generous food, and conversations that continue into the evening.",
     alt: "Guests sharing a candlelit dinner at a long supper-club table.",
   },
   {
     id: "ph-photo-film-screening",
     title: "Film screening",
-    sub: "Stories from our land and people.",
+    sub: "Cinema from Palestine and its diaspora, followed by space to reflect and respond.",
     alt: "An audience watching a film projected onto a screen.",
   },
   {
     id: "ph-photo-book-talk",
     title: "Book talk",
-    sub: "Ideas, literature and important conversations.",
+    sub: "Writers, readers, ideas, and conversations that deepen how we understand Palestine.",
     alt: "Three speakers in conversation at a book talk.",
   },
   {
     id: "ph-photo-market-day",
     title: "Market day",
-    sub: "Local makers, Palestinian products, community vibes.",
+    sub: "Palestinian makers, independent products, local food, and community under one roof.",
     alt: "Visitors browsing clothing and crafts at a market day.",
   },
 ];
