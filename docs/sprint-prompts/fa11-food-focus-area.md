@@ -79,7 +79,22 @@ checks + rollback-only role sims: admin k3 upsert OK, l1/L rejected, non-admin
 `0026_verify_PROD_safe_readonly.sql` (Section A post-migration: shapes +
 30/728/30/269 · Section B post-ingest: 33/818/33/299 + 30 K storage objects).
 
-## Prod rollout runbook (owner, after merge approval)
+## Prod rollout — EXECUTED + VERIFIED 2026-07-18
+
+`0026_focus_area_k.up.sql` applied by the owner in the prod SQL Editor; the
+engine verified **Section A** read-only (constraints A–K ×3 · both RPC bodies
+carry the widened regexes, old forms gone · anon-denied/authenticated-granted ·
+counts unchanged 30/728/30/269, K=0). Then `--pack food` ingested against prod
+(`jwogtqizqujwhbvpoziu`, 3/90/3/30 rows, 30/30 uploads) and **Section B**
+verified read-only: **33/818/33/299 + 30 K storage objects**, all three K
+elements complete (bodies + one_line + 30 grouped checklist items + academy
+body + 10 private templates each), clean group labels. **⚠️ Prod DB is ahead
+of the deployed code until PR #65 merges** — `/build`/`/academy`/`/resources`-
+hub already surface K live; only `/resources/k` 404s on the old guard until the
+deploy. Merge #65 promptly. `.env.local` prod ingest vars to be reverted by the
+owner post-run.
+
+## Prod rollout runbook (owner, reference — now executed)
 
 1. Apply `supabase/sql/migrations/0026_focus_area_k.up.sql` in the **prod** SQL
    Editor (backwards-compatible with live code).
