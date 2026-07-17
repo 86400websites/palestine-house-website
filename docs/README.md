@@ -95,7 +95,7 @@ The full version with exit gates is `ROADMAP.md`. *(Steps 1–4 and the CI/Verce
 - ❌ Don't commit directly to `main`, force-push, or merge without green CI **and** a tested Preview.
 - ❌ Don't bundle sprints or unrelated changes into one branch.
 - ❌ Don't expose gated content publicly, add a second signup path beside `/apply`, or add quizzes/certificates — the model is locked.
-- ❌ Don't rewrite approved copy, redesign the locked header/footer, or invent proof numbers (**10 · 30 · 200+ · 267 · 120-day launch**).
+- ❌ Don't rewrite approved copy, redesign the locked header/footer, or invent proof numbers (**11 · 33 · 200+ · 297 · 120-day launch** — updated from 10 · 30 · 267 with Focus Area 11, FA11 2026-07-18).
 - ❌ Don't add dependencies you don't need, or make unrelated refactors.
 - ❌ Don't skip Git hooks or CI (`--no-verify`) without an explicit, recorded reason.
 

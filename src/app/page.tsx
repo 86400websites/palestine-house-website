@@ -27,13 +27,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-/* Labels owner-approved (copy overhaul, 2026-07-17); the numbers themselves
-   are locked proof numbers and never change. */
+/* Labels owner-approved (copy overhaul, 2026-07-17). Counts updated to 11 · 33 ·
+   297 when Focus Area 11 "Café & Culinary Experience" shipped (FA11, 2026-07-18,
+   decision D-FA11-a); 200+ and 120 unchanged. */
 const HOME_PROOF = [
-  { n: "10", label: "Focus areas" },
-  { n: "30", label: "Core topics" },
+  { n: "11", label: "Focus areas" },
+  { n: "33", label: "Core topics" },
   { n: "200+", label: "Checklist actions" },
-  { n: "267", label: "Ready-to-use templates" },
+  { n: "297", label: "Ready-to-use templates" },
   { n: "120", label: "Day guided launch plan" },
 ] as const;
 

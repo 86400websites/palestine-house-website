@@ -69,7 +69,7 @@ Goal: a complete, polished, working public website running locally. All forms re
 | **0.4 Live + supporting pages** | `/live` public listing + watch view (static empty states), `/focus-areas`, `/about`, `/contact` (form UI, no-op) | |
 | **0.5 Apply + auth UI + legal + SEO** | `/apply` form UI (no-op submit with honest "not yet live" handling), `/login` `/forgot-password` `/update-password` UI shells, `/privacy` `/terms`, metadata + sitemap + robots + OG | |
 
-**Stage 0 exit gate:** typecheck/lint/build green · every public page matches its mockup at 320px → desktop · copy verbatim · proof numbers correct (10 · 30 · 200+ · 267 · 120-day launch) · reduced-motion respected · no console errors · headers/footer identical everywhere.
+**Stage 0 exit gate:** typecheck/lint/build green · every public page matches its mockup at 320px → desktop · copy verbatim · proof numbers correct (11 · 33 · 200+ · 297 · 120-day launch — updated from 10 · 30 · 267 with Focus Area 11, FA11 2026-07-18) · reduced-motion respected · no console errors · headers/footer identical everywhere.
 
 ### Stage 1 — Connect & launch the barebones site
 
