@@ -8,6 +8,7 @@ import {
   MessageCircle,
   Radio,
   Users,
+  UtensilsCrossed,
 } from "lucide-react";
 import { FadeIn, Stagger } from "@/components/motion/reveal";
 import { createClient } from "@/lib/supabase/server";
@@ -22,10 +23,11 @@ import {
 /* /dashboard (docs/page-copy/03-member-workspace/dashboard.md) — the Welcome
    page. Two states:
    - pending: the calm "under review" notice (S10 10-3);
-   - approved: a minimal premium dashboard of five nav cards (Plan · Build ·
-     Operate · Program · Live) — each an icon (an image can drop into the art
-     slot later), a one-liner, and a link to that page, with the live Design &
-     Build % on the Build card (S10 10-10; Live card added in LH1).
+   - approved: a minimal premium dashboard of six nav cards (Plan · Build ·
+     Operate · Food · Program · Live) — each an icon (an image can drop into the
+     art slot later), a one-liner, and a link to that page, with the live Design &
+     Build % on the Build card (S10 10-10; Live card added in LH1; Food added
+     in FA11).
    Approval is read live (cached), so it flips without a re-login. */
 
 export const metadata: Metadata = { title: "Welcome" };
@@ -128,6 +130,14 @@ export default async function DashboardPage() {
       cta: "Open Operate",
     },
     {
+      key: "food",
+      title: "Food",
+      Icon: UtensilsCrossed,
+      line: "Your menu, the qahwa ritual, and every plate that tells a story.",
+      href: "/food",
+      cta: "Open Food",
+    },
+    {
       key: "program",
       title: "Program",
       Icon: Users,
@@ -151,7 +161,7 @@ export default async function DashboardPage() {
         {firstName ? `Welcome, ${firstName}.` : "Welcome."}
       </h1>
       <p className="ws-lead">
-        Start in Plan, then move through Build, Operate, and Program.
+        Start in Plan, then move through Build, Operate, Food, and Program.
       </p>
 
       <Stagger className="dash-cards">

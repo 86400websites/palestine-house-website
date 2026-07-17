@@ -9,7 +9,7 @@ import { AcademyCard } from "./academy-card";
 /* /academy — the optional video library (docs/page-copy/03-member-workspace/academy.md).
    Labelled "Videos" in the sidebar (S10). A reference, never a course: no
    progress, quizzes, certificate, or "next lesson". One card per topic, grouped
-   by the ten focus areas. Gated before any fetch. Real per-topic videos aren't
+   by the eleven focus areas. Gated before any fetch. Real per-topic videos aren't
    produced yet, so each card falls back to a clearly-marked neutral "Sample"
    clip (src/lib/workspace/sample-videos.ts); a real academy_modules.youtube_url
    takes priority. Cards open the video on YouTube (a normal outbound link — no
@@ -65,9 +65,9 @@ export default async function AcademyPage() {
             textWrap: "pretty",
           }}
         >
-          Videos follow the same ten focus areas and thirty topics as the rest of
-          the platform. Find the topic you&rsquo;re working on; watch the video
-          that goes with it.
+          Videos follow the same eleven focus areas and thirty-three topics as
+          the rest of the platform. Find the topic you&rsquo;re working on;
+          watch the video that goes with it.
         </p>
       </section>
 

@@ -113,7 +113,23 @@ checks + rollback-only role sims: admin k3 upsert OK, l1/L rejected, non-admin
   k1 bodies / K signed-URL payload · pending 0 rows ×3 · anon permission
   denied. `.env.local` with TEST ingest vars placed by the owner in the
   worktree (gitignored, never staged).
-- _(FA11-5…FA11-7 appended as they complete.)_
+- **FA11-5** — admin zod schemas widened to a-k/A-K (element slug + focus area,
+  academy slug, resource focus area) + `revalidatePath("/food")` in
+  `saveElementAction`; the `/resources/[category]` route guard widened to A–K
+  (was 404ing `/resources/k`). `src/` grep: zero A–J shape patterns remain.
+- **FA11-6** — the Food section shipped: NEW `src/app/(workspace)/food/page.tsx`
+  (clone of the /program pattern; `FOOD_GROUPS` = K1–K3; PendingState gate
+  before any fetch; zero new CSS) · sidebar item Food after Operate
+  (`workspace-shell.tsx`) · 6th dashboard card after Operate + the approved
+  lead sentence (`dashboard/page.tsx`) · academy caption → eleven/thirty-three ·
+  admin resources caption → 297. **Trap caught: `/food` added to
+  `GATED_PREFIXES` in `site-chrome.tsx`** (the LH1 double-chrome trap — without
+  it the public header/footer would wrap the workspace shell; this is the one
+  `src/components/layout` file in the diff, same precedent as LH1's `/live`).
+  typecheck/lint/build green (47 routes, `/food` ƒ gated). Anon smoke test on
+  the prod build: `/food` response is byte-shape identical to `/plan`
+  (streamed NEXT_REDIRECT → login), `/resources/k` same posture.
+- _(FA11-7 appended at the exit gate.)_
 
 ## Follow-ups / open decisions created by this sprint
 
