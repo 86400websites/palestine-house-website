@@ -8,7 +8,7 @@ import { AcademyAdmin, type AcademyRow, type AcademyDetail } from "./academy-adm
    module(). Edit-only (one module per topic, 1:1) — selection is server-driven
    via ?element=<element_id> so the script loads only for the open module. */
 
-export const metadata: Metadata = { title: "Academy — Content admin" };
+export const metadata: Metadata = { title: "Videos — Content admin" };
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -36,7 +36,7 @@ export default async function AcademyAdminPage({
 
   return (
     <div>
-      <h1 className="adm-h1">Academy.</h1>
+      <h1 className="adm-h1">Videos.</h1>
       <p className="adm-intro">
         One optional video module per topic. Select a topic to edit its video
         link and script — leave the link blank for the “video coming” state.

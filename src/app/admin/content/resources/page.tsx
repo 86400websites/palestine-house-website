@@ -14,7 +14,7 @@ import {
    read-only. File replacement is out of scope (re-ingest path), so there is no
    create / delete / upload here — selection is server-driven via ?id=. */
 
-export const metadata: Metadata = { title: "Resources — Content admin" };
+export const metadata: Metadata = { title: "Templates — Content admin" };
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -46,9 +46,9 @@ export default async function ResourcesAdminPage({
 
   return (
     <div>
-      <h1 className="adm-h1">Resources.</h1>
+      <h1 className="adm-h1">Templates.</h1>
       <p className="adm-intro">
-        The 297 templates and 2 booklets. Edit a resource’s details — the file
+        The 297 templates and 2 booklets. Edit a template’s details — the file
         itself is managed through the content ingest, not here.
       </p>
       <ResourcesAdmin rows={rows} elements={elements} selected={selected} />
