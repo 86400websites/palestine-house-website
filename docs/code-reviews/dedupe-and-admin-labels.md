@@ -142,4 +142,24 @@ the member-facing vocabulary: **Elements → "Focus Areas" · Academy →
 
 ## Review verdict (Codex)
 
-_(appended after review)_
+### `origin/main...claude/home-model-section-dedupe`
+
+**APPROVE.** No blocking findings. Reviewed the fetched `17cd8f9...27733da`
+range: the dead-reference and kept-rule sweeps are clean, `StageCards` has the
+single intended `/bring-ph` consumer, the `pages.css` → `v3.css` cascade and
+named-container queries remain sound, and the Home/Model removals preserve the
+surviving approved copy and accessibility wiring. The scope guard found no
+DB, auth/gate, CSP, routing, dependency, or chrome change. `pnpm install
+--frozen-lockfile`, `pnpm run typecheck`, `pnpm run lint`, and `pnpm run build`
+all pass (46/46 pages generated).
+
+### `origin/main...claude/admin-content-labels`
+
+**APPROVE.** No blocking findings. Reviewed the fetched `17cd8f9...ce37638`
+range: exactly the five requested files change; all route paths, RPC names,
+identifiers, admin gating, and form field names remain unchanged. No
+user-visible admin string retains the old section labels, and `30` → `33`
+appears in exactly the two requested visible strings. The scope guard found no
+DB, auth/gate, CSP, routing, dependency, or chrome change. `pnpm install
+--frozen-lockfile`, `pnpm run typecheck`, `pnpm run lint`, and `pnpm run build`
+all pass (46/46 pages generated).
