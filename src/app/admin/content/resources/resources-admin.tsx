@@ -79,7 +79,7 @@ export function ResourcesAdmin({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Filter by title, type, focus area or topic"
-          aria-label="Filter resources"
+          aria-label="Filter templates"
         />
         <span className="adm-count">
           {filtered.length} of {rows.length}
@@ -123,7 +123,7 @@ export function ResourcesAdmin({
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={4} className="adm-td-muted">
-                    No resources match.
+                    No templates match.
                   </td>
                 </tr>
               )}
@@ -135,7 +135,7 @@ export function ResourcesAdmin({
           <ResourceForm key={selected.id} resource={selected} elements={elements} />
         ) : (
           <div className="adm-detail-empty">
-            Select a resource to edit its details.
+            Select a template to edit its details.
           </div>
         )}
       </div>
@@ -156,7 +156,7 @@ function ResourceForm({
   );
 
   return (
-    <aside className="adm-detail" aria-label="Edit resource">
+    <aside className="adm-detail" aria-label="Edit template">
       <h2>{r.title}</h2>
 
       <form action={formAction} className="adm-form">

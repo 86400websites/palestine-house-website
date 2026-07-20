@@ -9,7 +9,7 @@ import { ElementsAdmin, type ElementRow, type ElementDetail } from "./elements-a
    selecting a topic (?slug=) loads its full bodies for the form. No create /
    delete (the 30 topics are locked content). */
 
-export const metadata: Metadata = { title: "Elements — Content admin" };
+export const metadata: Metadata = { title: "Focus Areas — Content admin" };
 
 export default async function ElementsAdminPage({
   searchParams,
@@ -31,9 +31,9 @@ export default async function ElementsAdminPage({
 
   return (
     <div>
-      <h1 className="adm-h1">Elements.</h1>
+      <h1 className="adm-h1">Focus Areas.</h1>
       <p className="adm-intro">
-        The 30 topic guides. Select a topic to edit its overview, simple guide,
+        The 33 topic guides. Select a topic to edit its overview, simple guide,
         and what to watch for.
       </p>
       <ElementsAdmin rows={rows} selected={selected} />

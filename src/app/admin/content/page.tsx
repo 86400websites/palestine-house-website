@@ -9,25 +9,26 @@ import Link from "next/link";
    Canon-vs-scope reconciliation (PROJECT-STATUS D-S11-f): the copy canon lists a
    "Live Programming sessions" section, but programming is already self-managed
    in the gated /programming tool (S9), so it is NOT duplicated here. This hub
-   carries four sections — Elements, Academy, Resources, Admins. The section
-   routes are built in 11-6..11-9. */
+   carries four sections — Focus Areas (elements), Videos (academy), Templates
+   (resources), Admins; display labels renamed for consistency per the owner
+   (2026-07-20), routes unchanged. The section routes are built in 11-6..11-9. */
 
 export const metadata: Metadata = { title: "Content admin" };
 
 const SECTIONS = [
   {
     href: "/admin/content/elements",
-    title: "Elements",
-    desc: "The 30 topic guides — overview, simple guide, and what to watch for.",
+    title: "Focus Areas",
+    desc: "The 33 topic guides — overview, simple guide, and what to watch for.",
   },
   {
     href: "/admin/content/academy",
-    title: "Academy",
+    title: "Videos",
     desc: "Each topic's video link and script.",
   },
   {
     href: "/admin/content/resources",
-    title: "Resources",
+    title: "Templates",
     desc: "Template and booklet details — title, type, and where they appear.",
   },
   {
