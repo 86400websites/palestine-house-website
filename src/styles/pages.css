@@ -1174,6 +1174,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  /* photo-only since the dedupe — center it against the taller is/is-not
+     column so it sits level with the lists instead of hanging at the
+     section top beside the eyebrow (owner, 2026-07-20) */
+  align-self: center;
 }
 .model-plainly-photo {
   width: 100%;
