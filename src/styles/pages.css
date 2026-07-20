@@ -1103,8 +1103,9 @@
 }
 
 /* A cultural institution built to last — is/is-not columns on the left, the
-   "Culture leads" lockup + closing still life on the right (copy overhaul
-   2026-07-17, built to the owner's reference mockup). */
+   closing still life on the right (copy overhaul 2026-07-17; the "Culture
+   leads" lockup + reciprocity pair were removed as repeated copy — owner
+   dedupe, 2026-07-20). */
 .model-plainly-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
@@ -1173,48 +1174,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-}
-.model-leads {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-}
-.model-leads-a {
-  font-weight: var(--weight-semibold);
-  font-size: clamp(1.6rem, 1.4vw + 1rem, 2.1rem);
-  line-height: var(--leading-tight);
-  color: var(--char-900);
-}
-.model-leads-b {
-  font-style: italic;
-  font-weight: var(--weight-regular);
-  font-size: clamp(1.4rem, 1.2vw + 0.9rem, 1.9rem);
-  line-height: var(--leading-tight);
-  color: var(--olive-700);
-}
-.model-plainly-aside-text {
-  font: var(--text-ui);
-  line-height: var(--leading-normal);
-  color: var(--muted-foreground);
-}
-/* the doc's closing reciprocity pair — the last words on the page */
-.model-reciprocity {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-.model-reciprocity li {
-  font: var(--text-ui);
-  line-height: var(--leading-normal);
-  color: var(--char-900);
-}
-.model-reciprocity strong {
-  font-weight: var(--weight-semibold);
-  color: var(--olive-700);
+  /* photo-only since the dedupe — center it against the taller is/is-not
+     column so it sits level with the lists instead of hanging at the
+     section top beside the eyebrow (owner, 2026-07-20) */
+  align-self: center;
 }
 .model-plainly-photo {
   width: 100%;
@@ -1977,13 +1940,8 @@
   font-weight: var(--weight-semibold);
 }
 
-/* The three stages — Home's v3 stage photo-cards via the shared StageCards
-   (DR2.1-4, replacing the PH-HIW artwork triptych; the .v3-stage* styles +
-   their responsive rules live in v3.css). This wrapper only spaces the grid
-   under the section head, as .v3-stages-layout does on Home. */
-.bring-stages-cards {
-  margin-top: var(--space-12);
-}
+/* The three stages close (the cards + side art use the shared
+   .v3-stages-layout / .v3-stage* rules in v3.css) */
 .bring-stages-close {
   margin-top: var(--space-12);
   font: var(--text-lead);

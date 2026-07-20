@@ -240,9 +240,11 @@ export default function BringAHousePage() {
         </div>
       </section>
 
-      {/* 4 — What it takes: the three stages (DR2.1-4: Home's v3 stage
+      {/* 4 — What it takes: the three stages (DR2.1-4: the v3 stage
           photo-cards via the shared StageCards — replacing the PH-HIW
-          artwork triptych; cards only, no side art, per the owner) */}
+          artwork triptych). The Al-Aqsa line-art beside the grid moved here
+          from Home when its stages section was removed (owner dedupe,
+          2026-07-20); it hides ≤1100px like on Home. */}
       <section className="ph-section-lg" id="what-it-takes">
         <div className="ph-container">
           <Reveal className="sec-head">
@@ -256,11 +258,20 @@ export default function BringAHousePage() {
               plan.
             </p>
           </Reveal>
-          <div className="bring-stages-cards">
+          <div className="v3-stages-layout">
             <StageCards
-              sizes="(max-width: 860px) 100vw, 33vw"
+              sizes="(max-width: 880px) 100vw, (max-width: 1100px) 33vw, 24vw"
               stages={BRING_STAGES}
             />
+            <div className="v3-stages-art" aria-hidden="true">
+              <Image
+                src={ART_SOURCES["ph-art-line-alaqsa"]}
+                alt=""
+                width={1095}
+                height={1309}
+                sizes="(max-width: 1100px) 0px, 30vw"
+              />
+            </div>
           </div>
           <Reveal>
             <p className="bring-stages-close">

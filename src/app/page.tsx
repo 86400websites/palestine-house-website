@@ -7,7 +7,6 @@ import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { HomeHero } from "@/components/sections/home/home-hero";
 import { InsideStrip } from "@/components/sections/home/inside-strip";
-import { StageCards } from "@/components/sections/stage-cards";
 import { SITE_TAGLINE } from "@/lib/site";
 
 /* Home (/) — v3 design refresh (DR1, 2026-07-02): layout + hero/split copy
@@ -79,35 +78,7 @@ export default function HomePage() {
       {/* 3 — Inside a Palestine House (photo strip) */}
       <InsideStrip />
 
-      {/* 4 — One path, three stages (DR2-3: photo cards with moss arch-notch
-          number plates + the Al-Aqsa line-art beside the grid, per the
-          owner's stages-section mockup; cards extracted to the shared
-          StageCards in DR2.1-4 — /bring-ph renders the same cards) */}
-      <section className="ph-section-lg v3-stages-section">
-        <div className="ph-container">
-          <Reveal className="sec-head is-center">
-            <h2>One path. Three clear stages.</h2>
-            <p className="ph-lead">
-              The Palestine House system guides you from your first idea to
-              opening day and supports you as the House grows.
-            </p>
-          </Reveal>
-          <div className="v3-stages-layout">
-            <StageCards sizes="(max-width: 880px) 100vw, (max-width: 1100px) 33vw, 24vw" />
-            <div className="v3-stages-art" aria-hidden="true">
-              <Image
-                src={ART_SOURCES["ph-art-line-alaqsa"]}
-                alt=""
-                width={1095}
-                height={1309}
-                sizes="(max-width: 1100px) 0px, 30vw"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5 — A complete system, not a binder (DR2-4: olive proof band —
+      {/* 4 — A complete system, not a binder (DR2-4: olive proof band —
           stats over the centered caption, olive-branch ornaments clipped at
           the band edges, per the owner's proof-band mockup) */}
       {/* aria-labelledby: the caption h2 sits AFTER the stats in the DOM
@@ -182,7 +153,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 6 — The work is real / A private platform for partners — photo band.
+      {/* 5 — The work is real / A private platform for partners — photo band.
           Film-screening (DR1-10): its dark audience texture sits under the
           copy and the glowing screen falls behind the white card — and unlike
           oud-night it doesn't repeat a recognizable marquee image on the

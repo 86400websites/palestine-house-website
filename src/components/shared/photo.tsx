@@ -21,7 +21,7 @@ export const PHOTO_SOURCES = {
   "ph-photo-bring-house": "/assets/photos/ph-photo-bring-house.jpg",
   "ph-photo-our-support": "/assets/photos/ph-photo-our-support.jpg",
   "ph-photo-apply": "/assets/photos/ph-photo-apply.jpg",
-  /* DR2 — "One path, three stages" card photos */
+  /* DR2 — the three-stages card photos (now /bring-ph §4 via StageCards) */
   "ph-photo-stage-plan": "/assets/photos/ph-photo-stage-plan.jpg",
   "ph-photo-stage-build": "/assets/photos/ph-photo-stage-build.jpg",
   "ph-photo-stage-cafe": "/assets/photos/ph-photo-stage-cafe.jpg",
@@ -65,8 +65,8 @@ export const PHOTO_SOURCES = {
      courtyard (/focus-areas). */
   "ph-photo-apply-hero": "/assets/photos/ph-photo-apply-hero.jpg",
   "ph-photo-focus-hero": "/assets/photos/ph-photo-focus-hero.jpg",
-  /* Copy overhaul (owner masters, 2026-07-17) — /model §6 "Culture leads" still
-     life + /experience §6 "More than somewhere to visit" gathering photo. */
+  /* Copy overhaul (owner masters, 2026-07-17) — /model §6 closing still life +
+     /experience §6 "More than somewhere to visit" gathering photo. */
   "ph-photo-model-culture": "/assets/photos/ph-photo-model-culture.jpg",
   "ph-photo-exp-gather": "/assets/photos/ph-photo-exp-gather.jpg",
 } as const;
