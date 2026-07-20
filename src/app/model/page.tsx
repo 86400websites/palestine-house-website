@@ -260,8 +260,9 @@ export default function ModelPage() {
       </section>
 
       {/* 6 — A cultural institution built to last (what it is / what it is
-          not) + "Culture leads" and the closing still life (copy overhaul
-          2026-07-17, built to the owner's reference mockup) */}
+          not) + the closing still life (copy overhaul 2026-07-17; the
+          "Culture leads" lockup + reciprocity pair were removed as repeated
+          copy — owner dedupe, 2026-07-20) */}
       <section className="ph-section-lg bg-muted model-plainly">
         <Reveal className="ph-container model-plainly-layout">
           <div className="model-plainly-main">
@@ -295,26 +296,6 @@ export default function ModelPage() {
             </div>
           </div>
           <aside className="model-plainly-aside">
-            <p className="model-leads">
-              <span className="model-leads-a">Culture leads.</span>
-              <span className="model-leads-b">The structure helps it last.</span>
-            </p>
-            <p className="model-plainly-aside-text">
-              Palestine House brings together local ownership, cultural
-              expertise, and a shared operating system so that Palestinian
-              culture can have a permanent home in cities around the world.
-            </p>
-            <ul className="model-reciprocity">
-              <li>
-                <strong>You bring</strong> the commitment, the local
-                relationships, and the daily leadership.
-              </li>
-              <li>
-                <strong>We bring</strong> the name, the system, the guidance,
-                and the cultural partnership to help you build something
-                meaningful and sustain it.
-              </li>
-            </ul>
             <Photo
               assetId="ph-photo-model-culture"
               alt="A cup of Palestinian coffee and a decorated vase on an embroidered tatreez cloth."

@@ -36,7 +36,7 @@ const ARTWORK_SOURCES = {
   "PH-FOOD-01": "/assets/art/PH-FOOD-01.jpg",
   "PH-FOOD-02": "/assets/art/PH-FOOD-02.png",
   /* PH-HIW-01..03 retired with the bring-ph triptych (DR2.1-4) — the stages
-     render Home's shared StageCards photo cards now. */
+     render the shared StageCards photo cards now. */
   "PH-HOME-01": "/assets/art/PH-HOME-01.png",
   "PH-LIVE-01": "/assets/art/PH-LIVE-01.png",
   "PH-LIVE-02": "/assets/art/PH-LIVE-02.png",

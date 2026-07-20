@@ -76,7 +76,7 @@ function CardList({ hidden }: { hidden?: boolean }) {
 
 export function InsideStrip() {
   return (
-    <section className="ph-section-lg v3-inside">
+    <section className="ph-section-lg">
       <div className="ph-container">
         <Reveal>
           <h2 className="v3-rule-head">Inside a Palestine House</h2>

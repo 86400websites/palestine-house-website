@@ -480,14 +480,6 @@ img.phx-brand-mark {
 }
 
 /* --- "Inside a Palestine House" photo strip (inside-strip.tsx) ------------ */
-/* Same-background neighbors share a ~6rem join like the rest of the page —
-   without these, two ph-section-lg paddings stack to ~12rem (DR1-10). */
-.v3-inside {
-  padding-bottom: var(--space-10);
-}
-.v3-stages-section {
-  padding-top: var(--space-14);
-}
 .v3-rule-head {
   position: relative;
   padding-bottom: var(--space-4);
@@ -567,9 +559,10 @@ img.phx-brand-mark {
   color: var(--muted-foreground);
 }
 
-/* --- "One path, three stages." — photo cards with moss arch-notch number
-   plates + the Al-Aqsa line-art beside the grid (DR2-3, owner mockup; the
-   centered head reuses the shared .sec-head.is-center primitive) ----------- */
+/* --- Three-stages photo cards — moss panels with arch-notch number plates +
+   the Al-Aqsa line-art beside the grid (DR2-3, owner mockup). Built for Home;
+   /bring-ph §4 is the sole consumer since the Home section was removed
+   (owner dedupe, 2026-07-20) — its left-aligned .sec-head sits above. ------ */
 .v3-stages-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 30%);
