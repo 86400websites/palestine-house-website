@@ -1748,7 +1748,7 @@
   --brand-primary-hover: var(--bring-cta-hover);
 }
 
-/* Shared eyebrow row (§2 · §7): sprig · label · flex hairline · sparkle. */
+/* Shared eyebrow row (§2 · §8): sprig · label · flex hairline · sparkle. */
 .bring-eyebrow {
   display: flex;
   align-items: center;
@@ -1776,7 +1776,7 @@
   flex: none;
 }
 
-/* Centered section head ornament (§3 · §5 · §6): the star-logo mark (raster). */
+/* Centered section head ornament (§3 · §6 · §7): the star-logo mark (raster). */
 .bring-head-orn {
   display: block;
   width: 40px;
@@ -1949,7 +1949,165 @@
   max-width: 38rem;
 }
 
-/* ---- §5 The 120-day launch (arched DAY cards + ribbon; copy overhaul
+/* ---- §5 Proof numbers — olive band, stats over the caption (DR2-4; the
+   band + its rules moved here from Home §4, owner 2026-07-21) ---- */
+/* .bring-proof surface = .ph-section-dark + .ph-section-olive (v3.css). The
+   olive-branch ornaments hug the band edges and clip there — never overflow. */
+.bring-proof {
+  position: relative;
+  overflow: hidden;
+}
+.bring-proof-branch {
+  position: absolute;
+  z-index: 0;
+  height: auto;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.bring-proof-branch--left {
+  width: clamp(90px, 12vw, 190px);
+  left: 0;
+  top: 50%;
+  /* -40% (was -28%): keeps the visible tip clear of the first stat label
+     on wide layouts; ≤1000px the block below rescales both branches into
+     the text-free zones instead (DR2-7 exit-gate review + owner fix). */
+  transform: translate(-40%, -50%);
+}
+.bring-proof-branch--right {
+  /* DR2.1-3 (owner, 2026-07-06): the corner branch reads as a fuller
+     bottom-right ornament — was clamp(110px,14vw,230px) / translate(24%,30%),
+     which cropped most of the L-shape into the corner. A slight bleed keeps
+     it anchored to the band edge; the vertical arm hugs the far right. */
+  width: clamp(150px, 17vw, 270px);
+  right: 0;
+  bottom: 0;
+  transform: translate(8%, 10%);
+}
+/* Mobile bookends (owner, 2026-07-06): one small centered sprig at the top
+   of the band and one mirrored at the bottom — hidden on desktop, where the
+   two corner branches carry the composition. */
+.bring-proof-branch--m-top,
+.bring-proof-branch--m-bottom {
+  display: none;
+  left: 50%;
+  width: clamp(150px, 46vw, 240px);
+}
+.bring-proof-branch--m-top {
+  top: 0;
+  transform: translate(-50%, -40%);
+}
+.bring-proof-branch--m-bottom {
+  bottom: 0;
+  transform: translate(-50%, 40%) scaleY(-1);
+}
+.bring-proof-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.bring-proof-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-8) var(--space-6);
+  margin: 0;
+}
+.bring-proof-item {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse; /* number above its label; dt precedes dd in DOM */
+  align-items: center;
+  gap: var(--space-2);
+}
+.bring-proof-item dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: clamp(2.25rem, 2.6vw + 1rem, 3.5rem);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  /* v3: copper numerals — warm sand on the olive band (DR2-4; /bring-ph is
+     public-only, so this needs no scoping). */
+  color: var(--copper-300);
+}
+.bring-proof-item dt {
+  font: var(--text-ui);
+  font-weight: var(--weight-medium);
+  color: rgba(255, 255, 255, 0.8);
+}
+/* Thin copper hairlines between the five stats (mockup) — desktop only. */
+.bring-proof-item + .bring-proof-item::before {
+  content: "";
+  position: absolute;
+  left: calc(-0.5 * var(--space-6));
+  top: 50%;
+  transform: translateY(-50%);
+  height: 76%;
+  width: 1px;
+  background: color-mix(in srgb, var(--copper-300) 45%, transparent);
+}
+/* The caption reads as one flowing serif line under the stats (mockup):
+   the h2 keeps the section's heading semantics but flows inline with it.
+   On desktop an olive sprig flanks it on each side (owner, 2026-07-06). */
+.bring-proof-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  max-width: 64rem;
+  margin: var(--space-12) auto 0;
+}
+.bring-proof-caption-text {
+  max-width: 46rem;
+}
+/* .bring-proof prefix outranks globals' own .ph-section-dark color rules
+   (globals' body rules land after this file in the @import cascade). */
+.bring-proof .bring-proof-caption h2,
+.bring-proof .bring-proof-caption .ph-lead {
+  display: inline;
+  font: var(--weight-regular) var(--text-xl) / 1.6 var(--font-display);
+  color: var(--white);
+}
+/* DR2.1-3 (owner, 2026-07-06): on sprig-flanked desktop layouts the caption
+   sits as two balanced lines — text-xl ran to three. Scoped ≥1001px so the
+   narrow layouts keep their DR2-approved rendering untouched. */
+@container page (min-width: 1001px) {
+  .bring-proof-caption-text {
+    max-width: 48rem;
+    text-wrap: balance;
+  }
+  .bring-proof .bring-proof-caption h2,
+  .bring-proof .bring-proof-caption .ph-lead {
+    font: var(--weight-regular) var(--text-lg) / 1.6 var(--font-display);
+  }
+}
+@container page (max-width: 860px) {
+  .bring-proof-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bring-proof-item + .bring-proof-item::before {
+    content: none;
+  }
+  /* 2-2-1 flow: the fifth stat centers on its own full row instead of
+     hanging left (DR2-6 mobile pass). */
+  .bring-proof-item:last-child {
+    grid-column: 1 / -1;
+  }
+}
+/* Mobile (owner, 2026-07-06): drop the desktop corner branches entirely and
+   bookend the band instead with a single small centered sprig at the top and
+   one mirrored at the very bottom. */
+@container page (max-width: 1000px) {
+  .bring-proof-branch--left,
+  .bring-proof-branch--right {
+    display: none;
+  }
+  .bring-proof-branch--m-top,
+  .bring-proof-branch--m-bottom {
+    display: block;
+  }
+}
+
+/* ---- §6 The 120-day launch (arched DAY cards + ribbon; copy overhaul
    2026-07-17, built to the owner's "Redesign Example" mockup) ---- */
 .bring-timeline {
   list-style: none;
@@ -2064,7 +2222,7 @@
   }
 }
 
-/* ---- §6 The commitments (light cream, three medallion cards) ---- */
+/* ---- §7 The commitments (light cream, three medallion cards) ---- */
 .bring-page .bring-eyebrow-flank {
   display: inline-flex;
   align-items: center;
@@ -2146,7 +2304,7 @@
   color: var(--muted-foreground);
 }
 
-/* ---- §7 Ready to apply? (CTA · arch photo) ---- */
+/* ---- §8 Ready to apply? (CTA · arch photo) ---- */
 .bring-apply {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
@@ -2180,7 +2338,7 @@
   gap: var(--space-3);
   margin-top: var(--space-8);
 }
-/* §7 secondary: forest border + text, matching the mockup's outlined button.
+/* §8 secondary: forest border + text, matching the mockup's outlined button.
    The shared v3.css outline rule is `:is(.ph-page,…) [data-slot=button][data-variant=outline]`
    (0,3,0) and loads AFTER pages.css, so this must out-specify it — including hover. */
 .bring-page .bring-cta-secondary[data-slot="button"][data-variant="outline"],
@@ -2201,7 +2359,7 @@
   color: var(--olive-600);
   flex: none;
 }
-/* §7 PALESTINE HOUSE lockup (seal star above the wordmark), per the mockup. */
+/* §8 PALESTINE HOUSE lockup (seal star above the wordmark), per the mockup. */
 .bring-wordmark {
   display: flex;
   flex-direction: column;
@@ -2246,7 +2404,7 @@
   width: 100%;
   height: 100%;
 }
-/* §7: the olive-branch flourish down the arch's right edge, and the small
+/* §8: the olive-branch flourish down the arch's right edge, and the small
    sparkle floating just outside the arch's upper-left (both per the mockup). */
 .bring-arch-sprig {
   position: absolute;
@@ -3695,167 +3853,11 @@
    feeling-cards section, and the illustrated stages were replaced by
    .v3-hero / .v3-split / .v3-strip / .v3-stages (src/styles/v3.css) — their
    old home-hero* / home-feels* / home-stage* rules are deleted. The proof
-   strip, platform split, and the lead-magnet dialog below are still live.
+   band + its .bring-proof* rules moved to /bring-ph §5 (owner, 2026-07-21);
+   the platform split below is still live.
    ======================================================================== */
 
-/* --- 4 · Proof numbers — olive band, stats over the caption (DR2-4) ------- */
-/* .home-proof surface = .ph-section-dark + .ph-section-olive (v3.css). The
-   olive-branch ornaments hug the band edges and clip there — never overflow. */
-.home-proof {
-  position: relative;
-  overflow: hidden;
-}
-.home-proof-branch {
-  position: absolute;
-  z-index: 0;
-  height: auto;
-  opacity: 0.85;
-  pointer-events: none;
-}
-.home-proof-branch--left {
-  width: clamp(90px, 12vw, 190px);
-  left: 0;
-  top: 50%;
-  /* -40% (was -28%): keeps the visible tip clear of the first stat label
-     on wide layouts; ≤1000px the block below rescales both branches into
-     the text-free zones instead (DR2-7 exit-gate review + owner fix). */
-  transform: translate(-40%, -50%);
-}
-.home-proof-branch--right {
-  /* DR2.1-3 (owner, 2026-07-06): the corner branch reads as a fuller
-     bottom-right ornament — was clamp(110px,14vw,230px) / translate(24%,30%),
-     which cropped most of the L-shape into the corner. A slight bleed keeps
-     it anchored to the band edge; the vertical arm hugs the far right. */
-  width: clamp(150px, 17vw, 270px);
-  right: 0;
-  bottom: 0;
-  transform: translate(8%, 10%);
-}
-/* Mobile bookends (owner, 2026-07-06): one small centered sprig at the top
-   of the band and one mirrored at the bottom — hidden on desktop, where the
-   two corner branches carry the composition. */
-.home-proof-branch--m-top,
-.home-proof-branch--m-bottom {
-  display: none;
-  left: 50%;
-  width: clamp(150px, 46vw, 240px);
-}
-.home-proof-branch--m-top {
-  top: 0;
-  transform: translate(-50%, -40%);
-}
-.home-proof-branch--m-bottom {
-  bottom: 0;
-  transform: translate(-50%, 40%) scaleY(-1);
-}
-.home-proof-inner {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-}
-.home-proof-strip {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-8) var(--space-6);
-  margin: 0;
-}
-.home-proof-item {
-  position: relative;
-  display: flex;
-  flex-direction: column-reverse; /* number above its label; dt precedes dd in DOM */
-  align-items: center;
-  gap: var(--space-2);
-}
-.home-proof-item dd {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: var(--weight-semibold);
-  font-size: clamp(2.25rem, 2.6vw + 1rem, 3.5rem);
-  line-height: 1;
-  letter-spacing: var(--tracking-tight);
-  /* v3: copper numerals — warm sand on the olive band (DR2-4; Home is
-     public-only, so this needs no scoping). */
-  color: var(--copper-300);
-}
-.home-proof-item dt {
-  font: var(--text-ui);
-  font-weight: var(--weight-medium);
-  color: rgba(255, 255, 255, 0.8);
-}
-/* Thin copper hairlines between the five stats (mockup) — desktop only. */
-.home-proof-item + .home-proof-item::before {
-  content: "";
-  position: absolute;
-  left: calc(-0.5 * var(--space-6));
-  top: 50%;
-  transform: translateY(-50%);
-  height: 76%;
-  width: 1px;
-  background: color-mix(in srgb, var(--copper-300) 45%, transparent);
-}
-/* The caption reads as one flowing serif line under the stats (mockup):
-   the h2 keeps the section's heading semantics but flows inline with it.
-   On desktop an olive sprig flanks it on each side (owner, 2026-07-06). */
-.home-proof-caption {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-8);
-  max-width: 64rem;
-  margin: var(--space-12) auto 0;
-}
-.home-proof-caption-text {
-  max-width: 46rem;
-}
-/* .home-proof prefix outranks globals' own .ph-section-dark color rules
-   (globals' body rules land after this file in the @import cascade). */
-.home-proof .home-proof-caption h2,
-.home-proof .home-proof-caption .ph-lead {
-  display: inline;
-  font: var(--weight-regular) var(--text-xl) / 1.6 var(--font-display);
-  color: var(--white);
-}
-/* DR2.1-3 (owner, 2026-07-06): on sprig-flanked desktop layouts the caption
-   sits as two balanced lines — text-xl ran to three. Scoped ≥1001px so the
-   narrow layouts keep their DR2-approved rendering untouched. */
-@container page (min-width: 1001px) {
-  .home-proof-caption-text {
-    max-width: 48rem;
-    text-wrap: balance;
-  }
-  .home-proof .home-proof-caption h2,
-  .home-proof .home-proof-caption .ph-lead {
-    font: var(--weight-regular) var(--text-lg) / 1.6 var(--font-display);
-  }
-}
-@container page (max-width: 860px) {
-  .home-proof-strip {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .home-proof-item + .home-proof-item::before {
-    content: none;
-  }
-  /* 2-2-1 flow: the fifth stat centers on its own full row instead of
-     hanging left (DR2-6 mobile pass). */
-  .home-proof-item:last-child {
-    grid-column: 1 / -1;
-  }
-}
-/* Mobile (owner, 2026-07-06): drop the desktop corner branches entirely and
-   bookend the band instead with a single small centered sprig at the top and
-   one mirrored at the very bottom. */
-@container page (max-width: 1000px) {
-  .home-proof-branch--left,
-  .home-proof-branch--right {
-    display: none;
-  }
-  .home-proof-branch--m-top,
-  .home-proof-branch--m-bottom {
-    display: block;
-  }
-}
-
-/* --- 5 · The work is real / A private platform for partners ---------------- */
+/* --- 4 · The work is real / A private platform for partners ---------------- */
 .home-split {
   display: grid;
   grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
@@ -3885,11 +3887,6 @@
   align-items: flex-start;
   gap: var(--space-4);
   margin-top: var(--space-8);
-}
-.home-cta-support {
-  font: var(--weight-regular) var(--text-xs) / 1.4 var(--font-body);
-  color: var(--muted-foreground);
-  margin-top: var(--space-2) !important;
 }
 @container page (max-width: 980px) {
   .home-split {
