@@ -62,6 +62,18 @@ const BRING_STAGES: readonly StageCopy[] = [
   },
 ];
 
+/* Proof-band labels owner-approved (copy overhaul, 2026-07-17). Counts updated
+   to 11 · 33 · 297 when Focus Area 11 "Café & Culinary Experience" shipped
+   (FA11, 2026-07-18, decision D-FA11-a); 200+ and 120 unchanged. The band moved
+   here from Home §4 (owner, 2026-07-21) to sit below the three stages. */
+const BRING_PROOF = [
+  { n: "11", label: "Focus areas" },
+  { n: "33", label: "Core topics" },
+  { n: "200+", label: "Checklist actions" },
+  { n: "297", label: "Ready-to-use templates" },
+  { n: "120", label: "Day guided launch plan" },
+] as const;
+
 const BRING_GATES = [
   {
     day: "30",
@@ -283,7 +295,83 @@ export default function BringAHousePage() {
         </div>
       </section>
 
-      {/* 5 — The 120-day launch: arched-card timeline (copy overhaul
+      {/* 5 — A complete system, not a binder (DR2-4: olive proof band —
+          stats over the centered caption, olive-branch ornaments clipped at
+          the band edges, per the owner's proof-band mockup). Moved here from
+          Home §4 (owner, 2026-07-21). */}
+      {/* aria-labelledby: the caption h2 sits AFTER the stats in the DOM
+          (mockup layout) — naming the section keeps screen-reader users
+          oriented before the bare numbers (DR2-7 exit-gate review). */}
+      <section
+        className="ph-section-lg ph-section-dark ph-section-olive bring-proof"
+        aria-labelledby="bring-proof-title"
+      >
+        <Image
+          src={ART_SOURCES["ph-art-branch-4"]}
+          alt=""
+          aria-hidden="true"
+          width={792}
+          height={1200}
+          sizes="190px"
+          className="bring-proof-branch bring-proof-branch--left"
+        />
+        <Image
+          src={ART_SOURCES["ph-art-branch-1"]}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={914}
+          sizes="270px"
+          className="bring-proof-branch bring-proof-branch--right"
+        />
+        {/* Mobile-only bookends (owner, 2026-07-06): the small olive sprig
+            sits once at the top of the band and once, mirrored, at the very
+            bottom — the desktop corner branches are hidden on mobile. */}
+        <Image
+          src={ART_SOURCES["ph-art-branch-3"]}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={317}
+          sizes="240px"
+          className="bring-proof-branch bring-proof-branch--m-top"
+        />
+        <Image
+          src={ART_SOURCES["ph-art-branch-3"]}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={317}
+          sizes="240px"
+          className="bring-proof-branch bring-proof-branch--m-bottom"
+        />
+        <Reveal className="ph-container bring-proof-inner">
+          <dl className="bring-proof-strip">
+            {BRING_PROOF.map((p) => (
+              <div key={p.label} className="bring-proof-item">
+                <dt>{p.label}</dt>
+                <dd>{p.n}</dd>
+              </div>
+            ))}
+          </dl>
+          {/* The caption is a single centered serif line (owner, 2026-07-06 —
+              the desktop flanking sprigs were removed). */}
+          <div className="bring-proof-caption">
+            <div className="bring-proof-caption-text">
+              <h2 id="bring-proof-title">
+                Everything you need, in one connected system.
+              </h2>{" "}
+              <p className="ph-lead">
+                From planning and permissions to staffing, programming, finance,
+                and launch, everything is organised in one place with your
+                progress saved as you build.
+              </p>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* 6 — The 120-day launch: arched-card timeline (copy overhaul
           2026-07-17, rebuilt to the owner's "Redesign Example" mockup —
           four DAY cards + a ribbon closing line). */}
       <section className="ph-section-lg" id="checkpoints">
@@ -328,7 +416,7 @@ export default function BringAHousePage() {
         </div>
       </section>
 
-      {/* 6 — Three rules, no exceptions (light cream, per the mockup) */}
+      {/* 7 — Three rules, no exceptions (light cream, per the mockup) */}
       <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head is-center bring-head">
@@ -369,7 +457,7 @@ export default function BringAHousePage() {
         </div>
       </section>
 
-      {/* 7 — Ready to apply? (CTA · arch photo) */}
+      {/* 8 — Ready to apply? (CTA · arch photo) */}
       <section className="ph-section-lg">
         <Reveal className="ph-container bring-apply">
           <div className="bring-apply-copy">

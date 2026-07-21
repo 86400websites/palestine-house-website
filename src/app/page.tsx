@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
-import { Photo, PHOTO_SOURCES, ART_SOURCES } from "@/components/shared/photo";
+import { Photo, PHOTO_SOURCES } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { HomeHero } from "@/components/sections/home/home-hero";
@@ -25,18 +24,6 @@ export const metadata: Metadata = {
   description: SITE_TAGLINE,
   alternates: { canonical: "/" },
 };
-
-/* Labels owner-approved (copy overhaul, 2026-07-17). Counts updated to 11 · 33 ·
-   297 when Focus Area 11 "Café & Culinary Experience" shipped (FA11, 2026-07-18,
-   decision D-FA11-a); 200+ and 120 unchanged. */
-const HOME_PROOF = [
-  { n: "11", label: "Focus areas" },
-  { n: "33", label: "Core topics" },
-  { n: "200+", label: "Checklist actions" },
-  { n: "297", label: "Ready-to-use templates" },
-  { n: "120", label: "Day guided launch plan" },
-] as const;
-
 
 export default function HomePage() {
   return (
@@ -78,82 +65,7 @@ export default function HomePage() {
       {/* 3 — Inside a Palestine House (photo strip) */}
       <InsideStrip />
 
-      {/* 4 — A complete system, not a binder (DR2-4: olive proof band —
-          stats over the centered caption, olive-branch ornaments clipped at
-          the band edges, per the owner's proof-band mockup) */}
-      {/* aria-labelledby: the caption h2 sits AFTER the stats in the DOM
-          (mockup layout) — naming the section keeps screen-reader users
-          oriented before the bare numbers (DR2-7 exit-gate review). */}
-      <section
-        className="ph-section-lg ph-section-dark ph-section-olive home-proof"
-        aria-labelledby="home-proof-title"
-      >
-        <Image
-          src={ART_SOURCES["ph-art-branch-4"]}
-          alt=""
-          aria-hidden="true"
-          width={792}
-          height={1200}
-          sizes="190px"
-          className="home-proof-branch home-proof-branch--left"
-        />
-        <Image
-          src={ART_SOURCES["ph-art-branch-1"]}
-          alt=""
-          aria-hidden="true"
-          width={1200}
-          height={914}
-          sizes="270px"
-          className="home-proof-branch home-proof-branch--right"
-        />
-        {/* Mobile-only bookends (owner, 2026-07-06): the small olive sprig
-            sits once at the top of the band and once, mirrored, at the very
-            bottom — the desktop corner branches are hidden on mobile. */}
-        <Image
-          src={ART_SOURCES["ph-art-branch-3"]}
-          alt=""
-          aria-hidden="true"
-          width={1200}
-          height={317}
-          sizes="240px"
-          className="home-proof-branch home-proof-branch--m-top"
-        />
-        <Image
-          src={ART_SOURCES["ph-art-branch-3"]}
-          alt=""
-          aria-hidden="true"
-          width={1200}
-          height={317}
-          sizes="240px"
-          className="home-proof-branch home-proof-branch--m-bottom"
-        />
-        <Reveal className="ph-container home-proof-inner">
-          <dl className="home-proof-strip">
-            {HOME_PROOF.map((p) => (
-              <div key={p.label} className="home-proof-item">
-                <dt>{p.label}</dt>
-                <dd>{p.n}</dd>
-              </div>
-            ))}
-          </dl>
-          {/* The caption is a single centered serif line (owner, 2026-07-06 —
-              the desktop flanking sprigs were removed). */}
-          <div className="home-proof-caption">
-            <div className="home-proof-caption-text">
-              <h2 id="home-proof-title">
-                Everything you need, in one connected system.
-              </h2>{" "}
-              <p className="ph-lead">
-                From planning and permissions to staffing, programming, finance,
-                and launch, everything is organised in one place with your
-                progress saved as you build.
-              </p>
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* 5 — The work is real / A private platform for partners — photo band.
+      {/* 4 — The work is real / A private platform for partners — photo band.
           Film-screening (DR1-10): its dark audience texture sits under the
           copy and the glowing screen falls behind the white card — and unlike
           oud-night it doesn't repeat a recognizable marquee image on the
@@ -204,18 +116,9 @@ export default function HomePage() {
                 Once approved, you receive access to the complete playbook,
                 toolkit, templates, training, and partner platform.
               </p>
+              {/* Apply button + its HQ support line removed (owner, 2026-07-21)
+                  — the hero and footer CTAs carry the apply path on Home. */}
               <div className="home-platform-ctas">
-                <div>
-                  <Button asChild>
-                    <Link href="/apply">
-                      Apply to bring a House
-                      <ArrowRight aria-hidden="true" />
-                    </Link>
-                  </Button>
-                  <p className="home-cta-support">
-                    Every application is reviewed by HQ.
-                  </p>
-                </div>
                 <Button asChild variant="outline">
                   <Link href="/model">Explore the model</Link>
                 </Button>
