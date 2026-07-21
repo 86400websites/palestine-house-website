@@ -106,4 +106,28 @@
 
 ## Review verdict (Codex)
 
-_(to be appended by the reviewer)_
+**APPROVE — 2026-07-21.** Merge recommendation: **approve**.
+
+- **Blocking findings:** none.
+- **Non-blocking findings:** none.
+- Reviewed the single branch diff against freshly fetched `origin/main`
+  (`d968438`). Scope/path guard is clean: exactly the five briefed files,
+  with no protected-path, dependency, lockfile, env, or secret-bearing change.
+- Move fidelity passes: the five-entry proof array and complete JSX section are
+  byte-identical after only `HOME_PROOF` → `BRING_PROOF` and
+  `home-proof` → `bring-proof`; the CSS rule bodies are likewise identical
+  after the selector rename (the documented comment freshens excluded).
+- Dead-reference and collision sweeps pass. The removed Home names have zero
+  implementation hits; `bring-proof` is confined to `/bring-ph` and
+  `pages.css`; the `aria-labelledby` target is present and unique.
+- Cascade/container review passes. The `.bring-page` green-heading recipe does
+  not match the proof caption, the renamed white-caption selector still
+  out-specifies the later global dark-heading rule, and the section remains a
+  direct child inside SiteChrome's named `.ph-page` container, so all three
+  `@container page` queries remain active.
+- Home's platform-card paragraphs and surviving approved copy are unchanged;
+  the remaining CTA row has one valid outline-button child, while Home retains
+  its hero Apply CTA and the site-wide footer Apply CTA.
+- Re-run checks: `pnpm install --frozen-lockfile`, `pnpm run typecheck`,
+  `pnpm run lint`, and `pnpm run build` all pass (Next.js production build:
+  46/46 static pages generated where applicable).
