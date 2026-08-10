@@ -134,6 +134,11 @@ async function writeJpeg(input: Buffer, outFile: string, maxWidth: number, quali
     .flatten({ background: "#ffffff" })
     .jpeg({ quality, progressive: true, mozjpeg: true })
     .toFile(outFile);
+  await reportSize(outFile);
+}
+
+/** Every committed workspace asset must stay under the 600 KB page budget. */
+async function reportSize(outFile: string) {
   const kb = Math.round((await fs.stat(outFile)).size / 1024);
   console.log(`  wrote ${path.relative(ROOT, outFile)} (${kb} KB)`);
   assert(kb < 600, `${outFile} is ${kb} KB — over the 600 KB budget, lower quality/width`);
@@ -203,6 +208,33 @@ async function main() {
     [...new Set(stdResources.map((r) => r.kind))].sort().join("|") === [...RES_KINDS].sort().join("|"),
     "standard resource kinds drifted from OVERVIEW/GUIDE/CHECKLIST/WATCH OUT",
   );
+
+  // Card copy must be CONSTANT per kind across all 33 topics — that is what
+  // licenses shipping it as app constants in PP3 instead of DB rows. Assert it
+  // before picking a representative row, so a future mockup that varies the
+  // copy fails loudly here rather than silently losing the variants.
+  const copySignature = (r: Record<string, string>, keys: string[]) =>
+    JSON.stringify(keys.map((k) => r[k] ?? null));
+  const assertConstantCopy = (
+    label: string,
+    rows: Array<Record<string, string>>,
+    keys: string[],
+  ) => {
+    const signatures = new Set(rows.map((r) => copySignature(r, keys)));
+    assert(
+      signatures.size === 1,
+      `${label}: card copy is not constant across topics (${signatures.size} variants of ${keys.join("/")}) — it can no longer ship as app constants`,
+    );
+  };
+  for (const kind of RES_KINDS) {
+    assertConstantCopy(
+      `standard resource "${kind}"`,
+      stdResources.filter((r) => r.kind === kind),
+      ["key", "title", "icon", "desc", "action", "use"],
+    );
+  }
+  assertConstantCopy("templates", templates, ["kind", "icon", "desc", "use"]);
+  assertConstantCopy("extras", extras, ["kind", "icon", "desc", "use"]);
 
   // The map: every topic resolves to a distinct, known element slug.
   const mapped = new Set<string>();
@@ -297,7 +329,7 @@ async function main() {
       // Ornaments may carry alpha — keep PNG, just cap the size.
       const outFile = path.join(OUT_ASSETS, "misc", `${out}.png`);
       await sharp(buf).resize({ width: 1600, withoutEnlargement: true }).png().toFile(outFile);
-      console.log(`  wrote ${path.relative(ROOT, outFile)} (${Math.round((await fs.stat(outFile)).size / 1024)} KB)`);
+      await reportSize(outFile);
       miscPaths[key] = `/assets/workspace/misc/${out}.png`;
     } else {
       await writeJpeg(buf, path.join(OUT_ASSETS, "misc", `${out}.jpg`), 2000, 80);

@@ -9,8 +9,10 @@
 > `docs/ROADMAP.md` Stage 4): spec extraction + additive DB migrations +
 > committed workspace assets + tracker updates. **Zero UI/behaviour change; no
 > app code (`src/`) is touched at all. No auth/gate, CSP, routing, dependency,
-> or chrome change. TEST DB only** (the TEST project was paused at build time —
-> the apply/verify step runs when the owner restores it; NO prod step in PP1).
+> or chrome change. TEST DB only** — 0027 + 0028 are **applied and fully
+> verified on TEST** (2026-08-10, after the owner restored the paused project;
+> results in `docs/sprint-prompts/pp1-platform-foundations.md`). **NO prod step
+> in PP1** — prod applies by hand at the PP2 merge gate.
 > Verdict appended below after review.
 
 ## Context (read first)
@@ -115,15 +117,113 @@ they shape the later sprints.
 - **`journey_desc` duplicates each section's `lead`** — faithful to the
   mockup's data (the About journey cards reuse the section leads today);
   kept as separate columns so the CMS can diverge them later.
-- **The TEST apply has not run yet** — the TEST Supabase project is paused
-  (MCP timeouts, 2026-08-10). The owner restores it; then the apply + the
-  TEST verification run and their results are appended to the sprint record
-  before the PR merges. If you can reach TEST, running
-  `0027 → 0028 → 0027_verify_TEST_db_only.sql` yourself is welcome.
+- **The TEST apply is DONE** (2026-08-10, after the owner restored the paused
+  project): 0027 + 0028 applied via the sanctioned `supabase-test` MCP, then
+  verified — structure/RLS/privileges exact, seed 5/10/33/15, 297 codes, role
+  simulations 9/9 (approved reads all, pending reads zero everywhere),
+  down→re-up reversibility and seed idempotency proven, advisors showing no
+  new findings. Full log in `docs/sprint-prompts/pp1-platform-foundations.md`.
+  Re-running it independently is welcome but not required.
 - **`academy_modules` is untouched** — it is retired only at the PP7
   contraction migration (old code still calls `get_academy_modules()` until
   PP5 tears the old workspace down).
 
 ## Verdict
 
-*(Codex appends here.)*
+**REQUEST CHANGES — 2026-08-10.** No blocking auth, approval-gate, RLS,
+data-safety, migration, or element-map defect was found, but the two Medium
+findings below should be corrected before merge.
+
+1. **Medium · `scripts/extract-mockup-spec.ts:191-205, 293-318` · The
+   generator does not enforce two invariants that PP1 says it hard-asserts.**
+   It checks resource counts/kinds, then builds `resourceKinds`,
+   `templateCopy`, and `extraCopy` from the first matching row without
+   asserting that the other rows carry identical copy. Its PNG branch also
+   writes assets without the `<600 KB` assertion used by `writeJpeg`. The
+   current mockup is clean (independent read-only parsing found one variant
+   for each of the four standard kinds, one template variant, and one extra
+   variant; all 47 current assets are below 600 KB), but a later mockup
+   re-extraction could silently discard divergent copy or admit an oversized
+   PNG while reporting success. **Suggested fix:** assert one full copy
+   signature per standard kind and one signature each for templates/extras
+   before selecting the representative rows; apply the same post-write size
+   assertion to PNG outputs. **Confidence: High.**
+
+2. **Medium · `docs/ROADMAP.md:128`; `docs/code-reviews/pp1-platform-foundations.md:118` · The PP1 source-of-truth
+   documents contradict the delivered and recorded state.** The roadmap row
+   says `platform_sections`/approved reads contain 4 rows and points later
+   work at `<slug>.png`; the migration, seed, spec, verification scripts, and
+   sprint record consistently use 5 rows (About + four toolkit pages) and
+   `.jpg` assets. This brief also still says the TEST apply has not run, while
+   `PROJECT-STATUS.md` and the sprint record say 0027/0028 were applied and
+   fully verified on TEST. Because Stage 4 explicitly makes the roadmap the
+   scoping/exit-gate source for PP2-PP7, these stale facts can produce a false
+   validation target or broken asset paths. **Suggested fix:** update the PP1
+   row to 5/10/33/15 and `.jpg`, and update the brief's TEST status to match
+   the completed verification record. **Confidence: High.**
+
+**Checks and coverage:**
+
+- Fresh `git fetch origin`; merge base and `origin/main` both resolve to
+  `d6ec65b`. The reviewed range is exactly
+  `origin/main...claude/sprint-pp1-platform-foundations`.
+- The 33 map pairs are plausible against the existing A1-K3 title canon and
+  agree exactly across `ELEMENT_MAP`, `workspace-spec.json`, and generated
+  0028 SQL (33 distinct values; zero mismatches).
+- 0027 is additive to deployed data/app behavior apart from the compatible
+  appended `get_resources()` fields. All four new tables are RLS-on with no
+  policies; the three new RPCs and widened resource RPC use the approved-only
+  SECURITY DEFINER/pinned-search-path/revoke-then-grant pattern. No anon or
+  pending leak path was found.
+- 0028 conflict targets are backed by the declared primary/unique constraints;
+  all element/group subselect keys are unique; the apostrophe in generated
+  copy is correctly doubled. Re-run semantics preserve IDs and the CMS-owned
+  nullable link/YouTube fields; 0028-down then 0027-down is ordered cleanly.
+- Repo hygiene passes: zero `src/`, dependency, config, middleware, or env
+  changes; mockup/masters/`.env.local` are ignored and untracked; 47/47 assets
+  decode, total 11,230,480 bytes, maximum 357,458 bytes.
+- `pnpm run typecheck` and `pnpm run lint` pass. `pnpm run build` passes with
+  all 46 routes generated. One earlier identical build compiled and
+  type-checked, then suffered a non-reproducible Windows worker termination at
+  static-page 0/46; the immediate rerun completed normally.
+- No TEST Supabase connector was available in this review, so the database
+  apply/role simulation was not independently repeated; the committed sprint
+  record documents the completed TEST run and rollback/re-apply proof.
+
+**Merge recommendation: request changes** for the two Medium findings above;
+after those focused corrections, the implementation otherwise looks safe to
+merge.
+
+## Response — both findings fixed (2026-08-10)
+
+Both accepted; neither touches the DB objects already applied on TEST.
+
+**Finding 1 — `scripts/extract-mockup-spec.ts` now enforces what the brief
+claims.** Added `assertConstantCopy()` and applied it to all three copy
+families before any representative row is selected: one full signature per
+standard kind (`key/title/icon/desc/action/use`), one for templates, one for
+extras (`kind/icon/desc/use`) — a divergent future mockup now fails loudly
+instead of silently discarding variants. The `<600 KB` check moved into a
+shared `reportSize()` helper that the **PNG branch now calls too** (it was
+JPEG-only). **Negative test run:** a scratch copy of the mockup with one
+template `desc` mutated made the run abort with
+`ASSERT FAILED: templates: card copy is not constant across topics (2 variants
+of kind/icon/desc/use)` — before writing any file (the asserts precede the
+asset/spec/SQL stages). Temp files removed; working tree clean.
+
+**Finding 2 — the stale source-of-truth facts are corrected.** `ROADMAP.md`
+PP1 row now reads `platform_sections` (**5** — About at `num` 0 plus the 4
+toolkit pages, with the rationale inline), the exit gate reads approved
+**5**/10/33/15, and the asset line now describes the real pipeline (37 PNG
+masters optimized → `<slug>.jpg`, mozjpeg, each <600 KB, masters gitignored,
+plus the 5 heroes + 5 ornaments from base64). The `hard-asserts` clause also
+now mentions the copy-constancy invariant. This brief's header and its
+"Known nuances" entry now state that the TEST apply is **done and verified**,
+matching `PROJECT-STATUS.md` and the sprint record.
+
+**Re-verification after the fixes:** the generator was re-run — `docs/workspace-spec.json`,
+both `0028` files, and all 47 assets came out **byte-identical** (`git diff`
+empty for those paths), so the migrations already applied and verified on TEST
+remain exactly what is committed. `pnpm run typecheck` / `lint` / `build`
+green (46/46 routes). No `src/`, DB, config, or dependency change in the fix
+commit — only the script's assertions and two docs.
