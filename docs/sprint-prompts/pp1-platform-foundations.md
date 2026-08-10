@@ -1,6 +1,6 @@
 # PP1 — Private Platform Revamp foundations (sprint record)
 
-**Branch:** `claude/sprint-pp1-platform-foundations` (off `main` `d6ec65b`, the PR #69 merge) · **Built:** 2026-08-10 · **Status at save:** BUILD COMPLETE + **0027/0028 APPLIED + FULLY VERIFIED ON TEST** (same day — owner restored the paused project; results below) · **Review brief:** `docs/code-reviews/pp1-platform-foundations.md`
+**Branch:** `claude/sprint-pp1-platform-foundations` (off `main` `d6ec65b`, the PR #69 merge) · **Built:** 2026-08-10 · **Status at save:** BUILD COMPLETE + **0027/0028 APPLIED + FULLY VERIFIED ON TEST** + **Codex-reviewed (2 Medium, both fixed)** — READY FOR THE OWNER PR · **Review brief:** `docs/code-reviews/pp1-platform-foundations.md`
 
 ## Why this sprint exists
 
@@ -14,7 +14,7 @@ The owner delivered a final HTML prototype (`PH - Palestine House Final Mockup.h
 
 New-model mapping for later sprints: Overview/Simple-guide/Watch-out Read Now ← the three markdown columns (existing sanitized renderer reused) · Practical-checklist Read Now ← `checklist_items` read-only · template downloads ← existing signed-URL flow · the 132 standard docx files + 15 extras files are NOT uploaded yet → honest "coming soon" states until CMS v2 (PP6), mirroring the mockup's own "Video coming soon" toast.
 
-## What shipped (2 commits)
+## What shipped (5 commits)
 
 1. **`f7dd77b`** — trackers: `ROADMAP.md` Stage 4 (PP1–PP7 with per-sprint scope/exit gates + DB expand→contract timing) · `PROJECT-STATUS.md` §1 (PP1 active) + §5 (D-PP-a public-terminology drift parked; D-PP-b the four owner decisions).
 2. **`e83689c`** — the foundations (55 files, no `src/` change):
@@ -24,6 +24,9 @@ New-model mapping for later sprints: Overview/Simple-guide/Watch-out Read Now �
    - **`0028_platform_seed.up/.down.sql`** — GENERATED idempotent seed (natural-key upserts).
    - **`supabase/sql/verification/0027_verify_TEST_db_only.sql`** (role-simulated: approved 5/33/15/299+297-coded; pending zero everywhere; rollback-only) + **`0027_verify_PROD_safe_readonly.sql`** (for the owner's prod apply at the **PP2 merge gate**).
    - **47 assets** under `public/assets/workspace/` (11MB): 33 topic + 4 section photos (from the owner's 92MB PNG masters, moved to gitignored `docs/source-assets/design-refs/workspace/topic-masters/`), 5 page heroes + 5 misc ornaments (base64-only in the mockup), all sharp-optimized ≤600KB each.
+3. **`1723e5a`** — the Codex review brief + this record.
+4. **`c2dbe9e`** — the TEST apply/verification results + tracker flip to review-ready.
+5. **`0e3f903`** — the two Codex fixes (generator asserts + stale roadmap/brief facts; see the review section below).
 
 ## Gotchas / decisions captured for later sprints
 
@@ -53,10 +56,18 @@ Applied via the sanctioned `supabase-test` MCP as tracked migrations `0027_platf
 - **Idempotency proven:** re-running a seed upsert over existing rows changes nothing (topic id stable).
 - **Security advisors:** no new findings — only the pre-existing by-design patterns (default-deny "RLS enabled no policy" INFO rows, which now correctly include the 4 new tables, and the generic SECURITY-DEFINER-callable warnings that apply to every self-authorizing RPC in this system; the anon-callable `rls_auto_enable()` notice predates PP1).
 
+## Codex review + fixes (2026-08-10)
+
+**Verdict: REQUEST CHANGES — 2 Medium, both fixed** (full verdict + response in `docs/code-reviews/pp1-platform-foundations.md`). Codex confirmed no auth, approval-gate, RLS, data-safety, migration, or element-map defect: the 33 map pairs agree exactly across `ELEMENT_MAP`, the spec JSON, and the generated SQL; 0027 is additive to deployed behaviour; conflict targets are constraint-backed; repo hygiene clean; typecheck/lint/build green.
+
+1. **Generator didn't enforce two invariants the brief claimed** → added `assertConstantCopy()` over all three copy families (per standard kind, templates, extras) *before* a representative row is chosen, and moved the `<600 KB` check into a shared `reportSize()` the **PNG branch now calls too** (was JPEG-only). Proven by negative test: a mutated-copy mockup aborts the run with a clear message before writing any file.
+2. **Stale source-of-truth facts** → `ROADMAP.md` PP1 row corrected to `platform_sections` **5** (About + 4, rationale inline), exit gate to approved **5**/10/33/15, asset line to the real `.jpg` pipeline; the brief's TEST status now matches reality.
+
+**Re-verified after the fixes:** regenerating produced **byte-identical** spec, 0028 pair, and all 47 assets (`git diff` empty for those paths) — so what was applied and verified on TEST is still exactly what is committed. typecheck/lint/build green (46/46 routes). Fix commit touches no `src/`, DB, config, or dependency.
+
 ## Remaining before the PR merges (in order)
 
-1. Independent Codex review (brief: `docs/code-reviews/pp1-platform-foundations.md`; verdict slot empty — note for Codex: the TEST apply/verify above is DONE).
-2. Owner: open the PR → Vercel Preview (site must be **visually identical everywhere** — PP1 is spec/DB/assets only) → merge → delete the branch.
-3. **NO prod DB step in PP1.** 0027+0028 go to PROD by hand at the **PP2 merge gate** (runbook: apply 0027 → 0028 → run `0027_verify_PROD_safe_readonly.sql`).
+1. Owner: open the PR on `claude/sprint-pp1-platform-foundations` → Vercel Preview (site must be **visually identical everywhere** — PP1 is spec/DB/assets only) → merge → delete the branch.
+2. **NO prod DB step in PP1.** 0027+0028 go to PROD by hand at the **PP2 merge gate** (runbook: apply 0027 → 0028 → run `0027_verify_PROD_safe_readonly.sql`).
 
 **Next sprint: PP2 — workspace shell v2 + About landing** (scope from `ROADMAP.md` Stage 4 with `/sprint-prompt`).
