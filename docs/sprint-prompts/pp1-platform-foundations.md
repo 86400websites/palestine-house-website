@@ -1,6 +1,6 @@
 # PP1 — Private Platform Revamp foundations (sprint record)
 
-**Branch:** `claude/sprint-pp1-platform-foundations` (off `main` `d6ec65b`, the PR #69 merge) · **Built:** 2026-08-10 · **Status at save:** BUILD COMPLETE, **TEST apply pending** (TEST project paused) · **Review brief:** `docs/code-reviews/pp1-platform-foundations.md`
+**Branch:** `claude/sprint-pp1-platform-foundations` (off `main` `d6ec65b`, the PR #69 merge) · **Built:** 2026-08-10 · **Status at save:** BUILD COMPLETE + **0027/0028 APPLIED + FULLY VERIFIED ON TEST** (same day — owner restored the paused project; results below) · **Review brief:** `docs/code-reviews/pp1-platform-foundations.md`
 
 ## Why this sprint exists
 
@@ -39,12 +39,24 @@ New-model mapping for later sprints: Overview/Simple-guide/Watch-out Read Now �
 
 `pnpm run typecheck` / `lint` / `build` — all green (46 routes, unchanged set; PP1 touches no `src/`). `git status` clean of gitignored inputs (mockup + masters ignored; `.env.local` untouched).
 
+## TEST apply + verification results (2026-08-10, after the owner restored the project)
+
+Applied via the sanctioned `supabase-test` MCP as tracked migrations `0027_platform_ia` + `0028_platform_seed` (file content minus the explicit `begin;`/`commit;` wrappers — the MCP apply is atomic on its own; the committed files keep the wrappers for the owner's prod SQL-editor run, which is also a single-batch transaction). **Every check passed:**
+
+- **Structure (verify §0):** all 4 platform tables exist, `rls_enabled = true`, `client_policies = 0` on each.
+- **Seed shape (§1):** sections **5** · groups **10** · topics **33** · extras **15** (across **6** topics) · distinct/joined elements **33/33** · unmapped elements **0** · per-section topics **operate 15 / program 9 / setup 5 / support 4**.
+- **resources (§2):** `code` backfilled on **297** (booklets = the 2 NULLs), **0 malformed**, `doc_key` **0** as expected; `resources_element_doc_key_ux` present.
+- **Privileges (§3):** `anon = false` / `authenticated = true` on all four RPCs (`get_platform_sections/topics/extras`, widened `get_resources`).
+- **Role sims (§4, rollback-only): 9/9 pass** — approved member reads 5 / 33 / 15 / 299 (297 coded); pending member reads **0 rows from every RPC**, no errors.
+- **Mapping spot-checks on real rows:** `launching-a-new-house → i2`, `menu-and-palestinian-culinary-identity → k1`, `crisis-management → i3`, `guest-journey-and-member-journey → a2` — all correct titles.
+- **Reversibility proven:** `0028.down` → `0027.down` left zero platform tables/RPCs/columns, restored the exact 0014 `get_resources` signature, and content untouched (**299 resources / 33 elements / 818 checklist items**); re-applied up cleanly to the final state.
+- **Idempotency proven:** re-running a seed upsert over existing rows changes nothing (topic id stable).
+- **Security advisors:** no new findings — only the pre-existing by-design patterns (default-deny "RLS enabled no policy" INFO rows, which now correctly include the 4 new tables, and the generic SECURITY-DEFINER-callable warnings that apply to every self-authorizing RPC in this system; the anon-callable `rls_auto_enable()` notice predates PP1).
+
 ## Remaining before the PR merges (in order)
 
-1. **Owner: restore the paused TEST Supabase project** (`sdszcralogcrujtyghig` — MCP timeouts on 2026-08-10).
-2. Claude: apply `0027` → `0028` on TEST (supabase-test MCP, sanctioned read/write) → run `0027_verify_TEST_db_only.sql` → every EXPECT passes → prove reversibility (down → re-up) → append results here.
-3. Independent Codex review (brief: `docs/code-reviews/pp1-platform-foundations.md`; verdict slot empty).
-4. Owner: open the PR → Vercel Preview (site must be **visually identical everywhere** — PP1 is spec/DB/assets only) → merge → delete the branch.
-5. **NO prod DB step in PP1.** 0027+0028 go to PROD by hand at the **PP2 merge gate** (runbook: apply 0027 → 0028 → run `0027_verify_PROD_safe_readonly.sql`).
+1. Independent Codex review (brief: `docs/code-reviews/pp1-platform-foundations.md`; verdict slot empty — note for Codex: the TEST apply/verify above is DONE).
+2. Owner: open the PR → Vercel Preview (site must be **visually identical everywhere** — PP1 is spec/DB/assets only) → merge → delete the branch.
+3. **NO prod DB step in PP1.** 0027+0028 go to PROD by hand at the **PP2 merge gate** (runbook: apply 0027 → 0028 → run `0027_verify_PROD_safe_readonly.sql`).
 
 **Next sprint: PP2 — workspace shell v2 + About landing** (scope from `ROADMAP.md` Stage 4 with `/sprint-prompt`).
