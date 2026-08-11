@@ -39,3 +39,6 @@ Thumbs.db
 docs/page-copy/
 docs/page-designs/
 docs/source-assets/
+
+# The owner's mockup copy at docs/ root — kept on disk until the PP series closes (PP7); never commit it
+docs/PH - Palestine House Final.html
