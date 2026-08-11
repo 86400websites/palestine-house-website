@@ -1,13 +1,14 @@
 -- 0027_verify_TEST_db_only.sql
--- Role-simulated proof for migrations 0027_platform_ia + 0028_platform_seed
--- (PP1 — the new workspace IA presentation layer). TEST DATABASE ONLY: section 4
--- switches role inside begin ... rollback. It leaves NO permanent data. For
--- production use the read-only companion file.
+-- Role-simulated proof for migrations 0027_platform_ia + 0028_platform_seed as
+-- corrected by PP1.1 (D-PP-c: 3-card model, extras dropped). TEST DATABASE ONLY:
+-- section 4 switches role inside begin ... rollback. It leaves NO permanent
+-- data. For production use the read-only companion file.
 -- Run the whole file after applying 0027 THEN 0028; every EXPECT must pass.
 
 -- ===========================================================================
--- 0) The four platform tables exist, RLS is enabled, and there are ZERO client
---    policies (default-deny; RPC-only reads — the 0011 posture).
+-- 0) The three platform tables exist, RLS is enabled, and there are ZERO client
+--    policies (default-deny; RPC-only reads — the 0011 posture). The
+--    pre-correction extras table/RPC must NOT exist.
 -- ===========================================================================
 select
   t.relname,
@@ -18,26 +19,32 @@ join pg_namespace n on n.oid = t.relnamespace
 left join pg_policy p on p.polrelid = t.oid
 where n.nspname = 'public'
   and t.relname in
-    ('platform_sections', 'platform_groups', 'platform_topics', 'platform_extras')
+    ('platform_sections', 'platform_groups', 'platform_topics')
 group by t.relname, t.relrowsecurity
 order by t.relname;
--- EXPECT: four rows, rls_enabled = true, client_policies = 0 on every row.
+-- EXPECT: three rows, rls_enabled = true, client_policies = 0 on every row.
+
+select
+  to_regclass('public.platform_extras') as extras_table,
+  (select count(*) from pg_proc p
+     join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public'
+       and p.proname = 'get_platform_extras')  as extras_rpc;
+-- EXPECT: extras_table = null, extras_rpc = 0 (the PP1.1 correction re-applied).
 
 -- ===========================================================================
--- 1) Seed shape: 5 sections (about + 4) / 10 groups / 33 topics (5/15/9/4)
---    / 15 extras across 6 topics; every element surfaces exactly once.
+-- 1) Seed shape: 5 sections (about + 4) / 10 groups / 33 topics (5/15/9/4);
+--    every element surfaces exactly once.
 -- ===========================================================================
 select
   (select count(*) from public.platform_sections)                    as sections,
   (select count(*) from public.platform_groups)                      as groups,
   (select count(*) from public.platform_topics)                      as topics,
-  (select count(*) from public.platform_extras)                      as extras,
-  (select count(distinct topic_id) from public.platform_extras)      as extra_topics,
   (select count(distinct element_id) from public.platform_topics)    as distinct_elements,
   (select count(*) from public.platform_topics t
      join public.elements e on e.id = t.element_id)                  as topics_joined;
--- EXPECT: sections = 5, groups = 10, topics = 33, extras = 15,
---         extra_topics = 6, distinct_elements = 33, topics_joined = 33.
+-- EXPECT: sections = 5, groups = 10, topics = 33,
+--         distinct_elements = 33, topics_joined = 33.
 
 select g.section_slug, count(t.id) as topic_count
 from public.platform_groups g
@@ -57,7 +64,7 @@ where t.id is null;
 -- 2) resources: additive columns + deterministic code backfill.
 --    All 297 private templates follow the <slug>/tNN- path convention, so all
 --    get a code; the 2 public booklets (bare filenames) stay NULL. doc_key is
---    NULL everywhere until the owner uploads standard docs via CMS v2 (PP6).
+--    NULL everywhere until the owner fills the 3 card slots via CMS v2 (PP6).
 -- ===========================================================================
 select
   count(*) filter (where code is not null)                    as coded,
@@ -72,8 +79,16 @@ select indexname from pg_indexes
 where schemaname = 'public' and indexname = 'resources_element_doc_key_ux';
 -- EXPECT: one row.
 
+-- The CHECK proves the PP1.1 correction is what actually applied.
+select pg_get_constraintdef(oid) as doc_key_check
+from pg_constraint
+where conname = 'resources_doc_key_shape'
+  and conrelid = 'public.resources'::regclass;
+-- EXPECT: one row listing 'overview', 'guide', 'template' —
+--         and NOT 'checklist' / 'watch'.
+
 -- ===========================================================================
--- 3) EXECUTE privileges: anon denied, authenticated granted, on the three new
+-- 3) EXECUTE privileges: anon denied, authenticated granted, on the two new
 --    RPCs and the widened get_resources().
 -- ===========================================================================
 select
@@ -84,9 +99,9 @@ from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
   and p.proname in ('get_platform_sections', 'get_platform_topics',
-                    'get_platform_extras', 'get_resources')
+                    'get_resources')
 order by p.proname;
--- EXPECT: four rows; anon_execute = false, authenticated_execute = true on all.
+-- EXPECT: three rows; anon_execute = false, authenticated_execute = true on all.
 
 -- ===========================================================================
 -- 4) Role simulations (rollback-only): an approved member reads the full IA
@@ -111,7 +126,6 @@ declare
   v_pending_uid  uuid;
   v_sections     integer;
   v_topics       integer;
-  v_extras       integer;
   v_resources    integer;
   v_coded        integer;
 begin
@@ -132,7 +146,6 @@ begin
 
   select count(*) into v_sections  from public.get_platform_sections();
   select count(*) into v_topics    from public.get_platform_topics();
-  select count(*) into v_extras    from public.get_platform_extras();
   select count(*) into v_resources from public.get_resources();
   select count(*) into v_coded     from public.get_resources() where code is not null;
 
@@ -142,8 +155,6 @@ begin
      v_sections::text,  v_sections  = 5),
     (4, 'approved get_platform_topics',   '33',
      v_topics::text,    v_topics    = 33),
-    (4, 'approved get_platform_extras',   '15',
-     v_extras::text,    v_extras    = 15),
     (4, 'approved get_resources',         '299',
      v_resources::text, v_resources = 299),
     (4, 'approved get_resources coded',   '297',
@@ -156,7 +167,6 @@ begin
 
   select count(*) into v_sections  from public.get_platform_sections();
   select count(*) into v_topics    from public.get_platform_topics();
-  select count(*) into v_extras    from public.get_platform_extras();
   select count(*) into v_resources from public.get_resources();
 
   perform set_config('role', 'postgres', true);
@@ -165,8 +175,6 @@ begin
      v_sections::text,  v_sections  = 0),
     (4, 'pending get_platform_topics',   '0',
      v_topics::text,    v_topics    = 0),
-    (4, 'pending get_platform_extras',   '0',
-     v_extras::text,    v_extras    = 0),
     (4, 'pending get_resources',         '0',
      v_resources::text, v_resources = 0);
 end;

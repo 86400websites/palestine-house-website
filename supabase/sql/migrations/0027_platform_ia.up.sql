@@ -1,9 +1,11 @@
 -- 0027_platform_ia.up.sql
 -- PP1 (Private Platform Revamp): the new workspace information architecture as a pure
 -- PRESENTATION LAYER over the existing content. The owner's final mockup regroups the
--- same 33 topics ("elements") into 4 sections -> 10 groups -> 33 topics; bodies
--- (elements.overview_md / simple_guide_md / watch_out_for_md), checklist_items and
--- resources are untouched and keep serving all content — zero re-upload, by design.
+-- same 33 topics ("elements") into 4 sections -> 10 groups -> 33 topics. As amended by
+-- D-PP-c (PP1.1, 2026-08-11): each topic surfaces 3 cards (Overview / Simple guide /
+-- Template). elements.overview_md / simple_guide_md and resources keep serving content
+-- with zero re-upload; watch_out_for_md and checklist_items stay in place but DORMANT
+-- (no consumer) until the PP7 contraction decision.
 --
 -- ADDITIVE ONLY. Old app code never touches these tables; the one changed signature
 -- (get_resources) is widened in-place inside this transaction (columns appended, none
@@ -11,7 +13,7 @@
 -- to production BEFORE the PP2 UI ships (expand -> migrate -> contract; the contraction
 -- migration lands after PP7 QA).
 --
--- Access model: identical to 0011 — all four new tables are RLS default-deny with NO
+-- Access model: identical to 0011 — all three new tables are RLS default-deny with NO
 -- client policy; approved partners read ONLY via the is_approved()-gated SECURITY
 -- DEFINER RPCs below. Structural metadata only — nothing here stores content bodies.
 --
@@ -82,26 +84,10 @@ create table if not exists public.platform_topics (
   updated_at     timestamptz not null default now()
 );
 
--- "More guides" extra file slots (15 rows). resource_id stays NULL until the owner
--- uploads the file via CMS v2 (PP6) — the UI renders an honest "coming soon" state
--- meanwhile. source_filename is the upload hint shown in the CMS.
-create table if not exists public.platform_extras (
-  id              uuid primary key default gen_random_uuid(),
-  topic_id        uuid        not null references public.platform_topics (id) on delete cascade,
-  title           text        not null,
-  source_filename text,
-  sort_order      integer     not null default 0,
-  resource_id     uuid unique references public.resources (id) on delete set null,
-  created_at      timestamptz not null default now(),
-  updated_at      timestamptz not null default now(),
-  constraint platform_extras_topic_title_key unique (topic_id, title)
-);
-
 -- RLS: enable + default-deny, no client policy (0011 pattern). RPC-only reads.
 alter table public.platform_sections enable row level security;
 alter table public.platform_groups   enable row level security;
 alter table public.platform_topics   enable row level security;
-alter table public.platform_extras   enable row level security;
 
 -- ---------------------------------------------------------------------------
 -- resources: two additive columns
@@ -119,16 +105,17 @@ set code = upper(substring(storage_path from '/([a-z][0-9]{2})-'))
 where code is null
   and storage_path ~ '/[a-z][0-9]{2}-';
 
--- doc_key: which of a topic's 4 standard reading docs a file download belongs to
--- (overview / guide / checklist / watch). NULL for templates/extras/booklets. The
--- 132 standard files don't exist yet — the owner uploads them via CMS v2 (PP6),
--- which inserts resources rows carrying element_id + doc_key. At most one file
--- per (element, doc kind).
+-- doc_key: which of a topic's 3 card slots a file download serves
+-- (overview / guide / template — D-PP-c). NULL for the dormant coded template
+-- library and booklets. None of these files exist yet — the owner fills the
+-- slots via CMS v2 (PP6): uploading a resources row carrying element_id +
+-- doc_key, or (for 'template') promoting one of the dormant coded rows by
+-- setting its doc_key. At most one file per (element, slot).
 alter table public.resources add column if not exists doc_key text;
 
 alter table public.resources drop constraint if exists resources_doc_key_shape;
 alter table public.resources add constraint resources_doc_key_shape
-  check (doc_key is null or doc_key in ('overview', 'guide', 'checklist', 'watch'));
+  check (doc_key is null or doc_key in ('overview', 'guide', 'template'));
 
 create unique index if not exists resources_element_doc_key_ux
   on public.resources (element_id, doc_key)
@@ -176,8 +163,8 @@ revoke execute on function public.get_platform_sections() from public, anon;
 grant execute on function public.get_platform_sections() to authenticated;
 
 -- One flat 33-row join serving every toolkit page, the global search index and
--- the reader breadcrumbs. element_slug/element_code let the app join bodies,
--- checklist items and resources without extra round-trips.
+-- the reader breadcrumbs. element_slug/element_code let the app join bodies
+-- and resources without extra round-trips.
 create or replace function public.get_platform_topics()
 returns table (
   id             uuid,
@@ -218,28 +205,6 @@ $$;
 
 revoke execute on function public.get_platform_topics() from public, anon;
 grant execute on function public.get_platform_topics() to authenticated;
-
-create or replace function public.get_platform_extras()
-returns table (
-  id          uuid,
-  topic_id    uuid,
-  title       text,
-  sort_order  integer,
-  resource_id uuid
-)
-language sql
-security definer
-set search_path = ''
-stable
-as $$
-  select x.id, x.topic_id, x.title, x.sort_order, x.resource_id
-  from public.platform_extras x
-  where public.is_approved()
-  order by x.topic_id, x.sort_order, x.title;
-$$;
-
-revoke execute on function public.get_platform_extras() from public, anon;
-grant execute on function public.get_platform_extras() to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- get_resources(): widened in place (code + doc_key appended). Return type
