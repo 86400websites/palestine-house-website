@@ -1,0 +1,153 @@
+/* ---------------------------------------------------------------------------
+   Palestine House — workspace v2 foundations (PP2, Stage 4 Private Platform
+   Revamp).
+
+   The gated workspace is being rebuilt to the owner's final mockup. Until PP5
+   tears the old workspace down, BOTH design systems ship in the same bundle,
+   so this layer is written to be incapable of touching anything outside the
+   new shell:
+
+     - every token is declared on `.pw-root`, never on `:root`, so no public
+       page or legacy workspace screen can inherit them;
+     - every rule is nested under `.pw-root`, which also wins specificity ties
+       against the legacy `.ws-*` rules in globals.css;
+     - nothing here targets an element or class the old workspace uses, and
+       `.adm-toast*` is deliberately untouched (admin + legacy screens still
+       depend on it — the new toast lands in PP2 2d as `.pw-toast`).
+
+   Tokens are the mockup's `:root` block verbatim (values recorded here so the
+   7.7MB mockup is never a build input). Fonts are NOT re-declared: the root
+   layout already loads Spectral + Inter via next/font and exposes them as
+   --font-display / --font-body, which is exactly the pair the mockup asks for.
+
+   Components (header, footer, toast, cards) arrive in the later PP2 sub-steps.
+--------------------------------------------------------------------------- */
+
+.pw-root {
+  /* --- Mockup palette ---------------------------------------------------- */
+  --pw-cream-50: #faf6ee;
+  --pw-cream-100: #f5efe5;
+  --pw-cream-150: #f2ebe0;
+  --pw-cream-200: #ece2d2;
+  --pw-white: #ffffff;
+  --pw-char-950: #201a15;
+  --pw-char-900: #2a241e;
+  --pw-char-800: #3c342c;
+  --pw-muted: #655d55;
+  --pw-muted-2: #7b7268;
+  --pw-line: #e4dccd;
+  --pw-line-strong: #cfc3b0;
+  --pw-olive-50: #f5f7f1;
+  --pw-olive-100: #e7eee8;
+  --pw-olive-300: #bfcdbe;
+  --pw-olive-600: #446b58;
+  --pw-olive-700: #315b49;
+  --pw-olive-800: #254b3c;
+  --pw-moss-900: #20230e;
+  --pw-moss-950: #171a0e;
+  --pw-copper-300: #c89a6a;
+  --pw-copper-500: #b0713d;
+  --pw-copper-700: #875329;
+  --pw-error: #963e31;
+  --pw-success: #416b4c;
+
+  /* --- Layout / motion --------------------------------------------------- */
+  --pw-header-h: 74px;
+  --pw-container: 1240px;
+  --pw-shadow-xs: 0 1px 2px rgba(42, 36, 30, 0.04);
+  --pw-shadow-sm: 0 8px 24px rgba(42, 36, 30, 0.06);
+  --pw-shadow-md: 0 18px 48px rgba(42, 36, 30, 0.12);
+  --pw-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* --- Scope base -------------------------------------------------------- */
+  background: var(--pw-white);
+  color: var(--pw-char-900);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The mockup's typographic base, scoped. Tailwind preflight already zeroes
+   heading/paragraph margins; these restate the display face + tracking the
+   mockup relies on rather than re-resetting what preflight handles. */
+.pw-root :is(h1, h2, h3) {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.018em;
+}
+
+.pw-root :is(button, input, select, textarea) {
+  font: inherit;
+  color: inherit;
+}
+
+.pw-root button {
+  cursor: pointer;
+}
+
+.pw-root a {
+  color: inherit;
+}
+
+.pw-root img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Copper focus ring — the mockup's accessibility affordance. Scoped so the
+   public site keeps its own --ring treatment. */
+.pw-root :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--pw-copper-500);
+  outline-offset: 3px;
+}
+
+/* --- Primitives ---------------------------------------------------------- */
+
+.pw-root .pw-container {
+  width: min(var(--pw-container), calc(100% - 48px));
+  margin-inline: auto;
+}
+
+.pw-root .pw-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.pw-root .pw-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+@media (max-width: 620px) {
+  .pw-root .pw-container {
+    width: min(var(--pw-container), calc(100% - 24px));
+  }
+}
+
+/* House motion rule (DESIGN.md §8) applies to the new shell too. */
+@media (prefers-reduced-motion: reduce) {
+  .pw-root *,
+  .pw-root *::before,
+  .pw-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
