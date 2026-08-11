@@ -24,6 +24,11 @@
  * Per-kind card copy is CONSTANT across all topics in the mockup — it ships as app
  * constants in PP3, not DB rows. Only structural metadata is seeded.
  *
+ * Workspace chrome copy (PP2, 2026-08-12): the header/footer strings live in the
+ * mockup's markup + render functions rather than #appData, so PP1 never captured them.
+ * They are extracted into spec.chrome (asserted, so mockup drift fails loudly) and the
+ * app reads them from the committed spec — the 7.7MB mockup is never a build input.
+ *
  * 3-card transform (D-PP-c, owner 2026-08-11): the mockup still shows 4 standard
  * cards + "More guides" extras per topic; the owner's instruction supersedes it.
  * The emitted spec/seed keep only Overview + Simple guide and synthesize the single
@@ -302,6 +307,114 @@ async function main() {
 
   console.log("3-card transform applied: 66 kept std (of 132) / Template card synthesized / extras dropped / 1 intro trim");
 
+  // ---- 2c. Workspace chrome copy (PP2) ----------------------------------------------
+  // The header/footer strings live in the mockup's markup + render functions, not in
+  // #appData, so PP1 never captured them. PP2 builds the real chrome and must use them
+  // verbatim — extract them here so the app reads the committed spec, never the 7.7MB
+  // mockup. Every capture is asserted: a mockup edit that moves or renames any of these
+  // fails the run loudly instead of silently shipping stale or missing copy.
+  const grab = (re: RegExp, label: string): string => {
+    const m = re.exec(html!);
+    assert(m && m[1] !== undefined, `chrome copy: ${label} not found in the mockup`);
+    return m![1].trim();
+  };
+
+  const navBlock = grab(
+    /function pageNavMarkup\(mobile=false\)\{\s*const items = \[([\s\S]*?)\];/,
+    "pageNavMarkup items",
+  );
+  const navItems = [...navBlock.matchAll(/\['([a-z]+)','([^']*)','([^']*)'\]/g)].map((m) => ({
+    page: m[1],
+    label: m[2],
+    tip: m[3],
+  }));
+  assert(navItems.length === 5, `expected 5 nav items, got ${navItems.length}`);
+  assert(
+    navItems.map((n) => n.page).join("/") === "about/setup/operate/program/support",
+    `nav order drifted: ${navItems.map((n) => n.page).join("/")}`,
+  );
+  for (const n of navItems) {
+    assert(n.label && n.tip, `nav item '${n.page}' is missing a label or tooltip`);
+  }
+
+  // The footer is one template literal assigned to #siteFooter — slice it out, then read
+  // only the static text (the ${…} interpolations are asset paths the app already owns).
+  const footerHtml = grab(
+    /\$\('#siteFooter'\)\.innerHTML\s*=\s*`([\s\S]*?)`;/,
+    "#siteFooter template",
+  );
+  const fgrab = (re: RegExp, label: string): string => {
+    const m = re.exec(footerHtml);
+    assert(m && m[1] !== undefined, `chrome copy: footer ${label} not found`);
+    return m![1].trim();
+  };
+
+  const footerCols = [...footerHtml.matchAll(/<div class="footer-col([^"]*)">([\s\S]*?)<\/div>/g)];
+  assert(footerCols.length === 5, `expected 5 footer columns, got ${footerCols.length}`);
+  assert(footerCols[0][1].includes("footer-brand"), "the first footer column is no longer the brand column");
+  const footerLinkCols = footerCols.slice(1).map(([, , inner]) => {
+    const title = /<span class="footer-title">([^<]*)<\/span>/.exec(inner);
+    assert(title, "a footer column is missing its title");
+    return {
+      title: title![1].trim(),
+      links: [...inner.matchAll(/<button class="footer-link"[^>]*>([^<]*)<\/button>/g)].map((m) =>
+        m[1].trim(),
+      ),
+      context: [...inner.matchAll(/<span class="footer-context">([^<]*)<\/span>/g)].map((m) =>
+        m[1].trim(),
+      ),
+    };
+  });
+  assert(
+    footerLinkCols.every((c) => c.title && (c.links.length > 0 || c.context.length > 0)),
+    "a footer column came out empty",
+  );
+
+  const chrome = {
+    skipLink: grab(/<a class="skip-link" href="#main-content">([^<]*)<\/a>/, "skip link"),
+    brand: {
+      href: grab(/<a class="brand" href="([^"]*)"/, "brand href"),
+      ariaLabel: grab(/<a class="brand"[^>]*aria-label="([^"]*)"/, "brand aria-label"),
+      logoAlt: grab(/<img class="brand-logo brand-logo--overlay"[^>]*alt="([^"]*)"/, "brand logo alt"),
+    },
+    nav: {
+      ariaLabel: grab(/<nav id="desktopNav"[^>]*aria-label="([^"]*)"/, "desktop nav aria-label"),
+      mobileAriaLabel: grab(/<nav id="mobileNav" aria-label="([^"]*)"/, "mobile nav aria-label"),
+      items: navItems,
+    },
+    account: {
+      label: grab(/<button class="header-action account"[^>]*>([^<]*)<\/button>/, "account label"),
+      ariaLabel: grab(/<button class="header-action account"[^>]*aria-label="([^"]*)"/, "account aria-label"),
+    },
+    menuButton: {
+      ariaLabel: grab(/<button class="header-action icon-only menu-button"[^>]*aria-label="([^"]*)"/, "menu aria-label"),
+    },
+    documentTitleSuffix: grab(/document\.title=`\$\{DATA\.pageMeta\[page\]\.label\} — ([^`]*)`/, "document title suffix"),
+    footer: {
+      cta: {
+        heading: fgrab(/<h2>([^<]*)<\/h2>/, "CTA heading"),
+        lead: fgrab(/<div class="footer-cta-row"><p>([^<]*)<\/p>/, "CTA lead"),
+        searchAction: fgrab(/data-open-search>([^$<]*)\$\{svg/, "search button label"),
+        askAction: fgrab(/data-scroll-target="ask-hq">([^$<]*)\$\{svg/, "Ask HQ button label"),
+        photoAlt: fgrab(/<img class="footer-photo"[^>]*alt="([^"]*)"/, "CTA photo alt"),
+      },
+      brand: {
+        logoAlt: fgrab(/<img class="footer-brand-logo"[^>]*alt="([^"]*)"/, "brand logo alt"),
+        blurb: fgrab(/<p>([^<]*)<\/p><p class="footer-arabic"/, "brand blurb"),
+        arabic: fgrab(/<p class="footer-arabic" lang="ar" dir="rtl">([^<]*)<\/p>/, "Arabic tagline"),
+      },
+      columns: footerLinkCols,
+      bottom: {
+        tagline: fgrab(/<span class="footer-tagline">([^<]*)<\/span>/, "footer tagline"),
+        copyright: fgrab(/<span class="footer-copy">([^<]*)<\/span>/, "footer copyright"),
+      },
+    },
+  };
+
+  console.log(
+    `chrome copy extracted: ${chrome.nav.items.length} nav items + ${chrome.footer.columns.length} footer columns`,
+  );
+
   // ---- 3. Assets --------------------------------------------------------------------
   for (const dir of ["topics", "sections", "heroes", "misc"]) {
     await fs.mkdir(path.join(OUT_ASSETS, dir), { recursive: true });
@@ -411,6 +524,8 @@ async function main() {
       TEMPLATE_CARD,
     ],
     templateCopy: { desc: templates[0].desc, use: templates[0].use },
+    // Header/footer strings for the PP2 workspace chrome, verbatim from the mockup.
+    chrome,
     pages: Object.fromEntries(
       Object.entries(pageMeta).map(([page, m]) => [
         page,

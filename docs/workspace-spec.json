@@ -42,6 +42,109 @@
     "desc": "A ready-to-use file for your team.",
     "use": "Download this when you need a practical working document for the topic."
   },
+  "chrome": {
+    "skipLink": "Skip to content",
+    "brand": {
+      "href": "https://www.palestine-house.com/",
+      "ariaLabel": "Palestine House — public home page",
+      "logoAlt": "Palestine House — Our Culture Embassy"
+    },
+    "nav": {
+      "ariaLabel": "Partner platform",
+      "mobileAriaLabel": "Partner platform, mobile",
+      "items": [
+        {
+          "page": "about",
+          "label": "About",
+          "tip": "Start here."
+        },
+        {
+          "page": "setup",
+          "label": "Setup",
+          "tip": "Get the foundations right."
+        },
+        {
+          "page": "operate",
+          "label": "Operate",
+          "tip": "Run the House."
+        },
+        {
+          "page": "program",
+          "label": "Program",
+          "tip": "Plan experiences."
+        },
+        {
+          "page": "support",
+          "label": "Support",
+          "tip": "Get help."
+        }
+      ]
+    },
+    "account": {
+      "label": "Partner Platform",
+      "ariaLabel": "Open Partner Platform"
+    },
+    "menuButton": {
+      "ariaLabel": "Open menu"
+    },
+    "documentTitleSuffix": "Palestine House Partner Platform",
+    "footer": {
+      "cta": {
+        "heading": "Need help finding the right resource?",
+        "lead": "Search every guide and template, or send one clear question to HQ.",
+        "searchAction": "Search all resources",
+        "askAction": "Ask HQ",
+        "photoAlt": "Guests gathered at a lantern-lit Palestine House doorway"
+      },
+      "brand": {
+        "logoAlt": "Palestine House — Our Culture Embassy",
+        "blurb": "A clear, shared home for every guide, checklist, video, and template your House needs.",
+        "arabic": "بيت فلسطين في كل مدينة"
+      },
+      "columns": [
+        {
+          "title": "Platform",
+          "links": [
+            "About",
+            "Setup",
+            "Operate"
+          ],
+          "context": []
+        },
+        {
+          "title": "Knowledge",
+          "links": [
+            "Program",
+            "Support",
+            "Search everything"
+          ],
+          "context": []
+        },
+        {
+          "title": "Account",
+          "links": [
+            "Partner Platform"
+          ],
+          "context": [
+            "Private access for approved Palestine House partners."
+          ]
+        },
+        {
+          "title": "Help",
+          "links": [
+            "Ask HQ"
+          ],
+          "context": [
+            "Live files and permissions connect through the authenticated platform."
+          ]
+        }
+      ],
+      "bottom": {
+        "tagline": "Passion inspires. Discipline delivers.",
+        "copyright": "© Palestine House · Partner Platform"
+      }
+    }
+  },
   "pages": {
     "about": {
       "label": "About",
