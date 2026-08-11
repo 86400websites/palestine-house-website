@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Date merged** | **Not yet merged.** Built + pushed 2026-08-12 (5 commits `3e2d57e`→`66fb54d`). ⚠️ **One step open: the TEST re-apply — run the SQL, test and verify via the `supabase-test` MCP, FIRST thing next session** (see Follow-ups). Owner then merges the `docs/pp1-close` PR, then this branch's PR. |
+| **Date merged** | **Not yet merged — but complete.** Built + pushed 2026-08-12; the **TEST re-apply ran and verified green the same day** (fresh session, `supabase-test` MCP attached as predicted). Owner merges the `docs/pp1-close` PR, then this branch's PR. PROD apply stays at the PP2 merge gate. |
 | **Branch / PR** | `claude/pp1-1-card-model` (off `docs/pp1-close`, which is 1 docs commit ahead of `main`) / PR to be opened by the owner |
 | **Goal** | Adopt the owner's **3-card topic model** (decision **D-PP-c**, 2026-08-11) across everything PP1 shipped, **pre-PROD**: each of the 33 focus areas shows exactly **Overview / Simple guide / Template** — the Practical-checklist and What-to-watch-out-for cards removed, ONE owner-chosen template per focus area (via CMS v2, coming-soon until upload), the 15 "More guides" extras dropped entirely, Watch Video kept. |
 
@@ -48,7 +48,15 @@ template card = owner picks/uploads via CMS (coming soon); extras dropped, video
 - Full branch diff reviewed (12 files, +206/−684). Hygiene grep: the only `platform_extras`/`get_platform_extras`/`additional_resources` references left are the two annotated defensive down-drops + the intentional verification negatives; `src/` has zero.
 - 0028 diff vs the merged PP1 version = header trim + extras block gone + down-delete gone + the one signed-off intro trim. Nothing else.
 - `git check-ignore` confirms the mockup copy can no longer be committed accidentally.
-- ⚠️ **NOT yet done: the TEST re-apply** (see Follow-ups) — the `supabase-test` MCP was re-added by the owner mid-session via terminal, but a running session cannot hot-attach an MCP server; it connects in NEW sessions only.
+- ✅ **TEST re-apply done (2026-08-12, next session as planned).** Ran whole, in order, via `supabase-test` `execute_sql`: `0028.down` → `0027.down` → corrected `0027.up` → corrected `0028.up` → `0027_verify_TEST_db_only.sql`. **Every EXPECT passed:**
+  - 3 platform tables, `rls_enabled = true`, `client_policies = 0` on each.
+  - `extras_table = null`, `extras_rpc = 0` — the correction is what actually applied.
+  - sections 5 · groups 10 · topics 33 · distinct elements 33 · topics joined 33 · unmapped elements 0; per-section operate 15 / program 9 / setup 5 / support 4.
+  - `resources`: coded 297 · uncoded 2 (booklets) · malformed 0 · doc_keys 0; `resources_element_doc_key_ux` present; `pg_get_constraintdef` = `CHECK (doc_key IS NULL OR doc_key = ANY (ARRAY['overview','guide','template']))` — no `checklist`/`watch`.
+  - EXECUTE: `anon` false / `authenticated` true on `get_platform_sections`, `get_platform_topics`, `get_resources`.
+  - Role sims 7/7: approved 5 / 33 / 299 / 297 coded; pending 0 / 0 / 0.
+  - `get_advisors(security)`: no new findings — the `platform_*` `rls_enabled_no_policy` INFOs and the two `authenticated`-executable SECURITY DEFINER WARNs are the intended 0011 posture; everything else pre-dates this migration.
+- **Transcription proof (extra, beyond the runbook).** The MCP takes SQL as a string, so the seed was typed out rather than piped from the file; to rule out any transcription drift the seeded rows were digest-compared against the generator's own `docs/workspace-spec.json`: canonical `|`-joined lines, sorted, md5 — **topics `8051ef779a67fe8b570656c4d15fe169` and sections `983e2df37e910f1e9f5cd90228aaa766` matched on both sides**, so what landed in TEST is byte-exact with the spec (all 33 topic rows incl. intro/description/icon/image/positions/sort, and the 10 group names/descriptions/sorts embedded in the topic lines).
 
 ## Deviations & learnings
 
@@ -60,8 +68,7 @@ template card = owner picks/uploads via CMS (coming soon); extras dropped, video
 
 ## Follow-ups
 
-1. ⚠️ **NEXT SESSION, FIRST: run the SQL + test + verify on TEST via the `supabase-test` MCP** (it is authorized and will connect in a fresh session). Runbook (also in `pp1-platform-foundations.md` → PP1.1 addendum) — run each file whole, in order:
-   ① `supabase/sql/migrations/0028_platform_seed.down.sql` ② `supabase/sql/migrations/0027_platform_ia.down.sql` ③ `supabase/sql/migrations/0027_platform_ia.up.sql` ④ `supabase/sql/migrations/0028_platform_seed.up.sql` ⑤ `supabase/sql/verification/0027_verify_TEST_db_only.sql` — **every EXPECT must pass**: three platform tables (RLS on, 0 policies) · `extras_table = null`, `extras_rpc = 0` · 5/10/33 · coded 297, doc_keys 0 · `doc_key_check` lists overview/guide/template · role sims approved 5/33/299/297, pending 0s. TEST only; PROD never had 0027/0028. Then flip PP1.1 to ✅ in ROADMAP + PROJECT-STATUS (+ this record's header) and run `get_advisors`.
+1. ~~TEST re-apply~~ ✅ **DONE 2026-08-12** — see Checks & results. TEST now carries the corrected 0027+0028; trackers flipped.
 2. **Owner merges** the `docs/pp1-close` PR first, then this branch's PR.
 3. **Then PP2 — workspace shell v2 + About landing** (ready-to-run gated prompt in the 2026-08-12 session close; re-derivable with `/sprint-prompt`). **At the PP2 merge gate the owner applies the corrected 0027 + 0028 to PROD by hand** + runs `0027_verify_PROD_safe_readonly.sql` (EXPECT 5/10/33 · 297 coded · doc_keys 0 · no `platform_extras` · anon denied).
 4. Optional: Codex review of this branch's diff vs `main` (schema class) before merge.
