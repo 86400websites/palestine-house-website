@@ -1,6 +1,8 @@
 -- 0027_verify_TEST_db_only.sql
 -- Role-simulated proof for migrations 0027_platform_ia + 0028_platform_seed as
--- corrected by PP1.1 (D-PP-c: 3-card model, extras dropped). TEST DATABASE ONLY:
+-- corrected by PP1.1 (extras dropped) and PP2 (D-PP-f: Overview card removed,
+-- one 'guide' doc slot, templates back to a many-per-topic grid reached by
+-- element_id). TEST DATABASE ONLY:
 -- section 4 switches role inside begin ... rollback. It leaves NO permanent
 -- data. For production use the read-only companion file.
 -- Run the whole file after applying 0027 THEN 0028; every EXPECT must pass.
@@ -63,8 +65,10 @@ where t.id is null;
 -- ===========================================================================
 -- 2) resources: additive columns + deterministic code backfill.
 --    All 297 private templates follow the <slug>/tNN- path convention, so all
---    get a code; the 2 public booklets (bare filenames) stay NULL. doc_key is
---    NULL everywhere until the owner fills the 3 card slots via CMS v2 (PP6).
+--    get a code; the 2 public booklets (bare filenames) stay NULL. Under
+--    D-PP-f those 297 rows ARE the live per-topic templates grid (matched by
+--    element_id), so they must all keep doc_key NULL — doc_key marks only the
+--    one Simple-guide file per topic, and none is uploaded yet.
 -- ===========================================================================
 select
   count(*) filter (where code is not null)                    as coded,
@@ -79,13 +83,34 @@ select indexname from pg_indexes
 where schemaname = 'public' and indexname = 'resources_element_doc_key_ux';
 -- EXPECT: one row.
 
--- The CHECK proves the PP1.1 correction is what actually applied.
+-- The CHECK proves the D-PP-f correction is what actually applied.
 select pg_get_constraintdef(oid) as doc_key_check
 from pg_constraint
 where conname = 'resources_doc_key_shape'
   and conrelid = 'public.resources'::regclass;
--- EXPECT: one row listing 'overview', 'guide', 'template' —
---         and NOT 'checklist' / 'watch'.
+-- EXPECT: one row naming ONLY 'guide' — not 'overview' / 'template' /
+--         'checklist' / 'watch'.
+
+-- D-PP-f: the templates grid reaches its files through element_id alone (no
+-- doc_key flag), so every one of the 33 topics must resolve a non-empty set.
+with per_topic as (
+  select t.element_id, count(r.id) as files
+  from public.platform_topics t
+  left join public.resources r
+    on r.element_id = t.element_id
+   and r.doc_key is null
+   and r.code is not null
+  group by t.element_id
+)
+select
+  count(*)                                as topics,
+  count(*) filter (where files = 0)       as topics_with_no_templates,
+  sum(files)                              as template_files,
+  min(files)                              as fewest_per_topic,
+  max(files)                              as most_per_topic
+from per_topic;
+-- EXPECT: topics = 33, topics_with_no_templates = 0, template_files = 297,
+--         fewest_per_topic = 4, most_per_topic = 10.
 
 -- ===========================================================================
 -- 3) EXECUTE privileges: anon denied, authenticated granted, on the two new
@@ -128,6 +153,7 @@ declare
   v_topics       integer;
   v_resources    integer;
   v_coded        integer;
+  v_templates    integer;
 begin
   select id into v_approved_uid
   from public.profiles where is_approved = true  order by id limit 1;
@@ -148,6 +174,12 @@ begin
   select count(*) into v_topics    from public.get_platform_topics();
   select count(*) into v_resources from public.get_resources();
   select count(*) into v_coded     from public.get_resources() where code is not null;
+  -- D-PP-f: the templates grid is reached through the same member RPC, so an
+  -- approved partner must resolve all 297 template rows (element_id set, no
+  -- doc_key flag). This is the check that would fail if the grid were ever
+  -- gated behind a per-row marker again.
+  select count(*) into v_templates from public.get_resources()
+    where element_id is not null and doc_key is null and code is not null;
 
   perform set_config('role', 'postgres', true);
   insert into _0027_verify_results values
@@ -158,7 +190,9 @@ begin
     (4, 'approved get_resources',         '299',
      v_resources::text, v_resources = 299),
     (4, 'approved get_resources coded',   '297',
-     v_coded::text,     v_coded     = 297);
+     v_coded::text,     v_coded     = 297),
+    (4, 'approved templates visible',     '297',
+     v_templates::text, v_templates = 297);
 
   -- Pending member: the gate yields zero rows, never an error.
   perform set_config('request.jwt.claims',

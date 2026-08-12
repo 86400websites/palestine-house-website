@@ -2,10 +2,12 @@
 -- PP1 (Private Platform Revamp): the new workspace information architecture as a pure
 -- PRESENTATION LAYER over the existing content. The owner's final mockup regroups the
 -- same 33 topics ("elements") into 4 sections -> 10 groups -> 33 topics. As amended by
--- D-PP-c (PP1.1, 2026-08-11): each topic surfaces 3 cards (Overview / Simple guide /
--- Template). elements.overview_md / simple_guide_md and resources keep serving content
--- with zero re-upload; watch_out_for_md and checklist_items stay in place but DORMANT
--- (no consumer) until the PP7 contraction decision.
+-- D-PP-c (PP1.1, 2026-08-11) and finally by D-PP-f (PP2, 2026-08-12): each topic shows a
+-- summary, ONE Simple guide card (Read + Download), Watch Video, and a grid of MANY
+-- downloadable templates. elements.simple_guide_md and the 297 coded template rows in
+-- public.resources keep serving content with zero re-upload; elements.overview_md,
+-- watch_out_for_md and checklist_items stay in place but DORMANT (no consumer) —
+-- overview_md is scheduled for deletion in the PP7 contraction (0030).
 --
 -- ADDITIVE ONLY. Old app code never touches these tables; the one changed signature
 -- (get_resources) is widened in-place inside this transaction (columns appended, none
@@ -105,17 +107,19 @@ set code = upper(substring(storage_path from '/([a-z][0-9]{2})-'))
 where code is null
   and storage_path ~ '/[a-z][0-9]{2}-';
 
--- doc_key: which of a topic's 3 card slots a file download serves
--- (overview / guide / template — D-PP-c). NULL for the dormant coded template
--- library and booklets. None of these files exist yet — the owner fills the
--- slots via CMS v2 (PP6): uploading a resources row carrying element_id +
--- doc_key, or (for 'template') promoting one of the dormant coded rows by
--- setting its doc_key. At most one file per (element, slot).
+-- doc_key: marks the ONE downloadable Simple-guide file per topic (D-PP-f,
+-- 2026-08-12 — the Overview card was removed and templates went back to a
+-- many-per-topic grid, so 'overview' and 'template' are no longer slots).
+-- NULL everywhere else, which is exactly what the 297 coded template rows are:
+-- a topic's templates are simply the resources rows carrying its element_id,
+-- badged by resources.code. No guide file exists yet — the owner uploads one
+-- per topic via CMS v2 (PP6) as a resources row with element_id + doc_key.
+-- The partial unique index below then enforces at most one guide per topic.
 alter table public.resources add column if not exists doc_key text;
 
 alter table public.resources drop constraint if exists resources_doc_key_shape;
 alter table public.resources add constraint resources_doc_key_shape
-  check (doc_key is null or doc_key in ('overview', 'guide', 'template'));
+  check (doc_key is null or doc_key in ('guide'));
 
 create unique index if not exists resources_element_doc_key_ux
   on public.resources (element_id, doc_key)

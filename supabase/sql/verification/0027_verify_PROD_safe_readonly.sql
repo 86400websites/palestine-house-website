@@ -1,6 +1,7 @@
 -- 0027_verify_PROD_safe_readonly.sql
 -- Production-safe verification for migrations 0027_platform_ia + 0028_platform_seed
--- as corrected by PP1.1 (D-PP-c: 3-card model, extras dropped). READ-ONLY: plain
+-- as corrected by PP1.1 (extras dropped) and PP2 (D-PP-f: Overview card removed,
+-- one guide slot, templates back to a many-per-topic grid). READ-ONLY: plain
 -- selects, no role switching, no writes. Run after applying 0027 THEN 0028 by hand
 -- in the production SQL editor (the PP2 merge gate — see ROADMAP.md Stage 4).
 
@@ -48,19 +49,38 @@ select
   count(*) filter (where code is null)        as uncoded,
   count(*) filter (where doc_key is not null) as doc_keys
 from public.resources;
--- EXPECT: coded = 297, uncoded = 2 (the booklets), doc_keys = 0.
+-- EXPECT: coded = 297, uncoded = 2 (the booklets), doc_keys = 0
+--         (no guide file is uploaded yet; the 297 coded rows are the templates
+--         grid and must stay doc_key NULL to appear in it).
 
 select indexname from pg_indexes
 where schemaname = 'public' and indexname = 'resources_element_doc_key_ux';
 -- EXPECT: one row.
 
--- The CHECK proves the PP1.1 correction is what actually applied.
+-- The CHECK proves the D-PP-f correction is what actually applied.
 select pg_get_constraintdef(oid) as doc_key_check
 from pg_constraint
 where conname = 'resources_doc_key_shape'
   and conrelid = 'public.resources'::regclass;
--- EXPECT: one row listing 'overview', 'guide', 'template' —
---         and NOT 'checklist' / 'watch'.
+-- EXPECT: one row naming ONLY 'guide' — not 'overview' / 'template' /
+--         'checklist' / 'watch'.
+
+-- Every focus area must have templates to show (D-PP-f: matched by element_id).
+with per_topic as (
+  select t.element_id, count(r.id) as files
+  from public.platform_topics t
+  left join public.resources r
+    on r.element_id = t.element_id
+   and r.doc_key is null
+   and r.code is not null
+  group by t.element_id
+)
+select
+  count(*)                          as topics,
+  count(*) filter (where files = 0) as topics_with_no_templates,
+  sum(files)                        as template_files
+from per_topic;
+-- EXPECT: topics = 33, topics_with_no_templates = 0, template_files = 297.
 
 -- A4) EXECUTE privileges: anon denied, authenticated granted.
 select
