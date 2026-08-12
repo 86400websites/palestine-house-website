@@ -1433,6 +1433,19 @@
   box-shadow: 0 12px 32px rgba(42, 36, 30, 0.075);
 }
 
+/* A deep link lands mid-page on a card that is already open, so nothing moves
+   to say "this one". The mockup answers that with one copper pulse. Neutralised
+   by the reduced-motion block at the end of this file. */
+@keyframes pw-flash {
+  40% {
+    box-shadow: 0 0 0 4px rgba(176, 113, 61, 0.25);
+  }
+}
+
+.pw-root .pw-topic.is-flash {
+  animation: pw-flash 1.1s var(--pw-ease);
+}
+
 .pw-root .pw-topic-head {
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
@@ -1519,19 +1532,6 @@
 .pw-root .pw-topic-placeholder-icon .pw-icon {
   width: 25px;
   height: 25px;
-}
-
-.pw-root .pw-topic-placeholder-label {
-  padding: 6px 10px;
-  border: 1px solid var(--pw-line-strong);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  color: var(--pw-muted);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  text-transform: uppercase;
 }
 
 .pw-root .pw-topic-copy {
