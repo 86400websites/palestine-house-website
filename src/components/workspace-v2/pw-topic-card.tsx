@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, ImageOff, PlayCircle } from "lucide-react";
 import { usePwToast } from "@/components/workspace-v2/pw-toast";
+import { PwStartCard } from "@/components/workspace-v2/pw-start-card";
 import { PwTemplateGrid } from "@/components/workspace-v2/pw-template-grid";
 import type { PwTopic } from "@/lib/workspace-v2/types";
 
@@ -147,6 +148,9 @@ export function PwTopicCard({
 
       <div className="pw-topic-body" id={bodyId} hidden={!open}>
         <div className="pw-topic-content">
+          {/* Always rendered: every topic has a Simple guide body, even before
+              PP4 can show it and PP6 can attach a download file. */}
+          <PwStartCard guide={topic.guide} />
           {topic.templates.length > 0 ? (
             <PwTemplateGrid
               topicSlug={topic.slug}
