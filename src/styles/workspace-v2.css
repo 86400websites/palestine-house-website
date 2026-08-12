@@ -1271,6 +1271,24 @@
   }
 }
 
+/* --- Touch targets ------------------------------------------------------- */
+/* The mockup sizes several controls at 36–42px. On a touch pointer the house
+   rule is a 44px minimum (DR1-10), so raise them there without disturbing the
+   mockup's desktop proportions. */
+
+@media (pointer: coarse) {
+  .pw-root .pw-header-action,
+  .pw-root .pw-header-action--icon,
+  .pw-root .pw-footer-link,
+  .pw-root .pw-journey-link {
+    min-height: 44px;
+  }
+
+  .pw-root .pw-header-action--icon {
+    width: 44px;
+  }
+}
+
 /* House motion rule (DESIGN.md §8) applies to the new shell too. */
 @media (prefers-reduced-motion: reduce) {
   .pw-root *,

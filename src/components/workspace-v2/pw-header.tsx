@@ -182,7 +182,10 @@ export function PwHeader() {
         id="pw-mobile-panel"
         ref={panelRef}
         aria-hidden={!menuOpen}
-        {...(menuOpen ? {} : { inert: "" as unknown as boolean })}
+        /* React 19 supports `inert` natively: while the panel is closed it is
+           visually hidden but still in the DOM, so this is what keeps its links
+           out of the tab order. */
+        inert={!menuOpen}
       >
         <nav aria-label={WORKSPACE_CHROME.nav.mobileAriaLabel}>
           {WORKSPACE_CHROME.nav.items.map((item) => {
