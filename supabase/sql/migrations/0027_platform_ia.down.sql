@@ -6,6 +6,9 @@
 
 begin;
 
+-- get_platform_extras / platform_extras exist only where the pre-correction
+-- (pre-D-PP-c, 2026-08-11) 0027 was applied (TEST) — defensive drops, no-ops
+-- on any post-correction database.
 drop function if exists public.get_platform_extras();
 drop function if exists public.get_platform_topics();
 drop function if exists public.get_platform_sections();

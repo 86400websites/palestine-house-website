@@ -3,10 +3,9 @@
   "source": "docs/page-designs/PH - Palestine House Final Mockup.html (gitignored; OneDrive canon)",
   "stats": {
     "sections": 4,
+    "groups": 10,
     "topics": 33,
-    "standard_resources": 132,
-    "additional_resources": 15,
-    "direct_resources": 147,
+    "standard_resources": 66,
     "templates": 297,
     "booklets": 2
   },
@@ -30,33 +29,18 @@
       "use": "Use this when you are ready to work through the topic with your team."
     },
     {
-      "kind": "CHECKLIST",
-      "key": "checklist",
-      "title": "Practical checklist",
-      "icon": "checklist",
-      "desc": "Use the list while completing the work.",
-      "action": "Open checklist",
-      "use": "Use this while doing the task so nothing important is missed."
-    },
-    {
-      "kind": "WATCH OUT",
-      "key": "watch",
-      "title": "What to watch out for",
-      "icon": "alert-triangle",
-      "desc": "See common mistakes, risks and points that need extra care.",
-      "action": "Read risk notes",
-      "use": "Use this before a decision or whenever something feels unclear or risky."
+      "kind": "TEMPLATE",
+      "key": "template",
+      "title": "Template",
+      "icon": "file-text",
+      "desc": "A ready-to-use file for your team.",
+      "action": "Download template",
+      "use": "Download this when you need a practical working document for the topic."
     }
   ],
   "templateCopy": {
     "desc": "A ready-to-use file for your team.",
     "use": "Download this when you need a practical working document for the topic."
-  },
-  "extraCopy": {
-    "kind": "ADDITIONAL GUIDE",
-    "icon": "guide",
-    "desc": "A focused file for this part of the topic.",
-    "use": "Open this when you need more detail on this specific area."
   },
   "pages": {
     "about": {
@@ -159,7 +143,7 @@
               "elementSlug": "i2",
               "title": "Launching a New House",
               "description": "Guidance and files to help you prepare your House.",
-              "intro": "Everything you need to open a new Palestine House, step by step — from first planning to opening day. Read the guides in order, then use the checklist and templates below to get the work done.",
+              "intro": "Everything you need to open a new Palestine House, step by step — from first planning to opening day. Read the guides in order, then use the template below to get the work done.",
               "icon": "compass",
               "image": "/assets/workspace/topics/launching-a-new-house.jpg",
               "imagePosition": "50% 54%",
@@ -173,19 +157,8 @@
                   "key": "guide",
                   "filename": "Launching_A_New_House_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Launching a New House/Launching_A_New_House_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Launching_A_New_House_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Launching a New House/Launching_A_New_House_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Launching_A_New_House_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Launching a New House/Launching_A_New_House_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -244,19 +217,8 @@
                   "key": "guide",
                   "filename": "Operating_Model_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/2. Operating Model & Governance/Operating Model/Operating_Model_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Operating_Model_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Operating Model/Operating_Model_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Operating_Model_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Operating Model/Operating_Model_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -333,19 +295,8 @@
                   "key": "guide",
                   "filename": "Mission_Values_Guest_Promise_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/1. The House Promise/Mission, Values and Guest Promise/Mission_Values_Guest_Promise_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Mission_Values_Guest_Promise_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Mission, Values and Guest Promise/Mission_Values_Guest_Promise_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Mission_Values_Guest_Promise_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Mission, Values and Guest Promise/Mission_Values_Guest_Promise_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -428,19 +379,8 @@
                   "key": "guide",
                   "filename": "Brand_Experience_Standards_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/1. The House Promise/Brand Experience Standards/Brand_Experience_Standards_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Brand_Experience_Standards_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Brand Experience Standards/Brand_Experience_Standards_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Brand_Experience_Standards_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Brand Experience Standards/Brand_Experience_Standards_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": null,
@@ -523,19 +463,8 @@
                   "key": "guide",
                   "filename": "Tech_Stack_Data_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Technology Stack & Data/Tech_Stack_Data_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Tech_Stack_Data_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Technology Stack & Data/Tech_Stack_Data_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Tech_Stack_Data_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Technology Stack & Data/Tech_Stack_Data_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -633,19 +562,8 @@
                   "key": "guide",
                   "filename": "Facility_Operations_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/6. Operations Engine/Facility Operations/Facility_Operations_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Facility_Operations_Checklist.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Facility Operations/Facility_Operations_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Facility_Operations_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Facility Operations/Facility_Operations_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -716,19 +634,8 @@
                   "key": "guide",
                   "filename": "Food_Beverage_Operations_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/6. Operations Engine/Food & Beverage Operations/Food_Beverage_Operations_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Food_Beverage_Operations_Checklist.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Food & Beverage Operations/Food_Beverage_Operations_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Food_Beverage_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Food & Beverage Operations/Food_Beverage_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -811,19 +718,8 @@
                   "key": "guide",
                   "filename": "Inventory_Procurement_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/6. Operations Engine/Inventory & Procurement/Inventory_Procurement_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Inventory_Procurement_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Inventory & Procurement/Inventory_Procurement_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Inventory_Procurement_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Inventory & Procurement/Inventory_Procurement_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -906,38 +802,6 @@
                   "key": "guide",
                   "filename": "Customer_Service_Recovery_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/5. Membership, Community & Service/3. Customer Service & Recovery/Customer_Service_Recovery_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Customer_Service_Recovery_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/3. Customer Service & Recovery/Customer_Service_Recovery_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Customer_Service_Recovery_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/3. Customer Service & Recovery/Customer_Service_Recovery_What_To_Watch_Out_For.docx"
-                }
-              ],
-              "extras": [
-                {
-                  "title": "Engage & Serve",
-                  "filename": "Customer_Service_Recovery_Engage_Serve.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/3. Customer Service & Recovery/Customer_Service_Recovery_Engage_Serve.docx"
-                },
-                {
-                  "title": "Onboard & Energize",
-                  "filename": "Customer_Service_Recovery_Onboard_Energize.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/3. Customer Service & Recovery/Customer_Service_Recovery_Onboard_Energize.docx"
-                },
-                {
-                  "title": "Retain & Expand",
-                  "filename": "Customer_Service_Recovery_Retain_Expand.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/3. Customer Service & Recovery/Customer_Service_Recovery_Retain_Expand.docx"
-                },
-                {
-                  "title": "Target & Acquire",
-                  "filename": "Customer_Service_Recovery_Target_Acquire.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/3. Customer Service & Recovery/Customer_Service_Recovery_Target_Acquire.docx"
                 }
               ],
               "templates": [
@@ -1029,19 +893,8 @@
                   "key": "guide",
                   "filename": "Org_Structure_Roles_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Org Structure & Roles/Org_Structure_Roles_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Org_Structure_Roles_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Org Structure & Roles/Org_Structure_Roles_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Org_Structure_Roles_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Org Structure & Roles/Org_Structure_Roles_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -1124,19 +977,8 @@
                   "key": "guide",
                   "filename": "Hiring_Onboarding_Training_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Hiring, Onboarding & Training/Hiring_Onboarding_Training_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Hiring_Onboarding_Training_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Hiring, Onboarding & Training/Hiring_Onboarding_Training_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Hiring_Onboarding_Training_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Hiring, Onboarding & Training/Hiring_Onboarding_Training_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -1219,19 +1061,8 @@
                   "key": "guide",
                   "filename": "Performance_Management_Culture_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Performance Management & Culture/Performance_Management_Culture_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Performance_Management_Culture_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Performance Management & Culture/Performance_Management_Culture_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Performance_Management_Culture_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Performance Management & Culture/Performance_Management_Culture_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -1321,23 +1152,6 @@
                   "key": "guide",
                   "filename": "Business_Model_Revenue_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Business Model & Revenue/Business_Model_Revenue_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Business_Model_Revenue_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Business Model & Revenue/Business_Model_Revenue_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Business_Model_Revenue_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Business Model & Revenue/Business_Model_Revenue_What_To_Watch_Out_For.docx"
-                }
-              ],
-              "extras": [
-                {
-                  "title": "Business model template pack",
-                  "filename": "Business_Model_Revenue_Templates.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Business Model & Revenue/Business_Model_Revenue_Templates.docx"
                 }
               ],
               "templates": [
@@ -1422,19 +1236,8 @@
                   "key": "guide",
                   "filename": "Financial_Operations_Controls_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Financial Operations & Controls/Financial_Operations_Controls_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Financial_Operations_Controls_Checklist.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Financial Operations & Controls/Financial_Operations_Controls_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Financial_Operations_Controls_WTWOF.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Financial Operations & Controls/Financial_Operations_Controls_WTWOF.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -1517,19 +1320,8 @@
                   "key": "guide",
                   "filename": "Reporting_KPIs_Audits_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Reporting, KPIs & Audits/Reporting_KPIs_Audits_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Reporting_KPIs_Audits_Checklist.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Reporting, KPIs & Audits/Reporting_KPIs_Audits_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Reporting_KPIs_Audits_WTWOF.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Reporting, KPIs & Audits/Reporting_KPIs_Audits_WTWOF.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "R01",
@@ -1583,19 +1375,8 @@
                   "key": "guide",
                   "filename": "Governance_Ethics_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/2. Operating Model & Governance/Governance & Ethics/Governance_Ethics_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Governance_Ethics_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Governance & Ethics/Governance_Ethics_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Governance_Ethics_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Governance & Ethics/Governance_Ethics_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -1678,19 +1459,8 @@
                   "key": "guide",
                   "filename": "Legal_Compliance_Risk_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/2. Operating Model & Governance/Legal, Compliance & Risk/Legal_Compliance_Risk_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Legal_Compliance_Risk_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Legal, Compliance & Risk/Legal_Compliance_Risk_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Legal_Compliance_Risk_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Legal, Compliance & Risk/Legal_Compliance_Risk_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -1780,19 +1550,8 @@
                   "key": "guide",
                   "filename": "2. Menu_Culinary_Identity_Simple_Guide.docx",
                   "source": "Food/2. Focus Areas/11. Café & Culinary Experience/1. Menu & Palestinian Culinary Identity/2. Menu_Culinary_Identity_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "3. Menu_Culinary_Identity_Operational_Checklist.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/1. Menu & Palestinian Culinary Identity/3. Menu_Culinary_Identity_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "4. Menu_Culinary_Identity_What_To_Watch_Out_For.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/1. Menu & Palestinian Culinary Identity/4. Menu_Culinary_Identity_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -1875,19 +1634,8 @@
                   "key": "guide",
                   "filename": "2. Coffee_Tea_Beverage_Program_Simple_Guide.docx",
                   "source": "Food/2. Focus Areas/11. Café & Culinary Experience/2. Coffee, Tea & Beverage Program/2. Coffee_Tea_Beverage_Program_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "3. Coffee_Tea_Beverage_Program_Operational_Checklist.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/2. Coffee, Tea & Beverage Program/3. Coffee_Tea_Beverage_Program_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "4. Coffee_Tea_Beverage_Program_What_To_Watch_Out_For.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/2. Coffee, Tea & Beverage Program/4. Coffee_Tea_Beverage_Program_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -1970,19 +1718,8 @@
                   "key": "guide",
                   "filename": "2. Catering_Private_Events_Culinary_Programming_Simple_Guide.docx",
                   "source": "Food/2. Focus Areas/11. Café & Culinary Experience/3. Catering, Private Events & Culinary Programming/2. Catering_Private_Events_Culinary_Programming_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "3. Catering_Private_Events_Culinary_Programming_Operational_Checklist.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/3. Catering, Private Events & Culinary Programming/3. Catering_Private_Events_Culinary_Programming_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "4. Catering_Private_Events_Culinary_Programming_What_To_Watch_Out_For.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/3. Catering, Private Events & Culinary Programming/4. Catering_Private_Events_Culinary_Programming_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -2080,19 +1817,8 @@
                   "key": "guide",
                   "filename": "Programming_Model_Pillars_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Programming Model & Pillars/Programming_Model_Pillars_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Programming_Model_Pillars_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Programming Model & Pillars/Programming_Model_Pillars_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Programming_Model_Pillars_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Programming Model & Pillars/Programming_Model_Pillars_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -2175,19 +1901,8 @@
                   "key": "guide",
                   "filename": "Aswatna_Studio_Collaboration_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Aswātna Studio Collaboration/Aswatna_Studio_Collaboration_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Aswatna_Studio_Collaboration_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Aswātna Studio Collaboration/Aswatna_Studio_Collaboration_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Aswatna_Studio_Collaboration_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Aswātna Studio Collaboration/Aswatna_Studio_Collaboration_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -2270,19 +1985,8 @@
                   "key": "guide",
                   "filename": "Event_Production_SOPs_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Event Production SOPs/Event_Production_SOPs_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Event_Production_SOPs_Checklist.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Event Production SOPs/Event_Production_SOPs_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Event_Production_SOPs_What_To_Watch_Out_For_fixed.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Event Production SOPs/Event_Production_SOPs_What_To_Watch_Out_For_fixed.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -2372,19 +2076,8 @@
                   "key": "guide",
                   "filename": "Guest_Journey_Member_Journey_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/1. The House Promise/Guest Journey & Member Journey/Guest_Journey_Member_Journey_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Guest_Journey_Member_Journey_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Guest Journey & Member Journey/Guest_Journey_Member_Journey_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Guest_Journey_Member_Journey_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Guest Journey & Member Journey/Guest_Journey_Member_Journey_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -2467,38 +2160,6 @@
                   "key": "guide",
                   "filename": "Membership_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Membership_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Membership_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_What_To_Watch_Out_For.docx"
-                }
-              ],
-              "extras": [
-                {
-                  "title": "Engage & Serve",
-                  "filename": "Membership_Model_Engage_Serve.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_Model_Engage_Serve.docx"
-                },
-                {
-                  "title": "Onboard & Energize",
-                  "filename": "Membership_Model_Onboard_Energize.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_Model_Onboard_Energize.docx"
-                },
-                {
-                  "title": "Retain & Expand",
-                  "filename": "Membership_Model_Retain_Expand.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_Model_Retain_Expand.docx"
-                },
-                {
-                  "title": "Target & Acquire",
-                  "filename": "Membership_Model_Target_Acquire.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_Model_Target_Acquire.docx"
                 }
               ],
               "templates": [
@@ -2583,38 +2244,6 @@
                   "key": "guide",
                   "filename": "Community_Partnerships_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/5. Membership, Community & Service/2. Community Partnerships/Community_Partnerships_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Community_Partnerships_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/2. Community Partnerships/Community_Partnerships_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Community_Partnerships_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/2. Community Partnerships/Community_Partnerships_What_To_Watch_Out_For.docx"
-                }
-              ],
-              "extras": [
-                {
-                  "title": "Engage & Serve",
-                  "filename": "Community_Partnerships_Engage_Serve.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/2. Community Partnerships/Community_Partnerships_Engage_Serve.docx"
-                },
-                {
-                  "title": "Onboard & Energize",
-                  "filename": "Community_Partnerships_Onboard_Energize.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/2. Community Partnerships/Community_Partnerships_Onboard_Energize.docx"
-                },
-                {
-                  "title": "Retain & Expand",
-                  "filename": "Community_Partnerships_Retain_Expand.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/2. Community Partnerships/Community_Partnerships_Retain_Expand.docx"
-                },
-                {
-                  "title": "Target & Acquire",
-                  "filename": "Community_Partnerships_Target_Acquire.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/2. Community Partnerships/Community_Partnerships_Target_Acquire.docx"
                 }
               ],
               "templates": [
@@ -2706,19 +2335,8 @@
                   "key": "guide",
                   "filename": "Local_Marketing_Playbook_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Local Marketing Playbook/Local_Marketing_Playbook_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Local_Marketing_Playbook_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Local Marketing Playbook/Local_Marketing_Playbook_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Local_Marketing_Playbook_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Local Marketing Playbook/Local_Marketing_Playbook_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -2801,19 +2419,8 @@
                   "key": "guide",
                   "filename": "Global_Campaigns_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Global Campaigns/Global_Campaigns_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Global_Campaigns_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Global Campaigns/Global_Campaigns_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Global_Campaigns_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Global Campaigns/Global_Campaigns_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -2860,23 +2467,6 @@
                   "key": "guide",
                   "filename": "Retail_Shop_Operations_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Retail  Shop Operations/Retail_Shop_Operations_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Retail_Shop_Operations_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Retail  Shop Operations/Retail_Shop_Operations_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Retail_Shop_Operations_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Retail  Shop Operations/Retail_Shop_Operations_What_To_Watch_Out_For.docx"
-                }
-              ],
-              "extras": [
-                {
-                  "title": "Retail shop template pack",
-                  "filename": "Retail_Shop_Operations_Templates.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Retail  Shop Operations/Retail_Shop_Operations_Templates.docx"
                 }
               ],
               "templates": [
@@ -2976,19 +2566,8 @@
                   "key": "guide",
                   "filename": "Crisis_Management_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Crisis Management/Crisis_Management_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Crisis_Management_Checklist.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Crisis Management/Crisis_Management_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Crisis_Management_WTWOF.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Crisis Management/Crisis_Management_WTWOF.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -3071,19 +2650,8 @@
                   "key": "guide",
                   "filename": "Sustainability_And_Impact_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Sustainability & Impact/Sustainability_And_Impact_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Sustainability_And_Impact_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Sustainability & Impact/Sustainability_And_Impact_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Sustainability_And_Impact_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Sustainability & Impact/Sustainability_And_Impact_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -3142,19 +2710,8 @@
                   "key": "guide",
                   "filename": "Continuous_Improvement_And_Knowledge_Sharing_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Continuous Improvement & Knowledge Sharing/Continuous_Improvement_And_Knowledge_Sharing_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Continuous_Improvement_And_Knowledge_Sharing_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Continuous Improvement & Knowledge Sharing/Continuous_Improvement_And_Knowledge_Sharing_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Continuous_Improvement_And_Knowledge_Sharing_What_To_Watch_Out_For.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Continuous Improvement & Knowledge Sharing/Continuous_Improvement_And_Knowledge_Sharing_What_To_Watch_Out_For.docx"
                 }
               ],
-              "extras": [],
               "templates": [
                 {
                   "code": "T01",
@@ -3213,23 +2770,6 @@
                   "key": "guide",
                   "filename": "Templates_And_Master_Index_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Templates & Master Index/Templates_And_Master_Index_Simple_Guide.docx"
-                },
-                {
-                  "key": "checklist",
-                  "filename": "Templates_And_Master_Index_Operational_Checklist.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Templates & Master Index/Templates_And_Master_Index_Operational_Checklist.docx"
-                },
-                {
-                  "key": "watch",
-                  "filename": "Templates_MasterIndex_WTWOF.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Templates & Master Index/Templates_MasterIndex_WTWOF.docx"
-                }
-              ],
-              "extras": [
-                {
-                  "title": "Network-wide master template index",
-                  "filename": "Templates_Master_Index.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Templates & Master Index/Templates_Master_Index.docx"
                 }
               ],
               "templates": [

@@ -21,10 +21,15 @@
  * elements.slug -> element_id, so a wrong mapping cannot silently attach the wrong
  * bodies — it would fail the asserts here or the FK/unique constraints on apply.
  *
- * Per-kind card copy (the 4 standard resources, extras, templates) is CONSTANT across
- * all topics in the mockup (verified: 4/4/1 distinct variants) — it ships as app
- *
+ * Per-kind card copy is CONSTANT across all topics in the mockup — it ships as app
  * constants in PP3, not DB rows. Only structural metadata is seeded.
+ *
+ * 3-card transform (D-PP-c, owner 2026-08-11): the mockup still shows 4 standard
+ * cards + "More guides" extras per topic; the owner's instruction supersedes it.
+ * The emitted spec/seed keep only Overview + Simple guide and synthesize the single
+ * Template card (download-only, owner-populated via CMS v2 in PP6). Extras are
+ * dropped entirely. The raw-shape asserts stay pinned to the mockup as source-drift
+ * guards; everything emitted is post-transform.
  *
  * Sources absent on disk (fresh clone without the OneDrive folders) fail with a clear
  * message — outputs are committed, so re-running is only needed when the mockup changes.
@@ -234,7 +239,6 @@ async function main() {
     );
   }
   assertConstantCopy("templates", templates, ["kind", "icon", "desc", "use"]);
-  assertConstantCopy("extras", extras, ["kind", "icon", "desc", "use"]);
 
   // The map: every topic resolves to a distinct, known element slug.
   const mapped = new Set<string>();
@@ -249,6 +253,54 @@ async function main() {
   assert(Object.keys(ELEMENT_MAP).length === 33, "ELEMENT_MAP has stale extra entries");
 
   console.log("appData asserts pass: 4 sections / 10 groups / 33 topics (5/15/9/4) / 132 std / 15 extras / 297 templates / 33:33 element map");
+
+  // ---- 2b. Owner transform (D-PP-c, 2026-08-11): the 3-card topic model -------------
+  // The mockup still shows 4 standard cards + "More guides" extras; the owner's
+  // instruction supersedes it (PROJECT-STATUS §5 D-PP-c): each topic ships
+  // Overview + Simple guide + ONE Template card; the checklist/watch cards and the
+  // extras are dropped. The raw asserts above stay pinned to the mockup (source-
+  // drift guards); everything emitted below is post-transform.
+  const KEPT_KEYS = ["overview", "guide"];
+  const KEPT_KINDS = ["OVERVIEW", "GUIDE"];
+  for (const { topic } of allTopics) {
+    topic.resources = topic.resources.filter((r) => KEPT_KEYS.includes(r.key));
+  }
+  const keptResources = allTopics.flatMap(({ topic }) => topic.resources);
+  assert(keptResources.length === 66, `expected 66 kept standard resources, got ${keptResources.length}`);
+  for (const { topic } of allTopics) {
+    assert(topic.resources.length === 2, `${topic.slug}: expected 2 kept standard resources`);
+  }
+  assert(
+    [...new Set(keptResources.map((r) => r.kind))].sort().join("|") === [...KEPT_KINDS].sort().join("|"),
+    "kept standard resource kinds drifted from OVERVIEW/GUIDE",
+  );
+
+  // The Template card: kind/icon/desc/use are the mockup's constancy-asserted
+  // template-row copy; only the title + action strings are new (owner sign-off
+  // 2026-08-12 — the only two invented strings in the 3-card correction).
+  const TEMPLATE_CARD = {
+    kind: templates[0].kind,
+    key: "template",
+    title: "Template",
+    icon: templates[0].icon,
+    desc: templates[0].desc,
+    action: "Download template",
+    use: templates[0].use,
+  };
+
+  // Owner-approved intro trims where mockup copy referenced a removed card
+  // (approved 2026-08-12; asserted so a future mockup edit can't silently miss).
+  const INTRO_TRIMS: Record<string, [from: string, to: string]> = {
+    "launching-a-new-house": ["use the checklist and templates below", "use the template below"],
+  };
+  for (const { topic } of allTopics) {
+    const trim = INTRO_TRIMS[topic.slug];
+    if (!trim) continue;
+    assert(topic.intro.includes(trim[0]), `${topic.slug}: intro trim source text not found — mockup copy changed?`);
+    topic.intro = topic.intro.replace(trim[0], trim[1]);
+  }
+
+  console.log("3-card transform applied: 66 kept std (of 132) / Template card synthesized / extras dropped / 1 intro trim");
 
   // ---- 3. Assets --------------------------------------------------------------------
   for (const dir of ["topics", "sections", "heroes", "misc"]) {
@@ -341,13 +393,24 @@ async function main() {
   const spec = {
     generatedBy: "scripts/extract-mockup-spec.ts",
     source: "docs/page-designs/PH - Palestine House Final Mockup.html (gitignored; OneDrive canon)",
-    stats: data.stats,
-    resourceKinds: RES_KINDS.map((kind) => {
-      const r = stdResources.find((x) => x.kind === kind)!;
-      return { kind, key: r.key, title: r.title, icon: r.icon, desc: r.desc, action: r.action, use: r.use };
-    }),
+    // Computed post-transform (the mockup's own stats block still counts 4 cards + extras).
+    stats: {
+      sections: sections.length,
+      groups: allGroups.length,
+      topics: allTopics.length,
+      standard_resources: keptResources.length,
+      templates: templates.length,
+      booklets: data.stats.booklets,
+    },
+    // The 3-card model (D-PP-c): the two kept kinds + the synthesized Template card.
+    resourceKinds: [
+      ...KEPT_KINDS.map((kind) => {
+        const r = keptResources.find((x) => x.kind === kind)!;
+        return { kind, key: r.key, title: r.title, icon: r.icon, desc: r.desc, action: r.action, use: r.use };
+      }),
+      TEMPLATE_CARD,
+    ],
     templateCopy: { desc: templates[0].desc, use: templates[0].use },
-    extraCopy: { kind: extras[0].kind, icon: extras[0].icon, desc: extras[0].desc, use: extras[0].use },
     pages: Object.fromEntries(
       Object.entries(pageMeta).map(([page, m]) => [
         page,
@@ -385,7 +448,8 @@ async function main() {
           image: `/assets/workspace/topics/${t.slug}.jpg`,
           imagePosition: posOf(t.slug),
           standardDocs: t.resources.map((r) => ({ key: r.key, filename: r.filename, source: r.source })),
-          extras: t.extras.map((e) => ({ title: e.title, filename: e.filename, source: e.source })),
+          // extras removed (D-PP-c ⑥); templates kept as the PP6 CMS picker's candidate
+          // list for the one owner-chosen template per topic (dormant coded rows).
           templates: t.templates.map((x) => ({ code: x.code || null, title: x.title, filename: x.filename, source: x.source })),
         })),
       })),
@@ -398,9 +462,10 @@ async function main() {
   // ---- 5. Generated seed migration --------------------------------------------------
   const up: string[] = [];
   up.push(`-- 0028_platform_seed.up.sql`);
-  up.push(`-- GENERATED by scripts/extract-mockup-spec.ts from the owner's final mockup — do not hand-edit;`);
-  up.push(`-- re-run the script instead. Idempotent: upserts keyed on stable natural keys (sections.slug,`);
-  up.push(`-- groups (section_slug, slug), topics element_id via elements.slug, extras (topic_id, title)).`);
+  up.push(`-- GENERATED by scripts/extract-mockup-spec.ts from the owner's final mockup (as amended by`);
+  up.push(`-- D-PP-c: 3-card model, extras dropped) — do not hand-edit; re-run the script instead.`);
+  up.push(`-- Idempotent: upserts keyed on stable natural keys (sections.slug,`);
+  up.push(`-- groups (section_slug, slug), topics element_id via elements.slug).`);
   up.push(`-- Requires 0027_platform_ia. Safe to re-run; never touches elements/checklists/resources rows.`);
   up.push(``);
   up.push(`begin;`);
@@ -465,18 +530,6 @@ async function main() {
     }
   }
   up.push(``);
-  up.push(`-- Extras (15) — "More guides" file slots; resource_id stays null until the owner`);
-  up.push(`-- uploads the file via CMS v2 (PP6). source_filename is the CMS upload hint.`);
-  for (const { topic } of allTopics) {
-    topic.extras.forEach((e, ei) => {
-      up.push(`insert into public.platform_extras (topic_id, title, source_filename, sort_order)`);
-      up.push(`select pt.id, ${sqlText(e.title)}, ${sqlText(e.filename)}, ${ei + 1}`);
-      up.push(`from public.platform_topics pt where pt.slug = ${sqlText(topic.slug)}`);
-      up.push(`on conflict (topic_id, title) do update set`);
-      up.push(`  source_filename = excluded.source_filename, sort_order = excluded.sort_order;`);
-    });
-  }
-  up.push(``);
   up.push(`commit;`);
   up.push(``);
   await fs.writeFile(OUT_SEED_UP, up.join("\n"), "utf8");
@@ -488,7 +541,6 @@ async function main() {
     `-- Never touches elements / checklist_items / resources / storage.`,
     ``,
     `begin;`,
-    `delete from public.platform_extras;`,
     `delete from public.platform_topics;`,
     `delete from public.platform_groups;`,
     `delete from public.platform_sections;`,

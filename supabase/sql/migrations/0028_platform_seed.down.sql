@@ -3,7 +3,6 @@
 -- Never touches elements / checklist_items / resources / storage.
 
 begin;
-delete from public.platform_extras;
 delete from public.platform_topics;
 delete from public.platform_groups;
 delete from public.platform_sections;

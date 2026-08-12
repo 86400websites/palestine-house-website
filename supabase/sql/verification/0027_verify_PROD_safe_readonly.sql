@@ -1,10 +1,11 @@
 -- 0027_verify_PROD_safe_readonly.sql
 -- Production-safe verification for migrations 0027_platform_ia + 0028_platform_seed
--- (PP1 — the new workspace IA presentation layer). READ-ONLY: plain selects, no
--- role switching, no writes. Run after applying 0027 THEN 0028 by hand in the
--- production SQL editor (the PP2 merge gate — see ROADMAP.md Stage 4).
+-- as corrected by PP1.1 (D-PP-c: 3-card model, extras dropped). READ-ONLY: plain
+-- selects, no role switching, no writes. Run after applying 0027 THEN 0028 by hand
+-- in the production SQL editor (the PP2 merge gate — see ROADMAP.md Stage 4).
 
--- A1) The four platform tables exist with RLS enabled and ZERO client policies.
+-- A1) The three platform tables exist with RLS enabled and ZERO client policies;
+--     the pre-correction extras table must NOT exist.
 select
   t.relname,
   t.relrowsecurity as rls_enabled,
@@ -14,22 +15,24 @@ join pg_namespace n on n.oid = t.relnamespace
 left join pg_policy p on p.polrelid = t.oid
 where n.nspname = 'public'
   and t.relname in
-    ('platform_sections', 'platform_groups', 'platform_topics', 'platform_extras')
+    ('platform_sections', 'platform_groups', 'platform_topics')
 group by t.relname, t.relrowsecurity
 order by t.relname;
--- EXPECT: four rows, rls_enabled = true, client_policies = 0 on every row.
+-- EXPECT: three rows, rls_enabled = true, client_policies = 0 on every row.
+
+select to_regclass('public.platform_extras') as extras_table;
+-- EXPECT: extras_table = null.
 
 -- A2) Seed shape.
 select
   (select count(*) from public.platform_sections)                 as sections,
   (select count(*) from public.platform_groups)                   as groups,
   (select count(*) from public.platform_topics)                   as topics,
-  (select count(*) from public.platform_extras)                   as extras,
   (select count(distinct element_id) from public.platform_topics) as distinct_elements,
   (select count(*) from public.elements e
      left join public.platform_topics t on t.element_id = e.id
      where t.id is null)                                          as unmapped_elements;
--- EXPECT: sections = 5, groups = 10, topics = 33, extras = 15,
+-- EXPECT: sections = 5, groups = 10, topics = 33,
 --         distinct_elements = 33, unmapped_elements = 0.
 
 select g.section_slug, count(t.id) as topic_count
@@ -51,6 +54,14 @@ select indexname from pg_indexes
 where schemaname = 'public' and indexname = 'resources_element_doc_key_ux';
 -- EXPECT: one row.
 
+-- The CHECK proves the PP1.1 correction is what actually applied.
+select pg_get_constraintdef(oid) as doc_key_check
+from pg_constraint
+where conname = 'resources_doc_key_shape'
+  and conrelid = 'public.resources'::regclass;
+-- EXPECT: one row listing 'overview', 'guide', 'template' —
+--         and NOT 'checklist' / 'watch'.
+
 -- A4) EXECUTE privileges: anon denied, authenticated granted.
 select
   p.proname,
@@ -60,9 +71,10 @@ from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
   and p.proname in ('get_platform_sections', 'get_platform_topics',
-                    'get_platform_extras', 'get_resources')
+                    'get_resources')
 order by p.proname;
--- EXPECT: four rows; anon_execute = false, authenticated_execute = true on all.
+-- EXPECT: three rows; anon_execute = false, authenticated_execute = true on all.
+-- (get_platform_extras must NOT appear — it no longer exists.)
 
 -- A5) get_resources() carries the two appended columns (old callers unaffected).
 select pg_get_function_result(p.oid) like '%code text, doc_key text%' as widened
