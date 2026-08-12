@@ -1271,6 +1271,919 @@
   }
 }
 
+/* --- Toolkit explorer (PP3) ---------------------------------------------- */
+/* The four section pages: accordion groups → image-led focus-area cards that
+   expand in place. Values are the mockup's, taken from its LAST layers — the
+   `final-focus-area-rollout` and `final-last-revision` style blocks, which
+   supersede the compact card treatment in the earlier ones. The mockup scopes
+   that rollout with `#page-setup, #page-operate, #page-program, #page-support`
+   only because all four toolkits live in one document; here each page renders
+   its own section, so the ID prefixes carry no meaning and are dropped.
+
+   Deliberately NOT ported:
+     - `.toolkit-head` / `.toolkit-tools` / `.local-search` / `.search-count`
+       and `[data-no-results]` — dead CSS in the mockup, whose markup no render
+       function emits (D-PP-g: no per-page search; PP4 ships the one overlay);
+     - `.extras-block` / `.extra-list` / `.extra-row` — extras dropped (D-PP-c);
+     - the preview-modal rules — no preview modal in the new model;
+     - `.topic-icon` / `.topic-meta` / `.topic-intro` / `.topic-sticky` /
+       `.topic-open-control` — all superseded or `display:none!important` in the
+       mockup's own final layers. */
+
+.pw-root .pw-toolkit {
+  padding: 38px 0 88px;
+  background: linear-gradient(
+    180deg,
+    var(--pw-white) 0,
+    var(--pw-white) 35%,
+    var(--pw-cream-50) 100%
+  );
+}
+
+.pw-root .pw-toolkit-shell {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+  border: 1px solid var(--pw-line);
+  border-radius: 20px;
+  background: var(--pw-white);
+  box-shadow: 0 14px 44px rgba(42, 36, 30, 0.065);
+  overflow: hidden;
+}
+
+.pw-root .pw-toolkit-body {
+  padding: 22px 28px 32px;
+}
+
+/* --- Group accordion ----------------------------------------------------- */
+
+.pw-root .pw-group + .pw-group {
+  margin-top: 19px;
+}
+
+.pw-root .pw-group-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  min-height: 70px;
+  padding: 12px 3px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--pw-line);
+  background: var(--pw-white);
+  text-align: left;
+}
+
+.pw-root .pw-group-toggle:hover {
+  border-color: var(--pw-line-strong);
+}
+
+.pw-root .pw-group-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: var(--pw-moss-900);
+  color: var(--pw-copper-300);
+}
+
+.pw-root .pw-group-copy {
+  min-width: 0;
+}
+
+.pw-root .pw-group-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.33rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.pw-root .pw-group-desc {
+  display: block;
+  margin-top: 3px;
+  color: var(--pw-muted);
+  font-size: 12.5px;
+}
+
+.pw-root .pw-group-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pw-muted-2);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+/* One chevron treatment for both disclosure levels. Driven by aria-expanded on
+   the control itself, so the rotation cannot drift out of step with the state
+   screen readers are told about. */
+.pw-root .pw-chevron {
+  color: var(--pw-muted);
+  transition: transform 0.22s var(--pw-ease);
+}
+
+.pw-root [aria-expanded="true"] > .pw-chevron,
+.pw-root [aria-expanded="true"] .pw-group-meta > .pw-chevron {
+  transform: rotate(180deg);
+}
+
+.pw-root .pw-group-content {
+  padding: 17px 0 2px;
+}
+
+/* --- Focus-area cards ---------------------------------------------------- */
+
+.pw-root .pw-topics {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: min(1020px, 100%);
+  margin-inline: auto;
+}
+
+.pw-root .pw-topic {
+  border: 1px solid var(--pw-line);
+  border-radius: 18px;
+  background: var(--pw-white);
+  box-shadow: 0 6px 22px rgba(42, 36, 30, 0.045);
+  overflow: hidden;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+
+.pw-root .pw-topic:hover {
+  border-color: var(--pw-line-strong);
+  box-shadow: 0 14px 34px rgba(42, 36, 30, 0.08);
+}
+
+.pw-root .pw-topic.is-open {
+  border-color: #cfc5b7;
+  box-shadow: 0 12px 32px rgba(42, 36, 30, 0.075);
+}
+
+.pw-root .pw-topic-head {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  align-items: center;
+  gap: 0;
+  background: var(--pw-white);
+  overflow: hidden;
+  text-align: left;
+}
+
+.pw-root .pw-topic.is-open > .pw-topic-head {
+  background: var(--pw-olive-50);
+}
+
+.pw-root .pw-topic-image {
+  position: relative;
+  display: block;
+  width: 320px;
+  aspect-ratio: 1 / 1;
+  align-self: center;
+  background: var(--pw-cream-100);
+  overflow: hidden;
+}
+
+.pw-root .pw-topic-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(32, 26, 21, 0.035),
+    rgba(32, 26, 21, 0) 68%
+  );
+  pointer-events: none;
+}
+
+.pw-root .pw-topic-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--pw-topic-position, 50% 50%);
+  transition: transform 0.55s var(--pw-ease);
+}
+
+.pw-root .pw-topic-head:hover .pw-topic-image img {
+  transform: scale(1.025);
+}
+
+/* Fallback for a topic with no image row. All 33 ship one today, so this is
+   insurance against a future CMS gap rather than a state anyone should see. */
+.pw-root .pw-topic-image.is-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  border-right: 1px solid var(--pw-line);
+  background:
+    linear-gradient(135deg, rgba(68, 107, 88, 0.08), rgba(176, 113, 61, 0.055)),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 18px,
+      rgba(68, 107, 88, 0.035) 18px 19px
+    ),
+    var(--pw-cream-100);
+  color: var(--pw-olive-700);
+}
+
+.pw-root .pw-topic-image.is-placeholder::after {
+  display: none;
+}
+
+.pw-root .pw-topic-placeholder-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--pw-olive-300);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 8px 20px rgba(42, 36, 30, 0.055);
+}
+
+.pw-root .pw-topic-placeholder-icon .pw-icon {
+  width: 25px;
+  height: 25px;
+}
+
+.pw-root .pw-topic-placeholder-label {
+  padding: 6px 10px;
+  border: 1px solid var(--pw-line-strong);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--pw-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.pw-root .pw-topic-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  padding: 28px 32px;
+}
+
+.pw-root .pw-topic-title {
+  color: var(--pw-char-950);
+  font-family: var(--font-body);
+  font-size: clamp(1.25rem, 1.65vw, 1.52rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.pw-root .pw-topic-desc {
+  margin-top: 7px;
+  max-width: 62ch;
+  color: var(--pw-muted);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.pw-root .pw-topic-summary {
+  margin-top: 10px;
+  max-width: 66ch;
+  color: var(--pw-char-800);
+  font-size: 13.5px;
+  line-height: 1.62;
+}
+
+.pw-root .pw-topic-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.pw-root .pw-topic-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 15px;
+  border: 1px solid var(--pw-olive-700);
+  border-radius: 999px;
+  background: var(--pw-olive-700);
+  color: var(--pw-white);
+  font-size: 11.5px;
+  font-weight: 850;
+  line-height: 1;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
+}
+
+.pw-root .pw-topic-action:hover {
+  background: var(--pw-olive-800);
+  border-color: var(--pw-olive-800);
+  transform: translateY(-1px);
+}
+
+.pw-root .pw-topic.is-open > .pw-topic-head .pw-topic-action {
+  background: var(--pw-white);
+  border-color: var(--pw-olive-700);
+  color: var(--pw-olive-800);
+}
+
+.pw-root .pw-topic.is-open > .pw-topic-head .pw-topic-action:hover {
+  background: var(--pw-olive-100);
+}
+
+.pw-root .pw-topic-action .pw-icon,
+.pw-root .pw-topic-video .pw-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.pw-root .pw-topic-video {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 15px;
+  border: 1px solid var(--pw-line-strong);
+  border-radius: 999px;
+  background: var(--pw-white);
+  color: var(--pw-olive-800);
+  font-size: 11.5px;
+  font-weight: 850;
+  line-height: 1;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
+}
+
+.pw-root .pw-topic-video:hover {
+  border-color: var(--pw-olive-600);
+  background: var(--pw-olive-100);
+  transform: translateY(-1px);
+}
+
+.pw-root .pw-topic-body {
+  border-top: 1px solid var(--pw-line);
+  background: var(--pw-white);
+}
+
+.pw-root .pw-topic-content {
+  width: min(1040px, 100%);
+  margin-inline: auto;
+  padding: 26px 20px 30px;
+}
+
+/* --- Section subheads ---------------------------------------------------- */
+
+.pw-root .pw-subhead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 13px;
+}
+
+.pw-root .pw-subhead-title {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pw-copper-700);
+}
+
+.pw-root .pw-subhead-note {
+  margin-top: 3px;
+  color: var(--pw-muted);
+  font-size: 12px;
+}
+
+.pw-root .pw-meta-pill {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--pw-cream-100);
+  color: var(--pw-muted-2);
+  font-size: 10.5px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+/* --- The one Start-here card --------------------------------------------- */
+/* The mockup lays these out in a 4-up grid because it drew four cards per
+   topic. Under D-PP-f there is exactly one, so the grid would leave three dead
+   columns — the card keeps every one of the mockup's own values and only its
+   container changes to a single readable measure. */
+
+.pw-root .pw-start-card {
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 100%);
+  padding: 28px;
+  border: 1px solid var(--pw-line);
+  border-radius: 20px;
+  background: var(--pw-white);
+  box-shadow: 0 7px 24px rgba(42, 36, 30, 0.045);
+  transition:
+    transform 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.pw-root .pw-start-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--pw-line-strong);
+  box-shadow: 0 17px 38px rgba(42, 36, 30, 0.09);
+}
+
+.pw-root .pw-start-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--pw-olive-100);
+  color: var(--pw-olive-700);
+}
+
+.pw-root .pw-start-icon .pw-icon {
+  width: 27px;
+  height: 27px;
+}
+
+.pw-root .pw-start-title {
+  margin-top: 22px;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1.18;
+}
+
+.pw-root .pw-start-desc {
+  margin-top: 11px;
+  flex: 1;
+  color: var(--pw-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pw-root .pw-start-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pw-line);
+}
+
+/* The mockup's `.btn.primary.small` / `.btn.secondary.small`, resolved. Named
+   apart from the existing `.pw-btn` (the footer's full-width CTA), which is a
+   different control with different proportions. */
+.pw-root .pw-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--pw-olive-700);
+  color: var(--pw-white);
+  font-size: 11.5px;
+  font-weight: 800;
+  text-decoration: none;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s,
+    transform 0.18s;
+}
+
+.pw-root .pw-action:hover {
+  background: var(--pw-olive-800);
+  transform: translateY(-1px);
+}
+
+.pw-root .pw-action--secondary {
+  background: var(--pw-cream-100);
+  border-color: var(--pw-line);
+  color: var(--pw-char-900);
+}
+
+.pw-root .pw-action--secondary:hover {
+  background: var(--pw-cream-200);
+  border-color: var(--pw-line-strong);
+}
+
+.pw-root .pw-action .pw-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.pw-root .pw-action[disabled] {
+  cursor: default;
+}
+
+.pw-root .pw-action[disabled]:hover {
+  transform: none;
+}
+
+/* --- Templates grid ------------------------------------------------------ */
+
+.pw-root .pw-templates {
+  margin-top: 27px;
+  padding-top: 23px;
+  border-top: 1px solid var(--pw-line);
+}
+
+.pw-root .pw-template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pw-root .pw-template-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 66px;
+  padding: 9px;
+  border: 1px solid var(--pw-line);
+  border-radius: 11px;
+  background: var(--pw-white);
+}
+
+.pw-root .pw-template-row:hover {
+  border-color: var(--pw-line-strong);
+  background: #faf8f3;
+}
+
+.pw-root .pw-template-code {
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 34px;
+  padding: 0 7px;
+  border-radius: 8px;
+  background: var(--pw-olive-100);
+  color: var(--pw-olive-800);
+  font-size: 9.5px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.pw-root .pw-template-title {
+  display: block;
+  min-width: 0;
+  font-size: 11.75px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.pw-root .pw-template-download {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--pw-line);
+  border-radius: 50%;
+  background: var(--pw-white);
+  color: var(--pw-olive-800);
+  transition:
+    background 0.18s,
+    border-color 0.18s;
+}
+
+.pw-root .pw-template-download:hover {
+  background: var(--pw-olive-100);
+  border-color: var(--pw-olive-600);
+}
+
+.pw-root .pw-template-download .pw-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.pw-root .pw-show-more {
+  width: auto;
+  margin-top: 12px;
+}
+
+/* --- Toolkit responsive -------------------------------------------------- */
+
+@media (max-width: 1080px) {
+  .pw-root .pw-topic-head {
+    grid-template-columns: 290px minmax(0, 1fr);
+  }
+
+  .pw-root .pw-topic-image {
+    width: 290px;
+  }
+
+  .pw-root .pw-template-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .pw-root .pw-toolkit-shell {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .pw-root .pw-toolkit-body {
+    padding: 16px 13px 24px;
+  }
+
+  .pw-root .pw-topics {
+    width: min(560px, 100%);
+    gap: 13px;
+  }
+
+  .pw-root .pw-topic-head {
+    grid-template-columns: 1fr;
+  }
+
+  .pw-root .pw-topic-image {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--pw-line);
+  }
+
+  .pw-root .pw-topic-copy {
+    padding: 21px;
+  }
+
+  .pw-root .pw-topic-summary {
+    font-size: 12.75px;
+    line-height: 1.58;
+  }
+
+  .pw-root .pw-topic-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pw-root .pw-topic-action,
+  .pw-root .pw-topic-video {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .pw-root .pw-topic-content {
+    width: 100%;
+    padding: 18px 13px 22px;
+  }
+}
+
+@media (max-width: 620px) {
+  .pw-root .pw-toolkit-body {
+    padding: 13px;
+  }
+
+  .pw-root .pw-group-toggle {
+    padding: 12px 2px;
+  }
+
+  .pw-root .pw-subhead {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  /* The mockup stops at two template columns; two 66px rows inside a 320px
+     viewport leaves no room for a title, so the grid goes single-column here. */
+  .pw-root .pw-template-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 390px) {
+  .pw-root .pw-topic-copy {
+    padding: 18px;
+  }
+}
+
+/* --- Ask HQ (PP3) -------------------------------------------------------- */
+/* The moss panel on /support: copy on the left, form on the right. Submission
+   is NOT wired in PP3 (D-PP-h) — PP4 lands the send — so no success state is
+   ported; the mockup's `.form-success` block would be a lie until then. */
+
+.pw-root .pw-ask {
+  padding: 0 0 96px;
+  background: var(--pw-cream-50);
+}
+
+.pw-root .pw-ask-wrap {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(480px, 1.22fr);
+  gap: 30px;
+  padding: 38px;
+  border-radius: 20px;
+  background: var(--pw-moss-900);
+  color: var(--pw-white);
+  box-shadow: 0 18px 50px rgba(32, 35, 14, 0.15);
+  overflow: hidden;
+}
+
+.pw-root .pw-ask-wrap::after {
+  content: "";
+  position: absolute;
+  right: -180px;
+  top: -190px;
+  width: 390px;
+  height: 390px;
+  border: 1px solid rgba(200, 154, 106, 0.22);
+  border-radius: 50%;
+}
+
+.pw-root .pw-ask-copy {
+  position: relative;
+  z-index: 1;
+  padding: 10px;
+}
+
+.pw-root .pw-kicker {
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pw-copper-700);
+}
+
+.pw-root .pw-ask-copy .pw-kicker {
+  color: var(--pw-copper-300);
+}
+
+.pw-root .pw-ask-copy h2 {
+  margin-top: 8px;
+  color: var(--pw-white);
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.1;
+}
+
+.pw-root .pw-ask-lead {
+  margin-top: 14px;
+  max-width: 420px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.pw-root .pw-ask-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.pw-root .pw-ask-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+}
+
+.pw-root .pw-ask-list .pw-icon {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  color: var(--pw-copper-300);
+}
+
+.pw-root .pw-ask-list a {
+  color: var(--pw-copper-300);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pw-root .pw-ask-form {
+  position: relative;
+  z-index: 1;
+  padding: 25px;
+  border-radius: 15px;
+  background: var(--pw-white);
+  color: var(--pw-char-900);
+  box-shadow: 0 13px 32px rgba(0, 0, 0, 0.11);
+}
+
+.pw-root .pw-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.pw-root .pw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pw-root .pw-field--full {
+  grid-column: 1 / -1;
+}
+
+.pw-root .pw-field label {
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.pw-root .pw-field :is(input, select, textarea) {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--pw-line);
+  border-radius: 10px;
+  background: var(--pw-white);
+  outline: none;
+}
+
+.pw-root .pw-field :is(input, select) {
+  height: 46px;
+}
+
+.pw-root .pw-field textarea {
+  min-height: 128px;
+  resize: vertical;
+}
+
+.pw-root .pw-field :is(input, select, textarea):focus {
+  border-color: var(--pw-olive-600);
+  box-shadow: 0 0 0 3px rgba(68, 107, 88, 0.13);
+}
+
+.pw-root .pw-field-error {
+  min-height: 16px;
+  color: var(--pw-error);
+  font-size: 10.5px;
+  font-weight: 650;
+}
+
+.pw-root .pw-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pw-root .pw-form-note {
+  max-width: 280px;
+  color: var(--pw-muted);
+  font-size: 10.5px;
+}
+
+.pw-root .pw-form-actions .pw-action {
+  width: auto;
+  min-height: 42px;
+  padding: 9px 15px;
+  font-size: 12.5px;
+}
+
+@media (max-width: 1080px) {
+  .pw-root .pw-ask-wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .pw-root .pw-ask-wrap {
+    padding: 22px;
+    border-radius: 15px;
+  }
+
+  .pw-root .pw-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pw-root .pw-form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pw-root .pw-form-actions .pw-action {
+    width: 100%;
+  }
+}
+
 /* --- Touch targets ------------------------------------------------------- */
 /* The mockup sizes several controls at 36–42px. On a touch pointer the house
    rule is a 44px minimum (DR1-10), so raise them there without disturbing the
@@ -1280,11 +2193,15 @@
   .pw-root .pw-header-action,
   .pw-root .pw-header-action--icon,
   .pw-root .pw-footer-link,
-  .pw-root .pw-journey-link {
+  .pw-root .pw-journey-link,
+  .pw-root .pw-action,
+  .pw-root .pw-show-more,
+  .pw-root .pw-template-download {
     min-height: 44px;
   }
 
-  .pw-root .pw-header-action--icon {
+  .pw-root .pw-header-action--icon,
+  .pw-root .pw-template-download {
     width: 44px;
   }
 }
