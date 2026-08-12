@@ -32,6 +32,12 @@ export type ChecklistRow = {
   sort_order: number;
 };
 
+/* get_resources() was widened in place by 0027 (columns appended, none removed
+   or reordered) — `code` is the template badge ("T01"), `doc_key` is 'guide' on
+   the one downloadable Simple-guide file per topic and NULL on everything else.
+   Both are read-only projections of existing columns, so the S6 consumers that
+   predate them are unaffected. Nothing constructs this type; it only ever
+   describes rows coming back from the RPC. */
 export type ResourceRow = {
   id: string;
   title: string;
@@ -41,6 +47,8 @@ export type ResourceRow = {
   version: string | null;
   is_public: boolean;
   sort_order: number;
+  code: string | null;
+  doc_key: string | null;
 };
 
 export type AcademyRow = {
