@@ -33,7 +33,12 @@ function PwTemplateRow({ template }: { template: PwTemplate }) {
   const [pending, startTransition] = React.useTransition();
   const { showToast } = usePwToast();
 
+  /* aria-disabled, not disabled: a `disabled` button drops out of the a11y tree
+     the instant it is pressed, so a keyboard user gets dumped back to the top of
+     the document mid-download. This keeps focus where it was and guards the
+     handler instead. */
   const onDownload = () => {
+    if (pending) return;
     startTransition(async () => {
       const result = await getResourceDownloadUrl(template.id);
       if ("url" in result) {
@@ -54,7 +59,7 @@ function PwTemplateRow({ template }: { template: PwTemplate }) {
         type="button"
         className="pw-template-download"
         onClick={onDownload}
-        disabled={pending}
+        aria-disabled={pending}
         aria-label={`Download ${template.title}`}
       >
         <Download className="pw-icon" aria-hidden="true" />

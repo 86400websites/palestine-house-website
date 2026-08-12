@@ -42,7 +42,10 @@ export function PwStartCard({ guide }: { guide: PwGuideFile | null }) {
   const { showToast } = usePwToast();
   const [pending, startTransition] = React.useTransition();
 
+  /* aria-disabled rather than disabled — see pw-template-grid.tsx: a disabled
+     button loses focus the moment it is pressed. */
   const onDownload = () => {
+    if (pending) return;
     if (!guide) {
       showToast(COPY.downloadSoon);
       return;
@@ -86,7 +89,7 @@ export function PwStartCard({ guide }: { guide: PwGuideFile | null }) {
             type="button"
             className="pw-action"
             onClick={onDownload}
-            disabled={pending}
+            aria-disabled={pending}
           >
             {COPY.download}
             <Download className="pw-icon" aria-hidden="true" />

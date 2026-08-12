@@ -79,10 +79,18 @@ export function PwAskHq({
     INITIAL,
   );
   const [sent, setSent] = React.useState(false);
+  const sentHeading = React.useRef<HTMLHeadingElement>(null);
 
   React.useEffect(() => {
     if (state.ok) setSent(true);
   }, [state]);
+
+  /* Submitting replaces the form — and the button that had focus — with the
+     confirmation. Without this, a keyboard or screen-reader user is returned to
+     the top of the document with no idea the send succeeded. */
+  React.useEffect(() => {
+    if (sent) sentHeading.current?.focus();
+  }, [sent]);
 
   return (
     <section className="pw-ask" id="ask-hq">
@@ -108,7 +116,9 @@ export function PwAskHq({
                 <span className="pw-success-icon" aria-hidden="true">
                   <Check className="pw-icon" />
                 </span>
-                <h3>{COPY.sent}</h3>
+                <h3 ref={sentHeading} tabIndex={-1}>
+                  {COPY.sent}
+                </h3>
                 <button
                   type="button"
                   className="pw-action pw-action--secondary"

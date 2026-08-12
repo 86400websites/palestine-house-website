@@ -1801,11 +1801,14 @@
   height: 15px;
 }
 
-.pw-root .pw-action[disabled] {
+/* In-flight controls use aria-disabled, not disabled, so focus is not thrown to
+   the top of the document mid-download — they still need to look inert. */
+.pw-root [aria-disabled="true"] {
   cursor: default;
+  opacity: 0.65;
 }
 
-.pw-root .pw-action[disabled]:hover {
+.pw-root [aria-disabled="true"]:hover {
   transform: none;
 }
 
@@ -1964,8 +1967,20 @@
     padding: 13px;
   }
 
+  /* The mockup's only narrow-screen rule for this control is the padding below.
+     Its three-column row does not survive 320px: "N Focus Areas" plus the
+     chevron claim ~100px, which squeezes the group title into a shred and
+     collides the two. Drop to two columns and let the meta take its own row
+     under the copy — nothing is hidden, and the title gets the full measure. */
   .pw-root .pw-group-toggle {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 6px;
     padding: 12px 2px;
+  }
+
+  .pw-root .pw-group-meta {
+    grid-column: 2;
+    justify-content: space-between;
   }
 
   .pw-root .pw-subhead {
@@ -1978,6 +1993,11 @@
      viewport leaves no room for a title, so the grid goes single-column here. */
   .pw-root .pw-template-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* 28px of padding inside a ~244px card leaves the title almost no measure. */
+  .pw-root .pw-start-card {
+    padding: 20px;
   }
 }
 
@@ -2226,7 +2246,10 @@
   .pw-root .pw-journey-link,
   .pw-root .pw-action,
   .pw-root .pw-show-more,
-  .pw-root .pw-template-download {
+  .pw-root .pw-template-download,
+  .pw-root .pw-topic-action,
+  .pw-root .pw-topic-video,
+  .pw-root .pw-form-actions .pw-action {
     min-height: 44px;
   }
 

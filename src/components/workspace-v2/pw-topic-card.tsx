@@ -82,7 +82,10 @@ export function PwTopicCard({
         <TopicImage topic={topic} />
 
         <div className="pw-topic-copy">
-          <h3 className="pw-topic-title" id={titleId}>
+          {/* tabIndex -1 so a deep link can move focus here: arriving at
+              /setup#topic-x should land a keyboard or screen-reader user on the
+              focus area they asked for, not at the top of the page. */}
+          <h3 className="pw-topic-title" id={titleId} tabIndex={-1}>
             {topic.title}
           </h3>
           {topic.description ? (

@@ -73,7 +73,7 @@ export function PwSectionExplorer({
     slug: string;
     block: ScrollLogicalPosition;
   } | null>(null);
-  const pendingFocus = React.useRef<string | null>(null);
+  const pendingFocus = React.useRef<{ id: string } | null>(null);
 
   const groupIdByTopic = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -111,7 +111,12 @@ export function PwSectionExplorer({
         current.has(groupId) ? current : new Set(current).add(groupId),
       );
       setOpenTopic(slug);
-      if (flash) setFlashTopic(slug);
+      if (flash) {
+        setFlashTopic(slug);
+        /* Arriving from a link: the flash says "this one" visually, so focus has
+           to say it too, or a keyboard user lands at the top of the page. */
+        pendingFocus.current = { id: `topic-${slug}-title` };
+      }
       pendingScroll.current = { slug, block: "start" };
       writeHash(slug);
     },
@@ -126,7 +131,7 @@ export function PwSectionExplorer({
            the control that was just pressed would be lost. Bring it back to the
            middle and hand focus to it. */
         pendingScroll.current = { slug, block: "center" };
-        pendingFocus.current = slug;
+        pendingFocus.current = { id: `explore-${slug}` };
         writeHash(null);
         return;
       }
@@ -147,9 +152,7 @@ export function PwSectionExplorer({
     const focus = pendingFocus.current;
     if (focus) {
       pendingFocus.current = null;
-      document
-        .getElementById(`explore-${focus}`)
-        ?.focus({ preventScroll: true });
+      document.getElementById(focus.id)?.focus({ preventScroll: true });
     }
   });
 
