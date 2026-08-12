@@ -36,6 +36,10 @@ const GATED_PREFIXES = [
   "/tools",
   "/account",
   "/support",
+  // src/app/(platform) route group — the PP2 workspace v2 shell. Routes migrate
+  // here from (workspace) as the revamp lands; both groups are gated, so a path
+  // stays in this list across the move.
+  "/setup",
   // admin
   "/admin",
 ];
