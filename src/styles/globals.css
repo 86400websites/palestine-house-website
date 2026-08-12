@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "./pages.css";
 @import "./v3.css";
+/* Workspace v2 (PP2) — fully scoped to `.pw-root`; imported last so it wins
+   ties against the legacy workspace rules it will replace at PP5. */
+@import "./workspace-v2.css";
 
 /* ---------------------------------------------------------------------------
    Palestine House — design system foundation (Sprint 0.1).

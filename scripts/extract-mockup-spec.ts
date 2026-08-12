@@ -24,12 +24,22 @@
  * Per-kind card copy is CONSTANT across all topics in the mockup — it ships as app
  * constants in PP3, not DB rows. Only structural metadata is seeded.
  *
- * 3-card transform (D-PP-c, owner 2026-08-11): the mockup still shows 4 standard
- * cards + "More guides" extras per topic; the owner's instruction supersedes it.
- * The emitted spec/seed keep only Overview + Simple guide and synthesize the single
- * Template card (download-only, owner-populated via CMS v2 in PP6). Extras are
- * dropped entirely. The raw-shape asserts stay pinned to the mockup as source-drift
- * guards; everything emitted is post-transform.
+ * Workspace chrome copy (PP2, 2026-08-12): the header/footer strings live in the
+ * mockup's markup + render functions rather than #appData, so PP1 never captured them.
+ * They are extracted into spec.chrome (asserted, so mockup drift fails loudly) and the
+ * app reads them from the committed spec — the 7.7MB mockup is never a build input.
+ *
+ * Owner transform (D-PP-c 2026-08-11, superseded by D-PP-f 2026-08-12): the mockup
+ * still shows 4 standard cards + "More guides" extras per topic; the owner's
+ * instruction supersedes it. The shipped model is
+ *   summary -> ONE Simple guide card (Read + Download) -> Watch Video -> templates grid
+ * so the emitted spec/seed keep ONLY the GUIDE standard card (33, one per topic).
+ * The Overview, checklist and watch cards are dropped, the extras are dropped, and
+ * NO single Template card is synthesized: templates are a live many-per-topic grid,
+ * so the per-topic `templates` arrays are emitted in full (297 rows that already
+ * exist in public.resources + Storage, matched by element_id). The raw-shape asserts
+ * stay pinned to the mockup as source-drift guards; everything emitted is
+ * post-transform. Copy edits the model forced are applied here behind asserts.
  *
  * Sources absent on disk (fresh clone without the OneDrive folders) fail with a clear
  * message — outputs are committed, so re-running is only needed when the mockup changes.
@@ -49,6 +59,7 @@ const OUT_SPEC = path.join(ROOT, "docs/workspace-spec.json");
 const OUT_SEED_UP = path.join(ROOT, "supabase/sql/migrations/0028_platform_seed.up.sql");
 const OUT_SEED_DOWN = path.join(ROOT, "supabase/sql/migrations/0028_platform_seed.down.sql");
 const OUT_ASSETS = path.join(ROOT, "public/assets/workspace");
+const OUT_APP_SPEC = path.join(ROOT, "src/lib/workspace-v2/spec.ts");
 
 /** topic_slug -> elements.slug. Verified against the live DB 2026-08-10 (33/33 titles match). */
 const ELEMENT_MAP: Record<string, string> = {
@@ -254,44 +265,40 @@ async function main() {
 
   console.log("appData asserts pass: 4 sections / 10 groups / 33 topics (5/15/9/4) / 132 std / 15 extras / 297 templates / 33:33 element map");
 
-  // ---- 2b. Owner transform (D-PP-c, 2026-08-11): the 3-card topic model -------------
-  // The mockup still shows 4 standard cards + "More guides" extras; the owner's
-  // instruction supersedes it (PROJECT-STATUS §5 D-PP-c): each topic ships
-  // Overview + Simple guide + ONE Template card; the checklist/watch cards and the
-  // extras are dropped. The raw asserts above stay pinned to the mockup (source-
-  // drift guards); everything emitted below is post-transform.
-  const KEPT_KEYS = ["overview", "guide"];
-  const KEPT_KINDS = ["OVERVIEW", "GUIDE"];
+  // ---- 2b. Owner transform (D-PP-f, 2026-08-12): the final topic model --------------
+  // The mockup shows 4 standard cards + "More guides" extras; the owner's instruction
+  // supersedes it (PROJECT-STATUS §5 D-PP-c as revised by D-PP-f). The shipped model is
+  //   summary -> ONE Simple guide card (Read + Download) -> Watch Video -> templates grid
+  // so only the GUIDE standard card survives; overview/checklist/watch cards and the 15
+  // extras are dropped. Templates are NOT reduced — under D-PP-f they are a live
+  // many-per-topic surface again (the 297 coded files already in the DB/Storage), so the
+  // per-topic `templates` arrays are emitted in full. The raw asserts above stay pinned
+  // to the mockup (source-drift guards); everything emitted below is post-transform.
+  const KEPT_KEYS = ["guide"];
+  const KEPT_KINDS = ["GUIDE"];
   for (const { topic } of allTopics) {
     topic.resources = topic.resources.filter((r) => KEPT_KEYS.includes(r.key));
   }
   const keptResources = allTopics.flatMap(({ topic }) => topic.resources);
-  assert(keptResources.length === 66, `expected 66 kept standard resources, got ${keptResources.length}`);
+  assert(keptResources.length === 33, `expected 33 kept standard resources, got ${keptResources.length}`);
   for (const { topic } of allTopics) {
-    assert(topic.resources.length === 2, `${topic.slug}: expected 2 kept standard resources`);
+    assert(topic.resources.length === 1, `${topic.slug}: expected exactly 1 kept standard resource (the guide)`);
+    assert(topic.templates.length > 0, `${topic.slug}: has no templates — the D-PP-f grid would be empty`);
   }
   assert(
     [...new Set(keptResources.map((r) => r.kind))].sort().join("|") === [...KEPT_KINDS].sort().join("|"),
-    "kept standard resource kinds drifted from OVERVIEW/GUIDE",
+    "kept standard resource kind drifted from GUIDE",
   );
 
-  // The Template card: kind/icon/desc/use are the mockup's constancy-asserted
-  // template-row copy; only the title + action strings are new (owner sign-off
-  // 2026-08-12 — the only two invented strings in the 3-card correction).
-  const TEMPLATE_CARD = {
-    kind: templates[0].kind,
-    key: "template",
-    title: "Template",
-    icon: templates[0].icon,
-    desc: templates[0].desc,
-    action: "Download template",
-    use: templates[0].use,
-  };
-
-  // Owner-approved intro trims where mockup copy referenced a removed card
-  // (approved 2026-08-12; asserted so a future mockup edit can't silently miss).
+  // Owner-approved intro trims where mockup copy referenced a removed card. The
+  // launching-a-new-house intro promised "the guides" (plural) and "the checklist and
+  // templates"; under D-PP-f a topic has one guide and many templates. Asserted so a
+  // future mockup edit cannot silently miss the trim.
   const INTRO_TRIMS: Record<string, [from: string, to: string]> = {
-    "launching-a-new-house": ["use the checklist and templates below", "use the template below"],
+    "launching-a-new-house": [
+      "Read the guides in order, then use the checklist and templates below",
+      "Read the guide, then use the templates below",
+    ],
   };
   for (const { topic } of allTopics) {
     const trim = INTRO_TRIMS[topic.slug];
@@ -300,7 +307,136 @@ async function main() {
     topic.intro = topic.intro.replace(trim[0], trim[1]);
   }
 
-  console.log("3-card transform applied: 66 kept std (of 132) / Template card synthesized / extras dropped / 1 intro trim");
+  console.log(
+    `D-PP-f transform applied: 33 kept std (of 132, guide only) / ${templates.length} templates kept live / extras dropped / 1 intro trim`,
+  );
+
+  // ---- 2c. Workspace chrome copy (PP2) ----------------------------------------------
+  // The header/footer strings live in the mockup's markup + render functions, not in
+  // #appData, so PP1 never captured them. PP2 builds the real chrome and must use them
+  // verbatim — extract them here so the app reads the committed spec, never the 7.7MB
+  // mockup. Every capture is asserted: a mockup edit that moves or renames any of these
+  // fails the run loudly instead of silently shipping stale or missing copy.
+  const grab = (re: RegExp, label: string): string => {
+    const m = re.exec(html!);
+    assert(m && m[1] !== undefined, `chrome copy: ${label} not found in the mockup`);
+    return m![1].trim();
+  };
+
+  const navBlock = grab(
+    /function pageNavMarkup\(mobile=false\)\{\s*const items = \[([\s\S]*?)\];/,
+    "pageNavMarkup items",
+  );
+  const navItems = [...navBlock.matchAll(/\['([a-z]+)','([^']*)','([^']*)'\]/g)].map((m) => ({
+    page: m[1],
+    label: m[2],
+    tip: m[3],
+  }));
+  assert(navItems.length === 5, `expected 5 nav items, got ${navItems.length}`);
+  assert(
+    navItems.map((n) => n.page).join("/") === "about/setup/operate/program/support",
+    `nav order drifted: ${navItems.map((n) => n.page).join("/")}`,
+  );
+  for (const n of navItems) {
+    assert(n.label && n.tip, `nav item '${n.page}' is missing a label or tooltip`);
+  }
+
+  // The footer is one template literal assigned to #siteFooter — slice it out, then read
+  // only the static text (the ${…} interpolations are asset paths the app already owns).
+  const footerHtml = grab(
+    /\$\('#siteFooter'\)\.innerHTML\s*=\s*`([\s\S]*?)`;/,
+    "#siteFooter template",
+  );
+  const fgrab = (re: RegExp, label: string): string => {
+    const m = re.exec(footerHtml);
+    assert(m && m[1] !== undefined, `chrome copy: footer ${label} not found`);
+    return m![1].trim();
+  };
+
+  const footerCols = [...footerHtml.matchAll(/<div class="footer-col([^"]*)">([\s\S]*?)<\/div>/g)];
+  assert(footerCols.length === 5, `expected 5 footer columns, got ${footerCols.length}`);
+  assert(footerCols[0][1].includes("footer-brand"), "the first footer column is no longer the brand column");
+  const footerLinkCols = footerCols.slice(1).map(([, , inner]) => {
+    const title = /<span class="footer-title">([^<]*)<\/span>/.exec(inner);
+    assert(title, "a footer column is missing its title");
+    return {
+      title: title![1].trim(),
+      links: [...inner.matchAll(/<button class="footer-link"[^>]*>([^<]*)<\/button>/g)].map((m) =>
+        m[1].trim(),
+      ),
+      context: [...inner.matchAll(/<span class="footer-context">([^<]*)<\/span>/g)].map((m) =>
+        m[1].trim(),
+      ),
+    };
+  });
+  assert(
+    footerLinkCols.every((c) => c.title && (c.links.length > 0 || c.context.length > 0)),
+    "a footer column came out empty",
+  );
+
+  const chrome = {
+    skipLink: grab(/<a class="skip-link" href="#main-content">([^<]*)<\/a>/, "skip link"),
+    brand: {
+      href: grab(/<a class="brand" href="([^"]*)"/, "brand href"),
+      ariaLabel: grab(/<a class="brand"[^>]*aria-label="([^"]*)"/, "brand aria-label"),
+      logoAlt: grab(/<img class="brand-logo brand-logo--overlay"[^>]*alt="([^"]*)"/, "brand logo alt"),
+    },
+    nav: {
+      ariaLabel: grab(/<nav id="desktopNav"[^>]*aria-label="([^"]*)"/, "desktop nav aria-label"),
+      mobileAriaLabel: grab(/<nav id="mobileNav" aria-label="([^"]*)"/, "mobile nav aria-label"),
+      items: navItems,
+    },
+    account: {
+      label: grab(/<button class="header-action account"[^>]*>([^<]*)<\/button>/, "account label"),
+      ariaLabel: grab(/<button class="header-action account"[^>]*aria-label="([^"]*)"/, "account aria-label"),
+    },
+    menuButton: {
+      ariaLabel: grab(/<button class="header-action icon-only menu-button"[^>]*aria-label="([^"]*)"/, "menu aria-label"),
+    },
+    documentTitleSuffix: grab(/document\.title=`\$\{DATA\.pageMeta\[page\]\.label\} — ([^`]*)`/, "document title suffix"),
+    footer: {
+      cta: {
+        heading: fgrab(/<h2>([^<]*)<\/h2>/, "CTA heading"),
+        lead: fgrab(/<div class="footer-cta-row"><p>([^<]*)<\/p>/, "CTA lead"),
+        searchAction: fgrab(/data-open-search>([^$<]*)\$\{svg/, "search button label"),
+        askAction: fgrab(/data-scroll-target="ask-hq">([^$<]*)\$\{svg/, "Ask HQ button label"),
+        photoAlt: fgrab(/<img class="footer-photo"[^>]*alt="([^"]*)"/, "CTA photo alt"),
+      },
+      brand: {
+        logoAlt: fgrab(/<img class="footer-brand-logo"[^>]*alt="([^"]*)"/, "brand logo alt"),
+        blurb: fgrab(/<p>([^<]*)<\/p><p class="footer-arabic"/, "brand blurb"),
+        arabic: fgrab(/<p class="footer-arabic" lang="ar" dir="rtl">([^<]*)<\/p>/, "Arabic tagline"),
+      },
+      columns: footerLinkCols,
+      bottom: {
+        tagline: fgrab(/<span class="footer-tagline">([^<]*)<\/span>/, "footer tagline"),
+        copyright: fgrab(/<span class="footer-copy">([^<]*)<\/span>/, "footer copyright"),
+      },
+    },
+  };
+
+  // Owner-approved chrome copy edits (2026-08-12), asserted so a future mockup
+  // edit cannot silently skip them:
+  //  1. the footer blurb named a "checklist", a surface D-PP-f removed;
+  //  2. the Help column carried prototype scaffolding ("...connect through the
+  //     authenticated platform"), written from outside the build — inside the
+  //     signed-in platform it describes itself in the third person.
+  const BLURB_FROM = "every guide, checklist, video, and template";
+  const BLURB_TO = "every guide, video, and template";
+  assert(
+    chrome.footer.brand.blurb.includes(BLURB_FROM),
+    "footer blurb no longer contains the approved trim source — mockup copy changed?",
+  );
+  chrome.footer.brand.blurb = chrome.footer.brand.blurb.replace(BLURB_FROM, BLURB_TO);
+
+  const HELP_LINE = "Live files and permissions connect through the authenticated platform.";
+  const helpColumn = chrome.footer.columns.find((c) => c.context.includes(HELP_LINE));
+  assert(helpColumn, "the prototype Help line was not found — mockup copy changed?");
+  helpColumn!.context = helpColumn!.context.filter((line) => line !== HELP_LINE);
+
+  console.log(
+    `chrome copy extracted: ${chrome.nav.items.length} nav items + ${chrome.footer.columns.length} footer columns (2 owner-approved edits applied)`,
+  );
 
   // ---- 3. Assets --------------------------------------------------------------------
   for (const dir of ["topics", "sections", "heroes", "misc"]) {
@@ -402,15 +538,15 @@ async function main() {
       templates: templates.length,
       booklets: data.stats.booklets,
     },
-    // The 3-card model (D-PP-c): the two kept kinds + the synthesized Template card.
-    resourceKinds: [
-      ...KEPT_KINDS.map((kind) => {
-        const r = keptResources.find((x) => x.kind === kind)!;
-        return { kind, key: r.key, title: r.title, icon: r.icon, desc: r.desc, action: r.action, use: r.use };
-      }),
-      TEMPLATE_CARD,
-    ],
+    // D-PP-f: the single surviving standard card (Simple guide). Templates carry their
+    // own shared copy in templateCopy below and render as a grid, not as a card.
+    resourceKinds: KEPT_KINDS.map((kind) => {
+      const r = keptResources.find((x) => x.kind === kind)!;
+      return { kind, key: r.key, title: r.title, icon: r.icon, desc: r.desc, action: r.action, use: r.use };
+    }),
     templateCopy: { desc: templates[0].desc, use: templates[0].use },
+    // Header/footer strings for the PP2 workspace chrome, verbatim from the mockup.
+    chrome,
     pages: Object.fromEntries(
       Object.entries(pageMeta).map(([page, m]) => [
         page,
@@ -448,8 +584,9 @@ async function main() {
           image: `/assets/workspace/topics/${t.slug}.jpg`,
           imagePosition: posOf(t.slug),
           standardDocs: t.resources.map((r) => ({ key: r.key, filename: r.filename, source: r.source })),
-          // extras removed (D-PP-c ⑥); templates kept as the PP6 CMS picker's candidate
-          // list for the one owner-chosen template per topic (dormant coded rows).
+          // extras removed (D-PP-c ⑥). templates = the LIVE per-topic grid (D-PP-f):
+          // these rows already exist in public.resources + Storage, matched by
+          // element_id and badged by resources.code — nothing to re-upload.
           templates: t.templates.map((x) => ({ code: x.code || null, title: x.title, filename: x.filename, source: x.source })),
         })),
       })),
@@ -463,7 +600,8 @@ async function main() {
   const up: string[] = [];
   up.push(`-- 0028_platform_seed.up.sql`);
   up.push(`-- GENERATED by scripts/extract-mockup-spec.ts from the owner's final mockup (as amended by`);
-  up.push(`-- D-PP-c: 3-card model, extras dropped) — do not hand-edit; re-run the script instead.`);
+  up.push(`-- D-PP-c: extras dropped, and D-PP-f: no Overview card, one 'guide' doc slot, templates`);
+  up.push(`-- back to a many-per-topic grid) — do not hand-edit; re-run the script instead.`);
   up.push(`-- Idempotent: upserts keyed on stable natural keys (sections.slug,`);
   up.push(`-- groups (section_slug, slug), topics element_id via elements.slug).`);
   up.push(`-- Requires 0027_platform_ia. Safe to re-run; never touches elements/checklists/resources rows.`);
@@ -549,6 +687,55 @@ async function main() {
   ];
   await fs.writeFile(OUT_SEED_DOWN, down.join("\n"), "utf8");
   console.log(`wrote ${path.relative(ROOT, OUT_SEED_DOWN)}`);
+
+  // ---- 6. Generated app spec module (PP2) -------------------------------------------
+  // docs/workspace-spec.json is ~167 KB — far too heavy to import into the app. The
+  // shell needs only the chrome copy plus the 5 page heroes and 4 journey cards, so
+  // that slice ships as a small typed, committed module generated from the same
+  // extraction. Regenerating the spec regenerates this, so the two cannot drift.
+  // Everything below the shell (groups, topics, resources) comes from the DB via the
+  // PP1 RPCs, never from here.
+  const appSpecTs = [
+    `/* GENERATED by scripts/extract-mockup-spec.ts — do not hand-edit; re-run the script.`,
+    ` *`,
+    ` * The workspace v2 shell copy, verbatim from the owner's final mockup (the same`,
+    ` * extraction that writes docs/workspace-spec.json). Kept as a generated module`,
+    ` * rather than a JSON import because the full spec is ~167 KB and only this slice`,
+    ` * is needed at module scope. Section/topic content comes from the database. */`,
+    ``,
+    `export const WORKSPACE_CHROME = ${JSON.stringify(chrome, null, 2)} as const;`,
+    ``,
+    `export const PLATFORM_PAGES = ${JSON.stringify(spec.pages, null, 2)} as const;`,
+    ``,
+    `export const PLATFORM_JOURNEY = ${JSON.stringify(
+      spec.journey.map((j) => ({
+        page: j.page,
+        num: j.num,
+        icon: j.icon,
+        title: j.title,
+        desc: j.desc,
+        action: j.action,
+        image: j.image,
+        imagePosition: j.imagePosition,
+      })),
+      null,
+      2,
+    )} as const;`,
+    ``,
+    `/* The one surviving standard card (D-PP-f) and the templates grid's shared copy.`,
+    ` * Constant across all 33 topics in the mockup — asserted above — which is what`,
+    ` * licenses shipping them as constants instead of database rows. */`,
+    `export const RESOURCE_KINDS = ${JSON.stringify(spec.resourceKinds, null, 2)} as const;`,
+    ``,
+    `export const TEMPLATE_COPY = ${JSON.stringify(spec.templateCopy, null, 2)} as const;`,
+    ``,
+    `export type WorkspaceNavItem = (typeof WORKSPACE_CHROME.nav.items)[number];`,
+    `export type PlatformPageKey = keyof typeof PLATFORM_PAGES;`,
+    ``,
+  ].join("\n");
+  await fs.mkdir(path.dirname(OUT_APP_SPEC), { recursive: true });
+  await fs.writeFile(OUT_APP_SPEC, appSpecTs, "utf8");
+  console.log(`wrote ${path.relative(ROOT, OUT_APP_SPEC)}`);
 
   console.log("\nDone. Review docs/workspace-spec.json + the 0028 pair, then apply 0027 + 0028 on TEST.");
 }

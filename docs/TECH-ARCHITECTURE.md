@@ -2,6 +2,9 @@
 
 > **Project: Palestine House** — `palestine-house`. This file is the generic locked stack **plus** the Palestine House specifics below. When any other doc disagrees with this one about the stack, this one wins. The full route map, access model, and data notes live in `/docs/page-designs/content/PH_Sitemap_Architecture_TECH.txt`; the sprint order lives in [`ROADMAP.md`](./ROADMAP.md); current state lives in [`PROJECT-STATUS.md`](./PROJECT-STATUS.md).
 
+> ### ⚠️ Stage 4 supersession (2026-08-12)
+> §0's description of the gated workspace is **pre-Stage-4** and is rewritten at PP5. Until then `ROADMAP.md` Stage 4 + `PROJECT-STATUS.md` §5 win: the per-topic model is **summary → one Simple guide card → Watch Video → a many-template grid** (D-PP-f); **saved checklist progress is dropped** (D-PP-b), so the "single piece of per-user interactivity" sentence below no longer holds; new gated pages live in `src/app/(platform)` with its own server-side gate; `resources.doc_key` is `('guide')`. Migrations **0027/0028 are applied to production and immutable** — schema fixes ship as 0029+.
+
 ## 0. Palestine House — project architecture summary
 
 **Two shells, one gate.** A thin, conversion-focused **public shell** and a private partner **reference platform**. Access is **approval-gated**: the single `/apply` form is also sign-up — submitting it creates a *pending* account and records the partner application; an HQ admin flips `profiles.is_approved` to unlock the platform. Reference content is never public. It is a reference, **not a course** (no quizzes, no certificate) and not a day-to-day ops tool. The single piece of per-user interactivity is the saved launch-checklist progress in Stages › Design & Build.

@@ -2,6 +2,16 @@
 
 > Governs **non-primary agents** in the `palestine-house` repo — code-review agents (e.g. Codex), automation, and any tool other than the main Claude Code engine. The primary engine's rules live in [`CLAUDE.md`](./CLAUDE.md). Stack + project architecture: [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md). Process: [`WORKFLOW.md`](./WORKFLOW.md). Sprint plan: [`ROADMAP.md`](./ROADMAP.md). Current state: [`PROJECT-STATUS.md`](./PROJECT-STATUS.md).
 
+## ⚠️ Stage 4 supersession (2026-08-12) — read first
+
+The gated workspace is being rebuilt (PP1–PP7). **`ROADMAP.md` Stage 4 and `PROJECT-STATUS.md` §5 outrank the assumptions below**, which still describe the pre-Stage-4 workspace and are rewritten at PP5. Current truth:
+
+- **Per-topic model (D-PP-f):** summary → **one Simple guide card** (Read + Download) → Watch Video → a **many-template grid**. No Overview card, no per-topic checklist card, no "More guides" extras.
+- **Saved checklist progress is dropped** (D-PP-b) — the "only per-user interactivity" line below is obsolete.
+- **`resources.doc_key` is `('guide')`**; a topic's templates are the `resources` rows with its `element_id`, `doc_key IS NULL`, `code IS NOT NULL`, **`is_public = false`** and bucket `resources`.
+- New pages live in **`src/app/(platform)`** (its own server-side gate); legacy `src/app/(workspace)` is deleted at PP5.
+- Migrations **0027 and 0028 are applied to production and are IMMUTABLE** — any schema fix is a new migration 0029+.
+
 ## Project assumptions
 
 - This repository is the **Palestine House** website on the locked Next.js 15 stack in `TECH-ARCHITECTURE.md`.
