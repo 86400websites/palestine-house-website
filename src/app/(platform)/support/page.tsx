@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getMyProfile } from "@/lib/auth/profile";
+import { createClient } from "@/lib/supabase/server";
 import {
   PwSectionShell,
   PwSectionPending,
@@ -7,19 +8,24 @@ import {
   sectionMetadata,
 } from "@/components/workspace-v2/pw-section-page";
 import { PwSectionExplorer } from "@/components/workspace-v2/pw-section-explorer";
+import { PwAskHq } from "@/components/workspace-v2/pw-ask-hq";
 import { getSectionContent } from "@/lib/workspace-v2/content";
-import { SupportForm } from "./support-form";
 
-/* /support — a toolkit section in the workspace v2 shell (PP2 2i), filled with
-   its focus areas in PP3, and the one section page that carries a form.
+/* /support — a toolkit section like the other three, plus the Ask HQ panel.
 
-   The EXISTING Ask HQ form still sits below the toolkit (D-PP-e), so partners
-   keep a working in-account channel while the toolkit is built. Step 3h
-   replaces it with the mockup's Ask HQ panel, which under D-PP-h is UI only —
-   the send lands in PP4.
+   The panel is the mockup's, wired to the Ask HQ server action that has been
+   live since S6 (approved-only RPC 0019 + a Resend notification to HQ). That
+   supersedes D-PP-h, which had deferred the send to PP4 on the understanding
+   that it needed building: only the field shape differed, and it maps with no
+   backend change. So the legacy form is replaced outright and no channel is
+   lost between sprints.
 
-   Still approval-gated: submit_support_request is approved-only (D-S6-a), so a
-   pending session gets the notice and the public /contact route. */
+   Name and email are read here, server-side, purely to prefill the panel's two
+   read-only fields — the account is already who HQ replies to. Both belong to
+   the signed-in partner, so neither is a secret leaving the server.
+
+   Still approval-gated end to end: this page's own is_approved check, the
+   toolkit RPC's, and submit_support_request's. */
 
 export const metadata: Metadata = sectionMetadata("support");
 
@@ -27,7 +33,13 @@ export default async function SupportPage() {
   const profile = await getMyProfile();
   if (!profile?.is_approved) return <PwSectionPending />;
 
-  const groups = await getSectionContent("support");
+  const supabase = await createClient();
+  const [
+    groups,
+    {
+      data: { user },
+    },
+  ] = await Promise.all([getSectionContent("support"), supabase.auth.getUser()]);
 
   return (
     <PwSectionShell page="support">
@@ -36,11 +48,7 @@ export default async function SupportPage() {
       ) : (
         <PwSectionWaiting />
       )}
-      <section className="pw-page">
-        <div className="pw-container pw-narrow pw-legacy-form">
-          <SupportForm />
-        </div>
-      </section>
+      <PwAskHq fullName={profile.full_name} email={user?.email ?? null} />
     </PwSectionShell>
   );
 }

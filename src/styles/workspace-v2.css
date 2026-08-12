@@ -844,10 +844,6 @@
    until PP3 replaces it (D-PP-e). The form still carries its legacy `.ws-*`
    classes, which are global and so still resolve here; this wrapper only gives
    it breathing room inside the v2 page rhythm. Removed with the form at PP3. */
-.pw-root .pw-legacy-form {
-  padding-top: 4px;
-}
-
 @media (max-width: 1080px) {
   .pw-root .pw-journey-card {
     grid-template-columns: 185px minmax(0, 1fr);
@@ -1992,9 +1988,9 @@
 }
 
 /* --- Ask HQ (PP3) -------------------------------------------------------- */
-/* The moss panel on /support: copy on the left, form on the right. Submission
-   is NOT wired in PP3 (D-PP-h) — PP4 lands the send — so no success state is
-   ported; the mockup's `.form-success` block would be a lie until then. */
+/* The moss panel on /support: copy on the left, form on the right. It posts to
+   the Ask HQ action that has been live since S6, so the mockup's success state
+   ships with it — see pw-ask-hq.tsx for why D-PP-h no longer applies. */
 
 .pw-root .pw-ask {
   padding: 0 0 96px;
@@ -2139,13 +2135,6 @@
   box-shadow: 0 0 0 3px rgba(68, 107, 88, 0.13);
 }
 
-.pw-root .pw-field-error {
-  min-height: 16px;
-  color: var(--pw-error);
-  font-size: 10.5px;
-  font-weight: 650;
-}
-
 .pw-root .pw-form-actions {
   display: flex;
   align-items: center;
@@ -2158,6 +2147,38 @@
   max-width: 280px;
   color: var(--pw-muted);
   font-size: 10.5px;
+}
+
+/* The note slot doubles as the error slot — the action returns one neutral
+   sentence, so a single line beats a per-field error rail here. */
+.pw-root .pw-form-error {
+  color: var(--pw-error);
+  font-weight: 650;
+}
+
+.pw-root .pw-form-success {
+  padding: 36px 22px;
+  text-align: center;
+}
+
+.pw-root .pw-success-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: var(--pw-olive-100);
+  color: var(--pw-success);
+}
+
+.pw-root .pw-form-success h3 {
+  font-size: 1.6rem;
+}
+
+.pw-root .pw-form-success .pw-action {
+  width: auto;
+  margin-top: 17px;
 }
 
 .pw-root .pw-form-actions .pw-action {
