@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { Check, Send } from "lucide-react";
 import {
   submitSupportRequestAction,
   type SupportState,
 } from "@/lib/support/actions";
+import { SUPPORT_FOCUS_AREAS } from "@/lib/support/focus-areas";
 
 /* Ask HQ on /support (PP3) — the mockup's moss panel, wired to the Ask HQ
    server action that has been live since S6.
@@ -49,23 +50,12 @@ const COPY = {
   note: "We’ll use the email on your account.",
   send: "Send question",
   sending: "Sending…",
+  /* Success copy is the approved S6 wording, not the mockup's — its
+     "Your question is ready. The live platform will send it to HQ…" describes a
+     prototype that could not send. This one sends. */
   sent: "Got it — we’ll be in touch.",
-  again: "Send another request",
+  again: "Ask another question",
 } as const;
-
-/* The mockup's own option list, verbatim. Each becomes the stored subject. */
-const FOCUS_AREAS = [
-  "Setup",
-  "Operations",
-  "People",
-  "Finance",
-  "Governance or compliance",
-  "Programming",
-  "Membership or partnerships",
-  "Marketing or retail",
-  "Technology",
-  "Other",
-] as const;
 
 export function PwAskHq({
   fullName,
@@ -152,7 +142,7 @@ export function PwAskHq({
                     <label htmlFor="pw-ask-topic">{COPY.topic}</label>
                     <select id="pw-ask-topic" name="subject" required>
                       <option value="">{COPY.topicPlaceholder}</option>
-                      {FOCUS_AREAS.map((area) => (
+                      {SUPPORT_FOCUS_AREAS.map((area) => (
                         <option key={area}>{area}</option>
                       ))}
                     </select>
@@ -186,7 +176,7 @@ export function PwAskHq({
                     disabled={pending}
                   >
                     {pending ? COPY.sending : COPY.send}
-                    <ArrowRight className="pw-icon" aria-hidden="true" />
+                    <Send className="pw-icon" aria-hidden="true" />
                   </button>
                 </div>
               </form>

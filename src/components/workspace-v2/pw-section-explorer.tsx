@@ -163,7 +163,16 @@ export function PwSectionExplorer({
     const applyHash = () => {
       const hash = window.location.hash;
       if (!hash.startsWith(TOPIC_HASH)) return;
-      const slug = decodeURIComponent(hash.slice(TOPIC_HASH.length));
+      /* The fragment is user-controlled and decodeURIComponent throws on a
+         malformed one — /setup#topic-% would take the whole explorer down with
+         a URIError during mount (found by review, 2026-08-12). A fragment we
+         cannot read is simply not a topic. */
+      let slug: string;
+      try {
+        slug = decodeURIComponent(hash.slice(TOPIC_HASH.length));
+      } catch {
+        return;
+      }
       openTopicBySlug(slug, { flash: true });
     };
 

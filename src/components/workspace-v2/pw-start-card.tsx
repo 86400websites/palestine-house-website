@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, Download, FileText } from "lucide-react";
+import { BookOpen, Download } from "lucide-react";
 import { getResourceDownloadUrl } from "@/lib/resources/actions";
 import { usePwToast } from "@/components/workspace-v2/pw-toast";
 import { RESOURCE_KINDS } from "@/lib/workspace-v2/spec";
@@ -38,6 +38,17 @@ const COPY = {
   downloadSoon: "Download coming soon.",
 } as const;
 
+/* The mockup's own `i-guide` symbol, inline rather than approximated with a
+   lucide lookalike — it is one path, and RESOURCE_KINDS names this icon
+   explicitly, so the card carries the glyph the design specifies. */
+function GuideGlyph() {
+  return (
+    <svg className="pw-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4" />
+    </svg>
+  );
+}
+
 export function PwStartCard({ guide }: { guide: PwGuideFile | null }) {
   const { showToast } = usePwToast();
   const [pending, startTransition] = React.useTransition();
@@ -69,9 +80,12 @@ export function PwStartCard({ guide }: { guide: PwGuideFile | null }) {
         </div>
       </div>
 
+      {/* The mockup's resource grid, so the card is exactly the width it draws
+          at every breakpoint. D-PP-f fills one cell of four. */}
+      <div className="pw-start-grid">
       <article className="pw-start-card">
         <span className="pw-start-icon">
-          <FileText className="pw-icon" aria-hidden="true" />
+          <GuideGlyph />
         </span>
         <h5 className="pw-start-title">{GUIDE.title}</h5>
         <p className="pw-start-desc">{GUIDE.desc}</p>
@@ -100,6 +114,7 @@ export function PwStartCard({ guide }: { guide: PwGuideFile | null }) {
           </button>
         </div>
       </article>
+      </div>
     </section>
   );
 }

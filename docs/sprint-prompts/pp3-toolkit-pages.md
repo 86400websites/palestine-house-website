@@ -113,6 +113,74 @@ grid moved into 3e — see Deviations.)
   dropped on Start here (kept on Templates), which also avoids the "1 files"
   grammar bug the mockup's template would produce.
 
+## Independent review (2026-08-12) — "request changes", all findings resolved
+
+An external reviewer audited the branch with the mockup available (it confirmed
+both local copies byte-identical). Verdict: **no blocking issue** — the gating
+checks all pass, and it independently confirmed the D-PP-i argument by reading
+`0026_focus_area_k.up.sql:114-160` and `scripts/ingest-content.ts:675-699` and
+agreeing that no shipped path can produce a wrong-bucket row that passes the
+four-column predicate. It found two correctness defects and a set of design
+mismatches. Every one is now fixed.
+
+**C1 — the Ask HQ category allowlist was client-only.** The UI offers a fixed
+`<select>`, but the action's schema accepted any 1–200 character subject, so an
+approved caller could forge FormData and spoof the category a request lands in.
+Not injection — the RPC is parameterised and the mail is plain text — but the
+allowlist was decorative. **Fixed:** the list moved to
+`src/lib/support/focus-areas.ts`, imported by both sides, and the schema is now
+`z.enum(SUPPORT_FOCUS_AREAS)`.
+
+**C2 — a malformed deep link could take the page down.** `decodeURIComponent()`
+throws `URIError` on a fragment like `/setup#topic-%`, which would have killed
+the explorer during mount or `hashchange`. **Fixed:** decoding is wrapped, and a
+fragment that cannot be read is simply not a topic.
+
+**D1 — the Start-here card was built from a superseded CSS layer. This is the
+one that mattered, and the owner had already spotted it: "it looks stretched".**
+The mockup restyles `.resource-card` in three of its eight `<style>` blocks, and
+the sprint took the FIRST match. The effective values are
+`compact-card-review`'s: padding **18px not 28px**, radius **15px not 20px**,
+icon **46px not 64px**, title **1.2rem not 1.55rem**, body **12.5px not 14px**,
+actions **14px not 22px**. On top of that the card had been stretched to
+`min(560px, 100%)`. **Fixed:** the mockup's own `.resource-grid` is restored
+(4-up → 2 at 980 → 1 at 520 wide below 760), so the card is exactly the width
+the mockup computes at every breakpoint — **236×274 at desktop**, measured, down
+from a 560px slab. All the compact values and their ≤620px overrides are ported.
+
+**D2 — the 320px group-header collision was already solved by the mockup.** The
+sprint invented a two-row header for it. The mockup hides `.group-meta span` at
+≤620px and keeps its three-column row. **Fixed:** the invention is reverted and
+the mockup's answer used. Claimed deviation (f) was simply wrong.
+
+**D3 — Ask HQ drifted from the mockup.** The submit icon was `ArrowRight`, not
+the mockup's Send/paper-plane; the reset button said "Send another request"
+where the mockup says "Ask another question". **Fixed both.** The remaining
+non-mockup strings there — "We'll use the email on your account.", "Sending…",
+"Got it — we'll be in touch." — are **approved S6 copy**, kept deliberately: the
+mockup's own success wording describes a prototype that could not send, and this
+form does. Flagged for the owner rather than silently swapped.
+
+**D4 — the Simple guide card used a lucide lookalike** where `RESOURCE_KINDS`
+names the mockup's `guide` glyph. **Fixed:** the mockup's own one-path symbol is
+inlined.
+
+**D5 — six effective responsive rules were missing**, each because a later
+`<style>` block supersedes an earlier one: 24px gutters from 760px (not 620),
+shell radius 15px, group-content padding 11px, the topic description clamped to
+one line, Ask HQ 70px/18px, and the success button at a full 42px rather than
+`.small`. **All ported and re-measured at 320px.**
+
+Two things the reviewer raised that were *not* changed: the single card still
+leaves space to its right on desktop (it is now the mockup's card in the
+mockup's grid — the alignment is an owner call, noted in the follow-ups), and
+brand-voice verification of the three new strings is impossible for any agent
+because `docs/page-copy/` is gitignored.
+
+**A correction to the review, for the record:** it noted the HEAD diff was
+19 files / +2374 rather than the brief's 18 / +2190. That is because the exit
+gate (3j) landed after the review brief was written, not a discrepancy.
+
 ## Deviations & learnings
 
 - **Check what is already wired before scoping it as new work.** D-PP-h cost a
@@ -120,13 +188,19 @@ grid moved into 3e — see Deviations.)
   for a send that had been in production since S6. The premise was never
   checked against `src/lib/support/actions.ts`. That is the sprint's most
   transferable lesson, and it is recorded in §5 next to the decision.
-- **The mockup has eight stacked `<style>` blocks and the toolkit was rewritten
-  twice inside them.** Reading the first match would have shipped the wrong
-  design. The values here come from `final-focus-area-rollout` and
-  `final-last-revision`, which supersede the compact card treatment earlier in
-  the file. Its `#page-setup, #page-operate, …` prefixes exist only because all
-  four toolkits live in one document; each of our pages renders its own section,
-  so the prefixes carry no meaning and were dropped.
+- **The mockup has eight stacked `<style>` blocks, and resolving that cascade is
+  the single hardest part of porting it — I got it wrong once.** The card, the
+  group header and six responsive rules were all taken from a block that a later
+  one supersedes, and the review caught every one. The lesson is sharper than
+  "read the last block": *precedence is per-property, not per-block.* The topic
+  card's layout comes from `final-focus-area-rollout`, its actions from
+  `final-last-revision`, and the Start-here card's proportions from
+  `compact-card-review` — three different blocks, all effective at once. A rule
+  in an early `@media` also beats a later unconditional one only if it is more
+  specific, which is why `.toolkit-section`'s padding resolves to the desktop
+  value even at 320px. **Port by resolving each property, never by trusting a
+  block.** The `#page-setup, #page-operate, …` prefixes carry no meaning here —
+  they exist only because all four toolkits live in one document.
 - **Steps were resequenced for verifiability, not tidiness.** 3d wired the four
   pages (planned for 3h) so every later step was reviewable in the running app;
   3e absorbed the templates grid (planned for 3g) because Explore opening onto
@@ -162,14 +236,19 @@ grid moved into 3e — see Deviations.)
    focus area expanding to its Simple guide card and templates grid, **a real
    template download**, `/setup#topic-<slug>`, and `/support` sending an Ask HQ
    message end to end.
-3. **Two judgement calls to eyeball while there.** The Start-here card sits left
-   in a 1020px row, leaving space to its right — the D-PP-f consequence of one
-   card where the mockup drew four; centring or widening it is a one-line
-   change. And Setup and Support have a **single accordion group each** (Operate
-   has 5, Program 3), so on those two pages the accordion may read as an
-   unnecessary wrapper.
-4. **Codex review recommended before merge** — the diff adds gated reads and
-   puts the private-bucket download path on a new surface.
+3. **Two judgement calls to eyeball while there.** The Start-here card is now
+   the mockup's card at the mockup's width (236px at desktop), sitting in cell
+   one of a 4-up grid — so ~774px to its right is empty. Centring it is one
+   line if the owner prefers. And Setup and Support have a **single accordion
+   group each** (Operate has 5, Program 3), so on those two pages the accordion
+   may read as an unnecessary wrapper.
+4. ~~Codex review recommended~~ ✅ **Done 2026-08-12** — "request changes",
+   no blocking issue, two correctness defects and five design mismatches, all
+   fixed on-branch and re-verified. See the review section above.
+5. **Owner sign-off wanted on three Ask HQ strings** kept from S6 rather than the
+   mockup, because the mockup's versions describe a form that could not send:
+   "We'll use the email on your account.", "Sending…", "Got it — we'll be in
+   touch."
 5. **PP4 inherits one mandatory hand-off, not two:** swap the Read Now
    coming-soon toast for the real reader link on all 33 topics. Ask HQ is done.
    Re-read `src/lib/support/actions.ts` before scoping any Ask HQ work there.

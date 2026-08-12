@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/resend/client";
+import { SUPPORT_FOCUS_AREAS } from "./focus-areas";
 
 /* Support request submission (S6 6g). zod-validated (subject + message
    required, length-capped), then written through the submit_support_request
@@ -12,8 +13,12 @@ import { sendEmail } from "@/lib/resend/client";
    is stored, not lost; the owner reads the table meanwhile. Failures map to
    neutral brand-voice copy. */
 
+/* The subject is a category chosen from a fixed list, not free text (PP3): the
+   UI is a <select>, so the server validates against the same allowlist. Without
+   this the select was decorative — an approved caller could forge any subject
+   and spoof the queue it lands in (found by review, 2026-08-12). */
 const schema = z.object({
-  subject: z.string().trim().min(1).max(200),
+  subject: z.enum(SUPPORT_FOCUS_AREAS),
   message: z.string().trim().min(1).max(5000),
 });
 

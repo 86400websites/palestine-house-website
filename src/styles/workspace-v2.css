@@ -1689,18 +1689,35 @@
 }
 
 /* --- The one Start-here card --------------------------------------------- */
-/* The mockup lays these out in a 4-up grid because it drew four cards per
-   topic. Under D-PP-f there is exactly one, so the grid would leave three dead
-   columns — the card keeps every one of the mockup's own values and only its
-   container changes to a single readable measure. */
+/* The mockup's `.resource-card`, at the values that actually win.
+   Its CSS is stacked across eight <style> blocks and this card is restyled in
+   three of them, so the first match in the file is the WRONG one. Resolved
+   cascade, later source beating earlier at equal specificity:
+     head block          padding 28 · radius 20 · icon 64 · title 1.55rem
+     compact-card-review padding 18 · radius 15 · icon 46 · title 1.2rem  ← wins
+     menu-refinement     height auto · min-height 0 · align-self start
+   The grid around it is the mockup's too (4-up, then 2, then 1). Under D-PP-f
+   only one cell is filled, which leaves space to its right on desktop — but the
+   CARD is exactly the size the mockup draws, which is what matters. */
+
+.pw-root .pw-start-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+  width: min(1020px, 100%);
+  max-width: 1020px;
+}
 
 .pw-root .pw-start-card {
   display: flex;
   flex-direction: column;
-  width: min(560px, 100%);
-  padding: 28px;
+  align-self: start;
+  height: auto;
+  min-height: 0;
+  padding: 18px;
   border: 1px solid var(--pw-line);
-  border-radius: 20px;
+  border-radius: 15px;
   background: var(--pw-white);
   box-shadow: 0 7px 24px rgba(42, 36, 30, 0.045);
   transition:
@@ -1718,40 +1735,40 @@
 .pw-root .pw-start-icon {
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
   background: var(--pw-olive-100);
   color: var(--pw-olive-700);
 }
 
 .pw-root .pw-start-icon .pw-icon {
-  width: 27px;
-  height: 27px;
+  width: 21px;
+  height: 21px;
 }
 
 .pw-root .pw-start-title {
-  margin-top: 22px;
+  margin-top: 14px;
   font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  line-height: 1.18;
+  line-height: 1.2;
 }
 
 .pw-root .pw-start-desc {
-  margin-top: 11px;
+  margin-top: 7px;
   flex: 1;
   color: var(--pw-muted);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 12.5px;
+  line-height: 1.48;
 }
 
 .pw-root .pw-start-actions {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 9px;
-  margin-top: 22px;
-  padding-top: 16px;
+  gap: 7px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--pw-line);
 }
 
@@ -1799,6 +1816,14 @@
 .pw-root .pw-action .pw-icon {
   width: 15px;
   height: 15px;
+}
+
+/* The mockup's `.resource-actions .btn`: compact inside the card, but a full
+   44px target below 620px. */
+.pw-root .pw-start-actions .pw-action {
+  min-height: 38px;
+  padding: 7px 9px;
+  font-size: 10.5px;
 }
 
 /* In-flight controls use aria-disabled, not disabled, so focus is not thrown to
@@ -1914,11 +1939,32 @@
   .pw-root .pw-toolkit-shell {
     width: 100%;
   }
+
+  .pw-root .pw-start-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(700px, 100%);
+  }
 }
 
 @media (max-width: 760px) {
+  /* The mockup narrows the gutters on these two sections at 760, not 620 —
+     `.pw-container` alone would leave 48px until 620. */
+  .pw-root .pw-toolkit .pw-container,
+  .pw-root .pw-ask .pw-container {
+    width: min(var(--pw-container), calc(100% - 24px));
+  }
+
   .pw-root .pw-toolkit-body {
     padding: 16px 13px 24px;
+  }
+
+  .pw-root .pw-start-grid {
+    grid-template-columns: 1fr;
+    width: min(520px, 100%);
+  }
+
+  .pw-root .pw-start-card {
+    padding: 17px;
   }
 
   .pw-root .pw-topics {
@@ -1963,24 +2009,31 @@
 }
 
 @media (max-width: 620px) {
-  .pw-root .pw-toolkit-body {
-    padding: 13px;
+  .pw-root .pw-toolkit-shell {
+    border-radius: 15px;
   }
 
-  /* The mockup's only narrow-screen rule for this control is the padding below.
-     Its three-column row does not survive 320px: "N Focus Areas" plus the
-     chevron claim ~100px, which squeezes the group title into a shred and
-     collides the two. Drop to two columns and let the meta take its own row
-     under the copy — nothing is hidden, and the title gets the full measure. */
   .pw-root .pw-group-toggle {
-    grid-template-columns: auto minmax(0, 1fr);
-    row-gap: 6px;
     padding: 12px 2px;
   }
 
-  .pw-root .pw-group-meta {
-    grid-column: 2;
-    justify-content: space-between;
+  /* The mockup's own answer to the narrow group header: drop the count and keep
+     the chevron, so the three-column row survives. (An earlier pass here
+     invented a two-row header to solve a collision the mockup had already
+     solved — found by review, 2026-08-12.) */
+  .pw-root .pw-group-meta > span {
+    display: none;
+  }
+
+  .pw-root .pw-group-content {
+    padding-top: 11px;
+  }
+
+  .pw-root .pw-topic-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
   }
 
   .pw-root .pw-subhead {
@@ -1995,10 +2048,40 @@
     grid-template-columns: 1fr;
   }
 
-  /* 28px of padding inside a ~244px card leaves the title almost no measure. */
-  .pw-root .pw-start-card {
-    padding: 20px;
+  .pw-root .pw-start-grid {
+    gap: 10px;
   }
+
+  .pw-root .pw-start-card {
+    padding: 15px;
+    border-radius: 13px;
+  }
+
+  .pw-root .pw-start-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+  }
+
+  .pw-root .pw-start-title {
+    margin-top: 12px;
+    font-size: 1.1rem;
+  }
+
+  .pw-root .pw-start-desc {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .pw-root .pw-start-actions {
+    margin-top: 12px;
+    padding-top: 11px;
+  }
+
+  .pw-root .pw-start-actions .pw-action {
+    min-height: 44px;
+  }
+
 }
 
 @media (max-width: 390px) {
@@ -2196,9 +2279,13 @@
   font-size: 1.6rem;
 }
 
+/* The mockup's success button is a full `.btn`, not a `.small` one. */
 .pw-root .pw-form-success .pw-action {
   width: auto;
+  min-height: 42px;
   margin-top: 17px;
+  padding: 9px 15px;
+  font-size: 12.5px;
 }
 
 .pw-root .pw-form-actions .pw-action {
@@ -2215,9 +2302,17 @@
 }
 
 @media (max-width: 620px) {
+  .pw-root .pw-ask {
+    padding-bottom: 70px;
+  }
+
   .pw-root .pw-ask-wrap {
     padding: 22px;
     border-radius: 15px;
+  }
+
+  .pw-root .pw-ask-form {
+    padding: 18px;
   }
 
   .pw-root .pw-form-grid {
