@@ -48,7 +48,7 @@ insert into public.platform_topics
 select
   (select e.id from public.elements e where e.slug = 'i2'),
   (select pg.id from public.platform_groups pg where pg.section_slug = 'setup' and pg.slug = 'setup-toolkit'),
-  'launching-a-new-house', 'Launching a New House', 'Guidance and files to help you prepare your House.', 'Everything you need to open a new Palestine House, step by step — from first planning to opening day. Read the guides in order, then use the template below to get the work done.', 'compass',
+  'launching-a-new-house', 'Launching a New House', 'Guidance and files to help you prepare your House.', 'Everything you need to open a new Palestine House, step by step — from first planning to opening day. Read the guide, then use the templates below to get the work done.', 'compass',
   '/assets/workspace/topics/launching-a-new-house.jpg', '50% 54%', 1
 on conflict (element_id) do update set
   group_id = excluded.group_id, slug = excluded.slug, title = excluded.title,

@@ -260,44 +260,40 @@ async function main() {
 
   console.log("appData asserts pass: 4 sections / 10 groups / 33 topics (5/15/9/4) / 132 std / 15 extras / 297 templates / 33:33 element map");
 
-  // ---- 2b. Owner transform (D-PP-c, 2026-08-11): the 3-card topic model -------------
-  // The mockup still shows 4 standard cards + "More guides" extras; the owner's
-  // instruction supersedes it (PROJECT-STATUS §5 D-PP-c): each topic ships
-  // Overview + Simple guide + ONE Template card; the checklist/watch cards and the
-  // extras are dropped. The raw asserts above stay pinned to the mockup (source-
-  // drift guards); everything emitted below is post-transform.
-  const KEPT_KEYS = ["overview", "guide"];
-  const KEPT_KINDS = ["OVERVIEW", "GUIDE"];
+  // ---- 2b. Owner transform (D-PP-f, 2026-08-12): the final topic model --------------
+  // The mockup shows 4 standard cards + "More guides" extras; the owner's instruction
+  // supersedes it (PROJECT-STATUS §5 D-PP-c as revised by D-PP-f). The shipped model is
+  //   summary -> ONE Simple guide card (Read + Download) -> Watch Video -> templates grid
+  // so only the GUIDE standard card survives; overview/checklist/watch cards and the 15
+  // extras are dropped. Templates are NOT reduced — under D-PP-f they are a live
+  // many-per-topic surface again (the 297 coded files already in the DB/Storage), so the
+  // per-topic `templates` arrays are emitted in full. The raw asserts above stay pinned
+  // to the mockup (source-drift guards); everything emitted below is post-transform.
+  const KEPT_KEYS = ["guide"];
+  const KEPT_KINDS = ["GUIDE"];
   for (const { topic } of allTopics) {
     topic.resources = topic.resources.filter((r) => KEPT_KEYS.includes(r.key));
   }
   const keptResources = allTopics.flatMap(({ topic }) => topic.resources);
-  assert(keptResources.length === 66, `expected 66 kept standard resources, got ${keptResources.length}`);
+  assert(keptResources.length === 33, `expected 33 kept standard resources, got ${keptResources.length}`);
   for (const { topic } of allTopics) {
-    assert(topic.resources.length === 2, `${topic.slug}: expected 2 kept standard resources`);
+    assert(topic.resources.length === 1, `${topic.slug}: expected exactly 1 kept standard resource (the guide)`);
+    assert(topic.templates.length > 0, `${topic.slug}: has no templates — the D-PP-f grid would be empty`);
   }
   assert(
     [...new Set(keptResources.map((r) => r.kind))].sort().join("|") === [...KEPT_KINDS].sort().join("|"),
-    "kept standard resource kinds drifted from OVERVIEW/GUIDE",
+    "kept standard resource kind drifted from GUIDE",
   );
 
-  // The Template card: kind/icon/desc/use are the mockup's constancy-asserted
-  // template-row copy; only the title + action strings are new (owner sign-off
-  // 2026-08-12 — the only two invented strings in the 3-card correction).
-  const TEMPLATE_CARD = {
-    kind: templates[0].kind,
-    key: "template",
-    title: "Template",
-    icon: templates[0].icon,
-    desc: templates[0].desc,
-    action: "Download template",
-    use: templates[0].use,
-  };
-
-  // Owner-approved intro trims where mockup copy referenced a removed card
-  // (approved 2026-08-12; asserted so a future mockup edit can't silently miss).
+  // Owner-approved intro trims where mockup copy referenced a removed card. The
+  // launching-a-new-house intro promised "the guides" (plural) and "the checklist and
+  // templates"; under D-PP-f a topic has one guide and many templates. Asserted so a
+  // future mockup edit cannot silently miss the trim.
   const INTRO_TRIMS: Record<string, [from: string, to: string]> = {
-    "launching-a-new-house": ["use the checklist and templates below", "use the template below"],
+    "launching-a-new-house": [
+      "Read the guides in order, then use the checklist and templates below",
+      "Read the guide, then use the templates below",
+    ],
   };
   for (const { topic } of allTopics) {
     const trim = INTRO_TRIMS[topic.slug];
@@ -306,7 +302,9 @@ async function main() {
     topic.intro = topic.intro.replace(trim[0], trim[1]);
   }
 
-  console.log("3-card transform applied: 66 kept std (of 132) / Template card synthesized / extras dropped / 1 intro trim");
+  console.log(
+    `D-PP-f transform applied: 33 kept std (of 132, guide only) / ${templates.length} templates kept live / extras dropped / 1 intro trim`,
+  );
 
   // ---- 2c. Workspace chrome copy (PP2) ----------------------------------------------
   // The header/footer strings live in the mockup's markup + render functions, not in
@@ -516,14 +514,12 @@ async function main() {
       templates: templates.length,
       booklets: data.stats.booklets,
     },
-    // The 3-card model (D-PP-c): the two kept kinds + the synthesized Template card.
-    resourceKinds: [
-      ...KEPT_KINDS.map((kind) => {
-        const r = keptResources.find((x) => x.kind === kind)!;
-        return { kind, key: r.key, title: r.title, icon: r.icon, desc: r.desc, action: r.action, use: r.use };
-      }),
-      TEMPLATE_CARD,
-    ],
+    // D-PP-f: the single surviving standard card (Simple guide). Templates carry their
+    // own shared copy in templateCopy below and render as a grid, not as a card.
+    resourceKinds: KEPT_KINDS.map((kind) => {
+      const r = keptResources.find((x) => x.kind === kind)!;
+      return { kind, key: r.key, title: r.title, icon: r.icon, desc: r.desc, action: r.action, use: r.use };
+    }),
     templateCopy: { desc: templates[0].desc, use: templates[0].use },
     // Header/footer strings for the PP2 workspace chrome, verbatim from the mockup.
     chrome,
@@ -564,8 +560,9 @@ async function main() {
           image: `/assets/workspace/topics/${t.slug}.jpg`,
           imagePosition: posOf(t.slug),
           standardDocs: t.resources.map((r) => ({ key: r.key, filename: r.filename, source: r.source })),
-          // extras removed (D-PP-c ⑥); templates kept as the PP6 CMS picker's candidate
-          // list for the one owner-chosen template per topic (dormant coded rows).
+          // extras removed (D-PP-c ⑥). templates = the LIVE per-topic grid (D-PP-f):
+          // these rows already exist in public.resources + Storage, matched by
+          // element_id and badged by resources.code — nothing to re-upload.
           templates: t.templates.map((x) => ({ code: x.code || null, title: x.title, filename: x.filename, source: x.source })),
         })),
       })),
@@ -699,6 +696,13 @@ async function main() {
       null,
       2,
     )} as const;`,
+    ``,
+    `/* The one surviving standard card (D-PP-f) and the templates grid's shared copy.`,
+    ` * Constant across all 33 topics in the mockup — asserted above — which is what`,
+    ` * licenses shipping them as constants instead of database rows. */`,
+    `export const RESOURCE_KINDS = ${JSON.stringify(spec.resourceKinds, null, 2)} as const;`,
+    ``,
+    `export const TEMPLATE_COPY = ${JSON.stringify(spec.templateCopy, null, 2)} as const;`,
     ``,
     `export type WorkspaceNavItem = (typeof WORKSPACE_CHROME.nav.items)[number];`,
     `export type PlatformPageKey = keyof typeof PLATFORM_PAGES;`,

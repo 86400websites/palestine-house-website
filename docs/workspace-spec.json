@@ -5,20 +5,11 @@
     "sections": 4,
     "groups": 10,
     "topics": 33,
-    "standard_resources": 66,
+    "standard_resources": 33,
     "templates": 297,
     "booklets": 2
   },
   "resourceKinds": [
-    {
-      "kind": "OVERVIEW",
-      "key": "overview",
-      "title": "Overview",
-      "icon": "book-open",
-      "desc": "See what this topic covers and where to begin.",
-      "action": "Read overview",
-      "use": "Use this first when you need a quick, clear picture of the topic."
-    },
     {
       "kind": "GUIDE",
       "key": "guide",
@@ -27,15 +18,6 @@
       "desc": "Follow the recommended approach in clear steps.",
       "action": "Read guide",
       "use": "Use this when you are ready to work through the topic with your team."
-    },
-    {
-      "kind": "TEMPLATE",
-      "key": "template",
-      "title": "Template",
-      "icon": "file-text",
-      "desc": "A ready-to-use file for your team.",
-      "action": "Download template",
-      "use": "Download this when you need a practical working document for the topic."
     }
   ],
   "templateCopy": {
@@ -246,16 +228,11 @@
               "elementSlug": "i2",
               "title": "Launching a New House",
               "description": "Guidance and files to help you prepare your House.",
-              "intro": "Everything you need to open a new Palestine House, step by step — from first planning to opening day. Read the guides in order, then use the template below to get the work done.",
+              "intro": "Everything you need to open a new Palestine House, step by step — from first planning to opening day. Read the guide, then use the templates below to get the work done.",
               "icon": "compass",
               "image": "/assets/workspace/topics/launching-a-new-house.jpg",
               "imagePosition": "50% 54%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Launching_New_House_Overview.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Launching a New House/Launching_New_House_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Launching_A_New_House_Simple_Guide.docx",
@@ -311,11 +288,6 @@
               "image": "/assets/workspace/topics/operating-model.jpg",
               "imagePosition": "50% 53%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Operating_Model_Overview.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Operating Model/Operating_Model_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Operating_Model_Simple_Guide.docx",
@@ -389,11 +361,6 @@
               "image": "/assets/workspace/topics/mission-values-and-guest-promise.jpg",
               "imagePosition": "50% 52%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Mission_Values_Guest_Promise_Overview.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Mission, Values and Guest Promise/Mission_Values_Guest_Promise_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Mission_Values_Guest_Promise_Simple_Guide.docx",
@@ -474,11 +441,6 @@
               "imagePosition": "50% 54%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Brand_Experience_Standards_Overview.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Brand Experience Standards/Brand_Experience_Standards_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Brand_Experience_Standards_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/1. The House Promise/Brand Experience Standards/Brand_Experience_Standards_Simple_Guide.docx"
@@ -557,11 +519,6 @@
               "image": "/assets/workspace/topics/technology-stack-and-data.jpg",
               "imagePosition": "50% 55%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Technology_Stack_Data_Overview.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Technology Stack & Data/Technology_Stack_Data_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Tech_Stack_Data_Simple_Guide.docx",
@@ -657,11 +614,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Facility_Operations_Overview.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Facility Operations/Facility_Operations_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Facility_Operations_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/6. Operations Engine/Facility Operations/Facility_Operations_Simple_Guide.docx"
@@ -728,11 +680,6 @@
               "image": "/assets/workspace/topics/food-and-beverage-operations.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Food_Beverage_Operations_Overview.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Food & Beverage Operations/Food_Beverage_Operations_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Food_Beverage_Operations_Simple_Guide.docx",
@@ -813,11 +760,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Inventory_Procurement_Overview.docx",
-                  "source": "resources/2. Focus Areas/6. Operations Engine/Inventory & Procurement/Inventory_Procurement_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Inventory_Procurement_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/6. Operations Engine/Inventory & Procurement/Inventory_Procurement_Simple_Guide.docx"
@@ -896,11 +838,6 @@
               "image": "/assets/workspace/topics/customer-service-and-recovery.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Customer_Service_Recovery_Overview_Final.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/3. Customer Service & Recovery/Customer_Service_Recovery_Overview_Final.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Customer_Service_Recovery_Simple_Guide.docx",
@@ -988,11 +925,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Org_Structure_Roles_Overview.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Org Structure & Roles/Org_Structure_Roles_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Org_Structure_Roles_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Org Structure & Roles/Org_Structure_Roles_Simple_Guide.docx"
@@ -1072,11 +1004,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Hiring_Onboarding_Training_Overview.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Hiring, Onboarding & Training/Hiring_Onboarding_Training_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Hiring_Onboarding_Training_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Hiring, Onboarding & Training/Hiring_Onboarding_Training_Simple_Guide.docx"
@@ -1155,11 +1082,6 @@
               "image": "/assets/workspace/topics/performance-management-and-culture.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Performance_Management_Culture_Overview.docx",
-                  "source": "resources/2. Focus Areas/3. People System (Staff & Culture)/Performance Management & Culture/Performance_Management_Culture_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Performance_Management_Culture_Simple_Guide.docx",
@@ -1247,11 +1169,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Business_Model_Revenue_Overview.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Business Model & Revenue/Business_Model_Revenue_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Business_Model_Revenue_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Business Model & Revenue/Business_Model_Revenue_Simple_Guide.docx"
@@ -1330,11 +1247,6 @@
               "image": "/assets/workspace/topics/financial-operations-and-controls.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Financial_Operations_Controls_Overview.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Financial Operations & Controls/Financial_Operations_Controls_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Financial_Operations_Controls_Simple_Guide.docx",
@@ -1415,11 +1327,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Reporting_KPIs_Audits_Overview.docx",
-                  "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Reporting, KPIs & Audits/Reporting_KPIs_Audits_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Reporting_KPIs_Audits_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/8. Finance, Reporting & Sustainability/Reporting, KPIs & Audits/Reporting_KPIs_Audits_Simple_Guide.docx"
@@ -1469,11 +1376,6 @@
               "image": "/assets/workspace/topics/governance-and-ethics.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Governance_Ethics_Overview.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Governance & Ethics/Governance_Ethics_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Governance_Ethics_Simple_Guide.docx",
@@ -1553,11 +1455,6 @@
               "image": "/assets/workspace/topics/legal-compliance-and-risk.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Legal_Compliance_Risk_Overview.docx",
-                  "source": "resources/2. Focus Areas/2. Operating Model & Governance/Legal, Compliance & Risk/Legal_Compliance_Risk_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Legal_Compliance_Risk_Simple_Guide.docx",
@@ -1645,11 +1542,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "1. Menu_Culinary_Identity_Overview.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/1. Menu & Palestinian Culinary Identity/1. Menu_Culinary_Identity_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "2. Menu_Culinary_Identity_Simple_Guide.docx",
                   "source": "Food/2. Focus Areas/11. Café & Culinary Experience/1. Menu & Palestinian Culinary Identity/2. Menu_Culinary_Identity_Simple_Guide.docx"
@@ -1729,11 +1621,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "1. Coffee_Tea_Beverage_Program_Overview.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/2. Coffee, Tea & Beverage Program/1. Coffee_Tea_Beverage_Program_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "2. Coffee_Tea_Beverage_Program_Simple_Guide.docx",
                   "source": "Food/2. Focus Areas/11. Café & Culinary Experience/2. Coffee, Tea & Beverage Program/2. Coffee_Tea_Beverage_Program_Simple_Guide.docx"
@@ -1812,11 +1699,6 @@
               "image": "/assets/workspace/topics/catering-private-events-and-culinary-programming.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "1. Catering_Private_Events_Culinary_Programming_Overview.docx",
-                  "source": "Food/2. Focus Areas/11. Café & Culinary Experience/3. Catering, Private Events & Culinary Programming/1. Catering_Private_Events_Culinary_Programming_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "2. Catering_Private_Events_Culinary_Programming_Simple_Guide.docx",
@@ -1912,11 +1794,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Programming_Model_Pillars_Overview.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Programming Model & Pillars/Programming_Model_Pillars_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Programming_Model_Pillars_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Programming Model & Pillars/Programming_Model_Pillars_Simple_Guide.docx"
@@ -1996,11 +1873,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Aswatna_Studio_Collaboration_Overview.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Aswātna Studio Collaboration/Aswatna_Studio_Collaboration_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Aswatna_Studio_Collaboration_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Aswātna Studio Collaboration/Aswatna_Studio_Collaboration_Simple_Guide.docx"
@@ -2079,11 +1951,6 @@
               "image": "/assets/workspace/topics/event-production-sops.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Event_Production_SOPs_Overview.docx",
-                  "source": "resources/2. Focus Areas/4. Programming & Cultural Quality/Event Production SOPs/Event_Production_SOPs_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Event_Production_SOPs_Simple_Guide.docx",
@@ -2171,11 +2038,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Guest_Member_Journey_Overview.docx",
-                  "source": "resources/2. Focus Areas/1. The House Promise/Guest Journey & Member Journey/Guest_Member_Journey_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Guest_Journey_Member_Journey_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/1. The House Promise/Guest Journey & Member Journey/Guest_Journey_Member_Journey_Simple_Guide.docx"
@@ -2255,11 +2117,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Membership_Model_Benefits_Overview_Final.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_Model_Benefits_Overview_Final.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Membership_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/5. Membership, Community & Service/1. Membership Model & Benefits/Membership_Simple_Guide.docx"
@@ -2338,11 +2195,6 @@
               "image": "/assets/workspace/topics/community-partnerships.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Community_Partnerships_Overview_Final.docx",
-                  "source": "resources/2. Focus Areas/5. Membership, Community & Service/2. Community Partnerships/Community_Partnerships_Overview_Final.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Community_Partnerships_Simple_Guide.docx",
@@ -2430,11 +2282,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Local_Marketing_Playbook_Overview.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Local Marketing Playbook/Local_Marketing_Playbook_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Local_Marketing_Playbook_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Local Marketing Playbook/Local_Marketing_Playbook_Simple_Guide.docx"
@@ -2514,11 +2361,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Global_Campaigns_Overview.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Global Campaigns/Global_Campaigns_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Global_Campaigns_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Global Campaigns/Global_Campaigns_Simple_Guide.docx"
@@ -2561,11 +2403,6 @@
               "image": "/assets/workspace/topics/retail-shop-operations.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Retail_Shop_Operations_Overview.docx",
-                  "source": "resources/2. Focus Areas/7. Marketing, Communications & Growth/Retail  Shop Operations/Retail_Shop_Operations_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Retail_Shop_Operations_Simple_Guide.docx",
@@ -2661,11 +2498,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Crisis_Management_Overview.docx",
-                  "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Crisis Management/Crisis_Management_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Crisis_Management_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/9. Quality Control & Continuous Improvement/Crisis Management/Crisis_Management_Simple_Guide.docx"
@@ -2745,11 +2577,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Sustainability_Impact_Overview.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Sustainability & Impact/Sustainability_Impact_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Sustainability_And_Impact_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Sustainability & Impact/Sustainability_And_Impact_Simple_Guide.docx"
@@ -2805,11 +2632,6 @@
               "imagePosition": "50% 50%",
               "standardDocs": [
                 {
-                  "key": "overview",
-                  "filename": "Continuous_Improvement_Knowledge_Sharing_Overview.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Continuous Improvement & Knowledge Sharing/Continuous_Improvement_Knowledge_Sharing_Overview.docx"
-                },
-                {
                   "key": "guide",
                   "filename": "Continuous_Improvement_And_Knowledge_Sharing_Simple_Guide.docx",
                   "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Continuous Improvement & Knowledge Sharing/Continuous_Improvement_And_Knowledge_Sharing_Simple_Guide.docx"
@@ -2864,11 +2686,6 @@
               "image": "/assets/workspace/topics/templates-and-master-index.jpg",
               "imagePosition": "50% 50%",
               "standardDocs": [
-                {
-                  "key": "overview",
-                  "filename": "Templates_Master_Index_Overview.docx",
-                  "source": "resources/2. Focus Areas/10. Appendices & Tools Library/Templates & Master Index/Templates_Master_Index_Overview.docx"
-                },
                 {
                   "key": "guide",
                   "filename": "Templates_And_Master_Index_Simple_Guide.docx",

@@ -195,5 +195,25 @@ export const PLATFORM_JOURNEY = [
   }
 ] as const;
 
+/* The one surviving standard card (D-PP-f) and the templates grid's shared copy.
+ * Constant across all 33 topics in the mockup — asserted above — which is what
+ * licenses shipping them as constants instead of database rows. */
+export const RESOURCE_KINDS = [
+  {
+    "kind": "GUIDE",
+    "key": "guide",
+    "title": "Simple guide",
+    "icon": "guide",
+    "desc": "Follow the recommended approach in clear steps.",
+    "action": "Read guide",
+    "use": "Use this when you are ready to work through the topic with your team."
+  }
+] as const;
+
+export const TEMPLATE_COPY = {
+  "desc": "A ready-to-use file for your team.",
+  "use": "Download this when you need a practical working document for the topic."
+} as const;
+
 export type WorkspaceNavItem = (typeof WORKSPACE_CHROME.nav.items)[number];
 export type PlatformPageKey = keyof typeof PLATFORM_PAGES;
