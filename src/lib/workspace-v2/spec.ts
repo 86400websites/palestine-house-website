@@ -61,7 +61,7 @@ export const WORKSPACE_CHROME = {
     },
     "brand": {
       "logoAlt": "Palestine House — Our Culture Embassy",
-      "blurb": "A clear, shared home for every guide, checklist, video, and template your House needs.",
+      "blurb": "A clear, shared home for every guide, video, and template your House needs.",
       "arabic": "بيت فلسطين في كل مدينة"
     },
     "columns": [
@@ -97,9 +97,7 @@ export const WORKSPACE_CHROME = {
         "links": [
           "Ask HQ"
         ],
-        "context": [
-          "Live files and permissions connect through the authenticated platform."
-        ]
+        "context": []
       }
     ],
     "bottom": {

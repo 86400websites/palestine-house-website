@@ -410,8 +410,27 @@ async function main() {
     },
   };
 
+  // Owner-approved chrome copy edits (2026-08-12), asserted so a future mockup
+  // edit cannot silently skip them:
+  //  1. the footer blurb named a "checklist", a surface D-PP-f removed;
+  //  2. the Help column carried prototype scaffolding ("...connect through the
+  //     authenticated platform"), written from outside the build — inside the
+  //     signed-in platform it describes itself in the third person.
+  const BLURB_FROM = "every guide, checklist, video, and template";
+  const BLURB_TO = "every guide, video, and template";
+  assert(
+    chrome.footer.brand.blurb.includes(BLURB_FROM),
+    "footer blurb no longer contains the approved trim source — mockup copy changed?",
+  );
+  chrome.footer.brand.blurb = chrome.footer.brand.blurb.replace(BLURB_FROM, BLURB_TO);
+
+  const HELP_LINE = "Live files and permissions connect through the authenticated platform.";
+  const helpColumn = chrome.footer.columns.find((c) => c.context.includes(HELP_LINE));
+  assert(helpColumn, "the prototype Help line was not found — mockup copy changed?");
+  helpColumn!.context = helpColumn!.context.filter((line) => line !== HELP_LINE);
+
   console.log(
-    `chrome copy extracted: ${chrome.nav.items.length} nav items + ${chrome.footer.columns.length} footer columns`,
+    `chrome copy extracted: ${chrome.nav.items.length} nav items + ${chrome.footer.columns.length} footer columns (2 owner-approved edits applied)`,
   );
 
   // ---- 3. Assets --------------------------------------------------------------------

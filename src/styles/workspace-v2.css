@@ -519,6 +519,338 @@
   font-size: 1rem;
 }
 
+/* --- Buttons -------------------------------------------------------------- */
+
+.pw-root .pw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.pw-root .pw-btn--copper {
+  background: var(--pw-copper-500);
+  color: #fff;
+}
+
+.pw-root .pw-btn--copper:hover {
+  background: var(--pw-copper-700);
+}
+
+.pw-root .pw-btn--outline {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: transparent;
+  color: var(--pw-cream-50);
+}
+
+.pw-root .pw-btn--outline:hover {
+  border-color: var(--pw-cream-100);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+.pw-root .pw-footer {
+  position: relative;
+  margin: 16px;
+  border-radius: 20px;
+  background: var(--pw-moss-950);
+  color: #fff;
+  overflow: hidden;
+}
+
+.pw-root .pw-footer-cta {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+  min-height: 470px;
+  background: var(--pw-moss-900);
+}
+
+.pw-root .pw-footer-photo {
+  width: 100%;
+  height: 100%;
+  min-height: 470px;
+  object-fit: cover;
+}
+
+.pw-root .pw-footer-cta-content {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  max-width: 720px;
+  padding: 52px clamp(28px, 5vw, 64px);
+}
+
+.pw-root .pw-footer-cta-content h2 {
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.1;
+  color: var(--pw-cream-50);
+}
+
+.pw-root .pw-footer-rule {
+  position: relative;
+  display: block;
+  width: 205px;
+  height: 1px;
+  margin: 23px 0;
+  background: var(--pw-copper-300);
+  opacity: 0.64;
+}
+
+.pw-root .pw-footer-rule::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--pw-copper-300);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.pw-root .pw-footer-cta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: center;
+}
+
+.pw-root .pw-footer-cta-row p {
+  padding-right: 25px;
+  border-right: 1px solid rgba(200, 154, 106, 0.3);
+  color: var(--pw-cream-100);
+  font-size: 15px;
+}
+
+.pw-root .pw-footer-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.pw-root .pw-footer-branch {
+  position: absolute;
+  right: -1%;
+  bottom: -10%;
+  width: clamp(150px, 18vw, 270px);
+  height: auto;
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.pw-root .pw-tatreez-band {
+  height: 52px;
+  background-image: url("/assets/workspace/misc/tatreez.jpg");
+  background-repeat: repeat-x;
+  background-position: center;
+  background-size: auto 100%;
+}
+
+.pw-root .pw-footer-grid {
+  display: grid;
+  grid-template-columns: 1.55fr repeat(4, 1fr);
+  gap: 42px;
+  padding: 56px 0;
+}
+
+.pw-root .pw-footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.pw-root .pw-footer-brand-logo {
+  width: 136px;
+  height: auto;
+}
+
+.pw-root .pw-footer-brand p {
+  max-width: 310px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 12px;
+}
+
+.pw-root .pw-footer-arabic {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--pw-copper-300);
+}
+
+.pw-root .pw-footer-title {
+  margin-bottom: 2px;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.pw-root .pw-footer-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.77);
+  font-size: 12px;
+  text-align: left;
+  text-decoration: none;
+}
+
+.pw-root .pw-footer-link:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pw-root .pw-footer-context {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.pw-root .pw-footer-bottom {
+  position: relative;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pw-root .pw-footer-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+  gap: 26px;
+}
+
+.pw-root .pw-footer-tagline {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-style: italic;
+  color: var(--pw-cream-100);
+}
+
+.pw-root .pw-footer-copy {
+  position: absolute;
+  right: 26px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10.5px;
+}
+
+.pw-root .pw-footer-sprig {
+  position: absolute;
+  left: calc(50% + 180px);
+  bottom: -28px;
+  width: 74px;
+  height: auto;
+  opacity: 0.8;
+  transform: rotate(14deg);
+  pointer-events: none;
+}
+
+/* --- Toast --------------------------------------------------------------- */
+/* `.pw-toast`, never `.adm-toast` — the admin and legacy workspace screens
+   still own that class until PP5. */
+
+.pw-root .pw-toast {
+  position: fixed;
+  z-index: 500;
+  left: 50%;
+  bottom: 24px;
+  max-width: min(560px, calc(100% - 32px));
+  padding: 11px 16px;
+  border-radius: 999px;
+  background: var(--pw-char-900);
+  color: #fff;
+  box-shadow: var(--pw-shadow-md);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 18px);
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+.pw-root .pw-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 980px) {
+  .pw-root .pw-footer-cta {
+    grid-template-columns: 1fr;
+  }
+
+  .pw-root .pw-footer-photo {
+    min-height: 260px;
+  }
+
+  .pw-root .pw-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
+
+  .pw-root .pw-footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .pw-root .pw-footer {
+    margin: 8px;
+    border-radius: 15px;
+  }
+
+  .pw-root .pw-footer-cta-content {
+    padding: 38px 22px;
+  }
+
+  .pw-root .pw-footer-cta-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pw-root .pw-footer-cta-row p {
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  .pw-root .pw-footer-grid {
+    gap: 26px;
+    padding: 42px 0;
+  }
+
+  .pw-root .pw-footer-bottom-inner {
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+    min-height: 90px;
+    padding-top: 20px;
+    gap: 5px;
+  }
+
+  .pw-root .pw-footer-copy {
+    position: static;
+  }
+
+  .pw-root .pw-footer-sprig {
+    left: auto;
+    right: 16px;
+    bottom: -25px;
+  }
+}
+
 /* House motion rule (DESIGN.md §8) applies to the new shell too. */
 @media (prefers-reduced-motion: reduce) {
   .pw-root *,

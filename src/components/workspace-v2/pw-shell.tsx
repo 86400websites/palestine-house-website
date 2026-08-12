@@ -1,4 +1,6 @@
 import { PwHeader } from "@/components/workspace-v2/pw-header";
+import { PwFooter } from "@/components/workspace-v2/pw-footer";
+import { PwToastProvider } from "@/components/workspace-v2/pw-toast";
 import { WORKSPACE_CHROME } from "@/lib/workspace-v2/spec";
 
 /* Workspace v2 shell (PP2) — the chrome every new platform page sits inside.
@@ -12,13 +14,16 @@ import { WORKSPACE_CHROME } from "@/lib/workspace-v2/spec";
 export function PwShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="pw-root">
-      <a className="pw-skip-link" href="#pw-main">
-        {WORKSPACE_CHROME.skipLink}
-      </a>
-      <PwHeader />
-      <main id="pw-main" className="pw-main">
-        {children}
-      </main>
+      <PwToastProvider>
+        <a className="pw-skip-link" href="#pw-main">
+          {WORKSPACE_CHROME.skipLink}
+        </a>
+        <PwHeader />
+        <main id="pw-main" className="pw-main">
+          {children}
+        </main>
+        <PwFooter />
+      </PwToastProvider>
     </div>
   );
 }
