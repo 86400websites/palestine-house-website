@@ -1,33 +1,21 @@
 import type { Metadata } from "next";
 import { getMyProfile } from "@/lib/auth/profile";
-import { PendingState } from "@/components/workspace/pending-state";
-import { PLATFORM_PAGES } from "@/lib/workspace-v2/spec";
+import {
+  PwSectionShell,
+  PwSectionPending,
+  sectionMetadata,
+} from "@/components/workspace-v2/pw-section-page";
 
-/* /setup — the one genuinely new section route, stood up in PP2 2c so the new
-   header has a real page to live on. Hero copy only: the section's own title
-   and lead, verbatim from the mockup extraction. The "content arriving" state
-   (new copy, owner-approved) and the hero photo treatment land in 2f; the real
-   accordion of topics lands in PP3.
+/* /setup — the one genuinely new section route (PP2). Hero only; PP3 builds the
+   accordion of focus areas here.
 
-   Approval is checked here, server-side, exactly like every other gated page:
-   a pending or declined account gets the notice and nothing else. */
+   Listed in SiteChrome's GATED_PREFIXES alongside the other gated paths, so it
+   renders this shell and not the public chrome on top of it. */
 
-const PAGE = PLATFORM_PAGES.setup;
-
-export const metadata: Metadata = { title: PAGE.label };
+export const metadata: Metadata = sectionMetadata("setup");
 
 export default async function SetupPage() {
   const profile = await getMyProfile();
-  if (!profile?.is_approved) {
-    return <PendingState />;
-  }
-
-  return (
-    <section className="pw-page">
-      <div className="pw-container">
-        <h1 className="pw-page-title">{PAGE.title}</h1>
-        <p className="pw-page-lead">{PAGE.lead}</p>
-      </div>
-    </section>
-  );
+  if (!profile?.is_approved) return <PwSectionPending />;
+  return <PwSectionShell page="setup" />;
 }

@@ -840,6 +840,14 @@
   color: var(--pw-copper-700);
 }
 
+/* /support keeps its existing, already-approved Ask HQ form under the new hero
+   until PP3 replaces it (D-PP-e). The form still carries its legacy `.ws-*`
+   classes, which are global and so still resolve here; this wrapper only gives
+   it breathing room inside the v2 page rhythm. Removed with the form at PP3. */
+.pw-root .pw-legacy-form {
+  padding-top: 4px;
+}
+
 @media (max-width: 1080px) {
   .pw-root .pw-journey-card {
     grid-template-columns: 185px minmax(0, 1fr);

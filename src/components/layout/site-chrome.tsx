@@ -21,12 +21,17 @@ import { usePathname } from "next/navigation";
    layout so this decision becomes structural rather than a path list.) */
 
 const GATED_PREFIXES = [
-  // src/app/(workspace) route group
+  /* src/app/(platform) — the PP2 workspace v2 shell. Routes migrate here from
+     (workspace) one at a time as the revamp lands; both groups are gated, so a
+     path stays in this list unchanged across the move. */
   "/dashboard",
-  "/plan",
+  "/setup",
   "/operate",
-  "/food",
   "/program",
+  "/support",
+  // src/app/(workspace) — the legacy shell, deleted at PP5.
+  "/plan",
+  "/food",
   "/programming",
   "/live",
   "/build",
@@ -35,11 +40,6 @@ const GATED_PREFIXES = [
   "/academy",
   "/tools",
   "/account",
-  "/support",
-  // src/app/(platform) route group — the PP2 workspace v2 shell. Routes migrate
-  // here from (workspace) as the revamp lands; both groups are gated, so a path
-  // stays in this list across the move.
-  "/setup",
   // admin
   "/admin",
 ];
