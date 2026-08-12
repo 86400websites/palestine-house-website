@@ -25,10 +25,9 @@ import { SUPPORT_FOCUS_AREAS } from "@/lib/support/focus-areas";
 
    Name and work email are prefilled from the session and read-only: the account
    is already who HQ replies to, so asking again would collect data the action
-   ignores. The mockup's two prototype lines ("This prototype form does not send
-   data…", "In the live platform, this will go to the right HQ team.") are
-   dropped — with a working send they describe nothing. Every other string here
-   is the mockup's or the approved S6 copy. */
+   ignores. The mockup's third support-list bullet ("This prototype form does
+   not send data. It shows the final experience only.") is dropped — with a
+   working send it describes nothing. Every visible string is the mockup's. */
 
 const INITIAL: SupportState = { ok: false, message: null };
 
@@ -47,13 +46,21 @@ const COPY = {
   question: "Your question",
   questionPlaceholder:
     "Tell us what is happening, what you have already checked, and what decision you need to make.",
-  note: "We’ll use the email on your account.",
+  /* Owner, 2026-08-12: use the mockup's copy here, not the S6 substitutes an
+     earlier pass chose. Two carry a prototype clause that would be false in a
+     platform that actually sends, so each is the mockup's sentence with only
+     that clause removed:
+       note  "In the live platform, this will go to the right HQ team."
+       sent  "Your question is ready."  (mockup, verbatim)
+       again "Ask another question."    (mockup, verbatim)
+     The mockup's success paragraph — "The live platform will send it to HQ and
+     show the response in your account." — is NOT shipped: it promises an
+     in-account response view that D-PP-b ④ removed (Ask HQ is email only).
+     "Sending…" has no mockup equivalent, because the prototype never sent. */
+  note: "This will go to the right HQ team.",
   send: "Send question",
   sending: "Sending…",
-  /* Success copy is the approved S6 wording, not the mockup's — its
-     "Your question is ready. The live platform will send it to HQ…" describes a
-     prototype that could not send. This one sends. */
-  sent: "Got it — we’ll be in touch.",
+  sent: "Your question is ready.",
   again: "Ask another question",
 } as const;
 

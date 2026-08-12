@@ -155,11 +155,23 @@ the mockup's answer used. Claimed deviation (f) was simply wrong.
 
 **D3 — Ask HQ drifted from the mockup.** The submit icon was `ArrowRight`, not
 the mockup's Send/paper-plane; the reset button said "Send another request"
-where the mockup says "Ask another question". **Fixed both.** The remaining
-non-mockup strings there — "We'll use the email on your account.", "Sending…",
-"Got it — we'll be in touch." — are **approved S6 copy**, kept deliberately: the
-mockup's own success wording describes a prototype that could not send, and this
-form does. Flagged for the owner rather than silently swapped.
+where the mockup says "Ask another question". **Fixed both.** The reviewer also
+flagged three strings that were approved S6 copy rather than the mockup's; an
+earlier pass kept them because the mockup's versions describe a prototype that
+could not send. **The owner ruled for the mockup (2026-08-12)**, so `/support`
+now ships:
+
+| slot | shipping | source |
+|---|---|---|
+| form note | "This will go to the right HQ team." | mockup, minus its "In the live platform," clause |
+| pending | "Sending…" | no mockup equivalent — the prototype never sent |
+| success | "Your question is ready." | mockup, verbatim |
+| reset | "Ask another question" | mockup, verbatim |
+
+The mockup's success paragraph — *"The live platform will send it to HQ and show
+the response in your account."* — is **deliberately not shipped**: it promises an
+in-account response view that **D-PP-b ④ removed** (Ask HQ is email to HQ only).
+Shipping it would commit the platform to a feature that does not exist.
 
 **D4 — the Simple guide card used a lucide lookalike** where `RESOURCE_KINDS`
 names the mockup's `guide` glyph. **Fixed:** the mockup's own one-path symbol is
@@ -245,10 +257,14 @@ gate (3j) landed after the review brief was written, not a discrepancy.
 4. ~~Codex review recommended~~ ✅ **Done 2026-08-12** — "request changes",
    no blocking issue, two correctness defects and five design mismatches, all
    fixed on-branch and re-verified. See the review section above.
-5. **Owner sign-off wanted on three Ask HQ strings** kept from S6 rather than the
-   mockup, because the mockup's versions describe a form that could not send:
-   "We'll use the email on your account.", "Sending…", "Got it — we'll be in
-   touch."
+5. ~~Owner sign-off wanted on three Ask HQ strings~~ ✅ **Resolved 2026-08-12 —
+   the owner chose the mockup's copy;** the S6 substitutes are gone. The one
+   mockup line still withheld is its success paragraph, which promises an
+   in-account response view D-PP-b ④ removed.
+6. **`/support` success copy reads "Your question is ready." after a successful
+   send** — the mockup's word for a prototype that stopped short of sending.
+   Worth a second look on Preview now that it really does send; changing it is a
+   one-string edit.
 5. **PP4 inherits one mandatory hand-off, not two:** swap the Read Now
    coming-soon toast for the real reader link on all 33 topics. Ask HQ is done.
    Re-read `src/lib/support/actions.ts` before scoping any Ask HQ work there.
