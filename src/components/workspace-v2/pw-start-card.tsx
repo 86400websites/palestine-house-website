@@ -90,6 +90,10 @@ export function PwStartCard({ guide }: { guide: PwGuideFile | null }) {
             className="pw-action"
             onClick={onDownload}
             aria-disabled={pending}
+            /* Names the actual file on hover, as the mockup's download controls
+               do. Not aria-label: that would replace the visible "Download Now"
+               with text the label does not contain (WCAG 2.5.3). */
+            title={guide ? `Download ${guide.title}` : undefined}
           >
             {COPY.download}
             <Download className="pw-icon" aria-hidden="true" />

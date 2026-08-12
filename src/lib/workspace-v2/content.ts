@@ -178,7 +178,6 @@ export const getSectionContent = cache(
         title: row.title,
         description: row.description,
         intro: row.intro,
-        icon: row.icon,
         imagePath: row.image_path,
         imagePosition: row.image_position,
         youtubeUrl: safeHttpUrl(row.youtube_url),

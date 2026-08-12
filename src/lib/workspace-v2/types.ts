@@ -17,7 +17,8 @@ export type PwTemplate = {
 
 /* The single doc_key='guide' file behind Download Now. None are uploaded yet
    (PP6's CMS adds them), so this is null on all 33 topics today and the card
-   falls back to an honest coming-soon state. */
+   falls back to an honest coming-soon state. The title names the file on hover,
+   as the mockup's download controls do. */
 export type PwGuideFile = {
   id: string;
   title: string;
@@ -31,7 +32,9 @@ export type PwTopic = {
      Overview card, and elements.overview_md is rendered nowhere. */
   description: string | null;
   intro: string | null;
-  icon: string | null;
+  /* platform_topics.icon is deliberately NOT carried: the card renders the
+     topic's photo, and its no-image fallback uses one generic mark rather than
+     33 lucide imports for a state nobody should see. PP6 may need it again. */
   imagePath: string | null;
   imagePosition: string | null;
   /* Validated http(s) only — see safeHttpUrl. NULL until PP6 adds URLs. */
