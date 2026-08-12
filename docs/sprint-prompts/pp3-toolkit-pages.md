@@ -41,6 +41,195 @@ grid moved into 3e — see Deviations.)
 - **3j Exit gate.** Full-diff review, PROD invariants re-verified, trackers,
   this record.
 
+## Prompt used
+
+<details><summary>Exact implementation prompt (issued 2026-08-12; execution
+diverged as recorded under Deviations — 9 steps, not 10, and D-PP-h was
+superseded mid-sprint)</summary>
+
+```text
+You are my senior engineer for the Palestine House website, working in Claude Code.
+
+Session start: read docs/PROJECT-STATUS.md §1–§2 and §5, then Stage 4 + the PP3 row
+in docs/ROADMAP.md, then docs/sprint-prompts/pp2-workspace-shell-v2.md (what PP3
+inherits). CLAUDE.md governs everything below. Note the Stage 4 supersession block at
+the top of CLAUDE.md — the pre-Stage-4 workspace description in it is history, not truth.
+
+Sprint: PP3 — The four toolkit pages (Stage 4, Private Platform Revamp)
+Branch: claude/sprint-pp3-toolkit-pages — create from the LATEST main (git fetch first;
+        main is ccbceba, PR #76; a stale local main at 2548dff is wrong).
+
+Goal:
+Fill the four toolkit section pages (/setup /operate /program /support) with the real
+D-PP-f content, replacing PP2's "Content is on its way." stubs. One SectionExplorer
+client component per the mockup: accordion groups -> image-led topic cards -> inline
+Explore/Back expand -> #topic-slug hash deep links. Per topic: the summary
+(description + intro), ONE "Start here" Simple guide card, Watch Video, and the
+restored templates grid. Data is already in PROD (0027+0028 applied and verified) and
+the 33 topic images are already on disk — this sprint is CODE ONLY, no migration.
+
+Owner decisions taken at kickoff (2026-08-12) — build to these, do not re-litigate:
+- D-PP-g NO per-page local search. The final mockup renders none (.toolkit-head,
+  .local-search, .search-count and localSearch() survive only as dead CSS/JS). The
+  mockup wins over the ROADMAP row; correct the ROADMAP row in step 3a. Search is PP4.
+- D-PP-h Ask HQ on /support is UI ONLY in PP3; submission lands in PP4. This removes
+  the working submit_support_request form D-PP-e kept, so the page must give an honest
+  in-page route to /contact meanwhile. Record it as a known one-sprint regression.
+- D-PP-i NO migration. The templates-grid predicate is element_id + is_public = false
+  + doc_key IS NULL + code IS NOT NULL. The storage_bucket = 'resources' half of
+  SECURITY-CHECKLIST §15 is enforced by PP6's 0029 RPC guard, because no shipped admin
+  RPC can set storage_bucket today (0023/0026 cannot edit it) and PROD is verified at
+  297 private / 0 public-in-grid / 0 wrong-bucket.
+
+Execute in gated sub-steps (one owner gate after each):
+1.  (3a) Trackers + decisions, docs only. Flip PP1.1 and PP2 to MERGED in
+    PROJECT-STATUS §1 (Current stage, Next action, Active sprint) and §2, and in
+    ROADMAP Stage 4 (PP1.1 + PP2 rows, checkboxes). Record D-PP-g, D-PP-h and D-PP-i
+    in PROJECT-STATUS §5. Correct the PP3 ROADMAP scope + exit gate to drop local
+    search and to name the D-PP-i predicate. No code.
+2.  (3b) Data layer, no UI. New src/lib/workspace-v2/content.ts ("server-only", React
+    cache(), same shape as src/lib/workspace/content.ts): getPlatformSections(),
+    getPlatformTopics(), and a tree builder returning section -> groups -> topics for
+    one section slug. Add a templates selector over the EXISTING getResources()
+    applying the D-PP-i predicate, sorted by sort_order then code, plus a guide-file
+    lookup (doc_key = 'guide' for that element_id). Types in the same module. Every
+    read fails closed to [] / null. Then prove it on TEST via supabase-test MCP,
+    read-only: the predicate yields 33 topics, 297 template rows, 0 empty topics,
+    4–10 per topic, and 0 guide files today.
+3.  (3c) Toolkit CSS. Port the mockup's toolkit/group/topic/resource/template rules
+    into src/styles/workspace-v2.css, every selector .pw- prefixed and nested under
+    .pw-root exactly as PP2 did. Do NOT port .toolkit-head / .local-search /
+    .search-count (D-PP-g) and do NOT port .extras-block / .extra-row (D-PP-f drops
+    extras) or the preview-modal rules. Prove containment with a rule-level CSS bundle
+    diff before/after — PP2's method: 0 baseline rules removed or changed, every
+    addition .pw- scoped, 0 .adm-toast rules touched.
+4.  (3d) PwSectionExplorer — the group accordion. Client component fed by the 3b
+    server data. Per renderGroup: section icon, group name, group description,
+    "N Focus Area(s)" meta, chevron, first group open. Real <button aria-expanded>
+    disclosure, not CSS-only. No topic content yet.
+5.  (3e) Topic cards. Per renderTopic: image-led card (public/assets/workspace/topics/
+    <slug>.jpg with image_position; the mockup's placeholder branch is the fallback),
+    title, description, the intro as the summary line, Explore/Back inline expand
+    (aria-expanded, label swaps), and Watch Video -> the topic's youtube_url if set,
+    otherwise the "Video coming soon." toast via usePwToast. Card id topic-<slug>;
+    a #topic-<slug> deep link opens its group, expands the card, scrolls to it and
+    moves focus to its heading.
+6.  (3f) The one "Start here" Simple guide card. Copy from RESOURCE_KINDS in
+    src/lib/workspace-v2/spec.ts — never hand-type it. Read Now -> a coming-soon toast
+    in PP3 (PP4 builds the reader at /{section}/{topic}/guide; do NOT link to a route
+    that does not exist yet). Download Now -> getResourceDownloadUrl on the topic's
+    doc_key='guide' row, or a coming-soon toast when there is none (there are 0 today).
+    The mockup's subhead line "Four simple files explain the focus area from beginning
+    to end." is FALSE under D-PP-f (one card). Propose a replacement in brand voice and
+    STOP for my approval before committing it.
+7.  (3g) Templates grid. Per renderTopic's template block, using TEMPLATE_COPY from the
+    spec: "N files" meta pill, code badge (resources.code), title, download through the
+    EXISTING getResourceDownloadUrl server action. Rows beyond the 6th hidden behind
+    "Show all N templates". NO preview modal — so the mockup's "Preview file details"
+    note has no target; propose what replaces it (or its removal) and STOP for approval.
+    The raw storage path must never reach the client.
+8.  (3h) Wire the four pages. /setup /operate /program /support render the real
+    explorer behind their existing server-side approval checks (PwSectionPending stays
+    for pending/declined). /support additionally gets the mockup's Ask HQ form UI
+    (renderSupportForm) with its client-side validation, submit NOT wired (D-PP-h) —
+    plus an honest in-page line routing to /contact. Both new strings need my approval
+    before commit. Delete the now-unused "Content is on its way." notice if nothing
+    else uses it. Do not touch the mockup's "This prototype form does not send data"
+    line — it is prototype scaffolding, not shippable copy.
+9.  (3i) a11y + responsive pass. Disclosure semantics on groups and cards, focus
+    management on Explore/Back and on hash deep links, visible focus rings, reduced
+    motion, lazy/decoding on the 33 topic images with correct sizes, 44px targets under
+    (pointer: coarse) only, and a full 320px pass on all four pages.
+10. (3j) Sprint exit gate. Full-diff review of the whole sprint and fix everything
+    found. Re-verify the security invariants the diff touches (see below). Re-run the
+    rule-level CSS bundle diff, the path-guard and a secret scan. Update
+    docs/PROJECT-STATUS.md §1–§3 + change log, tick docs/ROADMAP.md PP3, and write
+    docs/sprint-prompts/pp3-toolkit-pages.md per docs/sprint-prompts/README.md.
+
+Per-step protocol (every sub-step, no exceptions):
+1. Read the exact locked input(s) for this sub-step BEFORE coding.
+2. Build it: smallest safe change, one focused concern.
+3. Verify: pnpm run typecheck && pnpm run lint && pnpm run build; spot-check the
+   affected routes and confirm nothing else broke.
+4. Self-review the diff for bugs and fix them before committing (full review at 3j).
+5. Commit AND push to the task branch — every sub-step, so I can review in the open PR.
+6. Report in <=6 lines: what shipped, checks run, anything flagged — then STOP and WAIT
+   for "proceed". Never start the next sub-step without it.
+
+Owner remote commands: "proceed" = next step · "pause" = hold · "status" = where are we ·
+"fix <thing>" = fix before continuing · "skip to <n>" = jump (record it in PROJECT-STATUS).
+
+Locked inputs (never invent, never paraphrase):
+- Design + copy: docs/PH - Palestine House Final.html (gitignored, on disk; byte-
+  identical to docs/page-designs/PH - Palestine House Final Mockup.html). The toolkit
+  render functions are renderToolkitPage (~L1315), renderGroup (~L1308), renderTopic
+  (~L1294), renderResourceCard (~L1290), renderSupportForm (~L1320); their CSS is in
+  the head block around L54–L58 and the later overrides around L686–L1085.
+- Generated copy contract: src/lib/workspace-v2/spec.ts — PLATFORM_PAGES,
+  RESOURCE_KINDS, TEMPLATE_COPY, WORKSPACE_CHROME. docs/workspace-spec.json is the full
+  extraction. If a string is in the spec, import it; never retype it.
+- DO NOT use docs/page-copy/ for these pages — those OneDrive docs are stale against
+  the mockup (known owner follow-up, PROJECT-STATUS §5 D-PP-a). Brand-voice rules in
+  docs/page-copy/00-global/brand-voice.md still govern any NEW string.
+- Data: get_platform_sections(), get_platform_topics() and the widened get_resources()
+  from supabase/sql/migrations/0027_platform_ia.up.sql; get_resource_download from
+  0017. Reuse src/lib/resources/actions.ts getResourceDownloadUrl and
+  src/lib/workspace/content.ts getResources — do not write a second download path.
+- Reuse the PP2 components: PwShell, PwHero, PwPendingState, PwSectionShell,
+  usePwToast, and lucide-react for icons (PP2's established choice; the 32 distinct
+  platform_topics.icon values need a single explicit map — no dynamic imports).
+- Proof numbers: 11 · 33 · 200+ · 297 · 120-day launch. Header/footer chrome is locked.
+
+Before editing:
+1. Inspect the repo (package.json, next.config.ts, src/app/) and read every locked
+   input above.
+2. Propose a short plan and confirm scope before changing files.
+
+While editing:
+- Smallest safe change; one focused concern per commit; no unrelated refactors.
+- Server Components by default; "use client" only for the explorer's interactivity.
+- Nothing in this sprint may touch a public page, an API route, middleware.ts,
+  next.config.ts, package.json, .env*, the legacy (workspace) group, .adm-* CSS, or
+  any SQL file. Run a path-guard on the diff at every step and report a violation.
+- Client code reads only NEXT_PUBLIC_* env vars; never hardcode or commit secrets.
+- 0027 and 0028 are IMMUTABLE — they have run on production. Any schema change would
+  be a NEW numbered migration, and PP3 is not authorised to need one.
+
+Approval-gate rules for this sprint (blocking):
+- Every new read goes through an is_approved()-gated RPC. A pending or declined session
+  must see zero topics, zero guide cards, zero template rows — prove it by walking the
+  pages with such a session, not by reading the code.
+- An anonymous visitor is redirected by the (platform) layout and leaks no chrome.
+- The templates grid uses the D-PP-i predicate exactly. Record in the sprint record
+  that the storage_bucket half is deferred to PP6's 0029.
+- Storage paths and bucket names never reach the client; downloads only via the
+  existing signed-URL server action; the 60s TTL is unchanged.
+
+Verification (must pass before reporting done):
+- pnpm run typecheck && pnpm run lint && pnpm run build
+- git status — .env.local untracked, no secrets staged
+- Rule-level CSS bundle diff: 0 baseline rules removed or changed, all additions .pw-
+  scoped, 0 .adm-toast rules touched
+- Manual, at 320px and desktop, on all four pages: first group open and the rest
+  closed · a group opens and closes by mouse and keyboard · a topic expands to its
+  summary + Simple guide card + templates grid and collapses back · a template
+  downloads · Show-all reveals the 7th+ row on a 10-template topic · Watch Video and
+  the two coming-soon states toast honestly · /setup#topic-<slug> opens, expands,
+  scrolls and focuses · /support shows the Ask HQ form UI and its /contact route ·
+  a pending account sees the pending state on all four
+
+When the sprint is complete, in the same branch: update docs/PROJECT-STATUS.md (§1, §2,
+§3, change log), tick PP3 in docs/ROADMAP.md, and write
+docs/sprint-prompts/pp3-toolkit-pages.md.
+
+Report at the end: summary · files changed · commands + results · risks/follow-ups ·
+suggested commit message · sprint status. Push policy: commit + push after every gated
+sub-step (standing authorization, 2026-06-12) so I review in the open PR; never merge,
+never push beyond the task branch.
+```
+
+</details>
+
 ## Checks & results
 
 - `pnpm run typecheck` ✅ · `pnpm run lint` ✅ · `pnpm run build` ✅ (47 routes).
