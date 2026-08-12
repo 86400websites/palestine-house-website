@@ -79,9 +79,20 @@ select
 from public.resources;
 -- EXPECT: coded = 297, uncoded = 2 (the booklets), malformed = 0, doc_keys = 0.
 
-select indexname from pg_indexes
-where schemaname = 'public' and indexname = 'resources_element_doc_key_ux';
--- EXPECT: one row.
+-- The index must be UNIQUE, over (element_id, doc_key), and PARTIAL on
+-- doc_key IS NOT NULL. A name-only check would pass on a non-unique index, the
+-- wrong columns, or a missing predicate — and PP6 could then register two
+-- guides for one topic (review finding B1, 2026-08-12). Section 4 additionally
+-- proves the constraint by trying to violate it.
+select
+  ix.indisunique                 as is_unique,
+  pg_get_indexdef(ix.indexrelid) as indexdef
+from pg_index ix
+join pg_class i on i.oid = ix.indexrelid
+where i.relname = 'resources_element_doc_key_ux';
+-- EXPECT: one row, is_unique = true, and indexdef exactly:
+--   CREATE UNIQUE INDEX resources_element_doc_key_ux ON public.resources
+--   USING btree (element_id, doc_key) WHERE (doc_key IS NOT NULL)
 
 -- The CHECK proves the D-PP-f correction is what actually applied.
 select pg_get_constraintdef(oid) as doc_key_check
@@ -111,6 +122,28 @@ select
 from per_topic;
 -- EXPECT: topics = 33, topics_with_no_templates = 0, template_files = 297,
 --         fewest_per_topic = 4, most_per_topic = 10.
+
+-- Shape invariants for the grid (review finding B2, 2026-08-12): counts alone
+-- cannot notice a PUBLIC row entering the grid, since a public booklet could
+-- replace a private template and leave the totals unchanged.
+select
+  count(*) filter (where element_id is not null and doc_key is null
+                     and code is not null and is_public = false
+                     and storage_bucket = 'resources')            as private_templates,
+  count(*) filter (where element_id is not null and doc_key is null
+                     and code is not null and is_public = true)   as public_in_grid,
+  count(*) filter (where element_id is not null and doc_key is null
+                     and code is not null
+                     and storage_bucket <> 'resources')           as wrong_bucket_in_grid,
+  count(*) filter (where is_public = true and storage_bucket = 'booklets'
+                     and element_id is null and code is null
+                     and doc_key is null)                         as booklets,
+  count(*) filter (where is_public = true and storage_bucket <> 'booklets') as stray_public
+from public.resources;
+-- EXPECT: private_templates = 297, public_in_grid = 0, wrong_bucket_in_grid = 0,
+--         booklets = 2, stray_public = 0.
+-- NOTE for PP3: the templates-grid query MUST include is_public = false and
+-- storage_bucket = 'resources', not just element_id/doc_key/code.
 
 -- ===========================================================================
 -- 3) EXECUTE privileges: anon denied, authenticated granted, on the two new
@@ -216,7 +249,46 @@ $fn$;
 
 select pg_temp.run_0027_verification();
 
+-- ===========================================================================
+-- 5) Negative test: the guide slot really is one-per-topic (review finding B1).
+--    Prove the partial unique index by trying to violate it. Inside the same
+--    rollback-only transaction, so nothing survives.
+-- ===========================================================================
+do $dup$
+declare
+  v_element uuid;
+  v_row     public.resources%rowtype;
+begin
+  select element_id into v_element from public.platform_topics order by slug limit 1;
+
+  select * into v_row from public.resources
+  where element_id = v_element and code is not null limit 1;
+
+  -- First guide: allowed.
+  insert into public.resources
+    (title, type, focus_area_code, element_id, version, storage_bucket,
+     storage_path, is_public, sort_order, code, doc_key)
+  values ('__verify guide A', v_row.type, v_row.focus_area_code, v_element, 'v1',
+          'resources', '__verify/a.docx', false, 9001, null, 'guide');
+
+  -- Second guide for the SAME element: must be rejected by the index.
+  begin
+    insert into public.resources
+      (title, type, focus_area_code, element_id, version, storage_bucket,
+       storage_path, is_public, sort_order, code, doc_key)
+    values ('__verify guide B', v_row.type, v_row.focus_area_code, v_element, 'v1',
+            'resources', '__verify/b.docx', false, 9002, null, 'guide');
+
+    insert into _0027_verify_results values
+      (5, 'second guide per topic rejected', 'unique_violation', 'ACCEPTED', false);
+  exception when unique_violation then
+    insert into _0027_verify_results values
+      (5, 'second guide per topic rejected', 'unique_violation', 'unique_violation', true);
+  end;
+end;
+$dup$;
+
 select * from _0027_verify_results order by section, scenario;
--- EXPECT: pass = true on every row.
+-- EXPECT: pass = true on every row, including section 5.
 
 rollback;

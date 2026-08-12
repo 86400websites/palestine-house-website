@@ -53,9 +53,19 @@ from public.resources;
 --         (no guide file is uploaded yet; the 297 coded rows are the templates
 --         grid and must stay doc_key NULL to appear in it).
 
-select indexname from pg_indexes
-where schemaname = 'public' and indexname = 'resources_element_doc_key_ux';
--- EXPECT: one row.
+-- The index must be UNIQUE, over (element_id, doc_key), and PARTIAL on
+-- doc_key IS NOT NULL. Checking only that the NAME exists would pass on a
+-- non-unique index, the wrong columns, or a missing predicate — and PP6 could
+-- then register two guides for one topic (review finding B1, 2026-08-12).
+select
+  ix.indisunique                 as is_unique,
+  pg_get_indexdef(ix.indexrelid) as indexdef
+from pg_index ix
+join pg_class i on i.oid = ix.indexrelid
+where i.relname = 'resources_element_doc_key_ux';
+-- EXPECT: one row, is_unique = true, and indexdef exactly:
+--   CREATE UNIQUE INDEX resources_element_doc_key_ux ON public.resources
+--   USING btree (element_id, doc_key) WHERE (doc_key IS NOT NULL)
 
 -- The CHECK proves the D-PP-f correction is what actually applied.
 select pg_get_constraintdef(oid) as doc_key_check
@@ -81,6 +91,29 @@ select
   sum(files)                        as template_files
 from per_topic;
 -- EXPECT: topics = 33, topics_with_no_templates = 0, template_files = 297.
+
+-- Shape invariants for the grid (review finding B2, 2026-08-12). Counting rows
+-- by element_id/doc_key/code alone cannot notice a PUBLIC row entering the grid,
+-- because a public booklet could replace a private template and leave the totals
+-- unchanged. Assert the two populations directly instead.
+select
+  count(*) filter (where element_id is not null and doc_key is null
+                     and code is not null and is_public = false
+                     and storage_bucket = 'resources')            as private_templates,
+  count(*) filter (where element_id is not null and doc_key is null
+                     and code is not null and is_public = true)   as public_in_grid,
+  count(*) filter (where element_id is not null and doc_key is null
+                     and code is not null
+                     and storage_bucket <> 'resources')           as wrong_bucket_in_grid,
+  count(*) filter (where is_public = true and storage_bucket = 'booklets'
+                     and element_id is null and code is null
+                     and doc_key is null)                         as booklets,
+  count(*) filter (where is_public = true and storage_bucket <> 'booklets') as stray_public
+from public.resources;
+-- EXPECT: private_templates = 297, public_in_grid = 0, wrong_bucket_in_grid = 0,
+--         booklets = 2, stray_public = 0.
+-- NOTE for PP3: the templates-grid query MUST include is_public = false and
+-- storage_bucket = 'resources', not just element_id/doc_key/code.
 
 -- A4) EXECUTE privileges: anon denied, authenticated granted.
 select

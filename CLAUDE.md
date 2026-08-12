@@ -4,6 +4,16 @@
 
 ## Project context
 
+> ### ⚠️ Stage 4 supersession — read before trusting this section (2026-08-12)
+> The gated workspace is being rebuilt (PP1–PP7). **`ROADMAP.md` Stage 4 and `PROJECT-STATUS.md` §5 outrank the "private partner reference platform" description below and the same descriptions in `AGENTS.md`, `TECH-ARCHITECTURE.md`, `DESIGN.md` and `SECURITY-CHECKLIST.md`.** Already true in production and on `main`-bound branches:
+> - **Per-topic model (D-PP-f):** summary → **one Simple guide card** (Read + Download) → Watch Video → a **templates grid with many downloadable templates**. There is no Overview card and no per-topic checklist card.
+> - **Saved checklist progress is dropped** (D-PP-b) — it is no longer "the only per-user interactivity"; `checklist_items` and `checklist_progress` are dormant and are dropped in PP7's migration 0030.
+> - **`/live` and the Academy are retired** as surfaces; their routes survive only until PP5 deletes them.
+> - New pages live in **`src/app/(platform)`** with its own server-side gate; the legacy `src/app/(workspace)` shell is deleted at PP5.
+> - **`resources.doc_key` is `('guide')`** — a topic's templates are the `resources` rows carrying its `element_id` (**and `is_public = false`, bucket `resources`**).
+>
+> These files are rewritten to match at PP5. Until then, treat the bullets above as current truth and everything below as pre-Stage-4 history.
+
 **Palestine House** is a global network of Palestinian cultural spaces. This site is **two shells behind one gate**:
 
 - A **public shell** — calm, premium, editorial marketing pages whose single conversion is the green **Apply** button ("Apply to bring a House" · *Every application is reviewed by HQ.*). Public routes: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/apply`, `/about`, `/contact`, `/focus-areas`, legal, auth. (`/live` moved into the gated workspace in LH1, 2026-07-10.)

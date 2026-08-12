@@ -34,6 +34,24 @@ Ten owner-gated steps, commit + push per step.
 - **Anonymous walkthrough** of all 7 gated paths: each redirects to login and leaks no chrome markup; the public home page still renders its own header. No double chrome.
 - **Secret scan** of the full sprint diff: no `service_role`, `sb_secret_`, JWT or private key introduced; `.env.local` untracked.
 
+## Independent review (2026-08-12) — verdict "fix first", all findings resolved
+
+An external reviewer audited the branch and the forward plan. Verdict: **no active approval leak, no reason to stop the live system**, but verification gaps and PP6/PP7 plan omissions to fix before PP3. It confirmed the approval-gate inventory across all 17 gated routes, the `GATED_PREFIXES` match, the down-script reversal, and that `src/lib/workspace-v2/spec.ts` carries nothing sensitive. Every finding is now closed:
+
+**B1 — the index check could certify the wrong index.** Both verification scripts asserted only that an index *named* `resources_element_doc_key_ux` existed; a non-unique index, wrong columns, or a missing predicate would have passed, and PP6 could then register two guides for one topic. **Fixed:** both scripts now assert `indisunique` **and** the full `pg_get_indexdef()` including the `WHERE (doc_key IS NOT NULL)` predicate, and the TEST script gained a **negative test** that inserts a second guide for the same topic inside the rollback and requires a `unique_violation`. **Verified:** production's real index is `CREATE UNIQUE INDEX … USING btree (element_id, doc_key) WHERE (doc_key IS NOT NULL)` — correct; and the negative test was executed on TEST, returned `unique_violation`, and left zero rows behind. So this was a **verification** weakness, never a live defect.
+
+**B2 — a public row could enter the templates grid unnoticed.** The scripts counted only `element_id`/`doc_key`/`code`, so a public booklet could have replaced a private template with every total unchanged. **Fixed:** both scripts now assert the two populations directly — `private_templates` (`is_public = false`, bucket `resources`), `public_in_grid`, `wrong_bucket_in_grid`, `booklets`, `stray_public`. **Verified on production: 297 / 0 / 0 / 2 / 0.** The `SECURITY-CHECKLIST` §15 templates invariant now states that any grid query **must** include `is_public = false AND storage_bucket = 'resources'`, and PP6's 0029 scope carries the same rule as an RPC-level guard.
+
+**Plan defects — all corrected in this commit:**
+- The generator's file-header JSDoc still described the D-PP-c 3-card transform while the code implemented D-PP-f. Rewritten.
+- `ROADMAP.md` still said "one surfaced template each · D-PP-c" in the parked-public-decision note. Corrected to the D-PP-f wording.
+- **The governing docs still asserted the pre-Stage-4 workspace as current truth** — and PP3 agents read them first. `CLAUDE.md`, `AGENTS.md`, `TECH-ARCHITECTURE.md`, `PROJECT-STATUS.md` §4, `DESIGN.md` and `SECURITY-CHECKLIST.md` now carry an explicit **Stage 4 supersession** block naming what is superseded (checklist progress, Academy, Live, the sidebar model, any per-topic card description) and pointing at ROADMAP Stage 4 + §5. They are rewritten wholesale at PP5.
+- **PP6 was not buildable as scoped.** The existing admin RPCs cannot edit `code`/`doc_key`/`storage_path`, do not return them, delete metadata while orphaning the Storage object, and the private bucket has no admin SELECT policy (only `is_approved()`). 0029's scope now spells out the replacement lifecycle, the admin read path, the orphaned-object compensation, and the D-PP-f invariant guards — including rejecting an orphan guide with `element_id IS NULL`, which the partial index does **not** constrain.
+- **PP7's 0030 would have failed or broken callers.** `elements.overview_md` is still selected by `get_element()`, written by `admin_upsert_element` and referenced by the admin element RPCs; `academy_modules` still has four dependent admin RPCs; and `scripts/ingest-content.ts` still writes Academy/overview/checklist data. 0030's scope now requires replacing those functions **before** the drops, and retiring or updating the ingest script in the same sprint.
+- **PP4 search was underspecified** — the only guide-body read is single-slug `get_element()`, so full-body search means 33 RPC calls or shipping every body to the client. The scope now forces an explicit decision at PP4 kickoff.
+
+The reviewer's one non-blocking observation it could not settle (no DB connector) was the live index/row shapes — both since verified above.
+
 ## Deviations & learnings
 
 - **The model changed mid-sprint.** The owner replaced D-PP-c's 3-card row with **D-PP-f** on day two. Because `0027`/`0028` had still never reached PROD, this was again a cheap in-place correction rather than a new migration pair — the expand-early/contract-last posture has now paid for itself twice. The lesson holds: **defer the PROD apply until the UI that depends on the schema is real.**

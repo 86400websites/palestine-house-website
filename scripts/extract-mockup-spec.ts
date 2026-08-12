@@ -29,12 +29,17 @@
  * They are extracted into spec.chrome (asserted, so mockup drift fails loudly) and the
  * app reads them from the committed spec — the 7.7MB mockup is never a build input.
  *
- * 3-card transform (D-PP-c, owner 2026-08-11): the mockup still shows 4 standard
- * cards + "More guides" extras per topic; the owner's instruction supersedes it.
- * The emitted spec/seed keep only Overview + Simple guide and synthesize the single
- * Template card (download-only, owner-populated via CMS v2 in PP6). Extras are
- * dropped entirely. The raw-shape asserts stay pinned to the mockup as source-drift
- * guards; everything emitted is post-transform.
+ * Owner transform (D-PP-c 2026-08-11, superseded by D-PP-f 2026-08-12): the mockup
+ * still shows 4 standard cards + "More guides" extras per topic; the owner's
+ * instruction supersedes it. The shipped model is
+ *   summary -> ONE Simple guide card (Read + Download) -> Watch Video -> templates grid
+ * so the emitted spec/seed keep ONLY the GUIDE standard card (33, one per topic).
+ * The Overview, checklist and watch cards are dropped, the extras are dropped, and
+ * NO single Template card is synthesized: templates are a live many-per-topic grid,
+ * so the per-topic `templates` arrays are emitted in full (297 rows that already
+ * exist in public.resources + Storage, matched by element_id). The raw-shape asserts
+ * stay pinned to the mockup as source-drift guards; everything emitted is
+ * post-transform. Copy edits the model forced are applied here behind asserts.
  *
  * Sources absent on disk (fresh clone without the OneDrive folders) fail with a clear
  * message — outputs are committed, so re-running is only needed when the mockup changes.
