@@ -1,24 +1,31 @@
 import type { Metadata } from "next";
 import { getMyProfile } from "@/lib/auth/profile";
+import { createClient } from "@/lib/supabase/server";
 import {
   PwSectionShell,
   PwSectionPending,
+  PwSectionWaiting,
   sectionMetadata,
 } from "@/components/workspace-v2/pw-section-page";
-import { SupportForm } from "./support-form";
+import { PwSectionExplorer } from "@/components/workspace-v2/pw-section-explorer";
+import { PwAskHq } from "@/components/workspace-v2/pw-ask-hq";
+import { getSectionContent } from "@/lib/workspace-v2/content";
 
-/* /support — a toolkit section in the workspace v2 shell (PP2 2i), and the one
-   section page that is NOT a bare stub.
+/* /support — a toolkit section like the other three, plus the Ask HQ panel.
 
-   Owner decision D-PP-e (PROJECT-STATUS §5): this page keeps its EXISTING,
-   already-approved Ask HQ form underneath the new hero until PP3 replaces it,
-   so an approved partner always has an in-account way to reach HQ during the
-   PP2→PP3 content gap. The form, its server action and the
-   submit_support_request write are untouched — only the chrome around them
-   changed. The legacy styling of the form itself is accepted for one sprint.
+   The panel is the mockup's, wired to the Ask HQ server action that has been
+   live since S6 (approved-only RPC 0019 + a Resend notification to HQ). That
+   supersedes D-PP-h, which had deferred the send to PP4 on the understanding
+   that it needed building: only the field shape differed, and it maps with no
+   backend change. So the legacy form is replaced outright and no channel is
+   lost between sprints.
 
-   Still approval-gated: submit_support_request is approved-only (D-S6-a), so a
-   pending session gets the notice and the public /contact route. */
+   Name and email are read here, server-side, purely to prefill the panel's two
+   read-only fields — the account is already who HQ replies to. Both belong to
+   the signed-in partner, so neither is a secret leaving the server.
+
+   Still approval-gated end to end: this page's own is_approved check, the
+   toolkit RPC's, and submit_support_request's. */
 
 export const metadata: Metadata = sectionMetadata("support");
 
@@ -26,13 +33,22 @@ export default async function SupportPage() {
   const profile = await getMyProfile();
   if (!profile?.is_approved) return <PwSectionPending />;
 
+  const supabase = await createClient();
+  const [
+    groups,
+    {
+      data: { user },
+    },
+  ] = await Promise.all([getSectionContent("support"), supabase.auth.getUser()]);
+
   return (
     <PwSectionShell page="support">
-      <section className="pw-page">
-        <div className="pw-container pw-narrow pw-legacy-form">
-          <SupportForm />
-        </div>
-      </section>
+      {groups.length > 0 ? (
+        <PwSectionExplorer section="support" groups={groups} />
+      ) : (
+        <PwSectionWaiting />
+      )}
+      <PwAskHq fullName={profile.full_name} email={user?.email ?? null} />
     </PwSectionShell>
   );
 }

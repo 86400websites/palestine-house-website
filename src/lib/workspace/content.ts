@@ -53,9 +53,11 @@ export const getResources = cache(async (): Promise<ResourceRow[]> => {
    'unsafe-inline' script-src does not block javascript: navigation, so validate
    the scheme at the data layer — mirroring the http/https/mailto allow-list
    markdown.ts already enforces for body links. Anything that isn't http(s)
-   becomes null; both consumers already fall back to the "video coming" empty
-   state on null (S7 fix). */
-function safeHttpUrl(value: string | null): string | null {
+   becomes null; every consumer falls back to a "video coming" empty state on
+   null (S7 fix). Exported since PP3 so the workspace v2 topic cards run their
+   DB-sourced youtube_url through the SAME check rather than a second copy of
+   it — one security control, one place to fix. */
+export function safeHttpUrl(value: string | null): string | null {
   if (!value) return null;
   try {
     const u = new URL(value);
