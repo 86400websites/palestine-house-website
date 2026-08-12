@@ -3,6 +3,12 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getResources, safeHttpUrl } from "@/lib/workspace/content";
 import type { ResourceRow } from "@/lib/workspace/types";
+import type {
+  PwGroup,
+  PwGuideFile,
+  PwSectionSlug,
+  PwTemplate,
+} from "./types";
 
 /* The PP3 data layer for the four toolkit pages.
 
@@ -19,8 +25,6 @@ import type { ResourceRow } from "@/lib/workspace/types";
    the generated spec (PLATFORM_PAGES) exactly as PP2 built it, and no other PP3
    surface reads section rows — so wrapping it now would ship an unused round
    trip. PP6 makes that copy owner-editable and is where the wrapper belongs. */
-
-export type PwSectionSlug = "setup" | "operate" | "program" | "support";
 
 /* One flat row per topic, joined across sections/groups/elements by the RPC.
    Column names mirror the get_platform_topics() return table verbatim. */
@@ -44,47 +48,6 @@ type PlatformTopicRow = {
   image_position: string | null;
   youtube_url: string | null;
   sort_order: number;
-};
-
-/* One downloadable file in a topic's templates grid. `code` is non-null by
-   construction — the grid predicate below requires it. */
-export type PwTemplate = {
-  id: string;
-  title: string;
-  code: string;
-};
-
-/* The single doc_key='guide' file behind Download Now. None are uploaded yet
-   (PP6's CMS adds them), so this is null on all 33 topics today and the card
-   falls back to an honest coming-soon state. */
-export type PwGuideFile = {
-  id: string;
-  title: string;
-};
-
-export type PwTopic = {
-  id: string;
-  slug: string;
-  title: string;
-  /* The D-PP-f summary is the topic's own description + intro. There is no
-     Overview card, and elements.overview_md is rendered nowhere. */
-  description: string | null;
-  intro: string | null;
-  icon: string | null;
-  imagePath: string | null;
-  imagePosition: string | null;
-  /* Validated http(s) only — see safeHttpUrl. NULL until PP6 adds URLs. */
-  youtubeUrl: string | null;
-  guide: PwGuideFile | null;
-  templates: PwTemplate[];
-};
-
-export type PwGroup = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  topics: PwTopic[];
 };
 
 const getPlatformTopics = cache(async (): Promise<PlatformTopicRow[]> => {

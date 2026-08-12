@@ -18,6 +18,25 @@ const COMING = {
   body: "This section’s focus areas are being prepared. Check back shortly.",
 };
 
+/* The honest state when a section has nothing to show — an approved partner
+   whose toolkit read came back empty. Since PP3 every section has content, so
+   this is now a failure/edge state rather than the normal one; it stays because
+   the data layer fails closed and the page must say so plainly. */
+export function PwSectionWaiting() {
+  return (
+    <section className="pw-page">
+      <div className="pw-container pw-narrow">
+        <div className="pw-notice">
+          <div>
+            <h2 className="pw-notice-h">{COMING.heading}</h2>
+            <p className="pw-notice-p">{COMING.body}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function PwSectionShell({
   page,
   children,
@@ -28,18 +47,7 @@ export function PwSectionShell({
   return (
     <>
       <PwHero page={page} />
-      {children ?? (
-        <section className="pw-page">
-          <div className="pw-container pw-narrow">
-            <div className="pw-notice">
-              <div>
-                <h2 className="pw-notice-h">{COMING.heading}</h2>
-                <p className="pw-notice-p">{COMING.body}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      {children ?? <PwSectionWaiting />}
     </>
   );
 }

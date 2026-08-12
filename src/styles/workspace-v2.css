@@ -1320,6 +1320,15 @@
   margin-top: 19px;
 }
 
+/* The toggle sits inside an <h2> (the ARIA accordion pattern), so it would
+   otherwise inherit the display face from `.pw-root :is(h1, h2, h3)`. Setting
+   the body face once on the control covers every span inside it. */
+.pw-root .pw-group-heading {
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
 .pw-root .pw-group-toggle {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
