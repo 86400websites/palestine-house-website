@@ -46,7 +46,19 @@ Ten owner-gated steps, commit + push per step.
 ## Follow-ups
 
 1. **Owner merges:** `docs/pp1-close` PR → the PP1.1 PR → this PR.
-2. **At this merge gate the owner applies the corrected `0027` + `0028` to PROD by hand** (SQL editor: `0027_platform_ia.up.sql` → `0028_platform_seed.up.sql`), then runs `supabase/sql/verification/0027_verify_PROD_safe_readonly.sql` — EXPECT 5/10/33 · coded 297 · doc_keys 0 · `doc_key_check` = `'guide'` · 33 topics with 297 template files, none empty · no `platform_extras` · anon denied.
+2. ~~PROD apply~~ ✅ **DONE 2026-08-12 — the owner ran `0027_platform_ia.up.sql` then `0028_platform_seed.up.sql` on production by hand, and it is verified read-only via `supabase-prod-readonly`:**
+   - 3 platform tables, RLS on, **0 client policies** each.
+   - sections 5 · groups 10 · topics 33 · distinct elements 33 · **unmapped elements 0**.
+   - `platform_extras` absent · `get_platform_extras` count 0.
+   - `resources_doc_key_shape` = `CHECK (doc_key IS NULL OR doc_key = 'guide')` — the D-PP-f shape, nothing else.
+   - resources: coded **297** · uncoded 2 (booklets) · **doc_keys 0** · `resources_element_doc_key_ux` present.
+   - templates grid: **33 topics, 0 empty, 297 files, 4–10 per topic.**
+   - EXECUTE: `anon` **false** / `authenticated` true on all three RPCs; `get_resources` confirmed widened with `code` + `doc_key`.
+   - Untouched content intact: elements 33 · checklist_items 818 · resources 299 · profiles 10 (10 approved) · applications 10 · support_requests 2 · checklist_progress 15.
+   - **Seed fidelity in PROD proven by digest:** topics `c948dc40bab1cc8b54be6999c6784b07` and sections `983e2df37e910f1e9f5cd90228aaa766` — **identical to TEST and to `docs/workspace-spec.json`**.
+   - `get_advisors(security)` on PROD: **no new findings** — same INFO/WARN set as TEST (the `platform_*` RLS-no-policy INFOs are the intended RPC-only posture).
+
+   **Migration immutability now applies to 0027/0028** — they have run on production, so any further change ships as a NEW numbered migration, never an in-place edit. The one exception already taken: the generated `0028` header comment was corrected from "D-PP-c: 3-card model" to name D-PP-c + D-PP-f, because a permanent migration file misstating its own governing decision is a trap for later sprints. **Comment-only — zero SQL statements differ from what PROD ran.**
 3. ⚠️ **Not verified in this sprint: the signed-in visual.** The gate, routing, CSS containment and DB were all proven, but nobody has seen the shell as an approved partner — that needs a real session. **Owner: walk the Vercel Preview** (About landing, all 5 nav links, mobile panel, toast, `/support` form still submits) at desktop and 320 px.
 4. **New copy awaiting explicit sign-off** (all reversible one-liners): the section waiting state — *"Content is on its way." / "This section's focus areas are being prepared. Check back shortly."* — and *"Search coming soon."* (modelled on the mockup's own *"Video coming soon."*). The two footer edits and the `launching-a-new-house` intro trim were approved in-session.
 5. **Codex review of this branch is recommended before merge** — it changes the approval surface (a new gated route group) and carries a PROD migration. Prompt in the session close.
