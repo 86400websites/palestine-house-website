@@ -1,25 +1,19 @@
 # Palestine House Website — Claude Code Instructions
 
-> This file configures how Claude Code works in the **Palestine House** repo (`palestine-house`). Companion docs in the same repo: [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md) (the locked stack + project architecture), [`WORKFLOW.md`](./WORKFLOW.md) (branch → PR → Preview → merge + sprint discipline), [`DESIGN.md`](./DESIGN.md) (the Palestine House visual system), [`ROADMAP.md`](./ROADMAP.md) (stages & sprints), [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) (where we are right now), [`AGENTS.md`](./AGENTS.md) (rules for other agents).
+> This file configures how Claude Code works in the **Palestine House** repo (`palestine-house`). Companion docs, all under `docs/` except `AGENTS.md`: [`TECH-ARCHITECTURE.md`](./docs/TECH-ARCHITECTURE.md) (the locked stack + project architecture), [`WORKFLOW.md`](./docs/WORKFLOW.md) (branch → PR → Preview → merge + sprint discipline), [`DESIGN.md`](./docs/DESIGN.md) (the Palestine House visual system), [`ROADMAP.md`](./docs/ROADMAP.md) (stages & sprints), [`PROJECT-STATUS.md`](./docs/PROJECT-STATUS.md) (where we are right now), [`AGENTS.md`](./AGENTS.md) (rules for other agents).
 
 ## Project context
 
-> ### ⚠️ Stage 4 supersession — read before trusting this section (2026-08-12)
-> The gated workspace is being rebuilt (PP1–PP7). **`ROADMAP.md` Stage 4 and `PROJECT-STATUS.md` §5 outrank the "private partner reference platform" description below and the same descriptions in `AGENTS.md`, `TECH-ARCHITECTURE.md`, `DESIGN.md` and `SECURITY-CHECKLIST.md`.** Already true in production and on `main`-bound branches:
-> - **Per-topic model (D-PP-f):** summary → **one Simple guide card** (Read + Download) → Watch Video → a **templates grid with many downloadable templates**. There is no Overview card and no per-topic checklist card.
-> - **Saved checklist progress is dropped** (D-PP-b) — it is no longer "the only per-user interactivity"; `checklist_items` and `checklist_progress` are dormant and are dropped in PP7's migration 0030.
-> - **`/live` and the Academy are retired** as surfaces; their routes survive only until PP5 deletes them.
-> - New pages live in **`src/app/(platform)`** with its own server-side gate; the legacy `src/app/(workspace)` shell is deleted at PP5.
-> - **`resources.doc_key` is `('guide')`** — a topic's templates are the `resources` rows carrying its `element_id` (**and `is_public = false`, bucket `resources`**).
->
-> These files are rewritten to match at PP5. Until then, treat the bullets above as current truth and everything below as pre-Stage-4 history.
-
 **Palestine House** is a global network of Palestinian cultural spaces. This site is **two shells behind one gate**:
 
-- A **public shell** — calm, premium, editorial marketing pages whose single conversion is the green **Apply** button ("Apply to bring a House" · *Every application is reviewed by HQ.*). Public routes: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/apply`, `/about`, `/contact`, `/focus-areas`, legal, auth. (`/live` moved into the gated workspace in LH1, 2026-07-10.)
-- A **private partner reference platform** — approval-gated (`profiles.is_approved`). Apply = sign-up: one form creates a pending account + application; HQ approval via `/admin/approvals` unlocks the platform. Gated routes: `/dashboard`, `/plan`, `/build`, `/operate`, `/elements/[slug]` (×33), `/live` (the members-only Live hub — watch + publish, LH1), `/resources`, `/tools` (coming soon), `/academy`, `/account`, `/support`.
+- A **public shell** — calm, premium, editorial marketing pages whose single conversion is the green **Apply** button ("Apply to bring a House" · *Every application is reviewed by HQ.*). Public routes: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/apply`, `/about`, `/contact`, `/focus-areas`, legal, auth.
+- A **private partner reference platform** — approval-gated (`profiles.is_approved`). Apply = sign-up: one form creates a pending account + application; HQ approval via `/admin/approvals` unlocks the platform. Gated routes: **`/dashboard`** (the About landing), the four toolkit sections **`/setup` · `/operate` · `/program` · `/support`**, the Simple guide reader at **`/{section}/{topic}/guide`** (×33), **`/account`**, and **`/admin/*`** for HQ.
 
-**It is a reference, not a course** — no quizzes, no certificate, no daily-ops tooling. The only per-user interactivity is saved checklist progress in Stages › Design & Build. **Proof numbers: 11 focus areas · 33 topics · 200+ checklist items · 297 templates · a 120-day launch** (updated from 10 · 30 · 267 when Focus Area 11 "Café & Culinary Experience" shipped, FA11 2026-07-18; they move only when real content is added, never invented).
+**The private model (D-PP-f), which is what the four toolkit pages render.** Four sections → ten groups → **33 focus areas**. Each focus area shows: its **summary** (`platform_topics.description` + `intro`) → **one Simple guide card** (Read Now → the reader · Download Now → the signed-URL file) → **Watch Video** → a **templates grid** of every `resources` row carrying that topic's `element_id`. There is no Overview card, no per-topic checklist card and no watch-out card. A global **Ctrl/⌘+K search** spans focus areas, guides and templates.
+
+**It is a reference, not a course** — no quizzes, no certificate, no daily-ops tooling. There is **no saved per-user state** beyond the partner's own account details: checklist progress was dropped at D-PP-b, and Ask HQ emails HQ rather than opening a ticket. **Proof numbers: 11 focus areas · 33 topics · 200+ checklist items · 297 templates · a 120-day launch** (updated from 10 · 30 · 267 when Focus Area 11 "Café & Culinary Experience" shipped, FA11 2026-07-18; they move only when real content is added, never invented). These are the **public** site's numbers and still use its A–K vocabulary; reconciling them with the private four-section model is parked as **D-PP-a** for a later public sprint.
+
+> **History, so the archaeology is not repeated.** Before Stage 4 the gated side was a sidebar workspace at `/plan` `/build` `/food` `/programming` `/live` `/elements/[slug]` `/resources` `/academy` `/tools`, with saved checklist progress, an Academy of video modules and a members-only Live hub. All of it was deleted at **PP5 (2026-08-14)**; those paths now 307 to `/dashboard`. `/live` had moved in from the public site at LH1 and went with the rest. The tables behind the retired features (`checklist_items`, `checklist_progress`, `academy_modules`, `programming_sessions`) are **still in the database** and are dropped by PP7's migration `0030` — code went first, data follows.
 
 GitHub is the source of truth. Vercel hosts Production and Preview. Claude Code is the primary build engine, working **one sprint at a time** from `ROADMAP.md`.
 
@@ -86,11 +80,12 @@ If the on-disk reality disagrees with this list, **trust the code** (especially 
 
 ### Palestine House access rules (non-negotiable)
 
-- **Approval gate everywhere:** workspace data RPCs check `is_approved` server-side. A pending account resolves only its profile/approval status — never element bodies, checklists, templates, resources, or Academy content. `/dashboard` renders the pending state for unapproved sessions.
-- **Public projections are anon-safe** and expose titles/overviews/session metadata only.
-- **Templates** are served from a private Storage bucket via server-issued signed URLs to approved users only. The two booklet PDFs are the only public files.
+- **Approval gate everywhere:** every platform data RPC checks `is_approved` server-side — `get_platform_sections/topics`, `get_element`, `get_resources`. A pending account resolves only its profile/approval status, never a guide body, a template row or a topic summary. Each page ALSO checks approval itself before rendering, and `/dashboard` renders the pending state. Two gates, because file location is never access control.
+- **The search index is the same gated reads** (D-PP-j): a pending or anonymous caller gets an empty index, and it carries no resource ids, storage paths or bucket names.
+- **`/account` is session-gated only, by design** — a pending partner must be able to set their name and password while they wait. It is the one gated page with no approval check, and it exposes nothing but the caller's own `profiles` row.
+- **Templates** are served from a private Storage bucket via server-issued signed URLs to approved users only. The two booklet PDFs are the only public files. The templates-grid predicate is app-level (`is_public = false` + `doc_key IS NULL` + `code IS NOT NULL`); **the `storage_bucket` half of `SECURITY-CHECKLIST` §15 is still owed by PP6's `0029`** (D-PP-i) — safe only while no shipped admin RPC can set that column, which PP6 changes.
 - **Public writes** (`/apply`, contact, lead magnet, newsletter): zod + rate limit + Turnstile, fail closed in Production.
-- **`programming_sessions`:** members-only reads via the approved-gated `member_programming_sessions()` projection (LH1, migration 0025 — no anon read path exists); partner writes owner-scoped under RLS.
+- **Retired surfaces, live tables.** PP5 deleted the Academy, the Live hub and the checklist UI, but `academy_modules`, `checklist_items`, `checklist_progress` and `programming_sessions` are still in the database until PP7's `0030`. Their RLS and gating still apply — do not treat an unreachable table as an unprotected one, and do not add a new caller to any of them.
 
 ### Handle server / client boundaries correctly
 

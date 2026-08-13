@@ -1,22 +1,22 @@
 # Palestine House Website — Agent Instructions
 
-> Governs **non-primary agents** in the `palestine-house` repo — code-review agents (e.g. Codex), automation, and any tool other than the main Claude Code engine. The primary engine's rules live in [`CLAUDE.md`](./CLAUDE.md). Stack + project architecture: [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md). Process: [`WORKFLOW.md`](./WORKFLOW.md). Sprint plan: [`ROADMAP.md`](./ROADMAP.md). Current state: [`PROJECT-STATUS.md`](./PROJECT-STATUS.md).
+> Governs **non-primary agents** in the `palestine-house` repo — code-review agents (e.g. Codex), automation, and any tool other than the main Claude Code engine. The primary engine's rules live in [`CLAUDE.md`](./CLAUDE.md). Stack + project architecture: [`TECH-ARCHITECTURE.md`](./docs/TECH-ARCHITECTURE.md). Process: [`WORKFLOW.md`](./docs/WORKFLOW.md). Sprint plan: [`ROADMAP.md`](./docs/ROADMAP.md). Current state: [`PROJECT-STATUS.md`](./docs/PROJECT-STATUS.md).
 
-## ⚠️ Stage 4 supersession (2026-08-12) — read first
+## The gated side, as it actually is (Stage 4, current since PP5 on 2026-08-14)
 
-The gated workspace is being rebuilt (PP1–PP7). **`ROADMAP.md` Stage 4 and `PROJECT-STATUS.md` §5 outrank the assumptions below**, which still describe the pre-Stage-4 workspace and are rewritten at PP5. Current truth:
-
+- **Where the code lives:** every gated page is in **`src/app/(platform)`**, which carries its own server-side session gate; each page also checks approval itself. `/admin/*` is separate and additionally checks the `admins` table. The legacy `src/app/(workspace)` group **no longer exists** — PP5 deleted it, and its paths (`/plan` `/build` `/food` `/programming` `/live` `/elements/[slug]` `/resources` `/academy` `/tools`) 307 to `/dashboard`.
+- **The surface:** `/dashboard` (About landing) · four toolkit sections `/setup` `/operate` `/program` `/support` · the Simple guide reader at `/{section}/{topic}/guide` · `/account` · a global Ctrl/⌘+K search overlay.
 - **Per-topic model (D-PP-f):** summary → **one Simple guide card** (Read + Download) → Watch Video → a **many-template grid**. No Overview card, no per-topic checklist card, no "More guides" extras.
-- **Saved checklist progress is dropped** (D-PP-b) — the "only per-user interactivity" line below is obsolete.
-- **`resources.doc_key` is `('guide')`**; a topic's templates are the `resources` rows with its `element_id`, `doc_key IS NULL`, `code IS NOT NULL`, **`is_public = false`** and bucket `resources`.
-- New pages live in **`src/app/(platform)`** (its own server-side gate); legacy `src/app/(workspace)` is deleted at PP5.
+- **No saved per-user state** beyond the partner's own account row (D-PP-b dropped checklist progress; Ask HQ emails HQ and opens no ticket).
+- **`resources.doc_key` is `('guide')`**; a topic's templates are the `resources` rows with its `element_id`, `doc_key IS NULL`, `code IS NOT NULL`, **`is_public = false`** and bucket `resources`. The bucket half of that predicate is **not yet enforced in SQL** — it is owed by PP6's `0029` (D-PP-i).
+- **Retired surfaces still have live tables.** `academy_modules`, `checklist_items`, `checklist_progress` and `programming_sessions` remain in the database until PP7's `0030`. Unreachable is not the same as unprotected: their RLS still matters, and nothing should add a new caller.
 - Migrations **0027 and 0028 are applied to production and are IMMUTABLE** — any schema fix is a new migration 0029+.
 
 ## Project assumptions
 
 - This repository is the **Palestine House** website on the locked Next.js 15 stack in `TECH-ARCHITECTURE.md`.
 - **Two shells, one gate:** a public marketing shell (single CTA: Apply) and a private, approval-gated partner reference platform. Apply = sign-up (one form → pending account → HQ approval via `profiles.is_approved` → unlock). Admin approval queue at `/admin/approvals` is server-checked via an `admins` table.
-- It is a **reference, not a course** — no quizzes, no certificate. The only per-user interactivity is saved checklist progress in `/build`.
+- It is a **reference, not a course** — no quizzes, no certificate, and no saved per-user state beyond the partner's own account details (see the section above).
 - Copy is **verbatim** from `/docs/page-copy/`; design follows `/docs/page-designs/` + the design tokens in `/docs/page-designs/design-system/`; the header/footer are locked and identical on every page. Proof numbers: **11 · 33 · 200+ · 297 · 120-day launch** (updated from 10 · 30 · 267 with Focus Area 11 "Café & Culinary Experience", FA11 2026-07-18; they move only when real content is added, never invented).
 - GitHub is the source of truth; `main` is protected and production-ready. Vercel hosts Production and Preview.
 - The project is built **one sprint at a time** per `ROADMAP.md`. Agents make **focused, reviewable** contributions inside the active sprint. Default mode is **review**, not large edits.
@@ -63,10 +63,10 @@ The gated workspace is being rebuilt (PP1–PP7). **`ROADMAP.md` Stage 4 and `PR
 
 ## Palestine House gating checks (blocking)
 
-- [ ] 🔴 Every gated route has an explicit **server-side session + `is_approved`** check; `/admin/*` additionally checks the `admins` table server-side
-- [ ] 🔴 Workspace RPCs enforce `is_approved` server-side; pending sessions can resolve only profile/approval status
-- [ ] 🔴 Public projections expose titles/overviews/session metadata only — never gated bodies, checklist data, templates, or Academy content
-- [ ] 🔴 Template/resource downloads go through server-issued **signed URLs** from a private bucket, to approved users only
+- [ ] 🔴 Every gated route has an explicit **server-side session + `is_approved`** check; `/admin/*` additionally checks the `admins` table server-side. The one deliberate exception is **`/account`**, which is session-gated only so a pending partner can manage their own row — flag any *other* route missing its approval check
+- [ ] 🔴 Platform RPCs (`get_platform_sections/topics`, `get_element`, `get_resources`) enforce `is_approved` server-side; pending sessions can resolve only profile/approval status, and the search index inherits this by being built from the same reads
+- [ ] 🔴 Public projections expose titles/overviews only — never gated bodies, templates, or the retired-but-still-present checklist/academy/session tables
+- [ ] 🔴 Template/resource downloads go through server-issued **signed URLs** from a private bucket, to approved users only; no storage path or bucket name reaches the client
 - [ ] 🔴 No quiz/certificate/ops features introduced; no second signup path beside `/apply`
 
 ## App Router checks
