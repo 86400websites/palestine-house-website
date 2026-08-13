@@ -81,7 +81,7 @@ export default function RootLayout({
         />
         <Providers>
           {/* Public chrome on marketing/auth routes; gated routes (the
-              (workspace) group + /admin) bring their own shell — see SiteChrome
+              (platform) group + /admin) bring their own shell — see SiteChrome
               (GATED_PREFIXES). */}
           <SiteChrome header={<SiteHeader />} footer={<SiteFooter />}>
             {children}
