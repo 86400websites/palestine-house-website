@@ -1,13 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type {
-  ElementFull,
-  ElementListItem,
-  ChecklistRow,
-  ResourceRow,
-  AcademyRow,
-} from "./types";
+import type { ElementFull, ResourceRow } from "./types";
 
 /* Typed server wrappers around the S5 content RPCs — S6 is their first
    consumer. Same shape as src/lib/auth/profile.ts: React-cached (one round-trip
@@ -15,7 +9,14 @@ import type {
    session + RLS via the publishable-key server client — never the secret key.
    Every RPC is is_approved()-gated server-side, so an unapproved caller gets
    zero rows. These never throw; they fail closed to null / [].
-   `server-only` makes an accidental client import a build error. */
+   `server-only` makes an accidental client import a build error.
+
+   PP5 cut this file down to what the platform actually reads. getElements(),
+   getChecklist() and getAcademyModules() went with the routes that called them:
+   the v2 surface reads a topic through get_platform_topics() and only ever
+   fetches one element at a time, by slug, for the guide reader. Their RPCs are
+   still in the database and PP7's 0030 drops the checklist and academy ones —
+   this is the deletion that stops that migration breaking a live caller. */
 
 export const getElement = cache(
   async (slug: string): Promise<ElementFull | null> => {
@@ -27,20 +28,6 @@ export const getElement = cache(
   },
 );
 
-export const getElements = cache(async (): Promise<ElementListItem[]> => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_elements");
-  if (error || !data) return [];
-  return data as ElementListItem[];
-});
-
-export const getChecklist = cache(async (): Promise<ChecklistRow[]> => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_checklist");
-  if (error || !data) return [];
-  return data as ChecklistRow[];
-});
-
 export const getResources = cache(async (): Promise<ResourceRow[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_resources");
@@ -48,8 +35,9 @@ export const getResources = cache(async (): Promise<ResourceRow[]> => {
   return data as ResourceRow[];
 });
 
-/* DB-sourced youtube_url is rendered into an <a href> (academy cards + the
-   element Video tab). React does not strip javascript:/data: URLs and the CSP's
+/* DB-sourced youtube_url is rendered into an <a href> — the workspace v2 topic
+   cards' Watch Video, and before PP5 the academy cards and the element Video
+   tab. React does not strip javascript:/data: URLs and the CSP's
    'unsafe-inline' script-src does not block javascript: navigation, so validate
    the scheme at the data layer — mirroring the http/https/mailto allow-list
    markdown.ts already enforces for body links. Anything that isn't http(s)
@@ -67,12 +55,3 @@ export function safeHttpUrl(value: string | null): string | null {
   }
 }
 
-export const getAcademyModules = cache(async (): Promise<AcademyRow[]> => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_academy_modules");
-  if (error || !data) return [];
-  return (data as AcademyRow[]).map((r) => ({
-    ...r,
-    youtube_url: safeHttpUrl(r.youtube_url),
-  }));
-});
