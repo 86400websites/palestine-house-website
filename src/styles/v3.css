@@ -125,17 +125,12 @@
    globals.css — one selector list, recolored per shell.) */
 
 /* --- Legacy-page corrections under the v3 remap (until DR2 redesigns them) -- */
-/* "Live now" is a STATUS — it keeps the locked muted red, not the copper the
-   --brand-accent remap would give it (status grammar: color + text). */
-.ph-page :is(.live-badge, .live-chip-live) {
-  background: var(--red-600);
-}
-/* These paired a raw green token with a now-olive brand token — re-pair them
-   on the olive side so one component doesn't mix two green systems. */
-.ph-page .live-filter-tag.is-active {
-  color: var(--olive-700);
-}
-.ph-page :is(.live-pill, .sup-artefact-icon) {
+/* This group lost three of its four rules at PP5: the "Live now" status badge,
+   the active filter tag and the .live-pill all belonged to the /live listing,
+   which the teardown deleted. What remains is the one selector here that was
+   never about /live — /our-support's artefact icon, a PUBLIC page — so the
+   pairing is kept and only its dead half removed. */
+.ph-page .sup-artefact-icon {
   background: var(--olive-100);
 }
 
