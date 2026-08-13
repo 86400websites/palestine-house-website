@@ -7,12 +7,14 @@ import {
   safeHttpUrl,
 } from "@/lib/workspace/content";
 import { renderMarkdown } from "@/lib/workspace/markdown";
+import { PLATFORM_PAGES, RESOURCE_KINDS } from "./spec";
 import { stripGuideCover } from "./guide-cover";
 import type { ResourceRow } from "@/lib/workspace/types";
 import type {
   PwGroup,
   PwGuideDoc,
   PwGuideFile,
+  PwSearchItem,
   PwSectionSlug,
   PwTemplate,
 } from "./types";
@@ -200,6 +202,75 @@ export const getSectionContent = cache(
     return groups;
   },
 );
+
+/* The global search index (PP4) — every focus area, every Simple guide and
+   every template, as one flat list the overlay can filter in the browser.
+
+   Built from the SAME two approval-gated reads the toolkit pages already make
+   and the SAME D-PP-i predicate written once above, so the index cannot drift
+   from what the pages show, and cannot include a row the grid would exclude.
+   A pending or anonymous caller gets zero topic rows and zero resource rows, so
+   the index comes back EMPTY — the gate is the RPC's, not a check here.
+
+   Order follows the mockup's own index: section by section, group by group,
+   topic by topic, and within a topic its guide and then its templates. Results
+   therefore cluster by focus area rather than by kind, which is what makes the
+   "All" chip readable.
+
+   Deliberately absent from every entry: resource ids, storage paths and bucket
+   names. A template hit deep-links to the focus-area card and the download
+   still runs through the existing signed-URL action from there, so search adds
+   no new path to a file. */
+export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
+  const [topicRows, resourceRows] = await Promise.all([
+    getPlatformTopics(),
+    getResources(),
+  ]);
+
+  if (topicRows.length === 0) return [];
+
+  const { templates } = indexFilesByElement(resourceRows);
+  const items: PwSearchItem[] = [];
+
+  for (const row of topicRows) {
+    const section = row.section_slug as PwSectionSlug;
+    const page = PLATFORM_PAGES[section];
+    /* A section slug the spec does not know would mean the DB and the generated
+       copy have diverged; skip rather than render "undefined ›". */
+    if (!page) continue;
+
+    const topicHref = `/${section}#topic-${encodeURIComponent(row.slug)}`;
+    const topicPath = `${page.label} › ${row.group_name}`;
+    const filePath = `${page.label} › ${row.title}`;
+
+    items.push({
+      kind: "TOPIC",
+      title: row.title,
+      path: topicPath,
+      href: topicHref,
+      /* D-PP-j: the focus area's own summary joins its match text. */
+      summary: [row.description, row.intro].filter(Boolean).join(" ") || undefined,
+    });
+
+    items.push({
+      kind: "GUIDE",
+      title: RESOURCE_KINDS[0].title,
+      path: filePath,
+      href: `/${section}/${encodeURIComponent(row.slug)}/guide`,
+    });
+
+    for (const template of templates.get(row.element_id) ?? []) {
+      items.push({
+        kind: "TEMPLATE",
+        title: template.title,
+        path: filePath,
+        href: topicHref,
+      });
+    }
+  }
+
+  return items;
+});
 
 /* The reader's payload (PP4) — one topic's Simple guide, ready to render.
 

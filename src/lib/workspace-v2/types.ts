@@ -51,6 +51,33 @@ export type PwGroup = {
   topics: PwTopic[];
 };
 
+/* One entry in the global search index (PP4).
+
+   The mockup's own index shape, minus what this platform does not have. Its
+   `filter` field is dropped because kind maps 1:1 onto the four chips here
+   (the mockup needed both because several resource kinds shared one chip), and
+   dropping it saves a field on all ~363 entries.
+
+   Nothing identifying travels with an entry: no resource id, no storage path,
+   no bucket name. A hit navigates to a page — the reader for a guide, the
+   focus-area card for a topic or a template — and the download still happens
+   only through the existing signed-URL server action, from the card. */
+export type PwSearchKind = "TOPIC" | "GUIDE" | "TEMPLATE";
+
+export type PwSearchItem = {
+  kind: PwSearchKind;
+  title: string;
+  /* The mockup's breadcrumb: "Setup › Foundations" for a focus area, and
+     "Setup › Launching a New House" for a guide or a template. */
+  path: string;
+  href: string;
+  /* Focus areas only. D-PP-j (owner, 2026-08-13) puts the topic's own
+     description + intro in the match text, which is what lets a partner find a
+     focus area by what it is about rather than only by its title. Guides and
+     templates match on title + path + kind alone, so they carry none. */
+  summary?: string;
+};
+
 /* Everything the reader at /{section}/{topic}/guide renders (PP4).
 
    Assembled server-side, so the page never handles raw Markdown and cannot
