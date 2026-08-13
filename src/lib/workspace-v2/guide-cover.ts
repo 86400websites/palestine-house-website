@@ -47,31 +47,57 @@ const MAX_COVER_LINES = 8;
 /* Letters and digits only, accents folded, upper-cased. Collapses every way the
    export writes the same words: `__S I M P L E   G U I D E__`, `# SIMPLE
    GUIDE`, `Aswātna` vs `Aswatna`, `Retail / Shop Operations` vs `Retail Shop
-   Operations`, `&` vs nothing. */
+   Operations`, `&` vs nothing.
+
+   UNICODE-AWARE, and that is load-bearing rather than tidy. An earlier version
+   kept `[A-Z0-9]` only, which compacted any non-Latin line — Arabic, for
+   instance — to the empty string, and an empty compaction is what this file
+   reads as "punctuation only, therefore cover matter". A leading Arabic line
+   was silently deleted from the reader. Found by independent review, 2026-08-13.
+   With `\p{L}\p{N}` such a line compacts to itself and is content. */
 function compact(value: string): string {
   return value
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/\p{Diacritic}/gu, "")
     .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "");
+    .replace(/[^\p{L}\p{N}]/gu, "");
 }
 
-function isCoverLine(line: string, titleKeys: string[]): boolean {
+type LineVerdict = {
+  /* Nothing of substance survived once the cover vocabulary was subtracted. */
+  cover: boolean;
+  /* This line carried a real cover MARKER — a banner or the playbook subtitle —
+     rather than merely repeating the topic's title. */
+  marker: boolean;
+};
+
+function classifyLine(line: string, titleKeys: string[]): LineVerdict {
   let rest = compact(line);
-  if (!rest) return true; // a rule, a row of dashes, punctuation only
+  /* Genuinely nothing but punctuation: a `---` rule, a row of dashes. Now that
+     compaction is Unicode-aware this can no longer swallow real prose. */
+  if (!rest) return { cover: true, marker: false };
+
+  let marker = false;
 
   for (const key of titleKeys) {
     if (!key) continue;
     while (rest.includes(key)) rest = rest.replace(key, "");
   }
   for (const phrase of COVER_PHRASES) {
-    while (rest.includes(phrase)) rest = rest.replace(phrase, "");
+    while (rest.includes(phrase)) {
+      rest = rest.replace(phrase, "");
+      marker = true;
+    }
   }
-  for (const pattern of COVER_PATTERNS) rest = rest.replace(pattern, "");
+  for (const pattern of COVER_PATTERNS) {
+    const next = rest.replace(pattern, "");
+    if (next !== rest) marker = true;
+    rest = next;
+  }
 
   /* Only if NOTHING of substance survives. A line like "ORG STRUCTURE & ROLES
      LIFECYCLE STAGES" keeps "LIFECYCLESTAGES" and is therefore content. */
-  return rest.length === 0;
+  return { cover: rest.length === 0, marker };
 }
 
 export function stripGuideCover(
@@ -85,16 +111,26 @@ export function stripGuideCover(
 
   let cut = 0; // index of the first line that is kept
   let seen = 0; // non-blank lines inspected
+  let sawMarker = false; // the prefix proved itself to be a cover block
 
   for (let i = 0; i < lines.length; i += 1) {
     if (!lines[i].trim()) continue;
     if (seen >= MAX_COVER_LINES) break;
-    if (!isCoverLine(lines[i], titleKeys)) break;
+    const verdict = classifyLine(lines[i], titleKeys);
+    if (!verdict.cover) break;
+    if (verdict.marker) sawMarker = true;
     seen += 1;
     cut = i + 1;
   }
 
-  if (cut === 0) return markdown;
+  /* A title on its own is NOT enough to delete. The candidate prefix must
+     contain at least one unambiguous cover marker — a PALESTINE HOUSE or SIMPLE
+     GUIDE banner, or the playbook subtitle — before anything is removed.
+     Without this, a body that legitimately opened with its own title as a
+     heading would lose that heading. The real openings all carry a marker (the
+     five-line one on `technology-stack-and-data` has two), which is why the
+     marker may appear on any line of the prefix rather than the first. */
+  if (cut === 0 || !sawMarker) return markdown;
 
   const kept = lines.slice(cut).join("\n");
   /* If the whole document was cover matter, keep the original: showing the
