@@ -1,5 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+
+/* Documentation must never influence the CSS bundle (PP4, found by the
+   rule-level containment diff). Tailwind v4 auto-detects sources across the
+   project and scans their raw TEXT, not just JSX — so an ordinary English word
+   in a Markdown file that happens to be a utility name emits that utility. A
+   sprint record describing the query handling added a real `.lowercase` rule to
+   production CSS. Prose is not markup; exclude it. */
+@source not "../../docs";
 @import "./pages.css";
 @import "./v3.css";
 /* Workspace v2 (PP2) — fully scoped to `.pw-root`; imported last so it wins

@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, ImageOff, PlayCircle } from "lucide-react";
 import { usePwToast } from "@/components/workspace-v2/pw-toast";
 import { PwStartCard } from "@/components/workspace-v2/pw-start-card";
 import { PwTemplateGrid } from "@/components/workspace-v2/pw-template-grid";
-import type { PwTopic } from "@/lib/workspace-v2/types";
+import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
 
 /* One focus-area card inside a toolkit group (PP3).
 
@@ -58,11 +58,16 @@ function TopicImage({ topic }: { topic: PwTopic }) {
 }
 
 export function PwTopicCard({
+  section,
   topic,
   open,
   flash,
   onToggle,
 }: {
+  /* Carried down from the page rather than derived from the URL in the
+     browser: the reader link must be right in the server-rendered HTML, and
+     the page already knows which section it is (PP4 4d). */
+  section: PwSectionSlug;
   topic: PwTopic;
   open: boolean;
   flash: boolean;
@@ -151,9 +156,10 @@ export function PwTopicCard({
 
       <div className="pw-topic-body" id={bodyId} hidden={!open}>
         <div className="pw-topic-content">
-          {/* Always rendered: every topic has a Simple guide body, even before
-              PP4 can show it and PP6 can attach a download file. */}
-          <PwStartCard guide={topic.guide} />
+          {/* Always rendered: every topic has a Simple guide body — PP4 4c gave
+              it a page and 4d links to it here, though PP6 has yet to attach a
+              downloadable file. */}
+          <PwStartCard section={section} topic={topic} />
           {topic.templates.length > 0 ? (
             <PwTemplateGrid
               topicSlug={topic.slug}

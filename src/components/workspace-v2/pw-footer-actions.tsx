@@ -2,27 +2,24 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { usePwToast } from "@/components/workspace-v2/pw-toast";
+import { usePwSearch } from "@/components/workspace-v2/pw-search";
 
 /* The footer's two CTAs and its action-style links (PP2 2d).
 
    Ask HQ is a real link: /support already carries a working Ask HQ form, so it
-   needs no placeholder. The global search overlay only ships in PP4, so the
-   search actions toast instead of pretending — "Search coming soon." follows
-   the mockup's own pattern for an unavailable surface ("Video coming soon.").
+   needs no placeholder.
+
+   The two search actions toasted "Search coming soon." until PP4 4g built the
+   overlay; they now open it. These are the mockup's ONLY search entry points
+   besides Ctrl/⌘+K — it puts none in the header — so on a phone the footer is
+   the way in, which is why the CTA band repeats on every page.
 
    Client islands so the Server-Component footer never needs "use client". */
 
-const SEARCH_SOON = "Search coming soon.";
-
 export function PwSearchCta({ label }: { label: string }) {
-  const { showToast } = usePwToast();
+  const { openSearch } = usePwSearch();
   return (
-    <button
-      type="button"
-      className="pw-btn pw-btn--copper"
-      onClick={() => showToast(SEARCH_SOON)}
-    >
+    <button type="button" className="pw-btn pw-btn--copper" onClick={openSearch}>
       {label}
       <ArrowRight className="pw-icon" aria-hidden="true" />
     </button>
@@ -38,10 +35,10 @@ export function PwAskHqCta({ label }: { label: string }) {
   );
 }
 
-/* Footer-column links with no destination yet. "Ask HQ" resolves to /support;
-   "Search everything" toasts until PP4 builds the overlay. */
+/* Footer-column links. "Ask HQ" resolves to /support; "Search everything" opens
+   the same overlay as the CTA above it. */
 export function PwFooterAction({ label }: { label: string }) {
-  const { showToast } = usePwToast();
+  const { openSearch } = usePwSearch();
 
   if (label === "Ask HQ") {
     return (
@@ -52,11 +49,7 @@ export function PwFooterAction({ label }: { label: string }) {
   }
 
   return (
-    <button
-      type="button"
-      className="pw-footer-link"
-      onClick={() => showToast(SEARCH_SOON)}
-    >
+    <button type="button" className="pw-footer-link" onClick={openSearch}>
       {label}
     </button>
   );

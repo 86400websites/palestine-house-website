@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date merged** | **Not yet merged.** Built + pushed 2026-08-12 (9 commits `72e0afd`→`3j`). |
-| **Branch / PR** | `claude/sprint-pp3-toolkit-pages`, off `main` `ccbceba` |
+| **Date merged** | **2026-08-13** (PR #77; `main` = `50978fe`, branch deleted). Built + pushed 2026-08-12 (9 commits `72e0afd`→`3j`), plus three post-review commits on the same branch. |
+| **Branch / PR** | `claude/sprint-pp3-toolkit-pages` → **PR #77**, off `main` `ccbceba` |
 | **Goal** | Fill `/setup` `/operate` `/program` `/support` with the real D-PP-f content, replacing PP2's "Content is on its way." stubs. Code only — `0027`/`0028` have run on production and are immutable, so the sprint ships **zero SQL**. |
 
 Stage 4 — Private Platform Revamp. Public pages untouched throughout.
@@ -431,7 +431,7 @@ gate (3j) landed after the review brief was written, not a discrepancy.
 
 ## Follow-ups
 
-1. **Owner: review + merge.** No DB step at this gate — PP3 ships zero SQL.
+1. ~~**Owner: review + merge.**~~ ✅ **Done 2026-08-13 — merged as PR #77** (`main` = `50978fe`). No DB step at this gate — PP3 shipped zero SQL.
 2. **Owner: the signed-in Preview walkthrough** (the one thing unverifiable
    here, carried over from PP2). Worth clicking: a group opening and closing, a
    focus area expanding to its Simple guide card and templates grid, **a real
