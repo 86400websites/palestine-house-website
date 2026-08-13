@@ -1,10 +1,16 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getResources, safeHttpUrl } from "@/lib/workspace/content";
+import {
+  getElement,
+  getResources,
+  safeHttpUrl,
+} from "@/lib/workspace/content";
+import { renderMarkdown } from "@/lib/workspace/markdown";
 import type { ResourceRow } from "@/lib/workspace/types";
 import type {
   PwGroup,
+  PwGuideDoc,
   PwGuideFile,
   PwSectionSlug,
   PwTemplate,
@@ -172,6 +178,10 @@ export const getSectionContent = cache(
         groups.push(group);
       }
 
+      /* The row carries element_slug; it is deliberately NOT copied onto
+         PwTopic. It would ride into the client payload on all 33 cards to serve
+         one server-side read (getTopicGuide, below), and PP3 kept this view
+         model to exactly what the UI renders. */
       group.topics.push({
         id: row.id,
         slug: row.slug,
@@ -187,5 +197,61 @@ export const getSectionContent = cache(
     }
 
     return groups;
+  },
+);
+
+/* The reader's payload (PP4) — one topic's Simple guide, ready to render.
+
+   The route is /{section}/{topic}/guide, but the body lives on `elements`, so
+   this is the one place that crosses from the new IA to the old one: the topic
+   row carries element_slug (the 1:1 spine 0027 established), and the body comes
+   back through the EXISTING is_approved()-gated get_element(). No new RPC, no
+   second wrapper, and the Markdown is sanitized here by the EXISTING
+   renderMarkdown — so the page receives HTML that has already been through the
+   allow-list and cannot forget to run it.
+
+   Two different kinds of "nothing", kept apart on purpose:
+     - the TOPIC does not exist (or the caller may not see it)  -> null, and the
+       page 404s.
+     - the topic exists but its BODY does not                   -> a doc with an
+       empty bodyHtml, and the page says so plainly. A 404 would be wrong here:
+       the focus-area card links straight to this URL, so "no such page" would
+       contradict the card the partner just pressed.
+
+   Three gates are already in front of this: the (platform) layout's session
+   check, the page's own is_approved check, and both RPCs re-checking
+   is_approved server-side. A pending caller gets zero topic rows here, so the
+   lookup fails before any body is fetched. */
+export const getTopicGuide = cache(
+  async (
+    section: PwSectionSlug,
+    topicSlug: string,
+  ): Promise<PwGuideDoc | null> => {
+    const topicRows = await getPlatformTopics();
+
+    const row = topicRows.find(
+      (r) => r.section_slug === section && r.slug === topicSlug,
+    );
+    if (!row) return null;
+
+    /* Both reads are React-cached and already warm whenever the section page
+       rendered in the same request, so this costs nothing extra there. */
+    const [element, resourceRows] = await Promise.all([
+      getElement(row.element_slug),
+      getResources(),
+    ]);
+
+    const { guides } = indexFilesByElement(resourceRows);
+
+    return {
+      section,
+      topicSlug: row.slug,
+      title: row.title,
+      description: row.description,
+      intro: row.intro,
+      groupName: row.group_name,
+      bodyHtml: renderMarkdown(element?.simple_guide_md),
+      file: guides.get(row.element_id) ?? null,
+    };
   },
 );
