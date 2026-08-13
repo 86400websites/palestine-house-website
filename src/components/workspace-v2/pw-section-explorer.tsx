@@ -237,6 +237,7 @@ export function PwSectionExplorer({
                       {group.topics.map((topic) => (
                         <PwTopicCard
                           key={topic.id}
+                          section={section}
                           topic={topic}
                           open={openTopic === topic.slug}
                           flash={flashTopic === topic.slug}

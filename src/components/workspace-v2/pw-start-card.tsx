@@ -1,10 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { BookOpen } from "lucide-react";
-import { usePwToast } from "@/components/workspace-v2/pw-toast";
 import { PwGuideDownload } from "@/components/workspace-v2/pw-guide-download";
 import { RESOURCE_KINDS } from "@/lib/workspace-v2/spec";
-import type { PwGuideFile } from "@/lib/workspace-v2/types";
+import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
 
 /* The one "Start here" card (PP3) — under D-PP-f a topic has a single Simple
    guide, not the mockup's row of four.
@@ -12,14 +12,16 @@ import type { PwGuideFile } from "@/lib/workspace-v2/types";
    Card title and description come from the generated spec (mockup verbatim);
    the two button labels are the mockup's own.
 
-   Both actions are inert in this sprint, and say so rather than failing
-   silently:
-     - Read Now needs the reader route. PP4 4c builds it and 4d wires this
-       button to it; until then the card must not link to a URL that 404s.
-     - Download Now needs a resources row with doc_key='guide'. There are none
-       until the owner uploads them through PP6's CMS, so the card falls back to
-       the same coming-soon shape. That control and its string now live in
-       PwGuideDownload, shared with the reader's own download. */
+   Read Now became a real link in PP4 4d — the sprint's one mandatory hand-off.
+   In PP3 it toasted "Reading coming soon." on all 33 focus areas, not because
+   anything was missing from the data (elements.simple_guide_md exists for every
+   one) but because the reader route did not exist yet and a card must never
+   link at a URL that 404s. 4c built it, so the toast is gone.
+
+   Download Now still falls back to an honest coming-soon state: it needs a
+   resources row with doc_key='guide' and there are none until the owner uploads
+   them through PP6's CMS. That control and its string live in PwGuideDownload,
+   shared with the reader's own download. */
 
 const GUIDE = RESOURCE_KINDS[0];
 
@@ -27,7 +29,6 @@ const COPY = {
   subhead: "Start here",
   note: "One simple guide explains this focus area from beginning to end.",
   read: "Read Now",
-  readSoon: "Reading coming soon.",
 } as const;
 
 /* The mockup's own `i-guide` symbol, inline rather than approximated with a
@@ -41,9 +42,13 @@ function GuideGlyph() {
   );
 }
 
-export function PwStartCard({ guide }: { guide: PwGuideFile | null }) {
-  const { showToast } = usePwToast();
-
+export function PwStartCard({
+  section,
+  topic,
+}: {
+  section: PwSectionSlug;
+  topic: PwTopic;
+}) {
   return (
     <section>
       <div className="pw-subhead">
@@ -64,15 +69,19 @@ export function PwStartCard({ guide }: { guide: PwGuideFile | null }) {
           <p className="pw-start-desc">{GUIDE.desc}</p>
 
           <div className="pw-start-actions">
-            <button
-              type="button"
+            {/* The accessible name names the focus area as well as the action,
+                the way PP3's Explore/Back controls do — and it OPENS with the
+                visible "Read Now" so the label is contained in the name
+                (WCAG 2.5.3), which is why this is not just the topic title. */}
+            <Link
               className="pw-action"
-              onClick={() => showToast(COPY.readSoon)}
+              href={`/${section}/${encodeURIComponent(topic.slug)}/guide`}
+              aria-label={`${COPY.read} — ${topic.title}`}
             >
               {COPY.read}
               <BookOpen className="pw-icon" aria-hidden="true" />
-            </button>
-            <PwGuideDownload guide={guide} />
+            </Link>
+            <PwGuideDownload guide={topic.guide} />
           </div>
         </article>
       </div>
