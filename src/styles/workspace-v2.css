@@ -2961,6 +2961,160 @@
   }
 }
 
+/* --- Account (PP5) ------------------------------------------------------- */
+/* The second page the mockup does not draw. Like the reader it invents no
+   value: the card is the Ask HQ panel's surface, the fields and the action row
+   are the shared form vocabulary, and the column is the reader's 640px — this
+   page is three short cards, so a wider measure would just strand the controls
+   at one end of a long line.
+
+   No hero. A hero here would need a photo and a lead the spec does not carry,
+   and the page is a utility the partner arrives at from the header, already
+   knowing why. The h1 does the work instead. */
+
+.pw-root .pw-account {
+  padding: 30px 0 88px;
+  background: linear-gradient(
+    180deg,
+    var(--pw-cream-50) 0,
+    var(--pw-white) 260px
+  );
+}
+
+.pw-root .pw-account-shell {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.pw-root .pw-account-title {
+  font-size: clamp(2rem, 4.4vw, 2.7rem);
+  line-height: 1.13;
+}
+
+.pw-root .pw-account-card {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid var(--pw-line);
+  border-radius: 15px;
+  background: var(--pw-white);
+  box-shadow: var(--pw-shadow-sm);
+}
+
+.pw-root .pw-account-card h2 {
+  margin-bottom: 14px;
+  font-size: 1.15rem;
+}
+
+.pw-root .pw-account-note {
+  margin-top: 12px;
+  color: var(--pw-muted);
+  font-size: 12.5px;
+}
+
+/* The action row sits outside the cards, because it saves both of them. */
+.pw-root .pw-account-actions {
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.pw-root .pw-account-actions .pw-form-note {
+  margin-right: auto;
+  max-width: 340px;
+}
+
+.pw-root .pw-account-saved {
+  color: var(--pw-success);
+  font-weight: 650;
+}
+
+/* An anchor, not a button, so it needs the shape the .pw-action rules give
+   real buttons. */
+.pw-root .pw-account-password {
+  display: inline-flex;
+  width: auto;
+  min-height: 42px;
+  padding: 9px 15px;
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+/* --- Switch (PP5) -------------------------------------------------------- */
+/* The system's first checkbox. The input is the real one — visually hidden but
+   present, focusable and part of the form — so the label, the keyboard, the
+   space bar and FormData all behave without a line of JavaScript. */
+
+.pw-root .pw-switch {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.pw-root .pw-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.pw-root .pw-switch-track {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--pw-line-strong);
+  transition: background 0.18s var(--pw-ease);
+}
+
+.pw-root .pw-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--pw-white);
+  box-shadow: var(--pw-shadow-xs);
+  transition: transform 0.18s var(--pw-ease);
+}
+
+.pw-root .pw-switch input:checked + .pw-switch-track {
+  background: var(--pw-olive-600);
+}
+
+.pw-root .pw-switch input:checked + .pw-switch-track .pw-switch-knob {
+  transform: translateX(18px);
+}
+
+.pw-root .pw-switch input:focus-visible + .pw-switch-track {
+  box-shadow: 0 0 0 3px rgba(68, 107, 88, 0.13);
+}
+
+.pw-root .pw-switch-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 620px) {
+  .pw-root .pw-account-card {
+    padding: 18px;
+  }
+
+  .pw-root .pw-account-actions {
+    align-items: stretch;
+  }
+
+  .pw-root .pw-account-actions .pw-form-note {
+    max-width: none;
+  }
+
+  .pw-root .pw-account-password {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* --- Touch targets ------------------------------------------------------- */
 /* The mockup sizes several controls at 36–42px. On a touch pointer the house
    rule is a 44px minimum (DR1-10), so raise them there without disturbing the
@@ -2979,6 +3133,8 @@
   .pw-root .pw-form-actions .pw-action,
   .pw-root .pw-reader-back,
   .pw-root .pw-reader-return,
+  .pw-root .pw-account-password,
+  .pw-root .pw-switch,
   .pw-root .pw-filter-chip {
     min-height: 44px;
   }
