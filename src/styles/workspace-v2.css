@@ -2329,6 +2329,350 @@
   }
 }
 
+/* --- Guide reader (PP4) --------------------------------------------------- */
+/* The one page in the workspace the mockup does not draw: it opened a preview
+   modal instead, which PP3 dropped, and the ROADMAP licenses this page as
+   Claude's own design. Nothing below invents a value — every colour, font and
+   shadow is a token this file already declares.
+
+   Sized for what the bodies measured at on TEST (step 4b, all 33): 13k–47k
+   characters, average 26k. That is a 2,000–7,500 word read, so the page is a
+   single reading column and everything else gets out of the way.
+
+   The column is 640px, not the system's 760px `.pw-narrow`, and the body steps
+   up to 18px. Those two numbers were MEASURED rather than guessed: the first
+   attempt (720px at 16.5px) came out at 88 characters per line in a browser,
+   well past the 45–75 that sustained reading wants. 640/18 lands at ~72. */
+
+.pw-root .pw-reader {
+  padding: 30px 0 88px;
+  background: linear-gradient(
+    180deg,
+    var(--pw-cream-50) 0,
+    var(--pw-white) 260px
+  );
+}
+
+.pw-root .pw-reader-shell {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.pw-root .pw-reader-crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--pw-muted);
+  font-size: 12px;
+}
+
+.pw-root .pw-reader-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pw-olive-700);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.pw-root .pw-reader-back:hover {
+  text-decoration: underline;
+}
+
+.pw-root .pw-reader-back .pw-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.pw-root .pw-reader-crumb-sep {
+  color: var(--pw-line-strong);
+}
+
+.pw-root .pw-reader-head {
+  margin-top: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--pw-line);
+}
+
+.pw-root .pw-reader-eyebrow {
+  color: var(--pw-copper-700);
+  font-size: 11.5px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pw-root .pw-reader-title {
+  margin-top: 9px;
+  font-size: clamp(2rem, 4.4vw, 2.7rem);
+  line-height: 1.13;
+}
+
+.pw-root .pw-reader-lead {
+  margin-top: 11px;
+  color: var(--pw-muted);
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+
+/* --- Reader body --------------------------------------------------------- */
+/* The HTML here is renderMarkdown's output — the S6 allow-list, so the tag set
+   below is closed and known: p, br, hr, strong/em/b/i/u/s, code, pre, ul/ol/li,
+   h2–h6, blockquote, a, and one table. */
+
+.pw-root .pw-reader-body {
+  margin-top: 32px;
+  color: var(--pw-char-800);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.pw-root .pw-reader-body > * + * {
+  margin-top: 1.05em;
+}
+
+.pw-root .pw-reader-body > *:first-child {
+  margin-top: 0;
+}
+
+/* THE load-bearing rule. 30 of the 33 bodies carry no Markdown heading at all —
+   the DOCX ingest wrote Word's headings as bold-only lines, 72 per body on
+   average — so marked emits `<p><strong>…</strong></p>` where a heading was
+   meant. Giving that shape a heading's typography recovers the structure of
+   every one of those documents without altering a character of the owner's
+   content, which is the only honest way to do it.
+
+   The space above comes from the strong's own margin collapsing through the
+   paragraph (the p has no border or padding, so the larger of the two wins) —
+   `:has()` would be the direct way to say this and is deliberately avoided for
+   reach. */
+.pw-root .pw-reader-body p > strong:only-child {
+  display: block;
+  margin-top: 1.6em;
+  color: var(--pw-char-950);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
+.pw-root .pw-reader-body > p:first-child > strong:only-child {
+  margin-top: 0;
+}
+
+/* Two bold-only lines in a row are ONE unit, not two headings — the ingest
+   writes a step's number and its title as separate lines (`__1__` then
+   `__Map Your Current Guest and Member Journeys__`), and a document's banner
+   sits directly above its own title the same way. Verified against the real
+   pipeline output at 4c. Tighten the second so the pair reads together.
+
+   The one `:has()` in this file, used as progressive enhancement: where it is
+   unsupported the pair simply keeps the standard heading gap, so nothing
+   breaks — which is why the base rule above does not depend on it. */
+.pw-root
+  .pw-reader-body
+  p:has(> strong:only-child)
+  + p:has(> strong:only-child)
+  > strong:only-child {
+  margin-top: 0.3em;
+}
+
+/* The three bodies that DO use Markdown headings, plus every `#` demoted to h2
+   by the sanitizer so the page keeps exactly one h1. */
+.pw-root .pw-reader-body :is(h2, h3, h4, h5, h6) {
+  margin-top: 1.7em;
+  color: var(--pw-char-950);
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.pw-root .pw-reader-body h2 {
+  font-size: 1.5rem;
+}
+
+.pw-root .pw-reader-body h3 {
+  font-size: 1.25rem;
+}
+
+.pw-root .pw-reader-body :is(h4, h5, h6) {
+  font-size: 1.08rem;
+}
+
+.pw-root .pw-reader-body :is(ul, ol) {
+  padding-left: 1.35em;
+}
+
+.pw-root .pw-reader-body ul {
+  list-style: disc;
+}
+
+.pw-root .pw-reader-body ol {
+  list-style: decimal;
+}
+
+.pw-root .pw-reader-body li + li {
+  margin-top: 0.4em;
+}
+
+.pw-root .pw-reader-body li::marker {
+  color: var(--pw-olive-600);
+}
+
+.pw-root .pw-reader-body a {
+  color: var(--pw-olive-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.pw-root .pw-reader-body blockquote {
+  padding-left: 18px;
+  border-left: 3px solid var(--pw-olive-300);
+  color: var(--pw-muted);
+  font-style: italic;
+}
+
+.pw-root .pw-reader-body :is(code, pre) {
+  background: var(--pw-cream-100);
+  font-size: 0.92em;
+}
+
+.pw-root .pw-reader-body code {
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.pw-root .pw-reader-body pre {
+  padding: 14px 16px;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.pw-root .pw-reader-body hr {
+  border: 0;
+  border-top: 1px solid var(--pw-line);
+}
+
+/* One body ships a table. `display: block` makes it scroll inside its own box
+   instead of pushing the page sideways at 320px. */
+.pw-root .pw-reader-body table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.94em;
+}
+
+.pw-root .pw-reader-body :is(th, td) {
+  padding: 9px 12px;
+  border: 1px solid var(--pw-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pw-root .pw-reader-body th {
+  background: var(--pw-cream-100);
+  font-weight: 800;
+}
+
+/* --- Reader footer ------------------------------------------------------- */
+
+.pw-root .pw-reader-foot {
+  display: grid;
+  gap: 20px;
+  justify-items: start;
+  margin-top: 44px;
+  padding-top: 26px;
+  border-top: 1px solid var(--pw-line);
+}
+
+.pw-root .pw-reader-download {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  padding: 18px;
+  border: 1px solid var(--pw-line);
+  border-radius: 15px;
+  background: var(--pw-cream-50);
+}
+
+.pw-root .pw-reader-download-h {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.pw-root .pw-reader-download-p {
+  margin-top: 5px;
+  color: var(--pw-muted);
+  font-size: 12.5px;
+  line-height: 1.48;
+}
+
+.pw-root .pw-reader-download .pw-action {
+  width: auto;
+  padding-inline: 18px;
+  white-space: nowrap;
+}
+
+.pw-root .pw-reader-return {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pw-olive-700);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.pw-root .pw-reader-return:hover {
+  text-decoration: underline;
+}
+
+.pw-root .pw-reader-return .pw-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* The 404 this group gained with the reader. */
+.pw-root .pw-page-actions {
+  margin-top: 22px;
+}
+
+.pw-root .pw-page-actions .pw-action {
+  width: auto;
+  padding-inline: 20px;
+}
+
+@media (max-width: 620px) {
+  .pw-root .pw-reader {
+    padding: 22px 0 64px;
+  }
+
+  /* A phone is already a narrow measure, so the reading size comes back down
+     to keep a sensible number of words per line. */
+  .pw-root .pw-reader-body {
+    font-size: 16.5px;
+  }
+
+  .pw-root .pw-reader-download {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+
+  .pw-root .pw-reader-download .pw-action {
+    width: 100%;
+  }
+}
+
 /* --- Touch targets ------------------------------------------------------- */
 /* The mockup sizes several controls at 36–42px. On a touch pointer the house
    rule is a 44px minimum (DR1-10), so raise them there without disturbing the
@@ -2344,7 +2688,9 @@
   .pw-root .pw-template-download,
   .pw-root .pw-topic-action,
   .pw-root .pw-topic-video,
-  .pw-root .pw-form-actions .pw-action {
+  .pw-root .pw-form-actions .pw-action,
+  .pw-root .pw-reader-back,
+  .pw-root .pw-reader-return {
     min-height: 44px;
   }
 

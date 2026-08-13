@@ -7,6 +7,7 @@ import {
   safeHttpUrl,
 } from "@/lib/workspace/content";
 import { renderMarkdown } from "@/lib/workspace/markdown";
+import { stripGuideCover } from "./guide-cover";
 import type { ResourceRow } from "@/lib/workspace/types";
 import type {
   PwGroup,
@@ -250,7 +251,17 @@ export const getTopicGuide = cache(
       description: row.description,
       intro: row.intro,
       groupName: row.group_name,
-      bodyHtml: renderMarkdown(element?.simple_guide_md),
+      /* The exported DOCX cover block comes off first (owner, 2026-08-13):
+         the reader prints the title as its h1, and 21 of the 33 bodies then
+         reprinted it immediately underneath. Both titles are passed because
+         they disagree on three topics — "Retail Shop Operations" vs "Retail /
+         Shop Operations", and the accented "Aswātna". */
+      bodyHtml: renderMarkdown(
+        stripGuideCover(element?.simple_guide_md, [
+          row.title,
+          element?.title ?? "",
+        ]),
+      ),
       file: guides.get(row.element_id) ?? null,
     };
   },
