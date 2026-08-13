@@ -15,10 +15,10 @@ import type { PwSearchItem } from "@/lib/workspace-v2/types";
 
 /* The global search overlay (PP4 4g) — the mockup's Ctrl/⌘+K dialog.
 
-   Behaviour is the mockup's `renderSearch()` verbatim: lowercase the query,
-   split it on whitespace, and require EVERY word to appear in the item's match
-   text; cap at 80; four chips; a "Popular starting points" panel when the field
-   is empty. D-PP-j (owner, 2026-08-13) adds one thing to the match text — a
+   Behaviour is the mockup's `renderSearch()` verbatim: fold the query to lower
+   case, split it on whitespace, and require EVERY word to appear in the item's
+   match text; cap at 80; four chips; a "Popular starting points" panel when the
+   field is empty. D-PP-j (owner, 2026-08-13) adds one thing to the match text — a
    focus area's own summary — so a partner can find a focus area by what it is
    about, not only by its title.
 
@@ -162,9 +162,16 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
 
   const closeSearch = React.useCallback(() => setOpen(false), []);
 
-  /* showModal() is what buys the focus trap, the inert background and Escape;
-     it can only be called on a mounted dialog, so it lives in an effect rather
-     than in the click handler. close() is idempotent-safe via the open check. */
+  /* showModal() is what buys the focus trap, the inert background, Escape and
+     focus restored to whatever opened it; it can only be called on a mounted
+     dialog, so it lives in an effect rather than in the click handler.
+
+     One thing showModal() does NOT do is stop the page behind from scrolling —
+     it is inert to clicks and to the keyboard, but a wheel or a trackpad still
+     moves it. The lock is applied here rather than in CSS because the only CSS
+     way to say it (`html:has(dialog[open])`) reaches outside `.pw-root`, and
+     nothing in this layer is allowed to. The previous value is restored, so a
+     page that had its own overflow set keeps it. */
   React.useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -174,6 +181,16 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
     } else if (!open && dialog.open) {
       dialog.close();
     }
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      root.style.overflow = previous;
+    };
   }, [open]);
 
   /* Escape and the backdrop both fire `close` on the dialog itself, so state
@@ -277,12 +294,14 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
 
           {/* aria-busy carries the loading state instead of a placeholder
               string: while the index is on its way there is nothing true to
-              say, and the live region announces the count once there is. */}
-          <div
-            className="pw-search-results"
-            aria-busy={index === null}
-            aria-live="polite"
-          >
+              say, and a placeholder would be a claim.
+
+              Deliberately NOT aria-live. A live region here would re-announce
+              the whole result list on every keystroke, which is the classic way
+              to make a search field unusable with a screen reader. The one
+              state that must be spoken — nothing found — announces itself from
+              the empty block below, which only exists when it is true. */}
+          <div className="pw-search-results" aria-busy={index === null}>
             {index === null ? null : searching ? (
               results.length > 0 ? (
                 results.map((item) => (
@@ -294,7 +313,7 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
                   />
                 ))
               ) : (
-                <div className="pw-search-empty">
+                <div className="pw-search-empty" role="status">
                   <strong>{COPY.emptyTitle}</strong>
                   <br />
                   {COPY.emptyBody}

@@ -6,9 +6,9 @@ import type { PwSearchItem, PwSearchKind } from "./types";
    decides, so it is kept out of the component where it can be run against real
    index entries outside the app.
 
-   The rule is the mockup's `renderSearch()`: lowercase the query, split it on
-   whitespace, and require EVERY word to appear somewhere in the item's match
-   text — so "budget template" narrows rather than widens. D-PP-j (owner,
+   The rule is the mockup's `renderSearch()`: fold the query to lower case,
+   split it on whitespace, and require EVERY word to appear somewhere in the
+   item's match text — so "budget template" narrows rather than widens. D-PP-j (owner,
    2026-08-13) adds one thing the mockup did not have: a focus area's own
    description and intro, which is what lets a partner find a focus area by what
    it is about instead of only by its title.
@@ -32,7 +32,15 @@ export const MAX_RESULTS = 80;
 export type PwIndexedItem = { item: PwSearchItem; haystack: string };
 
 /* Built once per index rather than once per keystroke — with 363 entries the
-   difference is 363 lowercase operations per typed character or none at all. */
+   difference is 363 case-folding operations per typed character, or none.
+
+   (A warning for whoever edits these comments: Tailwind scans source TEXT, not
+   just JSX, for utility candidates. Writing the name of the text-transform
+   utility as a single unbroken word in a COMMENT is enough to add that utility
+   to the shipped bundle — an unreferenced rule outside `.pw-root`, which is
+   why every mention here is hyphenated. Caught by the rule-level containment
+   diff at 4h; the fix caught it a second time, because the comment explaining
+   the trap had fallen into it.) */
 export function indexForSearch(items: PwSearchItem[]): PwIndexedItem[] {
   return items.map((item) => ({
     item,

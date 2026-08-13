@@ -2983,6 +2983,12 @@
     min-height: 44px;
   }
 
+  /* The overlay's close control is a 42px circle in the mockup. */
+  .pw-root .pw-modal-close {
+    width: 44px;
+    height: 44px;
+  }
+
   .pw-root .pw-header-action--icon,
   .pw-root .pw-template-download {
     width: 44px;
