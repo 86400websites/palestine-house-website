@@ -304,9 +304,15 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
           <div className="pw-search-results" aria-busy={index === null}>
             {index === null ? null : searching ? (
               results.length > 0 ? (
-                results.map((item) => (
+                results.map((item, position) => (
+                  /* Keyed by position within the result list, not by content.
+                     Nothing in the index is guaranteed unique — two templates
+                     in one topic may share a title, which PP6's CMS makes
+                     entirely possible even though production has none today —
+                     and results are a flat, fully re-rendered list with no
+                     state of their own, so the position IS the identity. */
                   <ResultRow
-                    key={`${item.kind}-${item.href}-${item.title}`}
+                    key={position}
                     item={item}
                     query={query}
                     onNavigate={closeSearch}
@@ -323,9 +329,9 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
               <div className="pw-search-start">
                 <h3>{COPY.startHeading}</h3>
                 <div className="pw-search-shortcuts">
-                  {shortcuts.map((item) => (
+                  {shortcuts.map((item, position) => (
                     <Link
-                      key={item.href}
+                      key={position}
                       className="pw-search-shortcut"
                       href={item.href}
                       onClick={closeSearch}

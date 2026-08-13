@@ -59,6 +59,20 @@ type PlatformTopicRow = {
   sort_order: number;
 };
 
+/* The four toolkit sections — the ones with a /{section} page behind them. The
+   fifth platform_sections row is `about`, the landing page, which has no
+   focus-area surface. */
+const TOOLKIT_SECTIONS: readonly PwSectionSlug[] = [
+  "setup",
+  "operate",
+  "program",
+  "support",
+];
+
+function isToolkitSection(slug: string): slug is PwSectionSlug {
+  return (TOOLKIT_SECTIONS as readonly string[]).includes(slug);
+}
+
 const getPlatformTopics = cache(async (): Promise<PlatformTopicRow[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_platform_topics");
@@ -233,11 +247,14 @@ export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
   const items: PwSearchItem[] = [];
 
   for (const row of topicRows) {
-    const section = row.section_slug as PwSectionSlug;
+    /* Checked against the four TOOLKIT sections, not against PLATFORM_PAGES —
+       that also holds `about`, which is the landing page and has no
+       /{section}#topic-… surface. A topic attached there would otherwise index
+       a link to a route that cannot render it. Zero such rows on production
+       today; this is what keeps it that way when PP6 lets the owner move one. */
+    if (!isToolkitSection(row.section_slug)) continue;
+    const section = row.section_slug;
     const page = PLATFORM_PAGES[section];
-    /* A section slug the spec does not know would mean the DB and the generated
-       copy have diverged; skip rather than render "undefined ›". */
-    if (!page) continue;
 
     const topicHref = `/${section}#topic-${encodeURIComponent(row.slug)}`;
     const topicPath = `${page.label} › ${row.group_name}`;
