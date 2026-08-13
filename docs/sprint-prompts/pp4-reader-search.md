@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Date merged** | **Not yet merged.** Built + pushed 2026-08-13 (9 commits `1b12e85`→`4i`). |
+| **Date merged** | **Not yet merged.** Built + pushed 2026-08-13 (9 commits `1b12e85`→`7d139f0`), plus one review-fix commit `cab785e` (2026-08-14). |
 | **Branch / PR** | `claude/sprint-pp4-reader-search`, off `main` `50978fe` (PR #77) |
 | **Goal** | Give the 33 Simple guides a place to be read, and ship the one global search overlay the shell already advertises. Closes PP3's single mandatory hand-off. Code only — `0027`/`0028` have run on production and are immutable, so the sprint ships **zero SQL**. |
 
@@ -365,6 +365,75 @@ never push beyond the task branch.
   *Back to About*. Everything else on both surfaces is existing approved copy or
   the mockup verbatim — **the search overlay needed no new copy at all.**
 
+## Independent review (2026-08-13) — "request changes", finding resolved
+
+**Verdict: no blocking issue.** The reviewer confirmed, by reading the code
+rather than taking the record's word: the reader's gate order is correct and an
+unapproved caller never performs a topic lookup, always gets the neutral title
+and never reaches `notFound()`; the platform 404 carries no topic-derived data;
+search entries contain only kind, display text, href and an optional summary —
+no resource id, storage path or bucket; raw Markdown follows cover-strip →
+server-only `renderMarkdown()` allow-list → `dangerouslySetInnerHTML`, with
+empty bodies bypassing injection entirely; the highlight uses React nodes; the
+scroll lock restores its previous inline value on close **and on unmount**; zero
+`.sql` files and no public page, legacy route, API route, `middleware.ts`,
+`next.config.ts`, `package.json`, lockfile, env file or CSP touched; and D-PP-i
+is intact — search adds neither a write path nor a download path, so the
+`storage_bucket` guard stays PP6's to close. It also **independently reproduced
+the containment claim** from clean baseline and head builds: zero baseline
+removals or changes, zero `.adm-*` changes, all added selector entries rooted at
+`.pw-root`, and only the prefixed `pw-modal-in` keyframe.
+
+**One Medium finding, and it was right.** `stripGuideCover` could delete real
+content — the one place in the product that alters an owner-authored body.
+
+- **`compact()` was ASCII-only.** It kept `[A-Z0-9]`, so *any* non-Latin line
+  compacted to the empty string — and an empty compaction is what this file
+  reads as "punctuation only, therefore cover matter". A leading Arabic line was
+  silently deleted from the reader. Reproduced exactly as reported.
+- **A title-only first line was removed with no cover marker present**, so a
+  body that legitimately opened with its own title as a heading would lose it.
+
+**Fixed in `cab785e`.** Compaction is now Unicode-aware (`\p{L}\p{N}` with
+diacritics folded), so every script compacts to itself and is content. And the
+candidate prefix must contain at least one unambiguous cover **marker** — a
+PALESTINE HOUSE or SIMPLE GUIDE banner, or the playbook subtitle — before
+anything is removed; a title on its own is never enough. The marker may appear
+on any line of the prefix rather than the first, which is what keeps the
+five-line block on `technology-stack-and-data` working: its second line is the
+bare title, and its markers sit on lines 1, 3 and 5.
+
+**The regression coverage the review said was missing now exists:**
+`scripts/verify-guide-cover.mts`, **17 cases**, run with
+`pnpm exec tsx scripts/verify-guide-cover.mts`. Seven are the real opening
+shapes across all 33 guides; ten are boundaries, including both findings, an
+all-cover document that must never be emptied, and the first-unrecognised-line
+stop. All 17 pass, and the fixed function was re-run over all 33 **real**
+openings: **33 stripped, 0 emptied, 0 suspicious** — identical to before the
+fix, so the fix costs nothing on real content.
+
+**A second thing the containment diff caught while fixing the first:**
+documentation was contributing rules to the production CSS bundle. Tailwind v4
+auto-detects sources and scans their raw **text**, so an ordinary English word
+in a Markdown file that happens to be a utility name emits that utility — this
+very record, written at 4i, added a `.lowercase` rule to shipped CSS.
+Hyphenating comments was a workaround that held only until the next document, so
+`globals.css` now carries `@source not "../../docs"`. That **deliberately
+removes 8 baseline rules** — `.invisible .relative .sticky .shrink .flex-wrap
+.ring .ease-out .paused` — a first for this series, stated plainly rather than
+buried. Every one is a bare utility that existed only because those words appear
+in prose, and every one was verified unused: no `className` in `src/` references
+any of them, and the near misses (`shrink-0`, `ring-ring/50`, the `--ease-out`
+variable) are different rules and untouched. The bundle is smaller; nothing
+rendered changes.
+
+**Two limits the reviewer stated, both real:** no authenticated Preview session
+was available to them either, so pending/declined/approved HTTP responses and
+the signed-in walkthrough remain unexercised by anyone but the owner; and there
+is still no automated coverage for the reader gate, the neutral metadata, the
+search action payload or the highlighting — only for the cover strip, which was
+the piece that could destroy data.
+
 ## Deviations & learnings
 
 - **The content was not what the code implied, and only reading it revealed
@@ -379,12 +448,15 @@ never push beyond the task branch.
   16.5px looked reasonable in the file and measured **88 characters per line** —
   well past the 45–75 that sustained reading wants. 640px at 18px measures 72.
   Numbers that only exist in CSS are guesses until something renders them.
-- **A comment shipped a CSS rule.** The rule-level containment diff flagged an
-  added `.lowercase` rule no component references. Tailwind scans source
-  **text**, not just JSX, so writing that utility's name as one unbroken word in
-  a **comment** is enough to ship it. It had to be fixed twice, because the
-  comment added to warn about the trap fell into it. Worth knowing before
-  writing any comment about a text-transform, flex or grid utility.
+- **Prose shipped CSS rules, and the workaround was the wrong fix.** The
+  containment diff flagged an added `.lowercase` rule no component references.
+  Tailwind scans source **text**, not just JSX, so a utility's name written as
+  one unbroken word in a **comment** is enough to ship it. Hyphenating the
+  comments fixed it twice — the second time because the comment warning about
+  the trap fell into it — and then this very sprint record re-introduced it a
+  third time. The real fix is structural: `@source not "../../docs"`.
+  Documentation must not be able to influence the build output. It turned out
+  eight utilities were already shipping for exactly this reason.
 - **Two of the search matcher's checks failed first time, and both times the
   expectation was wrong rather than the code.** `"opening day"` also finds
   *Facility Operations* ("opening and closing", "every day"); `"template"` also
@@ -415,7 +487,10 @@ never push beyond the task branch.
 
 ## Follow-ups
 
-1. **Owner: review + merge.** No DB step at this gate — PP4 ships zero SQL.
+1. **Owner: merge.** No DB step at this gate — PP4 ships zero SQL.
+   ~~Codex review~~ ✅ **Done 2026-08-13** — "request changes", **no blocking
+   issue**; one Medium content-loss finding in `stripGuideCover`, reproduced,
+   fixed and regression-tested in `cab785e`.
 2. **Owner: the signed-in Preview walkthrough** (the one thing unverifiable
    here, carried over from PP2 and PP3). Worth clicking: Read Now in each of the
    four sections; the reader's breadcrumb re-opening the card you came from;
@@ -425,8 +500,12 @@ never push beyond the task branch.
 3. **Two judgement calls to eyeball while there:** the reader's 640px column at
    18px, and the cover-block strip, which now removes the Word cover matter from
    the top of all 33 bodies.
-4. **Codex review recommended before merge** — the diff adds a new gated read
-   surface and a POST server action.
+4. **Wire `scripts/verify-guide-cover.mts` into CI** (and add a `package.json`
+   script for it). It is committed and passing but nothing runs it
+   automatically, so the coverage protects only the next person who remembers.
+   **PP7 (Final QA) is its natural home** — and the review's wider point stands:
+   the reader gate, the neutral metadata and the search payload have no
+   automated coverage at all.
 5. **An accessibility improvement deliberately NOT taken:** the bold-only lines
    are styled as headings but are not *marked up* as headings, so a screen-reader
    user cannot navigate a 7,500-word guide by heading. Converting
