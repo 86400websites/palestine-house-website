@@ -20,7 +20,12 @@ import { getSectionContent } from "@/lib/workspace-v2/content";
    not serve. An empty result falls through to the shell's honest waiting
    state rather than an empty page. */
 
-export const metadata: Metadata = sectionMetadata("setup");
+/* generateMetadata, not a static `metadata` object: since PP6a the tab title
+   follows the page name the owner set in the CMS, with the generated spec as
+   the fallback. */
+export async function generateMetadata(): Promise<Metadata> {
+  return sectionMetadata("setup");
+}
 
 export default async function SetupPage() {
   const profile = await getMyProfile();

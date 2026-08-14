@@ -27,7 +27,12 @@ import { getSectionContent } from "@/lib/workspace-v2/content";
    Still approval-gated end to end: this page's own is_approved check, the
    toolkit RPC's, and submit_support_request's. */
 
-export const metadata: Metadata = sectionMetadata("support");
+/* generateMetadata, not a static `metadata` object: since PP6a the tab title
+   follows the page name the owner set in the CMS, with the generated spec as
+   the fallback. */
+export async function generateMetadata(): Promise<Metadata> {
+  return sectionMetadata("support");
+}
 
 export default async function SupportPage() {
   const profile = await getMyProfile();

@@ -138,36 +138,47 @@ export async function saveElementAction(
 }
 
 // ---------------------------------------------------------------------------
-// Academy — save a topic's video link + script. youtube_url is validated the
-// same way the publish tool does (parseYouTubeId) before the RPC.
+// Pages (PP6a) — the hero copy for the About landing and the four toolkit
+// pages. EDIT ONLY: platform_sections_slug_shape freezes the set to these five
+// route segments, so the owner can never add or remove a page and a typo can
+// never create a broken menu item. The RPC rejects an unknown slug outright.
+//
+// This is the screen that would have been a dead form: get_platform_sections()
+// had ZERO call sites until PP6a wrapped it (getPlatformPages), so a Save here
+// used to change nothing a partner could see.
 // ---------------------------------------------------------------------------
-const academySchema = z.object({
-  elementId: z.string().regex(UUID_RE),
-  elementSlug: z.string().trim().regex(SLUG_RE).max(80).optional(),
+const PAGE_SLUGS = ["about", "setup", "operate", "program", "support"] as const;
+
+const platformSectionSchema = z.object({
+  slug: z.enum(PAGE_SLUGS),
+  label: z.string().trim().min(1).max(120),
   title: z.string().trim().min(1).max(200),
-  oneLine: z.string().trim().max(500).optional(),
-  length: z.string().trim().max(60).optional(),
+  eyebrow: z.string().trim().max(200).optional(),
+  lead: z.string().trim().max(1000).optional(),
+  heroImagePath: z.string().trim().max(300).optional(),
+  heroPosition: z.string().trim().max(60).optional(),
   youtubeUrl: z.string().trim().max(500).optional(),
-  bodyMd: z.string().max(100000).optional(),
-  sortOrder: z.coerce.number().int().min(0).max(100000).optional(),
 });
 
-export async function saveAcademyModuleAction(
+export async function savePlatformSectionAction(
   _prev: AdminContentState,
   formData: FormData,
 ): Promise<AdminContentState> {
-  const parsed = academySchema.safeParse({
-    elementId: formData.get("elementId"),
-    elementSlug: field(formData, "elementSlug"),
+  const parsed = platformSectionSchema.safeParse({
+    slug: formData.get("slug"),
+    label: formData.get("label"),
     title: formData.get("title"),
-    oneLine: field(formData, "oneLine"),
-    length: field(formData, "length"),
+    eyebrow: field(formData, "eyebrow"),
+    lead: field(formData, "lead"),
+    heroImagePath: field(formData, "heroImagePath"),
+    heroPosition: field(formData, "heroPosition"),
     youtubeUrl: field(formData, "youtubeUrl"),
-    bodyMd: field(formData, "bodyMd"),
-    sortOrder: field(formData, "sortOrder"),
   });
   if (!parsed.success) {
-    return { ok: false, message: "Please add a title before saving." };
+    return {
+      ok: false,
+      message: "Please fill in the page name and the heading before saving.",
+    };
   }
   if (parsed.data.youtubeUrl && !parseYouTubeId(parsed.data.youtubeUrl)) {
     return {
@@ -181,23 +192,26 @@ export async function saveAcademyModuleAction(
   if (!guard.ok) return { ok: false, message: guard.message };
 
   const d = parsed.data;
-  const { error } = await guard.supabase.rpc("admin_upsert_academy_module", {
-    p_element_id: d.elementId,
+  const { error } = await guard.supabase.rpc("admin_update_platform_section", {
+    p_slug: d.slug,
+    p_label: d.label,
     p_title: d.title,
-    p_one_line: d.oneLine ?? null,
-    p_length: d.length ?? null,
+    p_eyebrow: d.eyebrow ?? null,
+    p_lead: d.lead ?? null,
+    p_hero_image_path: d.heroImagePath ?? null,
+    p_hero_position: d.heroPosition ?? null,
     p_youtube_url: d.youtubeUrl ?? null,
-    p_body_md: d.bodyMd ?? null,
-    p_sort_order: d.sortOrder ?? 0,
   });
   if (error) return { ok: false, message: GENERIC };
 
-  /* The admin screen only. /academy and /elements/[slug] were this action's
-     other two targets and PP5 deleted both; the Academy has no partner-facing
-     surface at all now (D-PP-b), and this whole screen goes at PP6 with the
-     four academy RPCs behind it at PP7. `elementSlug` survives as a form field
-     because the RPC still takes it — nothing here reads it any more. */
-  revalidatePath("/admin/content/academy");
+  /* The page itself, plus the reader, whose breadcrumb carries the page name.
+     `about` is served at /dashboard — revalidating "/about" would be a silent
+     no-op, which is the failure PP5 found in this very file. */
+  revalidatePath("/admin/content/pages");
+  revalidatePath(d.slug === "about" ? "/dashboard" : `/${d.slug}`);
+  if (d.slug !== "about") {
+    revalidatePath(`/${d.slug}/[topic]/guide`, "page");
+  }
   return { ok: true, message: "Saved." };
 }
 

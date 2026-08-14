@@ -7,7 +7,7 @@ import {
   safeHttpUrl,
 } from "@/lib/workspace/content";
 import { renderMarkdown } from "@/lib/workspace/markdown";
-import { PLATFORM_PAGES, RESOURCE_KINDS } from "./spec";
+import { PLATFORM_PAGES, RESOURCE_KINDS, type PlatformPageKey } from "./spec";
 import { stripGuideCover } from "./guide-cover";
 import type { ResourceRow } from "@/lib/workspace/types";
 import type {
@@ -30,10 +30,10 @@ import type {
    or anonymous caller gets zero rows rather than an error. That is the gate;
    the page's own profile check only decides which state to render.
 
-   Not wrapped here: get_platform_sections(). The toolkit hero copy comes from
-   the generated spec (PLATFORM_PAGES) exactly as PP2 built it, and no other PP3
-   surface reads section rows — so wrapping it now would ship an unused round
-   trip. PP6 makes that copy owner-editable and is where the wrapper belongs. */
+   get_platform_sections() IS wrapped here as of PP6a — see getPlatformPages()
+   below. Until then it had zero call sites and the hero copy came only from the
+   generated spec, which would have made the CMS's Pages screen a form whose
+   Save changed nothing visible. The spec remains the per-field fallback. */
 
 /* One flat row per topic, joined across sections/groups/elements by the RPC.
    Column names mirror the get_platform_topics() return table verbatim. */
@@ -79,6 +79,79 @@ const getPlatformTopics = cache(async (): Promise<PlatformTopicRow[]> => {
   if (error || !data) return [];
   return data as PlatformTopicRow[];
 });
+
+/* Page copy — the hero heading, lead and photo for the About landing and the
+   four toolkit pages (PP6a).
+
+   Until now this came only from the generated spec (PLATFORM_PAGES), and
+   get_platform_sections() had ZERO call sites — verified 2026-08-14. That is
+   why PP6a ships this wrapper: without it the CMS's Pages screen would be a
+   form whose Save changed nothing the owner could see.
+
+   The spec stays as the FALLBACK, per field, and that is deliberate rather than
+   defensive:
+     - get_platform_sections() is is_approved()-gated, so a PENDING partner gets
+       zero rows — and /dashboard renders for pending partners. Without the
+       fallback their hero would go blank.
+     - the same is true at build time, where there is no session at all.
+     - a NULL column keeps the mockup wording instead of rendering an empty
+       heading, so a half-filled row can never produce a half-empty page.
+   Net effect: identical output to today until the owner edits something. */
+export type PwPageMeta = {
+  label: string;
+  eyebrow: string;
+  title: string;
+  lead: string;
+  heroImage: string;
+  heroPosition: string;
+};
+
+type PlatformSectionRow = {
+  slug: string;
+  label: string | null;
+  eyebrow: string | null;
+  title: string | null;
+  lead: string | null;
+  hero_image_path: string | null;
+  hero_position: string | null;
+};
+
+function isPlatformPageKey(slug: string): slug is PlatformPageKey {
+  return Object.prototype.hasOwnProperty.call(PLATFORM_PAGES, slug);
+}
+
+/* Non-empty string or nothing — an all-whitespace column must not win over the
+   fallback either. */
+function firm(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+export const getPlatformPages = cache(
+  async (): Promise<Record<PlatformPageKey, PwPageMeta>> => {
+    const pages = Object.fromEntries(
+      Object.entries(PLATFORM_PAGES).map(([slug, meta]) => [slug, { ...meta }]),
+    ) as Record<PlatformPageKey, PwPageMeta>;
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("get_platform_sections");
+    if (error || !data) return pages;
+
+    for (const row of data as PlatformSectionRow[]) {
+      if (!isPlatformPageKey(row.slug)) continue;
+      const base = pages[row.slug];
+      pages[row.slug] = {
+        label: firm(row.label) ?? base.label,
+        eyebrow: firm(row.eyebrow) ?? base.eyebrow,
+        title: firm(row.title) ?? base.title,
+        lead: firm(row.lead) ?? base.lead,
+        heroImage: firm(row.hero_image_path) ?? base.heroImage,
+        heroPosition: firm(row.hero_position) ?? base.heroPosition,
+      };
+    }
+    return pages;
+  },
+);
 
 /* D-PP-i (2026-08-12) — the templates-grid predicate, and the only place it is
    written. A topic's templates are simply the resources rows carrying its
@@ -243,6 +316,10 @@ export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
 
   if (topicRows.length === 0) return [];
 
+  /* Breadcrumb labels follow the owner's edited page names (PP6a), falling back
+     to the spec exactly as the heroes do. Cached, so this is not a round-trip
+     per search. */
+  const pages = await getPlatformPages();
   const { templates } = indexFilesByElement(resourceRows);
   const items: PwSearchItem[] = [];
 
@@ -254,7 +331,7 @@ export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
        today; this is what keeps it that way when PP6 lets the owner move one. */
     if (!isToolkitSection(row.section_slug)) continue;
     const section = row.section_slug;
-    const page = PLATFORM_PAGES[section];
+    const page = pages[section];
 
     const topicHref = `/${section}#topic-${encodeURIComponent(row.slug)}`;
     const topicPath = `${page.label} › ${row.group_name}`;

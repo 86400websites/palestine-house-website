@@ -13,7 +13,12 @@ import { getSectionContent } from "@/lib/workspace-v2/content";
    the new chrome; the path never changed. Gating as in /setup: the page's own
    is_approved check, then the RPC's. */
 
-export const metadata: Metadata = sectionMetadata("operate");
+/* generateMetadata, not a static `metadata` object: since PP6a the tab title
+   follows the page name the owner set in the CMS, with the generated spec as
+   the fallback. */
+export async function generateMetadata(): Promise<Metadata> {
+  return sectionMetadata("operate");
+}
 
 export default async function OperatePage() {
   const profile = await getMyProfile();
