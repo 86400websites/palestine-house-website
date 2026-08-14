@@ -444,62 +444,6 @@ export async function createGroupAction(
 }
 
 // ---------------------------------------------------------------------------
-// Resources — save template / booklet metadata only (the storage path and
-// is_public are never editable; files change via the re-ingest path).
-// ---------------------------------------------------------------------------
-const resourceSchema = z.object({
-  id: z.string().regex(UUID_RE),
-  title: z.string().trim().min(1).max(300),
-  type: z.enum(["form", "script", "log", "report", "approval", "guide", "booklet"]),
-  focusAreaCode: z.string().trim().regex(/^[A-K]$/i).optional(),
-  elementId: z.string().regex(UUID_RE).optional(),
-  version: z.string().trim().max(40).optional(),
-  sortOrder: z.coerce.number().int().min(0).max(100000).optional(),
-});
-
-export async function saveResourceAction(
-  _prev: AdminContentState,
-  formData: FormData,
-): Promise<AdminContentState> {
-  const parsed = resourceSchema.safeParse({
-    id: formData.get("id"),
-    title: formData.get("title"),
-    type: formData.get("type"),
-    focusAreaCode: field(formData, "focusAreaCode"),
-    elementId: field(formData, "elementId"),
-    version: field(formData, "version"),
-    sortOrder: field(formData, "sortOrder"),
-  });
-  if (!parsed.success) {
-    return { ok: false, message: "Please add a title and pick a type." };
-  }
-
-  const guard = await adminGuard();
-  if (!guard.ok) return { ok: false, message: guard.message };
-
-  const d = parsed.data;
-  const { error } = await guard.supabase.rpc("admin_update_resource", {
-    p_id: d.id,
-    p_title: d.title,
-    p_type: d.type,
-    p_focus_area_code: d.focusAreaCode ? d.focusAreaCode.toUpperCase() : null,
-    p_element_id: d.elementId ?? null,
-    p_version: d.version ?? null,
-    p_sort_order: d.sortOrder ?? null,
-  });
-  if (error) return { ok: false, message: GENERIC };
-
-  /* /resources was the old library page, deleted at PP5. A template's metadata
-     now shows in the templates grid on whichever focus area carries its
-     element_id, so the four section pages replace it. */
-  revalidatePath("/admin/content/resources");
-  for (const section of ["setup", "operate", "program", "support"]) {
-    revalidatePath(`/${section}`);
-  }
-  return { ok: true, message: "Saved." };
-}
-
-// ---------------------------------------------------------------------------
 // Admins — add by email / remove (with the self + last-admin lockout guards).
 // ---------------------------------------------------------------------------
 const addAdminSchema = z.object({

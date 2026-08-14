@@ -46,6 +46,21 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  experimental: {
+    /* PP6a (6a-g) — CONFIG CHANGE, called out deliberately.
+       This was dropped from the sprint scope at 6a-a on the evidence available
+       then: no experimental block existed, the Next.js default is 1 MB, and the
+       largest delivered content file is 188 KB. Building the actual upload path
+       is the condition that was named for revisiting it, and it has arrived —
+       the Files screen accepts Word documents and PDFs, and a PDF with images
+       passes 1 MB easily.
+       12 MB against a 10 MB limit enforced in src/lib/admin/file-actions.ts:
+       the headroom covers multipart encoding overhead. The two numbers must
+       move together — a UI limit above the body limit turns an ordinary large
+       file into an opaque framework error instead of a sentence the owner can
+       act on. Server Actions only; no route, header or CSP value changes. */
+    serverActions: { bodySizeLimit: "12mb" },
+  },
   images: {
     /* AVIF first, WebP fallback — ~20-30% smaller for the illustrated PNG art,
        a CWV/LCP win on the image-heavy marketing pages. Optimised images are

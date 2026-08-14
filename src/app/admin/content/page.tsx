@@ -31,7 +31,7 @@ const SECTIONS = [
     desc: "Each focus area's summary and its Simple guide.",
   },
   {
-    href: "/admin/content/resources",
+    href: "/admin/content/files",
     title: "Files",
     desc: "The guide and templates a partner downloads.",
   },

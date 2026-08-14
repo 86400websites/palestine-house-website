@@ -505,7 +505,7 @@ function FocusAreaForm({
             <span className="adm-field-label">Files</span>
             <p className="adm-field-hint">
               The guide and templates people download live on the Files screen.{" "}
-              <Link href="/admin/content/resources">Open Files</Link>
+              <Link href="/admin/content/files">Open Files</Link>
             </p>
           </div>
         ) : null}
