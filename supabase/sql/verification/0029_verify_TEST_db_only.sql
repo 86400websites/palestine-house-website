@@ -503,7 +503,179 @@ select * from _0029_write_results order by scenario;
 rollback;
 
 -- ===========================================================================
--- 7) Post-rollback: the database is exactly as it was. Nothing above survived.
+-- 7) THE FILE LIFECYCLE + D-PP-i (pass 3), rollback-only.
+--
+-- Section A is the important one: it attacks the D-PP-i invariants with DIRECT
+-- INSERTs that bypass every RPC. That is the difference between a guard and a
+-- suggestion — an RPC check only binds callers who use that RPC, a table CHECK
+-- binds a later migration, an ingest script and a hand-typed SQL Editor fix too.
+-- ===========================================================================
+begin;
+
+create temporary table _0029_file_results (
+  scenario text, expected text, observed text, pass boolean
+) on commit drop;
+
+create or replace function pg_temp.run_0029_files()
+returns void
+language plpgsql
+as $fn$
+declare
+  v_admin uuid; v_approved uuid; v_element uuid; v_topic uuid;
+  v_file uuid; v_guide uuid;
+  r text; r2 text; old_path text; n int; cnt int;
+  del_bucket text; del_path text;
+begin
+  select user_id into v_admin from public.admins limit 1;
+  select id into v_approved from public.profiles where is_approved order by id limit 1;
+  select t.id, t.element_id into v_topic, v_element
+    from public.platform_topics t order by t.slug limit 1;
+
+  -- ---- A. the constraints bite on a DIRECT INSERT, bypassing every RPC ----
+  begin
+    insert into public.resources (title,type,element_id,storage_bucket,storage_path,is_public,sort_order,code,version)
+    values ('__attack wrong bucket','form',v_element,'booklets','__a/2.docx',false,9002,'T98','v1');
+    r := 'ACCEPTED';
+  exception when check_violation then r := 'check_violation'; when others then r := sqlerrm; end;
+  insert into _0029_file_results values
+    ('direct INSERT: private file in the PUBLIC bucket', 'check_violation', r, r = 'check_violation');
+
+  begin
+    insert into public.resources (title,type,element_id,storage_bucket,storage_path,is_public,sort_order,code,doc_key,version)
+    values ('__attack orphan guide','guide',null,'resources','__a/3.docx',false,9003,null,'guide','v1');
+    r := 'ACCEPTED';
+  exception when check_violation then r := 'check_violation'; when others then r := sqlerrm; end;
+  insert into _0029_file_results values
+    ('direct INSERT: ORPHAN GUIDE (no focus area)', 'check_violation', r, r = 'check_violation');
+
+  begin
+    insert into public.resources (title,type,element_id,storage_bucket,storage_path,is_public,sort_order,code,version)
+    values ('__attack no element','form',null,'resources','__a/4.docx',false,9004,'T97','v1');
+    r := 'ACCEPTED';
+  exception when check_violation then r := 'check_violation'; when others then r := sqlerrm; end;
+  insert into _0029_file_results values
+    ('direct INSERT: private file with no focus area', 'check_violation', r, r = 'check_violation');
+
+  begin
+    insert into public.resources (title,type,element_id,storage_bucket,storage_path,is_public,sort_order,code,version)
+    values ('__attack uncoded','form',v_element,'resources','__a/5.docx',false,9005,null,'v1');
+    r := 'ACCEPTED';
+  exception when check_violation then r := 'check_violation'; when others then r := sqlerrm; end;
+  insert into _0029_file_results values
+    ('direct INSERT: unbadged private template', 'check_violation', r, r = 'check_violation');
+
+  -- ---- B. the RPC ----------------------------------------------------------
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_approved, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  begin perform public.admin_register_resource_file(v_element,'x/y.docx','X',null,'T01'); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_file_results values
+    ('non-admin cannot register a file', 'not authorized', r, r = 'not authorized');
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  -- no p_version anywhere below: resources.version is NOT NULL with no default,
+  -- so the RPC must supply 'v1' itself. Omitting this raised a not-null error
+  -- that MASKED the two guard tests below (caught on TEST, 2026-08-14).
+  v_file  := public.admin_register_resource_file(
+               v_element, 'get-legally-ready/t01-venue-checklist.docx', 'Venue Checklist', null, 'T01');
+  v_guide := public.admin_register_resource_file(
+               v_element, 'get-legally-ready/guide.docx', 'Get Legally Ready Simple Guide', 'guide');
+  begin perform public.admin_register_resource_file(
+          v_element, 'get-legally-ready/guide2.docx', 'Second guide', 'guide'); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  begin perform public.admin_register_resource_file(
+          v_element, 'get-legally-ready/t01-venue-checklist.docx', 'Dup', null, 'T05'); r2 := 'ACCEPTED';
+  exception when others then r2 := sqlerrm; end;
+  perform set_config('role', 'postgres', true);
+  select count(*) into n from public.resources
+   where id = v_file and is_public = false and storage_bucket = 'resources'
+     and doc_key is null and code = 'T01' and version = 'v1';
+  insert into _0029_file_results values
+    ('template registered',  'uuid', coalesce(v_file::text, 'NULL'),  v_file  is not null),
+    ('guide registered',     'uuid', coalesce(v_guide::text, 'NULL'), v_guide is not null),
+    ('registered row: private + right bucket + badged + v1', '1', n::text, n = 1),
+    ('SECOND guide on one focus area refused', 'file already registered', r,  r  = 'file already registered'),
+    ('duplicate object key refused',           'file already registered', r2, r2 = 'file already registered');
+
+  -- storage-path validation: the action computes it, the database guarantees it
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  begin perform public.admin_register_resource_file(v_element,'/abs/path.docx','Bad',null,'T02'); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  begin perform public.admin_register_resource_file(v_element,'../../etc/x.docx','Bad',null,'T03'); r2 := 'ACCEPTED';
+  exception when others then r2 := sqlerrm; end;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_file_results values
+    ('absolute storage path refused', 'invalid storage path', r,  r  = 'invalid storage path'),
+    ('path traversal refused',        'invalid storage path', r2, r2 = 'invalid storage path');
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  begin perform public.admin_register_resource_file(v_element,'https://evil.example/x.docx','Bad',null,'T04'); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  -- replace hands back the OLD key so the action can delete the object it replaced
+  old_path := public.admin_replace_resource_file(v_file, 'get-legally-ready/t01-venue-checklist-v2.docx');
+  perform public.admin_update_resource_meta(v_file, 'Venue Selection Checklist', 'T07', null, 'v2', 20);
+  perform set_config('role', 'postgres', true);
+  select count(*) into n from public.resources
+   where id = v_file and title = 'Venue Selection Checklist' and code = 'T07' and sort_order = 20;
+  insert into _0029_file_results values
+    ('absolute URL refused', 'invalid storage path', r, r = 'invalid storage path'),
+    ('replace returns the OLD key', 'get-legally-ready/t01-venue-checklist.docx', old_path,
+     old_path = 'get-legally-ready/t01-venue-checklist.docx'),
+    ('rename + re-badge works', '1', n::text, n = 1);
+
+  -- ---- C. pass 1 and pass 3 together: a file on a DRAFT focus area ----------
+  update public.platform_topics set published = false where id = v_topic;
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_approved, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select count(*) into n from public.get_resource_download(v_file);
+  perform set_config('role', 'postgres', true);
+  insert into _0029_file_results values
+    ('newly uploaded file on a DRAFT focus area: download refused', '0', n::text, n = 0);
+
+  update public.platform_topics set published = true where id = v_topic;
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_approved, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select count(*) into n from public.get_resource_download(v_file);
+  perform set_config('role', 'postgres', true);
+  insert into _0029_file_results values
+    ('the same file once Live: download allowed', '1', n::text, n = 1);
+
+  -- ---- D. delete is ROW FIRST and returns the object key -------------------
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select f.storage_bucket, f.storage_path into del_bucket, del_path
+    from public.admin_delete_resource_file(v_file) f;
+  cnt := public.admin_reorder_resource_files(array[v_guide]);
+  perform set_config('role', 'postgres', true);
+  select count(*) into n from public.resources where id = v_file;
+  insert into _0029_file_results values
+    ('delete returns the bucket',     'resources', coalesce(del_bucket, 'NULL'), del_bucket = 'resources'),
+    ('delete returns the object key', 'get-legally-ready/t01-venue-checklist-v2.docx',
+     coalesce(del_path, 'NULL'), del_path = 'get-legally-ready/t01-venue-checklist-v2.docx'),
+    ('the deleted row is gone', '0', n::text, n = 0),
+    ('reorder files works',     '1', cnt::text, cnt = 1);
+end;
+$fn$;
+
+select pg_temp.run_0029_files();
+select * from _0029_file_results order by scenario;
+-- EXPECT: pass = true on every row.
+
+rollback;
+
+-- ===========================================================================
+-- 8) Post-rollback: the database is exactly as it was. Nothing above survived.
 -- ===========================================================================
 select
   (select count(*) from public.elements)                    as elements,

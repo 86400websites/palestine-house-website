@@ -150,7 +150,83 @@ where n.nspname = 'public' and p.proname = 'admin_upsert_element';
 --         pre-amendment sprint scope would have shipped.
 
 -- ===========================================================================
--- 8) RLS posture unchanged: default-deny, zero client policies, RPC-only reads.
+-- 8) D-PP-i — the SECURITY-CHECKLIST §15 debt, owed since PP3. `0029` pays it
+--    with TABLE CONSTRAINTS rather than RPC checks, so the guard holds against
+--    every future writer, not only callers who use the right function.
+-- ===========================================================================
+select conname, pg_get_constraintdef(oid) as definition
+from pg_constraint
+where conrelid = 'public.resources'::regclass
+  and conname in ('resources_private_needs_element', 'resources_private_bucket_shape',
+                  'resources_guide_needs_element',  'resources_private_needs_code')
+order by conname;
+-- EXPECT: four rows.
+--   resources_private_bucket_shape  CHECK (is_public OR storage_bucket = 'resources')
+--   resources_private_needs_code    CHECK (is_public OR code IS NOT NULL OR doc_key IS NOT NULL)
+--   resources_private_needs_element CHECK (is_public OR element_id IS NOT NULL)
+--   resources_guide_needs_element   CHECK (doc_key IS NULL OR element_id IS NOT NULL)
+-- NOTE the bucket guard is CONDITIONAL by design: a blanket
+-- storage_bucket = 'resources' would abort, because the two public booklet PDFs
+-- legitimately live in the `booklets` bucket.
+
+-- The invariants the constraints now enforce, re-counted on live data.
+select
+  count(*) filter (where not is_public and storage_bucket <> 'resources') as private_wrong_bucket,
+  count(*) filter (where not is_public and element_id is null)            as private_without_focus_area,
+  count(*) filter (where doc_key is not null and element_id is null)      as orphan_guides,
+  count(*) filter (where not is_public and code is null and doc_key is null) as unbadged_private,
+  count(*) filter (where is_public)                                       as public_files
+from public.resources;
+-- EXPECT: 0, 0, 0, 0, and public_files = 2 (the two booklets).
+
+-- storage.objects: the admin write path + an admin read path, WITHOUT widening
+-- what a partner can see. Policies are OR-ed, so the 0017 partner policy is
+-- left exactly as it was and a second SELECT policy is added for admins.
+select polname,
+       polcmd::text as command,
+       pg_get_expr(polqual,      polrelid) as using_expr,
+       pg_get_expr(polwithcheck, polrelid) as with_check_expr
+from pg_policy
+where polrelid = 'storage.objects'::regclass
+order by polname;
+-- EXPECT: five rows.
+--   resources_bucket_select_approved [r]  bucket_id = 'resources' AND is_approved()   <- 0017, UNCHANGED
+--   resources_bucket_select_admin    [r]  bucket_id = 'resources' AND is_admin()
+--   resources_bucket_insert_admin    [a]                                              with check ... is_admin()
+--   resources_bucket_update_admin    [w]  bucket_id = 'resources' AND is_admin()      with check ... is_admin()
+--   resources_bucket_delete_admin    [d]  bucket_id = 'resources' AND is_admin()
+-- If resources_bucket_select_approved has changed at all, STOP: 0029 must not
+-- touch it.
+
+-- The file lifecycle, and the fact that it cannot leak a storage path to a
+-- browser: admin_list_resource_files deliberately does NOT return storage_path.
+select p.proname,
+       pg_get_function_result(p.oid) ~ 'storage_path' as returns_storage_path,
+       has_function_privilege('anon', p.oid, 'execute') as anon_execute
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname in ('admin_list_resource_files', 'admin_register_resource_file',
+                    'admin_replace_resource_file', 'admin_update_resource_meta',
+                    'admin_delete_resource_file', 'admin_reorder_resource_files')
+order by p.proname;
+-- EXPECT: six rows, anon_execute = false on all.
+--         returns_storage_path = false for admin_list_resource_files (the one a
+--         screen renders) and true only for admin_delete_resource_file, which
+--         hands the key to the SERVER ACTION so it can delete the object.
+
+-- Unreferenced Storage objects (the documented residue of a delete whose second
+-- half failed). Inert — signed URLs are minted only from resources rows — but
+-- worth watching. This is a report, not a failure.
+select count(*) as unreferenced_objects
+from storage.objects o
+where o.bucket_id = 'resources'
+  and not exists (select 1 from public.resources r
+                   where r.storage_bucket = o.bucket_id and r.storage_path = o.name);
+-- EXPECT: 0 immediately after a clean run. A non-zero count is cleanup work,
+-- not a breach.
+
+-- ===========================================================================
+-- 9) RLS posture unchanged: default-deny, zero client policies, RPC-only reads.
 -- ===========================================================================
 select t.relname, t.relrowsecurity as rls_enabled, count(p.polname) as client_policies
 from pg_class t

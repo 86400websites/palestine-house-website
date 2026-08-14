@@ -59,6 +59,29 @@ $guard$;
 --    / platform_groups / platform_topics before it, so dropping them restores
 --    the pre-0029 state exactly rather than reverting to an older version.
 -- ---------------------------------------------------------------------------
+-- Pass 3 first: the file lifecycle, the storage policies and the D-PP-i
+-- constraints. Dropping the constraints RE-OPENS the §15 gap, which is correct
+-- for a reversal but is the reason this file is not something to run casually —
+-- see the header.
+drop function if exists public.admin_reorder_resource_files(uuid[]);
+drop function if exists public.admin_delete_resource_file(uuid);
+drop function if exists public.admin_update_resource_meta(uuid, text, text, text, text, integer);
+drop function if exists public.admin_replace_resource_file(uuid, text);
+drop function if exists public.admin_register_resource_file(
+  uuid, text, text, text, text, text, text, integer);
+drop function if exists public.admin_list_resource_files(uuid);
+
+drop policy if exists "resources_bucket_delete_admin" on storage.objects;
+drop policy if exists "resources_bucket_update_admin" on storage.objects;
+drop policy if exists "resources_bucket_insert_admin" on storage.objects;
+drop policy if exists "resources_bucket_select_admin" on storage.objects;
+-- resources_bucket_select_approved (0017) is NOT touched — it was never ours.
+
+alter table public.resources drop constraint if exists resources_private_needs_code;
+alter table public.resources drop constraint if exists resources_guide_needs_element;
+alter table public.resources drop constraint if exists resources_private_bucket_shape;
+alter table public.resources drop constraint if exists resources_private_needs_element;
+
 drop function if exists public.admin_reorder_platform_groups(uuid[]);
 drop function if exists public.admin_reorder_platform_topics(uuid[]);
 drop function if exists public.admin_delete_platform_topic(uuid);

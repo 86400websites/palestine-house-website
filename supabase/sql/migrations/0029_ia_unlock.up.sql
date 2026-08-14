@@ -954,4 +954,375 @@ $$;
 revoke execute on function public.admin_reorder_platform_groups(uuid[]) from public, anon;
 grant execute on function public.admin_reorder_platform_groups(uuid[]) to authenticated;
 
+-- ===========================================================================
+-- 6) THE FILE LIFECYCLE + D-PP-i (PP6a pass 3).
+--
+-- Verified 2026-08-14: NOTHING can insert a resources row today — there is no
+-- `insert into public.resources` in any shipped function. And storage.objects
+-- carries exactly ONE policy: resources_bucket_select_approved, SELECT only,
+-- USING (bucket_id = 'resources' AND is_approved()). No INSERT, UPDATE or
+-- DELETE policy on any bucket, and is_approved() does not include admins — so
+-- an admin who is not also an approved partner cannot even LIST an object.
+-- Both halves are built here.
+--
+-- THIS IS WHERE SECURITY-CHECKLIST §15 IS FINALLY PAID (D-PP-i, owed since
+-- PP3). PP3's templates-grid predicate is app-level — is_public = false AND
+-- doc_key IS NULL AND code IS NOT NULL — which was safe only for as long as no
+-- shipped admin path could set storage_bucket. Pass 3 ships that path, so the
+-- guard ships with it.
+--
+-- The guards are TABLE CONSTRAINTS, not just RPC checks. That is stronger than
+-- the sprint scope asked for and it is the right call: a constraint holds
+-- against every future writer — a later RPC, a manual SQL Editor fix, an
+-- ingest script — whereas an RPC check only holds for callers who use that RPC.
+-- All four were verified against real data first (0 violations on all 299
+-- rows), so they validate without touching content.
+-- ===========================================================================
+
+-- --- 6a) The D-PP-i invariants, enforced structurally. -----------------------
+
+-- Every PRIVATE file belongs to a focus area. Closes the orphan-template case:
+-- resources_element_id_fkey is ON DELETE SET NULL, so without this a deleted
+-- element would leave private rows behind that no grid renders and no topic
+-- gates.
+alter table public.resources drop constraint if exists resources_private_needs_element;
+alter table public.resources add constraint resources_private_needs_element
+  check (is_public or element_id is not null);
+
+-- Every PRIVATE file lives in the private bucket. This is the storage_bucket
+-- half of §15. It is deliberately CONDITIONAL: a blanket
+-- `storage_bucket = 'resources'` CHECK would ABORT this migration, because the
+-- two public booklet PDFs legitimately live in the `booklets` bucket.
+alter table public.resources drop constraint if exists resources_private_bucket_shape;
+alter table public.resources add constraint resources_private_bucket_shape
+  check (is_public or storage_bucket = 'resources');
+
+-- A guide always belongs to a focus area. The partial unique index
+-- resources_element_doc_key_ux is ON (element_id, doc_key) WHERE doc_key IS NOT
+-- NULL and has no NULLS NOT DISTINCT, so it does NOT constrain rows with a NULL
+-- element_id — an unlimited number of orphan guides was insertable. This is the
+-- constraint that actually closes it.
+alter table public.resources drop constraint if exists resources_guide_needs_element;
+alter table public.resources add constraint resources_guide_needs_element
+  check (doc_key is null or element_id is not null);
+
+-- Every private file is badged. `code IS NOT NULL` is the third leg of the
+-- grid predicate and is currently a no-op (0 rows violate it) — but pass 3 is
+-- the first thing that could ever create a private, uncoded row, which would
+-- silently drop out of every grid while still existing.
+alter table public.resources drop constraint if exists resources_private_needs_code;
+alter table public.resources add constraint resources_private_needs_code
+  check (is_public or code is not null or doc_key is not null);
+
+-- --- 6b) storage.objects: the admin write path + an admin read path. ---------
+-- Policies are OR-ed, so adding an admin SELECT alongside the existing approved
+-- SELECT gives admins access WITHOUT widening what a partner can see. The
+-- partner policy is left exactly as 0017 wrote it.
+
+drop policy if exists "resources_bucket_select_admin" on storage.objects;
+create policy "resources_bucket_select_admin"
+  on storage.objects for select to authenticated
+  using (bucket_id = 'resources' and public.is_admin());
+
+drop policy if exists "resources_bucket_insert_admin" on storage.objects;
+create policy "resources_bucket_insert_admin"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'resources' and public.is_admin());
+
+drop policy if exists "resources_bucket_update_admin" on storage.objects;
+create policy "resources_bucket_update_admin"
+  on storage.objects for update to authenticated
+  using (bucket_id = 'resources' and public.is_admin())
+  with check (bucket_id = 'resources' and public.is_admin());
+
+drop policy if exists "resources_bucket_delete_admin" on storage.objects;
+create policy "resources_bucket_delete_admin"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'resources' and public.is_admin());
+
+-- --- 6c) The file lifecycle. --------------------------------------------------
+--
+-- THE COMPENSATION CONTRACT, stated rather than implied. A file is two things:
+-- a row here and an object in Storage. They cannot be written in one
+-- transaction, so the order is chosen so that a failure between them leaves the
+-- SAFE residue:
+--
+--   UPLOAD  object first, then admin_register_resource_file. If the RPC fails,
+--           the server action deletes the just-uploaded object. Residue: none.
+--   REPLACE new object first, then admin_replace_resource_file, which returns
+--           the OLD path for the action to delete. If the RPC fails, the action
+--           deletes the NEW object and the row still points at the old one.
+--           Residue: none.
+--   DELETE  ROW FIRST, then the object, using the path the RPC returns.
+--           Deliberately this way round: an orphaned OBJECT is inert — signed
+--           URLs are minted only from resources rows, so with no row there is
+--           no id, no URL and no reachable file. The opposite order would leave
+--           a row pointing at nothing, which shows a partner a Download button
+--           that fails. Residue: at worst some unreferenced bytes, listable by
+--           the cleanup query in the verification script.
+--
+-- storage_path NEVER goes to the browser: admin_list_resource_files omits it,
+-- and delete/replace return it only to the server action that needs it.
+
+create or replace function public.admin_list_resource_files(p_element_id uuid)
+returns table (
+  id         uuid,
+  title      text,
+  code       text,
+  doc_key    text,
+  type       text,
+  version    text,
+  sort_order integer,
+  is_public  boolean
+)
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select r.id, r.title, r.code, r.doc_key, r.type, r.version, r.sort_order, r.is_public
+  from public.resources r
+  where public.is_admin()
+    and r.element_id = p_element_id
+  order by (r.doc_key is null), r.sort_order, r.title;
+$$;
+
+revoke execute on function public.admin_list_resource_files(uuid) from public, anon;
+grant execute on function public.admin_list_resource_files(uuid) to authenticated;
+
+-- Register a file that the server action has ALREADY uploaded to
+-- p_storage_path in the private bucket. is_public and storage_bucket are not
+-- parameters at all — they are forced, so no caller can ever publish a template
+-- or point one at another bucket.
+create or replace function public.admin_register_resource_file(
+  p_element_id   uuid,
+  p_storage_path text,
+  p_title        text,
+  p_doc_key      text    default null,
+  p_code         text    default null,
+  p_type         text    default 'form',
+  p_version      text    default null,
+  p_sort_order   integer default 0
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_path  text := btrim(coalesce(p_storage_path, ''));
+  v_title text := nullif(btrim(coalesce(p_title, '')), '');
+  v_key   text := nullif(btrim(coalesce(p_doc_key, '')), '');
+  v_code  text := nullif(upper(btrim(coalesce(p_code, ''))), '');
+  v_id    uuid;
+begin
+  if not public.is_admin() then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if v_title is null then
+    raise exception 'title is required' using errcode = '22023';
+  end if;
+  -- Reject anything that is not a plain relative object key. No leading slash,
+  -- no traversal, no scheme — the action computes this, but the database is
+  -- where it is guaranteed.
+  if v_path = '' or v_path like '/%' or v_path like '%..%' or v_path like '%://%' then
+    raise exception 'invalid storage path' using errcode = '22023';
+  end if;
+  if p_element_id is null
+     or not exists (select 1 from public.elements e where e.id = p_element_id) then
+    raise exception 'unknown focus area' using errcode = '22023';
+  end if;
+  if v_key is not null and v_key <> 'guide' then
+    raise exception 'invalid file kind' using errcode = '22023';
+  end if;
+  -- A template is badged; a guide is not. This keeps the app-level grid
+  -- predicate (is_public = false, doc_key IS NULL, code IS NOT NULL) true by
+  -- construction rather than by convention.
+  if v_key is null and v_code is null then
+    raise exception 'code is required' using errcode = '22023';
+  end if;
+
+  begin
+    insert into public.resources
+      (title, type, focus_area_code, element_id, version,
+       storage_bucket, storage_path, is_public, sort_order, code, doc_key)
+    values
+      (left(v_title, 300), coalesce(nullif(btrim(coalesce(p_type, '')), ''), 'form'),
+       null, p_element_id,
+       -- resources.version is NOT NULL with no default, and all 299 existing
+       -- rows are 'v1'. Caught on TEST: passing NULL here raised a not-null
+       -- violation that MASKED two guard tests behind the wrong error.
+       coalesce(nullif(btrim(coalesce(p_version, '')), ''), 'v1'),
+       'resources', v_path, false, coalesce(p_sort_order, 0),
+       left(v_code, 16), v_key)
+    returning id into v_id;
+  exception
+    when unique_violation then
+      -- Either resources_storage_key (same object registered twice) or
+      -- resources_element_doc_key_ux (a second guide on one focus area).
+      raise exception 'file already registered' using errcode = '23505';
+  end;
+
+  return v_id;
+end;
+$$;
+
+revoke execute on function public.admin_register_resource_file(
+  uuid, text, text, text, text, text, text, integer) from public, anon;
+grant execute on function public.admin_register_resource_file(
+  uuid, text, text, text, text, text, text, integer) to authenticated;
+
+-- Point an existing row at a newly uploaded object and RETURN THE OLD PATH so
+-- the caller can delete the object it replaced. Nothing else about the row
+-- changes — in particular not element_id, doc_key, is_public or the bucket.
+create or replace function public.admin_replace_resource_file(
+  p_id           uuid,
+  p_storage_path text
+)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_path text := btrim(coalesce(p_storage_path, ''));
+  v_old  text;
+begin
+  if not public.is_admin() then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if v_path = '' or v_path like '/%' or v_path like '%..%' or v_path like '%://%' then
+    raise exception 'invalid storage path' using errcode = '22023';
+  end if;
+
+  select r.storage_path into v_old from public.resources r where r.id = p_id;
+  if v_old is null then
+    raise exception 'unknown file' using errcode = '22023';
+  end if;
+
+  -- NOTE: public.resources has created_at but NO updated_at column (unlike
+  -- elements and the platform_* tables). Caught on TEST, not assumed.
+  begin
+    update public.resources r
+       set storage_path = v_path
+     where r.id = p_id;
+  exception when unique_violation then
+    raise exception 'file already registered' using errcode = '23505';
+  end;
+
+  return v_old;
+end;
+$$;
+
+revoke execute on function public.admin_replace_resource_file(uuid, text) from public, anon;
+grant execute on function public.admin_replace_resource_file(uuid, text) to authenticated;
+
+-- Rename / re-badge / re-type. Deliberately CANNOT touch storage_path,
+-- storage_bucket, is_public, element_id or doc_key — those move a file between
+-- focus areas or change what it IS, and each has its own path.
+create or replace function public.admin_update_resource_meta(
+  p_id         uuid,
+  p_title      text,
+  p_code       text    default null,
+  p_type       text    default null,
+  p_version    text    default null,
+  p_sort_order integer default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_title text := nullif(btrim(coalesce(p_title, '')), '');
+  v_code  text := nullif(upper(btrim(coalesce(p_code, ''))), '');
+begin
+  if not public.is_admin() then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if v_title is null then
+    raise exception 'title is required' using errcode = '22023';
+  end if;
+
+  update public.resources r
+     set title      = left(v_title, 300),
+         code       = coalesce(left(v_code, 16), r.code),
+         type       = coalesce(nullif(btrim(coalesce(p_type, '')), ''), r.type),
+         version    = coalesce(nullif(btrim(coalesce(p_version, '')), ''), r.version),
+         sort_order = coalesce(p_sort_order, r.sort_order)
+   where r.id = p_id;
+
+  if not found then
+    raise exception 'unknown file' using errcode = '22023';
+  end if;
+end;
+$$;
+
+revoke execute on function public.admin_update_resource_meta(
+  uuid, text, text, text, text, integer) from public, anon;
+grant execute on function public.admin_update_resource_meta(
+  uuid, text, text, text, text, integer) to authenticated;
+
+-- Delete the ROW and hand back the object key. See the compensation contract
+-- above for why the row goes first. This supersedes 0023's
+-- admin_delete_resource, which deleted the row and deliberately left the object
+-- orphaned with no way for the caller to find it.
+create or replace function public.admin_delete_resource_file(p_id uuid)
+returns table (storage_bucket text, storage_path text)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+
+  return query
+  delete from public.resources r
+   where r.id = p_id
+  returning r.storage_bucket, r.storage_path;
+
+  if not found then
+    raise exception 'unknown file' using errcode = '22023';
+  end if;
+end;
+$$;
+
+revoke execute on function public.admin_delete_resource_file(uuid) from public, anon;
+grant execute on function public.admin_delete_resource_file(uuid) to authenticated;
+
+create or replace function public.admin_reorder_resource_files(p_ids uuid[])
+returns integer
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_count integer;
+begin
+  if not public.is_admin() then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if p_ids is null or array_length(p_ids, 1) is null then
+    return 0;
+  end if;
+
+  with ordered as (
+    select id, (ordinality::integer - 1) * 10 as new_sort
+    from unnest(p_ids) with ordinality as u(id, ordinality)
+  )
+  update public.resources r
+     set sort_order = o.new_sort
+    from ordered o
+   where r.id = o.id;
+
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$$;
+
+revoke execute on function public.admin_reorder_resource_files(uuid[]) from public, anon;
+grant execute on function public.admin_reorder_resource_files(uuid[]) to authenticated;
+
 commit;
