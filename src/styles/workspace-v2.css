@@ -1394,6 +1394,21 @@
   transform: rotate(180deg);
 }
 
+/* D-PP-n (2026-08-14): a section with exactly one group renders as a flat
+   list, with no accordion header — see pw-section-explorer.tsx. Two rules,
+   both rooted at .pw-root like everything else in this file: the panel loses
+   the padding that separated it from a header that is no longer drawn, and
+   the group description becomes a lead paragraph aligned to the card column
+   instead of a small line inside the button it used to live in. */
+.pw-root .pw-group--flat > .pw-group-content {
+  padding-top: 0;
+}
+
+.pw-root .pw-group--flat > .pw-group-desc {
+  width: min(1020px, 100%);
+  margin: 0 auto 14px;
+}
+
 .pw-root .pw-group-content {
   padding: 17px 0 2px;
 }
