@@ -15,12 +15,15 @@ import {
    area / sort order) as hidden inputs so the upsert is lossless; only the title,
    one-line and the three guide bodies are editable. */
 
+/* focus_area_* are nullable from 0029 (PP6a): the A–K vocabulary belongs to the
+   old 33-topic model, and the 22 real focus areas have none. Typed honestly here
+   so the null case is handled rather than discovered at runtime. */
 export type ElementRow = {
   id: string;
   slug: string;
   code: string;
-  focus_area_code: string;
-  focus_area_name: string;
+  focus_area_code: string | null;
+  focus_area_name: string | null;
   title: string;
   one_line: string | null;
   sort_order: number;
@@ -33,8 +36,8 @@ export type ElementDetail = {
   id: string;
   slug: string;
   code: string;
-  focus_area_code: string;
-  focus_area_name: string;
+  focus_area_code: string | null;
+  focus_area_name: string | null;
   title: string;
   one_line: string | null;
   overview_md: string | null;
@@ -102,7 +105,9 @@ export function ElementsAdmin({
                   {r.code} · {r.title}
                 </td>
                 <td className="adm-td-muted">
-                  {r.focus_area_code} — {r.focus_area_name}
+                  {r.focus_area_code
+                    ? `${r.focus_area_code} — ${r.focus_area_name ?? ""}`
+                    : "—"}
                 </td>
                 <td className="adm-td-muted" style={{ whiteSpace: "nowrap" }}>
                   <BodyDot on={r.has_overview} label="Overview" />{" "}
@@ -148,14 +153,27 @@ function ElementForm({ element }: { element: ElementDetail }) {
       <form action={formAction} className="adm-form">
         <input type="hidden" name="slug" value={element.slug} />
         <input type="hidden" name="code" value={element.code} />
-        <input type="hidden" name="focusAreaCode" value={element.focus_area_code} />
-        <input type="hidden" name="focusAreaName" value={element.focus_area_name} />
+        {/* Nullable since 0029 — the 22 real focus areas have no A–K code. The
+            ?? "" keeps React from rendering an uncontrolled input, and the
+            action maps "" back to absent rather than failing validation. */}
+        <input
+          type="hidden"
+          name="focusAreaCode"
+          value={element.focus_area_code ?? ""}
+        />
+        <input
+          type="hidden"
+          name="focusAreaName"
+          value={element.focus_area_name ?? ""}
+        />
         <input type="hidden" name="sortOrder" value={element.sort_order} />
 
         <div className="adm-field">
           <span className="adm-field-label">Focus area</span>
           <span className="adm-field-value">
-            {element.focus_area_code} — {element.focus_area_name}
+            {element.focus_area_code
+              ? `${element.focus_area_code} — ${element.focus_area_name ?? ""}`
+              : "Not set"}
           </span>
         </div>
 

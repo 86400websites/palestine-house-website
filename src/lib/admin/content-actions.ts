@@ -20,6 +20,14 @@ import { parseYouTubeId } from "@/lib/live/youtube";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/* PP6a (0029): the third and last layer of the 33-slot ceiling. An element slug
+   was pinned to /^[a-k][1-3]$/ here, in the DB CHECK, AND inside
+   admin_upsert_element — 11 letters x 3 = exactly 33 slots, all occupied. The
+   other two came off in 0029; this one has to match or the migration changes
+   nothing a form can reach. Same shape as the DB constraint, deliberately:
+   lowercase kebab, 1-80 chars. */
+const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/i;
+
 export type AdminContentState = { ok: boolean; message: string | null };
 
 const GENERIC = "Something went wrong. Please try again.";
@@ -53,10 +61,14 @@ async function adminGuard(): Promise<Guard> {
 // sort order) so the upsert never loses them.
 // ---------------------------------------------------------------------------
 const elementSchema = z.object({
-  slug: z.string().trim().regex(/^[a-k][1-3]$/i),
+  slug: z.string().trim().regex(SLUG_RE).max(80),
   code: z.string().trim().min(1).max(16),
-  focusAreaCode: z.string().trim().regex(/^[A-K]$/i),
-  focusAreaName: z.string().trim().min(1).max(120),
+  /* Optional since 0029: the A–K focus-area vocabulary belongs to the OLD
+     33-topic model. The 22 real focus areas have no A–K identity, and the DB
+     now stores NULL rather than a fabricated code. The legacy 33 keep theirs
+     and still round-trip through the hidden fields on the elements form. */
+  focusAreaCode: z.string().trim().regex(/^[A-K]$/i).optional(),
+  focusAreaName: z.string().trim().min(1).max(120).optional(),
   title: z.string().trim().min(1).max(200),
   oneLine: z.string().trim().max(500).optional(),
   overviewMd: z.string().max(100000).optional(),
@@ -72,8 +84,10 @@ export async function saveElementAction(
   const parsed = elementSchema.safeParse({
     slug: formData.get("slug"),
     code: formData.get("code"),
-    focusAreaCode: formData.get("focusAreaCode"),
-    focusAreaName: formData.get("focusAreaName"),
+    /* field() maps "" -> undefined, so a focus area with no A–K code posts an
+       empty hidden input and parses as absent rather than failing the regex. */
+    focusAreaCode: field(formData, "focusAreaCode"),
+    focusAreaName: field(formData, "focusAreaName"),
     title: formData.get("title"),
     oneLine: field(formData, "oneLine"),
     overviewMd: field(formData, "overviewMd"),
@@ -92,8 +106,8 @@ export async function saveElementAction(
   const { error } = await guard.supabase.rpc("admin_upsert_element", {
     p_slug: d.slug.toLowerCase(),
     p_code: d.code,
-    p_focus_area_code: d.focusAreaCode.toUpperCase(),
-    p_focus_area_name: d.focusAreaName,
+    p_focus_area_code: d.focusAreaCode?.toUpperCase() ?? null,
+    p_focus_area_name: d.focusAreaName ?? null,
     p_title: d.title,
     p_one_line: d.oneLine ?? null,
     p_overview_md: d.overviewMd ?? null,
@@ -129,7 +143,7 @@ export async function saveElementAction(
 // ---------------------------------------------------------------------------
 const academySchema = z.object({
   elementId: z.string().regex(UUID_RE),
-  elementSlug: z.string().trim().regex(/^[a-k][1-3]$/i).optional(),
+  elementSlug: z.string().trim().regex(SLUG_RE).max(80).optional(),
   title: z.string().trim().min(1).max(200),
   oneLine: z.string().trim().max(500).optional(),
   length: z.string().trim().max(60).optional(),
