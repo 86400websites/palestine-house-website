@@ -104,11 +104,22 @@ export async function saveElementAction(
   if (error) return { ok: false, message: GENERIC };
 
   revalidatePath("/admin/content/elements");
-  revalidatePath(`/elements/${d.slug.toLowerCase()}`);
-  revalidatePath("/plan");
-  revalidatePath("/operate");
-  revalidatePath("/food");
-  revalidatePath("/program");
+  /* PP5 re-pointed these. An element's body now surfaces on exactly two kinds
+     of page: the four toolkit sections (its summary card) and its own guide
+     reader. The old targets — /plan, /food and the per-slug /elements/[slug] —
+     are deleted routes, and revalidating a path that no longer exists is a
+     silent no-op, which is the worst kind of stale.
+
+     All four sections, because this action edits an `elements` row and never
+     reads `platform_topics`, so it does not know which section the topic sits
+     in. The reader is revalidated by ROUTE rather than by path for the same
+     reason, and for a sharper one: its [topic] segment is the platform_topics
+     slug, not this element's slug, so a path built from `d.slug` would match
+     nothing and fail silently. */
+  for (const section of ["setup", "operate", "program", "support"]) {
+    revalidatePath(`/${section}`);
+    revalidatePath(`/${section}/[topic]/guide`, "page");
+  }
   return { ok: true, message: "Saved." };
 }
 
@@ -167,9 +178,12 @@ export async function saveAcademyModuleAction(
   });
   if (error) return { ok: false, message: GENERIC };
 
+  /* The admin screen only. /academy and /elements/[slug] were this action's
+     other two targets and PP5 deleted both; the Academy has no partner-facing
+     surface at all now (D-PP-b), and this whole screen goes at PP6 with the
+     four academy RPCs behind it at PP7. `elementSlug` survives as a form field
+     because the RPC still takes it — nothing here reads it any more. */
   revalidatePath("/admin/content/academy");
-  revalidatePath("/academy");
-  if (d.elementSlug) revalidatePath(`/elements/${d.elementSlug.toLowerCase()}`);
   return { ok: true, message: "Saved." };
 }
 
@@ -219,8 +233,13 @@ export async function saveResourceAction(
   });
   if (error) return { ok: false, message: GENERIC };
 
+  /* /resources was the old library page, deleted at PP5. A template's metadata
+     now shows in the templates grid on whichever focus area carries its
+     element_id, so the four section pages replace it. */
   revalidatePath("/admin/content/resources");
-  revalidatePath("/resources");
+  for (const section of ["setup", "operate", "program", "support"]) {
+    revalidatePath(`/${section}`);
+  }
   return { ok: true, message: "Saved." };
 }
 

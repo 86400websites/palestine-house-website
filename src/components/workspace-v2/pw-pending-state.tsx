@@ -5,9 +5,10 @@ import { Clock, Info, Mail, MessageCircle } from "lucide-react";
    shell (PP2 2h).
 
    Every string here is carried over VERBATIM from the approved copy the legacy
-   workspace renders today (docs/page-copy/03-member-workspace/dashboard.md, via
-   (workspace)/dashboard/page.tsx and components/workspace/pending-state.tsx).
-   The revamp restyles these states; it does not rewrite them. There are two
+   workspace rendered (docs/page-copy/03-member-workspace/dashboard.md, via the
+   old dashboard page and components/workspace/pending-state.tsx — both deleted
+   at PP5, which is why this file is now the only home for these words).
+   The revamp restyled these states; it did not rewrite them. There are two
    approved variants and they differ, so both are preserved:
 
      variant="landing"  — the /dashboard wording ("Your application is under

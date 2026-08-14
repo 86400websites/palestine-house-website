@@ -2,26 +2,35 @@
 
 > **Project: Palestine House** — `palestine-house`. This file is the generic locked stack **plus** the Palestine House specifics below. When any other doc disagrees with this one about the stack, this one wins. The full route map, access model, and data notes live in `/docs/page-designs/content/PH_Sitemap_Architecture_TECH.txt`; the sprint order lives in [`ROADMAP.md`](./ROADMAP.md); current state lives in [`PROJECT-STATUS.md`](./PROJECT-STATUS.md).
 
-> ### ⚠️ Stage 4 supersession (2026-08-12)
-> §0's description of the gated workspace is **pre-Stage-4** and is rewritten at PP5. Until then `ROADMAP.md` Stage 4 + `PROJECT-STATUS.md` §5 win: the per-topic model is **summary → one Simple guide card → Watch Video → a many-template grid** (D-PP-f); **saved checklist progress is dropped** (D-PP-b), so the "single piece of per-user interactivity" sentence below no longer holds; new gated pages live in `src/app/(platform)` with its own server-side gate; `resources.doc_key` is `('guide')`. Migrations **0027/0028 are applied to production and immutable** — schema fixes ship as 0029+.
-
 ## 0. Palestine House — project architecture summary
 
-**Two shells, one gate.** A thin, conversion-focused **public shell** and a private partner **reference platform**. Access is **approval-gated**: the single `/apply` form is also sign-up — submitting it creates a *pending* account and records the partner application; an HQ admin flips `profiles.is_approved` to unlock the platform. Reference content is never public. It is a reference, **not a course** (no quizzes, no certificate) and not a day-to-day ops tool. The single piece of per-user interactivity is the saved launch-checklist progress in Stages › Design & Build.
+*(Rewritten at PP5, 2026-08-14, to describe the platform that now exists. The Stage 4 revamp replaced the gated side wholesale; the pre-Stage-4 shape is summarized at the end of this section so old sprint records still read sensibly.)*
 
-**Route map (locked — full detail in the sitemap doc):**
+**Two shells, one gate.** A thin, conversion-focused **public shell** and a private partner **reference platform**. Access is **approval-gated**: the single `/apply` form is also sign-up — submitting it creates a *pending* account and records the partner application; an HQ admin flips `profiles.is_approved` to unlock the platform. Reference content is never public. It is a reference, **not a course** (no quizzes, no certificate) and not a day-to-day ops tool. There is **no saved per-user state** beyond the partner's own account row.
+
+**The private model (D-PP-f).** Four sections → ten groups → **33 focus areas**. A focus area shows its **summary** (`platform_topics.description` + `intro`), **one Simple guide card** (Read Now → the reader · Download Now → a signed URL), **Watch Video**, and a **templates grid** of every `resources` row carrying its `element_id`. A global **Ctrl/⌘+K overlay** searches focus areas, guides and templates by title, breadcrumb path, kind and — for a focus area — its own summary (D-PP-j).
+
+**Route map:**
 
 | Layer | Routes |
 |---|---|
-| Public | `/` · `/model` · `/experience` · `/bring-ph` · `/our-support` · `/live` (+ watch view) · `/apply` (= sign-up) · `/about` · `/contact` · `/focus-areas` (footer) · `/privacy` · `/terms` · `/login` · `/forgot-password` · `/update-password` |
-| Gated (`is_approved = true`) | `/dashboard` (renders pending state too) · `/plan` · `/build` (saved checklist) · `/operate` · `/elements/[slug]` (×33) · `/live` partner tools · `/resources` · `/resources/[category]` · `/tools` (coming soon) · `/academy` · `/academy/[slug]` · `/account` · `/support` · `/search` (V1) |
-| Admin (server-checked `admins`) | `/admin/approvals` (MVP-critical) · `/admin/content` (V1) · `/admin/partner-interest` (later) |
+| Public | `/` · `/model` · `/experience` · `/bring-ph` · `/our-support` · `/apply` (= sign-up) · `/about` · `/contact` · `/focus-areas` (footer) · `/privacy` · `/terms` · `/login` · `/forgot-password` · `/update-password` |
+| Gated (`is_approved = true`) | `/dashboard` (the About landing; renders the pending state too) · `/setup` · `/operate` · `/program` · `/support` (the four toolkit sections) · `/{section}/{topic}/guide` (the Simple guide reader, ×33) |
+| Gated (session only) | `/account` — deliberately **not** approval-gated, so a pending partner can manage their own name, email preference and password while they wait |
+| Admin (server-checked `admins`) | `/admin/approvals` · `/admin/content` (elements · resources · academy · admins) |
+| Redirected (PP5) | `/plan` `/build` `/food` `/programming` `/live` (+ children) `/elements` (+ children) `/resources` (+ children) `/academy` `/tools` → **307 → `/dashboard`** |
 
-**Core data (Supabase):** `profiles` (incl. `is_approved`) · `applications` · `admins` · `elements` (33, MDX bodies) · `checklist_items` + per-user `checklist_progress` (200+ items) · `programming_sessions` (title, mode, status, venue, stream_url, recording_url, starts_at, cover — public read anon-safe, partner writes owner-scoped) · `resources` (metadata + private Storage bucket, signed URLs) · `academy_modules`. RLS default-deny on all; public projections via anon-safe RPCs expose titles/overviews only.
+**Where the code lives.** All gated pages sit in `src/app/(platform)`, whose layout is the authoritative server-side session gate; each page checks approval itself as well, because file location is never access control. The v2 design layer is `src/styles/workspace-v2.css`, entirely scoped to `.pw-root`. The legacy `src/app/(workspace)` group and its CSS were deleted at PP5.
 
-**Integrations in scope:** Supabase (auth + DB + Storage), Mailchimp (lead magnets `lead-booklet-a` / `lead-booklet-b`, newsletter, apply tagging), Resend (contact + transactional), Upstash (rate limiting), Turnstile (public forms), PostHog + Sentry (optional). Live Programming embeds via **YouTube** (resolved decision D1, `PROJECT-STATUS.md` §4 — extend CSP for the YouTube origin only).
+**Core data (Supabase):** `profiles` (incl. `is_approved`) · `applications` · `admins` · `elements` (33 — `simple_guide_md` is the live body; `overview_md` renders nowhere and is dropped by PP7) · `platform_sections` (5) + `platform_groups` (10) + `platform_topics` (33, `element_id UNIQUE FK→elements` is the integrity spine) · `resources` (metadata + private Storage bucket, signed URLs; `code` is the template badge, `doc_key='guide'` marks the one downloadable guide per topic). RLS default-deny on all; reads go through approval-gated `SECURITY DEFINER` RPCs.
 
-**Blocking security invariants (never merge with one unresolved — also in [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15):** approval enforcement server-side in every workspace RPC; RLS default-deny everywhere; hardened `SECURITY DEFINER` RPCs; public writes zod + rate-limit + Turnstile, fail-closed in Production; no secret client-side; templates served only by server-issued signed URLs to approved users; admin via server-checked `admins` table; security headers + tight CSP.
+**Dormant tables — present, unreachable, dropped by PP7's `0030`:** `checklist_items`, `checklist_progress`, `academy_modules`, `programming_sessions`. PP5 deleted every app-side caller; the rows are still there and still governed by RLS. Do not add a new caller and do not assume they are unprotected.
+
+**Integrations in scope:** Supabase (auth + DB + Storage), Mailchimp (lead magnets `lead-booklet-a` / `lead-booklet-b`, newsletter, apply tagging), Resend (contact + transactional, incl. the Ask HQ notification), Upstash (rate limiting), Turnstile (public forms), PostHog + Sentry (optional). Focus-area videos embed via **YouTube** (decision D1 — CSP extended for the `youtube-nocookie` origin only; the links return through PP6's CMS).
+
+**Blocking security invariants (never merge with one unresolved — also in [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15):** approval enforcement server-side in every platform RPC; RLS default-deny everywhere; hardened `SECURITY DEFINER` RPCs; public writes zod + rate-limit + Turnstile, fail-closed in Production; no secret client-side; templates served only by server-issued signed URLs to approved users; admin via server-checked `admins` table; security headers + tight CSP.
+
+> **Pre-Stage-4, for reading old records.** The gated side was a sidebar workspace: `/plan`, `/build` (saved checklist progress over 200+ items), `/operate`, `/food`, `/elements/[slug]` ×33, `/resources` + `/resources/[category]`, `/academy`, `/tools`, and — after LH1 moved it in from the public site — `/live` (+ watch view, with partner publishing over `programming_sessions`). PP5 deleted all of it.
 
 ---
 ---
