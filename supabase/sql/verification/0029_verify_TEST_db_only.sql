@@ -748,6 +748,175 @@ select * from _0029_file_results order by scenario;
 rollback;
 
 -- ===========================================================================
+-- 7b) DRAFT AT THE BYTE LAYER — the hole the exit-gate review found.
+--
+-- Filtering the four RPCs makes Draft a boundary for ROWS. It does nothing for
+-- FILES: the Storage API honours storage.objects policies directly, and 0017
+-- granted approved partners SELECT on every object in the private bucket. A
+-- partner could therefore have listed the bucket and signed a URL for a Draft
+-- focus area's files without any RPC being involved. 0029 narrows that policy.
+--
+-- Two failure modes are tested, because the FIRST attempt at the fix hit the
+-- second one: an inline EXISTS in the policy is evaluated as the INVOKING role,
+-- and public.resources is RLS default-deny, so it matched nothing and silently
+-- denied EVERY download. Hence public.is_published_object(), SECURITY DEFINER.
+-- ===========================================================================
+begin;
+
+create temporary table _0029_storage_results (
+  scenario text, expected text, observed text, pass boolean
+) on commit drop;
+
+create or replace function pg_temp.run_0029_storage()
+returns void
+language plpgsql
+as $fn$
+declare
+  v_admin uuid; v_partner uuid; v_topic uuid; v_path text; v_booklet uuid; n int;
+begin
+  select user_id into v_admin from public.admins limit 1;
+  select p.id into v_partner from public.profiles p
+   where p.is_approved
+     and not exists (select 1 from public.admins a where a.user_id = p.id)
+   limit 1;
+  if v_admin is null or v_partner is null then
+    raise exception 'needs one admin and one approved NON-admin profile on TEST';
+  end if;
+
+  select t.id, r.storage_path into v_topic, v_path
+  from public.platform_topics t
+  join public.platform_groups g on g.id = t.group_id
+  join public.resources r on r.element_id = t.element_id
+  where t.published and g.published
+  order by t.slug limit 1;
+
+  select id into v_booklet from public.resources
+   where element_id is null and is_public limit 1;
+
+  insert into storage.objects (bucket_id, name, owner_id)
+  values ('resources', v_path, v_admin::text) on conflict do nothing;
+
+  -- Live: the partner must still be able to read it, or every download breaks.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_partner, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select count(*) into n from storage.objects o where o.name = v_path;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_storage_results values
+    ('LIVE: partner CAN read the object', '1', n::text, n = 1);
+
+  -- Draft: the bytes go out of reach, not just the row.
+  update public.platform_topics set published = false where id = v_topic;
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_partner, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select count(*) into n from storage.objects o where o.name = v_path;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_storage_results values
+    ('DRAFT: partner CANNOT read the object', '0', n::text, n = 0);
+
+  -- ...but an admin still can, or replace and delete stop working.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select count(*) into n from storage.objects o where o.name = v_path;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_storage_results values
+    ('DRAFT: admin CAN still read it', '1', n::text, n = 1);
+  update public.platform_topics set published = true where id = v_topic;
+
+  perform set_config('request.jwt.claims',
+    json_build_object('role', 'anon')::text, true);
+  perform set_config('role', 'anon', true);
+  begin
+    select count(*) into n from storage.objects o where o.name = v_path;
+  exception when others then n := 0; end;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_storage_results values
+    ('anon reads nothing', '0', n::text, n = 0);
+
+  -- The public booklets are a different bucket and must be untouched.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_partner, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select count(*) into n from public.get_resource_download(v_booklet);
+  perform set_config('role', 'postgres', true);
+  insert into _0029_storage_results values
+    ('booklet download still works', '1', n::text, n = 1);
+end;
+$fn$;
+
+select pg_temp.run_0029_storage();
+select * from _0029_storage_results order by scenario;
+-- EXPECT: pass = true on all five. The FIRST row is the regression guard — if
+-- it fails, the policy is too tight and no partner can download anything.
+
+rollback;
+
+-- ===========================================================================
+-- 7c) SAVE MUST NOT DESTROY WHAT THE SCREEN CANNOT EDIT.
+--
+-- admin_update_platform_section takes 13 parameters; the Pages screen sends 8.
+-- admin_upsert_platform_topic defaults icon to 'sprig'; the Focus areas screen
+-- renders no icon field. Both originally wrote their parameters unconditionally,
+-- so an ordinary Save nulled five seeded section columns and flattened a topic's
+-- icon. Found by the exit-gate review; these are the regression guards.
+-- ===========================================================================
+begin;
+
+create temporary table _0029_save_results (
+  scenario text, expected text, observed text, pass boolean
+) on commit drop;
+
+create or replace function pg_temp.run_0029_save_safety()
+returns void
+language plpgsql
+as $fn$
+declare
+  v_admin uuid; v_topic uuid; v_icon0 text; v_icon text;
+  v_sub text; v_jdesc text; v_jicon text;
+begin
+  select user_id into v_admin from public.admins limit 1;
+  select id, icon into v_topic, v_icon0 from public.platform_topics order by slug limit 1;
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+
+  -- exactly what the Pages screen sends: 8 of 13 parameters
+  perform public.admin_update_platform_section(
+    'setup', 'Setup', 'A new heading', null, null, 'A new intro',
+    null, null, null, null, null, null, null);
+
+  -- exactly what the Focus areas screen sends: no icon
+  perform public.admin_upsert_platform_topic(
+    v_topic, null, null, 'Renamed by the verification script',
+    null, null, null, null, null, null, null, null, null, null);
+
+  perform set_config('role', 'postgres', true);
+
+  select subtitle, journey_desc, journey_icon into v_sub, v_jdesc, v_jicon
+  from public.platform_sections where slug = 'setup';
+  select icon into v_icon from public.platform_topics where id = v_topic;
+
+  insert into _0029_save_results values
+    ('section subtitle survives a Save',     'kept',
+     case when v_sub   is null then 'NULLED' else 'kept' end, v_sub   is not null),
+    ('section journey_desc survives a Save', 'kept',
+     case when v_jdesc is null then 'NULLED' else 'kept' end, v_jdesc is not null),
+    ('section journey_icon survives a Save', 'kept',
+     case when v_jicon is null then 'NULLED' else 'kept' end, v_jicon is not null),
+    ('topic icon survives an edit', v_icon0, v_icon, v_icon = v_icon0);
+end;
+$fn$;
+
+select pg_temp.run_0029_save_safety();
+select * from _0029_save_results order by scenario;
+-- EXPECT: pass = true on all four.
+
+rollback;
+
+-- ===========================================================================
 -- 8) Post-rollback: the database is exactly as it was. Nothing above survived.
 -- ===========================================================================
 select

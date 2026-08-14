@@ -263,7 +263,10 @@ function FocusAreaForm({
   topic: TopicRow | null;
   guide: GuideBody | null;
 }) {
-  const router = useRouter();
+  /* No useRouter here: the two children below refresh themselves. Passing an
+     inline `onDone={() => router.refresh()}` from this component is what caused
+     the refresh loop the exit-gate review found — a new function identity every
+     render, in an effect's dependency list. */
   const [state, formAction, pending] = React.useActionState(
     saveFocusAreaAction,
     INITIAL,
@@ -527,9 +530,9 @@ function FocusAreaForm({
       </form>
 
       {topic ? (
-        <TopicDangerZone topic={topic} onDone={() => router.refresh()} />
+        <TopicDangerZone topic={topic} />
       ) : (
-        <NewGroup section={section} onDone={() => router.refresh()} />
+        <NewGroup section={section} />
       )}
     </div>
   );
@@ -537,13 +540,8 @@ function FocusAreaForm({
 
 /* Publish / unpublish and delete, kept apart from the edit form so a Save can
    never publish something by accident and vice versa. */
-function TopicDangerZone({
-  topic,
-  onDone,
-}: {
-  topic: TopicRow;
-  onDone: () => void;
-}) {
+function TopicDangerZone({ topic }: { topic: TopicRow }) {
+  const router = useRouter();
   const [pubState, pubAction, pubPending] = React.useActionState(
     setFocusAreaPublishedAction,
     INITIAL,
@@ -555,8 +553,11 @@ function TopicDangerZone({
   const [confirming, setConfirming] = React.useState(false);
 
   React.useEffect(() => {
-    if (pubState.ok || delState.ok) onDone();
-  }, [pubState.ok, delState.ok, onDone]);
+    if (pubState.ok || delState.ok) router.refresh();
+    /* router is stable across renders; an inline onDone prop was NOT, so this
+       effect re-ran on every render and, once ok stayed true, refreshed in a
+       loop. Found by the PP6a exit-gate review, 2026-08-14. */
+  }, [pubState.ok, delState.ok, router]);
 
   return (
     <div style={{ marginTop: "var(--space-8)" }}>
@@ -644,13 +645,8 @@ function TopicDangerZone({
 /* Adding a group is rare — under D-PP-n each section has exactly one and the
    page renders it as a flat list. It exists so a section can be split later
    without a developer. */
-function NewGroup({
-  section,
-  onDone,
-}: {
-  section: string;
-  onDone: () => void;
-}) {
+function NewGroup({ section }: { section: string }) {
+  const router = useRouter();
   const [state, action, pending] = React.useActionState(
     createGroupAction,
     INITIAL,
@@ -658,8 +654,8 @@ function NewGroup({
   const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
-    if (state.ok) onDone();
-  }, [state.ok, onDone]);
+    if (state.ok) router.refresh();
+  }, [state.ok, router]);
 
   if (!open) {
     return (

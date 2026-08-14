@@ -75,7 +75,18 @@ drop policy if exists "resources_bucket_delete_admin" on storage.objects;
 drop policy if exists "resources_bucket_update_admin" on storage.objects;
 drop policy if exists "resources_bucket_insert_admin" on storage.objects;
 drop policy if exists "resources_bucket_select_admin" on storage.objects;
--- resources_bucket_select_approved (0017) is NOT touched — it was never ours.
+
+-- Restore the 0017 partner read policy verbatim. 0029 narrowed it so a Draft
+-- focus area's FILES are unreachable, not merely unlisted; reversing 0029 puts
+-- the wide version back, which is correct only because reversing 0029 also
+-- removes the `published` column that made Draft possible in the first place.
+drop policy if exists "resources_bucket_select_approved" on storage.objects;
+create policy "resources_bucket_select_approved"
+  on storage.objects for select to authenticated
+  using (bucket_id = 'resources' and public.is_approved());
+
+-- Dropped AFTER the policy that referenced it.
+drop function if exists public.is_published_object(text);
 
 alter table public.resources drop constraint if exists resources_private_needs_code;
 alter table public.resources drop constraint if exists resources_guide_needs_element;

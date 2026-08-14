@@ -42,7 +42,7 @@ export type TopicOption = {
 };
 
 const INITIAL: AdminContentState = { ok: false, message: null };
-const MAX_MB = 10;
+const MAX_MB = 4; // must match MAX_BYTES in src/lib/admin/file-actions.ts
 const ALLOWED_EXT = ["docx", "pdf"];
 
 function extOf(name: string) {

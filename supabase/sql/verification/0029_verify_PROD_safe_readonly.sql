@@ -190,13 +190,32 @@ from pg_policy
 where polrelid = 'storage.objects'::regclass
 order by polname;
 -- EXPECT: five rows.
---   resources_bucket_select_approved [r]  bucket_id = 'resources' AND is_approved()   <- 0017, UNCHANGED
+--   resources_bucket_select_approved [r]  bucket_id = 'resources' AND is_approved()
+--                                         AND is_published_object(name)  <- NARROWED by 0029
 --   resources_bucket_select_admin    [r]  bucket_id = 'resources' AND is_admin()
 --   resources_bucket_insert_admin    [a]                                              with check ... is_admin()
 --   resources_bucket_update_admin    [w]  bucket_id = 'resources' AND is_admin()      with check ... is_admin()
 --   resources_bucket_delete_admin    [d]  bucket_id = 'resources' AND is_admin()
--- If resources_bucket_select_approved has changed at all, STOP: 0029 must not
--- touch it.
+-- resources_bucket_select_approved IS deliberately changed by 0029, and this is
+-- the check that it changed CORRECTLY. 0017 granted approved partners SELECT on
+-- every object in the private bucket with no link to `published`, so a Draft
+-- focus area's FILES were reachable straight from the Storage API, bypassing all
+-- four filtered RPCs. If this policy still reads is_approved() alone, the hole is
+-- open: Draft is a boundary for rows and an illusion for bytes.
+--
+-- The test goes through public.is_published_object(), which MUST be SECURITY
+-- DEFINER: a policy expression runs as the INVOKING role and public.resources is
+-- RLS default-deny, so an inline join would match nothing and deny every
+-- download instead. Checked below.
+
+select p.proname,
+       p.prosecdef                                      as security_definer,
+       array_to_string(p.proconfig, ',')                as config,
+       has_function_privilege('anon', p.oid, 'execute') as anon_execute
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.proname = 'is_published_object';
+-- EXPECT: one row; security_definer = true, config = search_path="",
+--         anon_execute = false.
 
 -- The file lifecycle, and the fact that it cannot leak a storage path to a
 -- browser: admin_list_resource_files deliberately does NOT return storage_path.

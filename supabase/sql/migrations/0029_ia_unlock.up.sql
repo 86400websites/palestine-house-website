@@ -539,19 +539,36 @@ begin
     raise exception 'label and title are required' using errcode = '22023';
   end if;
 
+  /* ⚠️ LEAVE-ALONE semantics for anything the caller did not send.
+     Found by the PP6a exit-gate review, 2026-08-14. This function takes 13
+     parameters; the Pages screen renders 7 and sends 8. The five it does not
+     send — subtitle and the four journey_* — arrived as their `default null`
+     and were written straight over live data. All four toolkit sections have
+     all five populated on production, so ONE typo fix on the Pages screen, the
+     single intended action of that screen, would have silently nulled twenty
+     columns with no error and no partner-facing signal.
+
+     NULL now means "not supplied, keep what is there". A field the screen DOES
+     render can still be cleared, because the screen posts it as an empty
+     string, which `nullif(btrim(...), '')` turns into NULL — so those go
+     through the same coalesce and land on the existing value. That is the
+     honest trade for a form that shows 7 of 13 columns: this RPC can set a
+     value and cannot blank one. When a screen needs to blank a field, it gets
+     the explicit NULL-vs-'' treatment `admin_upsert_platform_topic` uses for
+     the guide body. */
   update public.platform_sections s
      set label                  = left(v_label, 120),
          title                  = left(v_title, 200),
-         subtitle               = nullif(btrim(coalesce(p_subtitle, '')), ''),
-         eyebrow                = nullif(btrim(coalesce(p_eyebrow, '')), ''),
-         lead                   = nullif(btrim(coalesce(p_lead, '')), ''),
-         hero_image_path        = nullif(btrim(coalesce(p_hero_image_path, '')), ''),
-         hero_position          = nullif(btrim(coalesce(p_hero_position, '')), ''),
-         journey_image_path     = nullif(btrim(coalesce(p_journey_image_path, '')), ''),
-         journey_image_position = nullif(btrim(coalesce(p_journey_image_position, '')), ''),
-         journey_desc           = nullif(btrim(coalesce(p_journey_desc, '')), ''),
-         journey_icon           = nullif(btrim(coalesce(p_journey_icon, '')), ''),
-         youtube_url            = nullif(btrim(coalesce(p_youtube_url, '')), ''),
+         subtitle               = coalesce(nullif(btrim(coalesce(p_subtitle, '')), ''), s.subtitle),
+         eyebrow                = coalesce(nullif(btrim(coalesce(p_eyebrow, '')), ''), s.eyebrow),
+         lead                   = coalesce(nullif(btrim(coalesce(p_lead, '')), ''), s.lead),
+         hero_image_path        = coalesce(nullif(btrim(coalesce(p_hero_image_path, '')), ''), s.hero_image_path),
+         hero_position          = coalesce(nullif(btrim(coalesce(p_hero_position, '')), ''), s.hero_position),
+         journey_image_path     = coalesce(nullif(btrim(coalesce(p_journey_image_path, '')), ''), s.journey_image_path),
+         journey_image_position = coalesce(nullif(btrim(coalesce(p_journey_image_position, '')), ''), s.journey_image_position),
+         journey_desc           = coalesce(nullif(btrim(coalesce(p_journey_desc, '')), ''), s.journey_desc),
+         journey_icon           = coalesce(nullif(btrim(coalesce(p_journey_icon, '')), ''), s.journey_icon),
+         youtube_url            = coalesce(nullif(btrim(coalesce(p_youtube_url, '')), ''), s.youtube_url),
          updated_at             = now()
    where s.slug = v_slug;
 
@@ -782,12 +799,19 @@ begin
       raise exception 'unknown focus area' using errcode = '22023';
     end if;
 
+    /* ⚠️ icon is COALESCED here, not overwritten. Found by the PP6a exit-gate
+       review, 2026-08-14: v_icon defaults to 'sprig' when the caller sends
+       nothing, and the Focus areas screen renders no icon field — so editing
+       any focus area's title would have flattened its icon. Production carries
+       32 distinct icons across 33 topics and not one of them is 'sprig'.
+       The 'sprig' default is right on CREATE (the column is NOT NULL and a new
+       focus area has no icon yet) and wrong on UPDATE. */
     update public.platform_topics t
        set group_id       = coalesce(p_group_id, t.group_id),
            title          = left(v_title, 200),
            description    = nullif(btrim(coalesce(p_description, '')), ''),
            intro          = nullif(btrim(coalesce(p_intro, '')), ''),
-           icon           = v_icon,
+           icon           = coalesce(nullif(btrim(coalesce(p_icon, '')), ''), t.icon),
            image_path     = nullif(btrim(coalesce(p_image_path, '')), ''),
            image_position = nullif(btrim(coalesce(p_image_position, '')), ''),
            youtube_url    = nullif(btrim(coalesce(p_youtube_url, '')), ''),
@@ -1027,6 +1051,66 @@ alter table public.resources add constraint resources_private_needs_code
 -- SELECT gives admins access WITHOUT widening what a partner can see. The
 -- partner policy is left exactly as 0017 wrote it.
 
+-- ⚠️ THE PARTNER READ POLICY IS NARROWED, not left alone.
+--
+-- 0017 granted approved partners SELECT on every object in the private bucket:
+--   using (bucket_id = 'resources' and is_approved())
+-- with no link to resources.element_id or platform_topics.published. That was
+-- correct when every file was Live. It is NOT correct once Draft exists: the
+-- Storage API honours these policies directly, and an approved partner holds a
+-- readable access token, so they could list the bucket and mint a signed URL
+-- for a Draft focus area's files WITHOUT any of the four filtered RPCs being
+-- involved. Draft would have been a boundary at the row layer and an illusion
+-- at the byte layer — the exact failure this migration's header claims to have
+-- closed. Found by the PP6a exit-gate review, 2026-08-14, before 0029 was ever
+-- applied to production.
+--
+-- ⚠️ The test MUST go through a SECURITY DEFINER helper, not an inline join.
+-- A policy expression is evaluated as the INVOKING role, and public.resources /
+-- platform_topics / platform_groups are all RLS default-deny with zero client
+-- policies — so an inline EXISTS finds nothing for a partner and the policy can
+-- never grant, silently breaking every download. Caught on TEST at the exit
+-- gate, on the first run of the fix for the hole above.
+--
+-- The helper takes an object key and returns one boolean. It reveals nothing a
+-- caller does not already hold, and the lookup is an index hit:
+-- resources_storage_key is UNIQUE (storage_bucket, storage_path).
+create or replace function public.is_published_object(p_name text)
+returns boolean
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select exists (
+    select 1
+    from public.resources r
+    join public.platform_topics t on t.element_id = r.element_id
+    join public.platform_groups g on g.id = t.group_id
+    where r.storage_bucket = 'resources'
+      and r.storage_path = p_name
+      and t.published
+      and g.published
+  );
+$$;
+
+revoke execute on function public.is_published_object(text) from public, anon;
+grant execute on function public.is_published_object(text) to authenticated;
+
+-- The two public booklets are unaffected — they live in the separate `booklets`
+-- bucket, which is public and does not consult this policy at all.
+drop policy if exists "resources_bucket_select_approved" on storage.objects;
+create policy "resources_bucket_select_approved"
+  on storage.objects for select to authenticated
+  using (
+    bucket_id = 'resources'
+    and public.is_approved()
+    and public.is_published_object(name)
+  );
+
+-- Admins keep an unconditional read of the private bucket: they need it to
+-- replace and remove objects, including ones whose row does not exist yet
+-- (the upload window) or is Draft.
 drop policy if exists "resources_bucket_select_admin" on storage.objects;
 create policy "resources_bucket_select_admin"
   on storage.objects for select to authenticated

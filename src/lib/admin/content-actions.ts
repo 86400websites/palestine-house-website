@@ -25,7 +25,16 @@ const UUID_RE =
    admin_upsert_element — 11 letters x 3 = exactly 33 slots, all occupied. The
    other two came off in 0029; this one has to match or the migration changes
    nothing a form can reach. Same shape as the DB constraint, deliberately:
-   lowercase kebab, 1-80 chars. */
+   kebab-case in lower case, 1-80 chars.
+
+   (Those last two words are separated on purpose — run together they spell a
+   Tailwind text-transform utility. Tailwind v4 scans the raw text of source
+   files, so the word alone in this comment emitted a real rule into the
+   stylesheet every visitor downloads. It is the same rule PP4 recorded as its
+   cautionary example, which arrived that time from docs/ and was fixed with an
+   @source guard; src/ cannot be excluded, so here the fix is to not write it.
+   Caught by the rule-level bundle diff at the PP6a exit gate. See also
+   globals.css, where the guards for docs/ and supabase/ live.) */
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/i;
 
 export type AdminContentState = { ok: boolean; message: string | null };

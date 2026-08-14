@@ -51,11 +51,22 @@ const ALLOWED = new Map<string, string>([
   ["pdf", "application/pdf"],
 ]);
 
-/* 10 MB, and next.config.ts raises the server-action body limit to 12 MB to
-   match with headroom for multipart overhead. The two numbers MUST move
-   together: a UI limit above the body limit turns an ordinary large file into
-   an opaque framework error instead of a sentence the owner can act on. */
-const MAX_BYTES = 10 * 1024 * 1024;
+/* 4 MB.
+   THREE limits have to agree, not two — corrected at the PP6a exit gate after
+   the review pointed out the third:
+     - this one, which produces a sentence the owner can act on;
+     - next.config.ts serverActions.bodySizeLimit, which must exceed it to cover
+       multipart overhead (set to 4.5mb);
+     - and the DEPLOY TARGET. Vercel rejects a serverless function request body
+       over ~4.5 MB with a 413 before our code runs at all, and
+       bodySizeLimit cannot raise a platform edge limit. A 10 MB limit here
+       would have promised something the host refuses, and the owner would have
+       met a framework error instead of a sentence — exactly what the original
+       comment said it was preventing.
+   The delivered content is 183–188 KB per file, so 4 MB is ~20x headroom. If a
+   genuinely large file is ever needed, the fix is a direct-to-storage signed
+   upload URL, which never passes through a function body at all. */
+const MAX_BYTES = 4 * 1024 * 1024;
 
 function slugify(value: string): string {
   return value
@@ -92,7 +103,7 @@ function checkFile(file: File | null): Checked {
   if (file.size > MAX_BYTES) {
     return {
       ok: false,
-      message: "That file is over 10 MB. Please save a smaller version.",
+      message: "That file is over 4 MB. Please save a smaller version.",
     };
   }
   return { ok: true, ext };
@@ -175,7 +186,11 @@ const uploadSchema = z.object({
   elementId: z.string().regex(UUID_RE),
   kind: z.enum(["guide", "template"]),
   title: z.string().trim().min(1).max(300),
-  code: z.string().trim().max(16).optional(),
+  code: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z0-9][A-Za-z0-9-]{0,15}$/)
+    .optional(),
 });
 
 export async function uploadFileAction(
@@ -206,9 +221,14 @@ export async function uploadFileAction(
   const elementSlug = await elementSlugFor(guard.supabase, d.elementId);
   if (!elementSlug) return { ok: false, message: GENERIC };
 
+  /* slugify the code, exactly as the replace path does. Raw, it is part of a
+     storage key: a code containing "../" would climb out of the focus-area
+     folder, 0029's path check would then reject the registration, and the
+     compensating remove() would use the un-normalised key and match nothing —
+     orphaned bytes with no row. Found by the PP6a exit-gate review. */
   const path = objectKey(
     elementSlug,
-    d.kind === "guide" ? "guide" : (d.code as string).toLowerCase(),
+    d.kind === "guide" ? "guide" : slugify(d.code as string) || "file",
     d.title,
     checked.ext,
   );
