@@ -308,7 +308,202 @@ select * from _0029_verify_results order by section, scenario;
 rollback;
 
 -- ===========================================================================
--- 6) Post-rollback: the database is exactly as it was. Nothing above survived.
+-- 6) THE IA WRITE PATH (pass 2), rollback-only.
+--
+-- Before 0029 there was nothing here: zero admin_*_platform_* functions, and
+-- all three tables RLS default-deny with zero client policies — readable, and
+-- completely unwritable. Everything below is new, so every guard is tested,
+-- not assumed. The four that keep the owner from breaking the platform from a
+-- form are the delete rules; they are enforced in the DATABASE, not the UI.
+-- ===========================================================================
+begin;
+
+create temporary table _0029_write_results (
+  scenario text, expected text, observed text, pass boolean
+) on commit drop;
+
+create or replace function pg_temp.run_0029_write_path()
+returns void
+language plpgsql
+as $fn$
+declare
+  v_admin uuid; v_approved uuid;
+  v_group uuid; v_topic uuid; v_element uuid;
+  v_existing_group uuid; v_topic_with_files uuid;
+  n int; r text; ids uuid[]; cnt int; s_first int; s_last int;
+  el_before int; el_after int;
+begin
+  select user_id into v_admin from public.admins limit 1;
+  select id into v_approved from public.profiles where is_approved order by id limit 1;
+  select id into v_existing_group from public.platform_groups where section_slug = 'setup' limit 1;
+  select t.id into v_topic_with_files
+    from public.platform_topics t
+   where exists (select 1 from public.resources r where r.element_id = t.element_id)
+   limit 1;
+  select count(*) into el_before from public.elements;
+  if v_admin is null then
+    raise exception '0029 verification needs at least one admins row on TEST';
+  end if;
+
+  -- --- an approved partner who is NOT an admin is refused -------------------
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_approved, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  begin
+    perform public.admin_upsert_platform_topic(
+      null, v_existing_group, 'x-test', 'X', null, null, null, null, null, null, 0, false, 'X1', null);
+    r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  -- RLS default-deny: an authenticated caller cannot even read the table directly
+  select count(*) into cnt from public.platform_topics;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_write_results values
+    ('non-admin write refused', 'not authorized', r, r = 'not authorized'),
+    ('RLS: direct table read denied', '0', cnt::text, cnt = 0);
+
+  -- --- create a Draft group + a Draft focus area (two tables, one call) -----
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  v_group := public.admin_upsert_platform_group(
+    null, 'setup', 'setup-focus-areas', 'Setup', 'The five things to do first', 0, false);
+  v_topic := public.admin_upsert_platform_topic(
+    null, v_group, 'get-legally-ready', 'Get Legally Ready',
+    'Register the entity, sign the lease, get insured.',
+    'Most Houses can do this in six weeks.', 'scale', null, null, null, 10, false, '1.1',
+    '# Step 1. Register Our Local Entity');
+  begin
+    perform public.admin_upsert_platform_topic(
+      null, v_group, 'get-legally-ready', 'Dup', null, null, null, null, null, null, 0, false, '1.9', null);
+    r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  perform set_config('role', 'postgres', true);
+
+  select element_id into v_element from public.platform_topics where id = v_topic;
+  select count(*) into n from public.elements
+   where id = v_element and slug = 'get-legally-ready';
+  select count(*) into el_after from public.elements;
+  insert into _0029_write_results values
+    ('group created',                'uuid', coalesce(v_group::text, 'NULL'), v_group is not null),
+    ('focus area created',           'uuid', coalesce(v_topic::text, 'NULL'), v_topic is not null),
+    ('elements row created with it', '1',    n::text,        n = 1),
+    ('elements count + 1', (el_before + 1)::text, el_after::text, el_after = el_before + 1),
+    -- platform_topics.slug is UNIQUE GLOBALLY, and the old 33 keep their slugs
+    -- until 0030, so a collision is realistic and must never surface as 23505.
+    ('duplicate slug refused', 'slug in use', r, r = 'slug in use');
+
+  -- --- invisible while Draft, visible once Live -----------------------------
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_approved, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select count(*) into n from public.get_platform_topics();
+  perform set_config('role', 'postgres', true);
+  insert into _0029_write_results values
+    ('new Draft focus area invisible', '33', n::text, n = 33);
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  perform public.admin_upsert_platform_group(v_group, null, null, 'Setup', null, 0, true);
+  perform public.admin_set_platform_topic_published(v_topic, true);
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_approved, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select count(*) into n from public.get_platform_topics();
+  perform set_config('role', 'postgres', true);
+  insert into _0029_write_results values
+    ('published -> visible as the 34th', '34', n::text, n = 34);
+
+  -- --- the delete guards ----------------------------------------------------
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  begin perform public.admin_delete_platform_topic(v_topic); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_write_results values
+    ('Live focus area cannot be deleted', 'live focus area', r, r = 'live focus area');
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  begin perform public.admin_delete_platform_group(v_group); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_write_results values
+    ('Live group cannot be deleted', 'live group', r, r = 'live group');
+
+  -- A focus area with files must refuse: resources_element_id_fkey is
+  -- ON DELETE SET NULL, so deleting it would orphan private files that then
+  -- vanish from every grid while still existing in Storage.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  perform public.admin_set_platform_topic_published(v_topic_with_files, false);
+  begin perform public.admin_delete_platform_topic(v_topic_with_files); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  perform public.admin_set_platform_topic_published(v_topic_with_files, true);
+  perform set_config('role', 'postgres', true);
+  insert into _0029_write_results values
+    ('focus area with files refuses delete', 'focus area has files', r,
+     r = 'focus area has files');
+
+  -- --- Draft it, delete it, and the elements row goes too -------------------
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  perform public.admin_set_platform_topic_published(v_topic, false);
+  perform public.admin_delete_platform_topic(v_topic);
+  perform set_config('role', 'postgres', true);
+  select count(*) into el_after from public.elements;
+  insert into _0029_write_results values
+    ('Draft delete removes the element too', el_before::text, el_after::text,
+     el_after = el_before);
+
+  -- --- a group with focus areas in it refuses (FK is ON DELETE RESTRICT) ----
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  perform public.admin_upsert_platform_group(v_existing_group, null, null, 'Setup toolkit', null, null, false);
+  begin perform public.admin_delete_platform_group(v_existing_group); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  perform public.admin_upsert_platform_group(v_existing_group, null, null, 'Setup toolkit', null, null, true);
+  begin perform public.admin_update_platform_section('nope', 'L', 'T'); r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  select count(*) into n from public.admin_list_platform_topics();
+  perform set_config('role', 'postgres', true);
+  insert into _0029_write_results values
+    ('non-empty group refuses delete', 'group not empty', r, r = 'group not empty'),
+    ('admin list returns every topic', '33', n::text, n = 33);
+
+  -- --- reorder ---------------------------------------------------------------
+  -- ids are gathered as the OWNER: an authenticated caller cannot read the
+  -- table at all (proved above), which is the point of RPC-only access.
+  select array_agg(id order by sort_order desc) into ids
+    from public.platform_topics where group_id = v_existing_group;
+  n := array_length(ids, 1);
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  cnt := public.admin_reorder_platform_topics(ids);
+  perform set_config('role', 'postgres', true);
+  select sort_order into s_first from public.platform_topics where id = ids[1];
+  select sort_order into s_last  from public.platform_topics where id = ids[n];
+  insert into _0029_write_results values
+    ('reorder touched every row',  n::text,           cnt::text,     cnt = n),
+    ('reorder: first sort = 0',    '0',               s_first::text, s_first = 0),
+    ('reorder: last sort = (n-1)*10', ((n-1)*10)::text, s_last::text,  s_last = (n-1)*10);
+end;
+$fn$;
+
+select pg_temp.run_0029_write_path();
+select * from _0029_write_results order by scenario;
+-- EXPECT: pass = true on every row.
+
+rollback;
+
+-- ===========================================================================
+-- 7) Post-rollback: the database is exactly as it was. Nothing above survived.
 -- ===========================================================================
 select
   (select count(*) from public.elements)                    as elements,

@@ -53,7 +53,29 @@ end;
 $guard$;
 
 -- ---------------------------------------------------------------------------
--- 1) Draft/Live goes. DROP COLUMN never fails on data, but it must happen
+-- 1) The IA write path goes FIRST — before the `published` columns it reads,
+--    so no surviving function ever references a dropped column. Every one of
+--    these is new in 0029; there was no admin write path for platform_sections
+--    / platform_groups / platform_topics before it, so dropping them restores
+--    the pre-0029 state exactly rather than reverting to an older version.
+-- ---------------------------------------------------------------------------
+drop function if exists public.admin_reorder_platform_groups(uuid[]);
+drop function if exists public.admin_reorder_platform_topics(uuid[]);
+drop function if exists public.admin_delete_platform_topic(uuid);
+drop function if exists public.admin_set_platform_topic_published(uuid, boolean);
+drop function if exists public.admin_upsert_platform_topic(
+  uuid, uuid, text, text, text, text, text, text, text, text, integer, boolean, text, text);
+drop function if exists public.admin_delete_platform_group(uuid);
+drop function if exists public.admin_upsert_platform_group(
+  uuid, text, text, text, text, integer, boolean);
+drop function if exists public.admin_update_platform_section(
+  text, text, text, text, text, text, text, text, text, text, text, text, text);
+drop function if exists public.admin_list_platform_topics();
+drop function if exists public.admin_list_platform_groups();
+drop function if exists public.admin_list_platform_sections();
+
+-- ---------------------------------------------------------------------------
+-- 2) Draft/Live goes. DROP COLUMN never fails on data, but it must happen
 --    BEFORE the RPCs are restored, so no restored function ever references a
 --    column mid-transaction.
 -- ---------------------------------------------------------------------------
