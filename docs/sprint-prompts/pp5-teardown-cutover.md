@@ -73,6 +73,20 @@ typecheck ✅ · lint ✅ · build ✅ (**41 routes**, from 52)
 - **PROD invariants re-verified read-only** (`supabase-prod-readonly`, no write): 297 in-grid templates · 0 wrong-bucket · 2 public booklets · 33 topics / 10 groups / 5 sections / 33 elements · 0 orphan guides · anon `EXECUTE` **false** and `is_approved` gating **present** on every read RPC (`get_platform_sections/topics`, `get_element`, `get_resources`, `member_programming_sessions`) · `set_my_account` correctly ungated on approval and anon-denied · the four dormant tables untouched (818 checklist items, 33 academy modules, 0 sessions).
 - **Not verified: the signed-in visual.** No `.env.local` in this checkout, so the Supabase client throws before any gate runs and `loading.tsx` has already committed a 200 — which is why gated routes appear to return 200 to an anonymous curl. Unchanged from PP2/PP3/PP4; PP5 touched no gate logic.
 
+## Independent review (2026-08-14) — "request changes", NO blocking issue
+
+**Verdict:** no blocking issue, no gating-check failure, no runtime approval bypass. One Medium non-blocking finding, which was correct and is fixed on-branch.
+
+**The finding: my own 5g rewrite narrowed a security rule.** The pre-PP5 blocking check read *"Workspace RPCs enforce `is_approved` server-side"* — a blanket rule. My rewrite made it more specific and thereby less complete: it enumerated four **read** RPCs, which silently dropped the `submit_support_request` write and the `get_resource_download` signed-URL issuer out of the checklist's scope. `src/lib/support/actions.ts` authenticates the caller but delegates approval enforcement to the RPC, so a future SQL regression could have let a pending user submit a request and trigger an HQ email while still satisfying the checklist as written.
+
+**No present bypass** — confirmed independently and then re-confirmed against production before fixing: `submit_support_request` and `get_resource_download` are both `anon EXECUTE = false` and both approval-gated in their function bodies (`0019` rejects unapproved callers). The defect was in the prose, not the code.
+
+**Fix (`AGENTS.md` + `SECURITY-CHECKLIST.md` §15):** the blanket requirement is restored — *every* platform RPC, read **and** write — with the function names demoted to **examples of the rule** and the single exception (owner-scoped account/profile RPCs, `set_my_account` / `get_my_profile`) named explicitly. §15 also now carries the reason in one line, so the next editor does not repeat it: **an enumeration in a security checklist silently becomes an allowlist, and a new RPC must be covered the day it is written.**
+
+**The general lesson, which is the one worth keeping:** rewriting a security document is a code change with no compiler. Making a rule concrete is usually an improvement; making it *finite* is usually a regression. Prefer "every X must Y, except Z" over any list of names.
+
+The review's other observations match this record's own: no signed-in Preview walkthrough was possible, the repo has no test script, and D-PP-i remains outstanding for PP6 by design. Its production check was inferred from shipped SQL rather than queried; the direct read is in "Checks & results" above (297 in-grid / 0 wrong-bucket).
+
 ## Deviations & learnings
 
 - **The written plan was wrong in three places, and each was caught by checking a claim rather than trusting it.** This is the sprint's real lesson, and it is the same one PP3 and PP4 recorded in different clothes.

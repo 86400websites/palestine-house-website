@@ -64,7 +64,7 @@
 ## Palestine House gating checks (blocking)
 
 - [ ] 🔴 Every gated route has an explicit **server-side session + `is_approved`** check; `/admin/*` additionally checks the `admins` table server-side. The one deliberate exception is **`/account`**, which is session-gated only so a pending partner can manage their own row — flag any *other* route missing its approval check
-- [ ] 🔴 Platform RPCs (`get_platform_sections/topics`, `get_element`, `get_resources`) enforce `is_approved` server-side; pending sessions can resolve only profile/approval status, and the search index inherits this by being built from the same reads
+- [ ] 🔴 **Every** platform RPC — read *and* write — enforces `is_approved` server-side. The only exception is an **owner-scoped account/profile RPC** (`set_my_account`, `get_my_profile`), which is scoped to `auth.uid()` and can touch nothing but the caller's own row. Pending sessions can resolve only profile/approval status. This is deliberately a blanket rule, not a list: the reads (`get_platform_sections/topics`, `get_element`, `get_resources`), the writes (`submit_support_request`) and the signed-URL issuer (`get_resource_download`) are **examples**, and a new RPC is covered the day it is written. The search index inherits the rule by being built from the same gated reads
 - [ ] 🔴 Public projections expose titles/overviews only — never gated bodies, templates, or the retired-but-still-present checklist/academy/session tables
 - [ ] 🔴 Template/resource downloads go through server-issued **signed URLs** from a private bucket, to approved users only; no storage path or bucket name reaches the client
 - [ ] 🔴 No quiz/certificate/ops features introduced; no second signup path beside `/apply`
