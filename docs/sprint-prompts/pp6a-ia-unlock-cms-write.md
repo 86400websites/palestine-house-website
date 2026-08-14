@@ -59,6 +59,79 @@ Nine regression tests were added for these across §7b and §7c of the TEST veri
 
 Six more regression tests cover these in §7d.
 
+## Prompt used
+
+<details><summary>Exact implementation prompt (from the <code>/sprint-prompt</code> plan, 2026-08-14)</summary>
+
+```text
+Sprint: PP6a — IA unlock + CMS write layer (+ migration 0029), Stage 4
+Branch: claude/sprint-pp6a-ia-unlock-cms-write (from main, after PP5 merges;
+then merge in docs/pp6-replan)
+
+Goal: the owner delivered the real content — 22 focus areas, 88 templates, zero
+overlap with the 33/297 now live. Before any of it can be loaded, the platform
+must be able to hold it and the owner must be able to manage it. This sprint
+ships that machinery and MOVES NO CONTENT. Three things it must achieve: remove
+the 33-slot ceiling; add a Draft/Live state so PP6b/PP6c can build invisibly and
+cut over reversibly; and give the owner a real write path — today the admin RPCs
+cannot edit code/doc_key/storage_path (0026), cannot list a Storage object as an
+admin (0017 grants private-bucket SELECT to is_approved() only), and delete rows
+while deliberately orphaning their files (0023). It also closes the D-PP-i
+storage_bucket guard that SECURITY-CHECKLIST §15 has recorded as owed since PP3.
+
+Execute in gated sub-steps (one owner gate after each):
+ 6a-a  Tracker flip + rebase. VERIFY THE PLAN AGAINST THE REPO BEFORE TRUSTING
+       IT: every claim below was true on 2026-08-14 — re-grep each one.
+ 6a-b  0029 pass 1 — the unlock. Relax elements_slug_shape (the 33-slot ceiling)
+       and elements_focus_area_shape; add published to platform_topics AND
+       platform_groups; every member-facing read filters it; up + down + BOTH
+       verification scripts; prove the full down→up cycle on TEST.
+ 6a-c  0029 pass 2 — the IA write path. admin_upsert_platform_section/_group/
+       _topic + delete + reorder + admin_list_platform_* returning drafts.
+       Hardened SECURITY DEFINER throughout; prove anon/non-admin EXECUTE false.
+ 6a-d  0029 pass 3 — files, storage, and the guards. A real resource-file
+       lifecycle covering row AND object with a DEFINED compensation path;
+       storage.objects admin policies plus an admin read path; THE D-PP-i GUARDS,
+       IN THE RPC AND NOT THE UI. Prove by attempting each violation.
+ 6a-e  /admin/content restructured to Pages · Focus areas · Files · Admins;
+       delete the retired Videos/academy screen; ship the get_platform_sections
+       wrapper so Pages is not a dead screen.
+ 6a-f  Focus areas screen — eleven fields, Draft/Live, the eight unbreakable
+       rules. Never a path, id, bucket or JSON on any admin screen.
+ 6a-g  Files screen — one Guide slot, a Templates list. Uploads via server
+       actions with the USER-SESSION client; storage paths never client-side.
+ 6a-h  SectionExplorer renders a single-group section as a flat list (D-PP-n);
+       fix the FOCUS_AREAS missing-"K" bug.
+ 6a-i  Sprint exit gate — full-diff review, path-guard, CSS containment by
+       rule-level bundle diff, PROD invariants read-only, 0029 reversibility
+       re-proven, trackers, record.
+
+Per-step protocol: read the locked inputs first · re-verify every factual claim
+against the repo, because the plan is a hypothesis and the code is the truth ·
+smallest safe change · typecheck + lint + build · self-review the diff · commit
+AND push · report in ≤6 lines, then STOP and wait for "proceed".
+
+Database discipline: docs/WORKFLOW.md §14 + docs/SUPABASE-MCP-SAFETY.md.
+supabase-test is read/write; supabase-prod-readonly is READ-ONLY. Never write to
+production through any channel. 0027 and 0028 are IMMUTABLE. The owner applies
+0029 to PRODUCTION by hand at the merge gate — do not apply it.
+
+Palestine House rules this sprint touches directly:
+- The approval gate is blanket: EVERY platform RPC, read and write, enforces
+  is_approved() server-side. Adding a new RPC means covering it the day it is
+  written.
+- Every /admin/* route checks the admins table server-side.
+- Templates stay private-bucket + server-issued signed URL to approved users
+  only. Never a public URL, never a client-side storage path.
+- Retired surfaces, live tables: academy_modules, checklist_items,
+  checklist_progress and programming_sessions are still governed until PP7's
+  0031. Do not add a caller to any of them.
+```
+
+</details>
+
+> ⚠️ **The prompt above is the plan as written, and step 6a-a proved parts of it wrong.** The scope was amended at kickoff — six blocking corrections, one addition, one drop — before any SQL existed. Two examples of why the amendment mattered: the "33-slot ceiling" is enforced in **three** places, not the one the prompt names, so 6a-b as written would have changed nothing a form could reach; and "every member-facing read filters it" resolved to **four** RPCs, not the one the plan had in mind, the fourth being the only surface that hands out bytes. The amended scope is the PP6a row in `ROADMAP.md`; this block is kept because the delta between plan and reality is the useful part of the record.
+
 ## Checks & results
 
 typecheck ✅ · lint ✅ · build ✅ (41 routes)
