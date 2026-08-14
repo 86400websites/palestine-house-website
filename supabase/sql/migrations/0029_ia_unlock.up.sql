@@ -715,6 +715,12 @@ declare
   v_code    text := nullif(btrim(coalesce(p_element_code, '')), '');
   v_guide   text := (case when btrim(coalesce(p_simple_guide_md, '')) = ''
                           then null else left(p_simple_guide_md, 100000) end);
+  /* NULL and '' must mean different things, or the owner can never EMPTY the
+     guide — coalesce alone would treat a cleared textarea as "not supplied" and
+     silently restore the old text. Caught on TEST, 2026-08-14.
+       NULL -> the caller did not send the field: leave the body alone.
+       ''   -> the caller sent an empty field: clear the body. */
+  v_guide_supplied boolean := p_simple_guide_md is not null;
   v_id      uuid;
   v_element uuid;
 begin
@@ -795,7 +801,9 @@ begin
        set title           = left(v_title, 200),
            one_line        = nullif(btrim(coalesce(p_description, '')), ''),
            code            = coalesce(left(v_code, 16), e.code),
-           simple_guide_md = coalesce(v_guide, e.simple_guide_md),
+           simple_guide_md = case when v_guide_supplied
+                                  then v_guide
+                                  else e.simple_guide_md end,
            updated_at      = now()
      where e.id = v_element;
   end if;

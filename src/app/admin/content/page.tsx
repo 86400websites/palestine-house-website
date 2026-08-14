@@ -26,7 +26,7 @@ const SECTIONS = [
     desc: "The heading, intro and photo at the top of each page.",
   },
   {
-    href: "/admin/content/elements",
+    href: "/admin/content/focus-areas",
     title: "Focus areas",
     desc: "Each focus area's summary and its Simple guide.",
   },

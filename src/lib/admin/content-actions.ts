@@ -56,88 +56,6 @@ async function adminGuard(): Promise<Guard> {
 }
 
 // ---------------------------------------------------------------------------
-// Elements — save the topic guide (overview / simple guide / watch-out-for +
-// metadata). The form round-trips the structural fields (code / focus area /
-// sort order) so the upsert never loses them.
-// ---------------------------------------------------------------------------
-const elementSchema = z.object({
-  slug: z.string().trim().regex(SLUG_RE).max(80),
-  code: z.string().trim().min(1).max(16),
-  /* Optional since 0029: the A–K focus-area vocabulary belongs to the OLD
-     33-topic model. The 22 real focus areas have no A–K identity, and the DB
-     now stores NULL rather than a fabricated code. The legacy 33 keep theirs
-     and still round-trip through the hidden fields on the elements form. */
-  focusAreaCode: z.string().trim().regex(/^[A-K]$/i).optional(),
-  focusAreaName: z.string().trim().min(1).max(120).optional(),
-  title: z.string().trim().min(1).max(200),
-  oneLine: z.string().trim().max(500).optional(),
-  overviewMd: z.string().max(100000).optional(),
-  simpleGuideMd: z.string().max(100000).optional(),
-  watchOutForMd: z.string().max(100000).optional(),
-  sortOrder: z.coerce.number().int().min(0).max(100000).optional(),
-});
-
-export async function saveElementAction(
-  _prev: AdminContentState,
-  formData: FormData,
-): Promise<AdminContentState> {
-  const parsed = elementSchema.safeParse({
-    slug: formData.get("slug"),
-    code: formData.get("code"),
-    /* field() maps "" -> undefined, so a focus area with no A–K code posts an
-       empty hidden input and parses as absent rather than failing the regex. */
-    focusAreaCode: field(formData, "focusAreaCode"),
-    focusAreaName: field(formData, "focusAreaName"),
-    title: formData.get("title"),
-    oneLine: field(formData, "oneLine"),
-    overviewMd: field(formData, "overviewMd"),
-    simpleGuideMd: field(formData, "simpleGuideMd"),
-    watchOutForMd: field(formData, "watchOutForMd"),
-    sortOrder: field(formData, "sortOrder"),
-  });
-  if (!parsed.success) {
-    return { ok: false, message: "Please add a title before saving." };
-  }
-
-  const guard = await adminGuard();
-  if (!guard.ok) return { ok: false, message: guard.message };
-
-  const d = parsed.data;
-  const { error } = await guard.supabase.rpc("admin_upsert_element", {
-    p_slug: d.slug.toLowerCase(),
-    p_code: d.code,
-    p_focus_area_code: d.focusAreaCode?.toUpperCase() ?? null,
-    p_focus_area_name: d.focusAreaName ?? null,
-    p_title: d.title,
-    p_one_line: d.oneLine ?? null,
-    p_overview_md: d.overviewMd ?? null,
-    p_simple_guide_md: d.simpleGuideMd ?? null,
-    p_watch_out_for_md: d.watchOutForMd ?? null,
-    p_sort_order: d.sortOrder ?? 0,
-  });
-  if (error) return { ok: false, message: GENERIC };
-
-  revalidatePath("/admin/content/elements");
-  /* PP5 re-pointed these. An element's body now surfaces on exactly two kinds
-     of page: the four toolkit sections (its summary card) and its own guide
-     reader. The old targets — /plan, /food and the per-slug /elements/[slug] —
-     are deleted routes, and revalidating a path that no longer exists is a
-     silent no-op, which is the worst kind of stale.
-
-     All four sections, because this action edits an `elements` row and never
-     reads `platform_topics`, so it does not know which section the topic sits
-     in. The reader is revalidated by ROUTE rather than by path for the same
-     reason, and for a sharper one: its [topic] segment is the platform_topics
-     slug, not this element's slug, so a path built from `d.slug` would match
-     nothing and fail silently. */
-  for (const section of ["setup", "operate", "program", "support"]) {
-    revalidatePath(`/${section}`);
-    revalidatePath(`/${section}/[topic]/guide`, "page");
-  }
-  return { ok: true, message: "Saved." };
-}
-
-// ---------------------------------------------------------------------------
 // Pages (PP6a) — the hero copy for the About landing and the four toolkit
 // pages. EDIT ONLY: platform_sections_slug_shape freezes the set to these five
 // route segments, so the owner can never add or remove a page and a typo can
@@ -213,6 +131,316 @@ export async function savePlatformSectionAction(
     revalidatePath(`/${d.slug}/[topic]/guide`, "page");
   }
   return { ok: true, message: "Saved." };
+}
+
+// ---------------------------------------------------------------------------
+// Focus areas (PP6a) — the main CMS screen. Replaces the old Elements screen,
+// whose two editable bodies are dead: overview_md is dropped by PP7's 0031
+// (D-PP-f removed the Overview card) and watch_out_for_md has had no consumer
+// since PP3. The guide body moves here.
+//
+// Everything routes through admin_upsert_platform_topic, which writes BOTH
+// tables in one transaction — platform_topics.element_id is NOT NULL + UNIQUE
+// + FK, so a focus area does not exist without its elements row and a
+// half-created one must be impossible.
+//
+// The DB raises short stable strings; this is the only place they become
+// sentences. A raw 23505 or 23503 must never reach the owner's screen.
+// ---------------------------------------------------------------------------
+
+/* The owner never types a web address. The slug is derived from the title on
+   CREATE and then frozen forever — admin_upsert_platform_topic ignores it on
+   update, so a rename can never break a link a partner has bookmarked. */
+function slugify(title: string): string {
+  return title
+    .normalize("NFKD")
+    /* Drop the combining marks NFKD just split off, so "Café" -> "cafe" rather
+       than "caf-". A Unicode property escape rather than a literal character
+       range: the range would embed raw combining marks in the source, which is
+       exactly the kind of thing an editor or a copy-paste silently mangles. */
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80)
+    .replace(/-+$/g, "");
+}
+
+function focusAreaMessage(dbMessage: string | undefined): string {
+  switch (dbMessage) {
+    case "slug in use":
+      return "Another focus area already uses that name. Try wording it slightly differently.";
+    case "live focus area":
+      return "This one is Live. Set it to Draft first, then delete it.";
+    case "focus area has files":
+      return "Remove its files first, then you can delete it.";
+    case "unknown group":
+      return "Choose a group for this focus area.";
+    case "title is required":
+      return "Please add a title before saving.";
+    case "code is required":
+      return "Please add a short code before saving.";
+    default:
+      return GENERIC;
+  }
+}
+
+const focusAreaSchema = z.object({
+  id: z.string().regex(UUID_RE).optional(),
+  groupId: z.string().regex(UUID_RE),
+  title: z.string().trim().min(1).max(200),
+  code: z.string().trim().min(1).max(16),
+  description: z.string().trim().max(500).optional(),
+  intro: z.string().trim().max(1000).optional(),
+  icon: z.string().trim().max(60).optional(),
+  imagePath: z.string().trim().max(300).optional(),
+  imagePosition: z.string().trim().max(60).optional(),
+  youtubeUrl: z.string().trim().max(500).optional(),
+  simpleGuideMd: z.string().max(100000).optional(),
+});
+
+/* Every section page a focus area can appear on, plus its reader route. The
+   action does not know which section moved, and a stale toolkit page is worse
+   than four cheap revalidations — the same reasoning the element save has
+   carried since PP5. */
+function revalidatePlatform() {
+  revalidatePath("/admin/content/focus-areas");
+  for (const section of ["setup", "operate", "program", "support"]) {
+    revalidatePath(`/${section}`);
+    revalidatePath(`/${section}/[topic]/guide`, "page");
+  }
+}
+
+export async function saveFocusAreaAction(
+  _prev: AdminContentState,
+  formData: FormData,
+): Promise<AdminContentState> {
+  const parsed = focusAreaSchema.safeParse({
+    id: field(formData, "id"),
+    groupId: formData.get("groupId"),
+    title: formData.get("title"),
+    code: formData.get("code"),
+    description: field(formData, "description"),
+    intro: field(formData, "intro"),
+    icon: field(formData, "icon"),
+    imagePath: field(formData, "imagePath"),
+    imagePosition: field(formData, "imagePosition"),
+    youtubeUrl: field(formData, "youtubeUrl"),
+    /* Read RAW, not through field(): "" must survive as "" so the owner can
+       clear the guide. field() maps "" to undefined, which the RPC reads as
+       "not supplied" and leaves the old text in place — meaning an emptied
+       textarea would silently come back. Found on TEST, 2026-08-14. */
+    simpleGuideMd: formData.has("simpleGuideMd")
+      ? String(formData.get("simpleGuideMd") ?? "")
+      : undefined,
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Please add a title and a short code before saving.",
+    };
+  }
+  if (parsed.data.youtubeUrl && !parseYouTubeId(parsed.data.youtubeUrl)) {
+    return {
+      ok: false,
+      message:
+        "That doesn’t look like a YouTube link — paste a youtube.com or youtu.be URL.",
+    };
+  }
+
+  const d = parsed.data;
+  const slug = d.id ? undefined : slugify(d.title);
+  if (!d.id && (!slug || !SLUG_RE.test(slug))) {
+    return {
+      ok: false,
+      message:
+        "That title doesn’t make a usable web address. Please include some letters or numbers.",
+    };
+  }
+
+  const guard = await adminGuard();
+  if (!guard.ok) return { ok: false, message: guard.message };
+
+  const { error } = await guard.supabase.rpc("admin_upsert_platform_topic", {
+    p_id: d.id ?? null,
+    p_group_id: d.groupId,
+    p_slug: slug ?? null,
+    p_title: d.title,
+    p_description: d.description ?? null,
+    p_intro: d.intro ?? null,
+    p_icon: d.icon ?? null,
+    p_image_path: d.imagePath ?? null,
+    p_image_position: d.imagePosition ?? null,
+    p_youtube_url: d.youtubeUrl ?? null,
+    p_sort_order: null,
+    /* Never published by CREATE — rule 1 of the eight, and the reason a
+       half-finished focus area can never reach a partner: no one outside HQ
+       sees it until the owner deliberately switches it on. On UPDATE, null
+       leaves the current state alone, so Save can never silently publish.
+
+       (Wording note, PP6a: the word that belongs here is a Tailwind utility
+       name, and Tailwind v4 scans the raw text of source files — using it in
+       this comment added a real rule to the stylesheet every visitor
+       downloads. Same mechanism PP4 found in docs/ and PP6a found in
+       supabase/, but inside src/, which cannot be excluded. Caught by the
+       rule-level bundle diff.) */
+    p_published: null,
+    p_element_code: d.code,
+    /* undefined -> null (field absent, leave the body alone); "" stays ""
+       (the owner cleared it, so clear it). */
+    p_simple_guide_md: d.simpleGuideMd ?? null,
+  });
+  if (error) return { ok: false, message: focusAreaMessage(error.message) };
+
+  revalidatePlatform();
+  return { ok: true, message: "Saved." };
+}
+
+const publishSchema = z.object({
+  id: z.string().regex(UUID_RE),
+  published: z.enum(["true", "false"]),
+});
+
+export async function setFocusAreaPublishedAction(
+  _prev: AdminContentState,
+  formData: FormData,
+): Promise<AdminContentState> {
+  const parsed = publishSchema.safeParse({
+    id: formData.get("id"),
+    published: formData.get("published"),
+  });
+  if (!parsed.success) return { ok: false, message: GENERIC };
+
+  const guard = await adminGuard();
+  if (!guard.ok) return { ok: false, message: guard.message };
+
+  const live = parsed.data.published === "true";
+  const { error } = await guard.supabase.rpc(
+    "admin_set_platform_topic_published",
+    { p_id: parsed.data.id, p_published: live },
+  );
+  if (error) return { ok: false, message: focusAreaMessage(error.message) };
+
+  revalidatePlatform();
+  return {
+    ok: true,
+    message: live
+      ? "Live. Partners can see it now."
+      : "Back to Draft. Partners can’t see it.",
+  };
+}
+
+/* Delete asks the owner to type the name, and the form carries it so the check
+   is re-done on the server — a confirmation that only exists in the browser is
+   decoration. The DB refuses anyway if the row is Live or still has files. */
+const deleteFocusAreaSchema = z.object({
+  id: z.string().regex(UUID_RE),
+  title: z.string().trim().min(1).max(200),
+  confirm: z.string().trim().min(1).max(200),
+});
+
+export async function deleteFocusAreaAction(
+  _prev: AdminContentState,
+  formData: FormData,
+): Promise<AdminContentState> {
+  const parsed = deleteFocusAreaSchema.safeParse({
+    id: formData.get("id"),
+    title: formData.get("title"),
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) return { ok: false, message: GENERIC };
+  if (
+    parsed.data.confirm.toLowerCase() !== parsed.data.title.trim().toLowerCase()
+  ) {
+    return {
+      ok: false,
+      message: "The name didn’t match, so nothing was deleted.",
+    };
+  }
+
+  const guard = await adminGuard();
+  if (!guard.ok) return { ok: false, message: guard.message };
+
+  const { error } = await guard.supabase.rpc("admin_delete_platform_topic", {
+    p_id: parsed.data.id,
+  });
+  if (error) return { ok: false, message: focusAreaMessage(error.message) };
+
+  revalidatePlatform();
+  return { ok: true, message: "Deleted." };
+}
+
+const reorderSchema = z.object({ ids: z.array(z.string().regex(UUID_RE)).min(1) });
+
+export async function reorderFocusAreasAction(
+  ids: string[],
+): Promise<AdminContentState> {
+  const parsed = reorderSchema.safeParse({ ids });
+  if (!parsed.success) return { ok: false, message: GENERIC };
+
+  const guard = await adminGuard();
+  if (!guard.ok) return { ok: false, message: guard.message };
+
+  const { error } = await guard.supabase.rpc("admin_reorder_platform_topics", {
+    p_ids: parsed.data.ids,
+  });
+  if (error) return { ok: false, message: GENERIC };
+
+  revalidatePlatform();
+  return { ok: true, message: "Order saved." };
+}
+
+/* Groups exist so a section can be split if it ever grows. Under D-PP-n the new
+   model is one group per section, rendered flat — so this is deliberately a
+   single small action rather than a screen of its own. */
+const groupSchema = z.object({
+  sectionSlug: z.enum(PAGE_SLUGS),
+  name: z.string().trim().min(1).max(200),
+});
+
+export async function createGroupAction(
+  _prev: AdminContentState,
+  formData: FormData,
+): Promise<AdminContentState> {
+  const parsed = groupSchema.safeParse({
+    sectionSlug: formData.get("sectionSlug"),
+    name: formData.get("name"),
+  });
+  if (!parsed.success) {
+    return { ok: false, message: "Please give the group a name." };
+  }
+  const slug = slugify(parsed.data.name);
+  if (!slug || !SLUG_RE.test(slug)) {
+    return { ok: false, message: "Please use some letters or numbers in the name." };
+  }
+
+  const guard = await adminGuard();
+  if (!guard.ok) return { ok: false, message: guard.message };
+
+  const { error } = await guard.supabase.rpc("admin_upsert_platform_group", {
+    p_id: null,
+    p_section_slug: parsed.data.sectionSlug,
+    p_slug: slug,
+    p_name: parsed.data.name,
+    p_description: null,
+    p_sort_order: 0,
+    /* Live: a group is only a heading, and an unpublished group would hide every
+       focus area the owner then puts in it — the opposite of helpful. Its
+       topics are what stay Draft. */
+    p_published: true,
+  });
+  if (error) {
+    return {
+      ok: false,
+      message:
+        error.message === "slug in use"
+          ? "There is already a group with that name in this section."
+          : GENERIC,
+    };
+  }
+
+  revalidatePlatform();
+  return { ok: true, message: "Group added." };
 }
 
 // ---------------------------------------------------------------------------

@@ -503,6 +503,79 @@ select * from _0029_write_results order by scenario;
 rollback;
 
 -- ===========================================================================
+-- 6b) GUIDE-BODY SEMANTICS: NULL and '' must mean different things.
+--
+-- Found on TEST while building the Focus areas screen: with a plain coalesce,
+-- an emptied textarea reads as "not supplied" and the old text silently comes
+-- back, so the owner can never DELETE a guide — only overwrite it. The fix is
+-- to branch on `p_simple_guide_md is not null` rather than on emptiness.
+--     NULL -> the caller did not send the field: leave the body alone.
+--     ''   -> the caller sent an empty field: clear the body.
+-- ===========================================================================
+begin;
+
+create temporary table _0029_guide_results (
+  scenario text, expected text, observed text, pass boolean
+) on commit drop;
+
+create or replace function pg_temp.run_0029_guide_semantics()
+returns void
+language plpgsql
+as $fn$
+declare
+  v_admin uuid; v_group uuid; v_id uuid; g text;
+begin
+  select user_id into v_admin from public.admins limit 1;
+  select id into v_group from public.platform_groups where section_slug = 'setup' limit 1;
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  v_id := public.admin_upsert_platform_topic(
+    null, v_group, 'guide-semantics', 'Guide Semantics',
+    null, null, null, null, null, null, null, null, 'G1', '# Original body');
+
+  perform public.admin_upsert_platform_topic(
+    v_id, v_group, null, 'Guide Semantics',
+    null, null, null, null, null, null, null, null, 'G1', null);
+  perform set_config('role', 'postgres', true);
+  select simple_guide_md into g from public.elements where slug = 'guide-semantics';
+  insert into _0029_guide_results values
+    ('NULL guide leaves the body alone', '# Original body',
+     coalesce(g, 'NULL'), g = '# Original body');
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  perform public.admin_upsert_platform_topic(
+    v_id, v_group, null, 'Guide Semantics',
+    null, null, null, null, null, null, null, null, 'G1', '');
+  perform set_config('role', 'postgres', true);
+  select simple_guide_md into g from public.elements where slug = 'guide-semantics';
+  insert into _0029_guide_results values
+    ('empty guide CLEARS the body', 'NULL', coalesce(g, 'NULL'), g is null);
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  perform public.admin_upsert_platform_topic(
+    v_id, v_group, null, 'Guide Semantics',
+    null, null, null, null, null, null, null, null, 'G1', '# Rewritten');
+  perform set_config('role', 'postgres', true);
+  select simple_guide_md into g from public.elements where slug = 'guide-semantics';
+  insert into _0029_guide_results values
+    ('guide can be rewritten after clearing', '# Rewritten',
+     coalesce(g, 'NULL'), g = '# Rewritten');
+end;
+$fn$;
+
+select pg_temp.run_0029_guide_semantics();
+select * from _0029_guide_results order by scenario;
+-- EXPECT: pass = true on all three.
+
+rollback;
+
+-- ===========================================================================
 -- 7) THE FILE LIFECYCLE + D-PP-i (pass 3), rollback-only.
 --
 -- Section A is the important one: it attacks the D-PP-i invariants with DIRECT
