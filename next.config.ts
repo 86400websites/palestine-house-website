@@ -46,6 +46,27 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  experimental: {
+    /* PP6a (6a-g) — CONFIG CHANGE, called out deliberately.
+       This was dropped from the sprint scope at 6a-a on the evidence available
+       then: no experimental block existed, the Next.js default is 1 MB, and the
+       largest delivered content file is 188 KB. Building the actual upload path
+       is the condition that was named for revisiting it, and it has arrived —
+       the Files screen accepts Word documents and PDFs, and a PDF with images
+       passes 1 MB easily.
+       ⚠️ Corrected at the exit gate: this was 12mb against a 10 MB app limit,
+       which was internally consistent and wrong about the DEPLOY TARGET.
+       Vercel rejects a serverless function request body over ~4.5 MB with a 413
+       before our code runs, and bodySizeLimit cannot raise a platform edge
+       limit — so a 10 MB promise would have produced the opaque framework error
+       this comment claimed to prevent. THREE numbers have to agree: 4 MB
+       enforced in src/lib/admin/file-actions.ts, 4.5mb of body here to cover
+       multipart overhead, and the host's own ceiling. The delivered content is
+       183–188 KB per file. A genuinely large file would need a direct-to-
+       storage signed upload URL, which bypasses the function body entirely.
+       Server Actions only; no route, header or CSP value changes. */
+    serverActions: { bodySizeLimit: "4.5mb" },
+  },
   images: {
     /* AVIF first, WebP fallback — ~20-30% smaller for the illustrated PNG art,
        a CWV/LCP win on the image-heavy marketing pages. Optimised images are

@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getMyProfile } from "@/lib/auth/profile";
 import { getTopicGuide } from "@/lib/workspace-v2/content";
-import { PLATFORM_PAGES, RESOURCE_KINDS } from "@/lib/workspace-v2/spec";
+import { getPlatformPages } from "@/lib/workspace-v2/content";
+import { RESOURCE_KINDS } from "@/lib/workspace-v2/spec";
 import { PwGuideDownload } from "@/components/workspace-v2/pw-guide-download";
 import { PwSectionPending } from "@/components/workspace-v2/pw-section-page";
 import type { PwGuideDoc, PwSectionSlug } from "@/lib/workspace-v2/types";
@@ -68,8 +69,8 @@ function GuideBody({ html }: { html: string }) {
   );
 }
 
-export function PwGuideReader({ doc }: { doc: PwGuideDoc }) {
-  const page = PLATFORM_PAGES[doc.section];
+export async function PwGuideReader({ doc }: { doc: PwGuideDoc }) {
+  const page = (await getPlatformPages())[doc.section];
   /* Back to the focus area itself, not just the section: the explorer opens
      the topic's group, expands its card and flashes it on this fragment. */
   const backHref = `/${doc.section}#topic-${encodeURIComponent(doc.topicSlug)}`;

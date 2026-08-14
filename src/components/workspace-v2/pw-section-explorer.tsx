@@ -195,44 +195,75 @@ export function PwSectionExplorer({
         <div className="pw-toolkit-shell">
           <div className="pw-toolkit-body">
             {groups.map((group) => {
-              const open = openGroups.has(group.id);
+              /* D-PP-n (owner, 2026-08-14): a section with exactly ONE group is
+                 not an accordion — it is just a list of focus areas. An
+                 accordion of one is a control whose only power is to hide the
+                 entire page, and the hero above already names the section, so
+                 the header would repeat it. Setup and Support have one group
+                 each today, so this shows immediately on two pages.
+
+                 The real content model has no middle level at all (4 sections ->
+                 22 focus areas), so after PP6c every section takes this branch.
+                 The accordion stays for the case a section is split later — the
+                 CMS can add a group without a developer. */
+              const flat = groups.length === 1;
+              const open = flat || openGroups.has(group.id);
               const panelId = `pw-group-${group.slug}`;
               const count = group.topics.length;
 
               return (
-                <section className="pw-group" key={group.id}>
-                  <h2 className="pw-group-heading">
-                    <button
-                      type="button"
-                      className="pw-group-toggle"
-                      aria-expanded={open}
-                      aria-controls={panelId}
-                      onClick={() => toggleGroup(group.id)}
-                    >
-                      <span className="pw-group-icon">
-                        <GroupIcon className="pw-icon" aria-hidden="true" />
-                      </span>
-                      <span className="pw-group-copy">
-                        <span className="pw-group-title">{group.name}</span>
-                        {group.description ? (
-                          <span className="pw-group-desc">
-                            {group.description}
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="pw-group-meta">
-                        <span>
-                          {count} Focus Area{count === 1 ? "" : "s"}
+                <section
+                  className={`pw-group${flat ? " pw-group--flat" : ""}`}
+                  key={group.id}
+                >
+                  {flat ? (
+                    /* The description would otherwise be lost with the button
+                       it lives inside, so it is promoted to a lead paragraph.
+                       No heading, no chevron, no "N Focus Areas" meta: with one
+                       group the count is simply the list you can see. */
+                    group.description ? (
+                      <p className="pw-group-desc">{group.description}</p>
+                    ) : null
+                  ) : (
+                    <h2 className="pw-group-heading">
+                      <button
+                        type="button"
+                        className="pw-group-toggle"
+                        aria-expanded={open}
+                        aria-controls={panelId}
+                        onClick={() => toggleGroup(group.id)}
+                      >
+                        <span className="pw-group-icon">
+                          <GroupIcon className="pw-icon" aria-hidden="true" />
                         </span>
-                        <ChevronDown
-                          className="pw-icon pw-chevron"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </button>
-                  </h2>
+                        <span className="pw-group-copy">
+                          <span className="pw-group-title">{group.name}</span>
+                          {group.description ? (
+                            <span className="pw-group-desc">
+                              {group.description}
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="pw-group-meta">
+                          <span>
+                            {count} Focus Area{count === 1 ? "" : "s"}
+                          </span>
+                          <ChevronDown
+                            className="pw-icon pw-chevron"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </button>
+                    </h2>
+                  )}
 
-                  <div className="pw-group-content" id={panelId} hidden={!open}>
+                  {/* id + hidden only matter while there is a control pointing
+                      at them; a flat list has nothing to expand. */}
+                  <div
+                    className="pw-group-content"
+                    id={flat ? undefined : panelId}
+                    hidden={flat ? undefined : !open}
+                  >
                     <div className="pw-topics">
                       {group.topics.map((topic) => (
                         <PwTopicCard

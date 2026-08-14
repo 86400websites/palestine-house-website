@@ -1,17 +1,21 @@
-import { PLATFORM_PAGES, type PlatformPageKey } from "@/lib/workspace-v2/spec";
+import { getPlatformPages } from "@/lib/workspace-v2/content";
+import { type PlatformPageKey } from "@/lib/workspace-v2/spec";
 
 /* Workspace v2 page hero (PP2) — the mockup's photo band.
 
    The About landing uses the tall variant; the four toolkit sections use the
    shorter `internal` one. Copy (title + lead) and the photo + its focal point
-   come from the generated spec, which is the mockup verbatim.
+   come from getPlatformPages() as of PP6a — the owner's edits where they exist,
+   the generated spec (the mockup verbatim) everywhere else. A pending partner
+   reads zero rows from the gated RPC and therefore sees the spec copy, which is
+   exactly what /dashboard showed them before.
 
    The photo is a CSS background rather than <Image> because the mockup layers
    two gradient scrims and a tatreez strip over it via ::before/::after; the
    element is decorative and the h1 carries the meaning. */
 
-export function PwHero({ page }: { page: PlatformPageKey }) {
-  const meta = PLATFORM_PAGES[page];
+export async function PwHero({ page }: { page: PlatformPageKey }) {
+  const meta = (await getPlatformPages())[page];
   const internal = page !== "about";
 
   return (

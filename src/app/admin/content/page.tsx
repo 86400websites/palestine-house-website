@@ -7,29 +7,33 @@ import Link from "next/link";
    the approved canon string (docs/page-copy/04-admin/admin-content.md).
 
    Canon-vs-scope reconciliation (PROJECT-STATUS D-S11-f): the copy canon lists a
-   "Live Programming sessions" section, but programming is already self-managed
-   in the gated /programming tool (S9), so it is NOT duplicated here. This hub
-   carries four sections — Focus Areas (elements), Videos (academy), Templates
-   (resources), Admins; display labels renamed for consistency per the owner
-   (2026-07-20), routes unchanged. The section routes are built in 11-6..11-9. */
+   "Live Programming sessions" section, but programming was self-managed in the
+   gated /programming tool (S9), which PP5 deleted along with the rest of the
+   legacy workspace — so it is not here either.
+
+   PP6a restructured this hub to the platform that now exists: Pages · Focus
+   areas · Files · Admins. The Videos card and its screen are gone — the Academy
+   was retired at D-PP-b, PP5 deleted its partner-facing surface, and PP5 left
+   this screen for PP6 to remove. Its four RPCs and the academy_modules table
+   follow in PP7's 0031. */
 
 export const metadata: Metadata = { title: "Content admin" };
 
 const SECTIONS = [
   {
-    href: "/admin/content/elements",
-    title: "Focus Areas",
-    desc: "The 33 topic guides — overview, simple guide, and what to watch for.",
+    href: "/admin/content/pages",
+    title: "Pages",
+    desc: "The heading, intro and photo at the top of each page.",
   },
   {
-    href: "/admin/content/academy",
-    title: "Videos",
-    desc: "Each topic's video link and script.",
+    href: "/admin/content/focus-areas",
+    title: "Focus areas",
+    desc: "Each focus area's summary and its Simple guide.",
   },
   {
-    href: "/admin/content/resources",
-    title: "Templates",
-    desc: "Template and booklet details — title, type, and where they appear.",
+    href: "/admin/content/files",
+    title: "Files",
+    desc: "The guide and templates a partner downloads.",
   },
   {
     href: "/admin/content/admins",
@@ -43,8 +47,8 @@ export default function ContentAdminPage() {
     <div>
       <h1 className="adm-h1">Content admin.</h1>
       <p className="adm-intro">
-        Manage the gated content partners see — topic guides, videos, and
-        templates — and who at HQ has admin access.
+        Everything partners see behind the gate — the pages, the focus areas and
+        their files — and who at HQ can change it.
       </p>
       <div className="adm-hub">
         {SECTIONS.map((s) => (

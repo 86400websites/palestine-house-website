@@ -8,6 +8,11 @@
    sprint record describing the query handling added a real `.lowercase` rule to
    production CSS. Prose is not markup; exclude it. */
 @source not "../../docs";
+/* Same reason, same finding, different directory (PP6a): migrations and their
+   verification scripts are prose-heavy SQL, and 0029 alone added ~1,000 lines
+   of English comments. Tailwind scanned them and grew the stylesheet every
+   visitor downloads. SQL is not markup either. */
+@source not "../../supabase";
 @import "./pages.css";
 @import "./v3.css";
 /* Workspace v2 (PP2) — fully scoped to `.pw-root`; imported last so it wins

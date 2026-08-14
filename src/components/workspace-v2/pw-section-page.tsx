@@ -1,6 +1,7 @@
 import { PwHero } from "@/components/workspace-v2/pw-hero";
 import { PwPendingState } from "@/components/workspace-v2/pw-pending-state";
-import { PLATFORM_PAGES, type PlatformPageKey } from "@/lib/workspace-v2/spec";
+import { getPlatformPages } from "@/lib/workspace-v2/content";
+import { type PlatformPageKey } from "@/lib/workspace-v2/spec";
 
 /* The four toolkit section pages in PP2 (2i): real chrome, the real hero, and
    an honest "content arriving" state where PP3 will build the accordion of
@@ -58,6 +59,9 @@ export function PwSectionPending() {
   return <PwPendingState variant="page" contactFallback />;
 }
 
-export function sectionMetadata(page: PlatformPageKey) {
-  return { title: PLATFORM_PAGES[page].label };
+/* Async since PP6a: the tab title follows the page name the owner set, with the
+   spec label as the fallback. The four section pages therefore export
+   generateMetadata() rather than a static `metadata` object. */
+export async function sectionMetadata(page: PlatformPageKey) {
+  return { title: (await getPlatformPages())[page].label };
 }
