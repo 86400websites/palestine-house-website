@@ -272,8 +272,24 @@ $$;
 revoke execute on function public.get_resource_download(uuid) from public, anon;
 grant execute on function public.get_resource_download(uuid) to authenticated;
 
--- 3e) Drop the unfiltered, caller-less element list (see the header note).
+-- 3e) Drop the unfiltered, caller-less member reads.
+--
+-- get_elements() — see the header note.
+--
+-- get_checklist() (0012) and get_academy_modules() (0015) go with it, added
+-- after the independent review, 2026-08-14. Both are is_approved()-gated and
+-- neither knows anything about `published`, so once Draft exists they are two
+-- more windows onto unreleased content: a drafted focus area's title and its
+-- checklist / Academy metadata, readable by any approved partner calling the
+-- RPC directly. Both have had ZERO callers since PP5 deleted their surfaces
+-- (D-PP-b retired the Academy; the checklist became read-only content), so
+-- filtering them would be maintaining a window nobody looks through.
+--
+-- Their TABLES stay — dropping data is PP7's 0031, which now finds these two
+-- functions already gone. The down migration restores all three verbatim.
 drop function if exists public.get_elements();
+drop function if exists public.get_checklist();
+drop function if exists public.get_academy_modules();
 
 -- ---------------------------------------------------------------------------
 -- 4) Layer 2 of the ceiling: the admin_upsert_element body.
@@ -879,7 +895,7 @@ grant execute on function public.admin_set_platform_topic_published(uuid, boolea
 -- SET NULL the resources' element_id, leaving private files that belong to
 -- nothing, invisible in every grid but still stored — so files must be removed
 -- through the file lifecycle FIRST.
-create or replace function public.admin_delete_platform_topic(p_id uuid)
+create or replace function public.admin_delete_platform_topic(p_id uuid, p_confirm_title text)
 returns void
 language plpgsql
 security definer
@@ -894,8 +910,12 @@ begin
     raise exception 'not authorized' using errcode = '42501';
   end if;
 
+  /* Confirmation compared against the CURRENT row, not against whatever title
+     the form was rendered with — see admin_delete_resource_file. */
   select t.published, t.element_id into v_published, v_element
-  from public.platform_topics t where t.id = p_id;
+  from public.platform_topics t
+  where t.id = p_id
+    and lower(btrim(t.title)) = lower(btrim(coalesce(p_confirm_title, '')));
   if v_element is null then
     raise exception 'unknown focus area' using errcode = '22023';
   end if;
@@ -913,8 +933,8 @@ begin
 end;
 $$;
 
-revoke execute on function public.admin_delete_platform_topic(uuid) from public, anon;
-grant execute on function public.admin_delete_platform_topic(uuid) to authenticated;
+revoke execute on function public.admin_delete_platform_topic(uuid, text) from public, anon;
+grant execute on function public.admin_delete_platform_topic(uuid, text) to authenticated;
 
 -- --- 5e) Reordering. ----------------------------------------------------------
 -- The CMS shows up/down arrows, never a number to fat-finger, so the whole
@@ -1075,6 +1095,15 @@ alter table public.resources add constraint resources_private_needs_code
 -- The helper takes an object key and returns one boolean. It reveals nothing a
 -- caller does not already hold, and the lookup is an index hit:
 -- resources_storage_key is UNIQUE (storage_bucket, storage_path).
+-- ⚠️ It carries its OWN is_approved() check, and that is not redundant.
+-- The policy below checks is_approved() first, so inside the policy this is
+-- belt-and-braces. But the function is also reachable directly at
+-- /rest/v1/rpc/is_published_object, because EXECUTE has to be granted to
+-- `authenticated` for the policy to call it at all — a policy expression runs
+-- as the invoking role. Without this line a PENDING partner could call it with
+-- a guessed key and learn whether that key names Live content: a small oracle,
+-- but a plain breach of the blanket rule that every platform RPC enforces
+-- is_approved() server-side. Found by the independent review, 2026-08-14.
 create or replace function public.is_published_object(p_name text)
 returns boolean
 language sql
@@ -1082,7 +1111,7 @@ security definer
 set search_path = ''
 stable
 as $$
-  select exists (
+  select public.is_approved() and exists (
     select 1
     from public.resources r
     join public.platform_topics t on t.element_id = r.element_id
@@ -1267,8 +1296,19 @@ grant execute on function public.admin_register_resource_file(
 -- Point an existing row at a newly uploaded object and RETURN THE OLD PATH so
 -- the caller can delete the object it replaced. Nothing else about the row
 -- changes — in particular not element_id, doc_key, is_public or the bucket.
+-- ⚠️ p_element_id is REQUIRED and is matched against the row, not trusted
+-- alongside it. Added after the independent review, 2026-08-14: the action
+-- takes an id and an element id as two independent form fields, and this
+-- function used to update by id alone. Submitting focus area A's element id
+-- with focus area B's file id uploaded the bytes under A and then repointed B's
+-- row at them — B's old object deleted, B's partners served A's file, and
+-- publication following B's row rather than A's. The same trick with a public
+-- booklet's id would leave a `booklets` row pointing at a key that exists only
+-- in `resources`. The row must satisfy all four: right id, right focus area,
+-- private, and in the private bucket.
 create or replace function public.admin_replace_resource_file(
   p_id           uuid,
+  p_element_id   uuid,
   p_storage_path text
 )
 returns text
@@ -1287,7 +1327,12 @@ begin
     raise exception 'invalid storage path' using errcode = '22023';
   end if;
 
-  select r.storage_path into v_old from public.resources r where r.id = p_id;
+  select r.storage_path into v_old
+  from public.resources r
+  where r.id = p_id
+    and r.element_id = p_element_id
+    and r.is_public = false
+    and r.storage_bucket = 'resources';
   if v_old is null then
     raise exception 'unknown file' using errcode = '22023';
   end if;
@@ -1306,8 +1351,8 @@ begin
 end;
 $$;
 
-revoke execute on function public.admin_replace_resource_file(uuid, text) from public, anon;
-grant execute on function public.admin_replace_resource_file(uuid, text) to authenticated;
+revoke execute on function public.admin_replace_resource_file(uuid, uuid, text) from public, anon;
+grant execute on function public.admin_replace_resource_file(uuid, uuid, text) to authenticated;
 
 -- Rename / re-badge / re-type. Deliberately CANNOT touch storage_path,
 -- storage_bucket, is_public, element_id or doc_key — those move a file between
@@ -1359,7 +1404,7 @@ grant execute on function public.admin_update_resource_meta(
 -- above for why the row goes first. This supersedes 0023's
 -- admin_delete_resource, which deleted the row and deliberately left the object
 -- orphaned with no way for the caller to find it.
-create or replace function public.admin_delete_resource_file(p_id uuid)
+create or replace function public.admin_delete_resource_file(p_id uuid, p_confirm_title text)
 returns table (storage_bucket text, storage_path text)
 language plpgsql
 security definer
@@ -1370,9 +1415,16 @@ begin
     raise exception 'not authorized' using errcode = '42501';
   end if;
 
+  /* The typed confirmation is compared HERE, against the row being deleted, not
+     in the browser against a title the form was rendered with. Added after the
+     independent review, 2026-08-14: two admins, or one admin with a stale tab,
+     could otherwise confirm the name of a file that has since been renamed and
+     delete whatever now sits under that id. Case- and space-insensitive,
+     because the owner is typing a name back, not a password. */
   return query
   delete from public.resources r
    where r.id = p_id
+     and lower(btrim(r.title)) = lower(btrim(coalesce(p_confirm_title, '')))
   returning r.storage_bucket, r.storage_path;
 
   if not found then
@@ -1381,8 +1433,8 @@ begin
 end;
 $$;
 
-revoke execute on function public.admin_delete_resource_file(uuid) from public, anon;
-grant execute on function public.admin_delete_resource_file(uuid) to authenticated;
+revoke execute on function public.admin_delete_resource_file(uuid, text) from public, anon;
+grant execute on function public.admin_delete_resource_file(uuid, text) to authenticated;
 
 create or replace function public.admin_reorder_resource_files(p_ids uuid[])
 returns integer

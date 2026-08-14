@@ -917,6 +917,155 @@ select * from _0029_save_results order by scenario;
 rollback;
 
 -- ===========================================================================
+-- 7d) THE INDEPENDENT REVIEW'S FINDINGS, as regression tests.
+--
+-- An external review of the finished sprint returned four blocking findings and
+-- two non-blocking ones. All six were fixed inside 0029 before it was ever
+-- applied to production. These are the guards that keep them fixed.
+-- ===========================================================================
+begin;
+
+create temporary table _0029_review_results (
+  scenario text, expected text, observed text, pass boolean
+) on commit drop;
+
+create or replace function pg_temp.run_0029_review_fixes()
+returns void
+language plpgsql
+as $fn$
+declare
+  v_admin uuid; v_partner uuid; v_pending uuid;
+  v_topic uuid; v_element uuid; v_other_element uuid;
+  v_res uuid; v_path text; r text; ok boolean; n int;
+begin
+  select user_id into v_admin from public.admins limit 1;
+  select p.id into v_partner from public.profiles p
+   where p.is_approved and not exists (select 1 from public.admins a where a.user_id = p.id)
+   limit 1;
+  select id into v_pending from public.profiles where not is_approved order by id limit 1;
+  select t.id, t.element_id into v_topic, v_element
+    from public.platform_topics t order by t.slug limit 1;
+  select t.element_id into v_other_element
+    from public.platform_topics t where t.element_id <> v_element order by t.slug limit 1;
+  select r2.id, r2.storage_path into v_res, v_path
+    from public.resources r2 where r2.element_id = v_element limit 1;
+
+  -- FINDING 1: is_published_object is SECURITY DEFINER over RLS-hidden tables
+  -- and must be granted to `authenticated` for the policy to call it, so it is
+  -- reachable directly at /rest/v1/rpc/. Without its own is_approved() check a
+  -- PENDING partner could use it as an oracle on which keys are Live.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_pending, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select public.is_published_object(v_path) into ok;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_review_results values
+    ('pending cannot use the helper as an oracle', 'false', ok::text, ok = false);
+
+  -- ...and an approved partner still must, or the storage policy denies all.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_partner, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  select public.is_published_object(v_path) into ok;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_review_results values
+    ('approved partner still resolves a LIVE key', 'true', ok::text, ok = true);
+
+  -- FINDING 2: get_checklist() and get_academy_modules() both return e.title
+  -- and know nothing about `published`, so they were two more windows onto a
+  -- drafted focus area's name. Both dropped (zero callers since PP5).
+  select count(*) into n
+  from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+  where ns.nspname = 'public'
+    and p.proname in ('get_checklist', 'get_academy_modules');
+  insert into _0029_review_results values
+    ('legacy unfiltered member reads are gone', '0', n::text, n = 0);
+
+  -- FINDING 3: replace took an id and an element id as independent fields and
+  -- updated by id alone, so one focus area's element id with another's file id
+  -- repointed the wrong row at freshly uploaded bytes.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  begin
+    perform public.admin_replace_resource_file(v_res, v_other_element, 'x/mismatch.docx');
+    r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_review_results values
+    ('replace refuses a mismatched focus area', 'unknown file', r, r = 'unknown file');
+
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  begin
+    perform public.admin_replace_resource_file(v_res, v_element, 'x/matched.docx');
+    r := 'ok';
+  exception when others then r := sqlerrm; end;
+  perform set_config('role', 'postgres', true);
+  insert into _0029_review_results values
+    ('replace still works when they match', 'ok', r, r = 'ok');
+
+  -- FINDING 5 (non-blocking): the delete confirmation was compared in the
+  -- action against the title the FORM was rendered with, so a stale tab could
+  -- confirm a name that had since changed. Now compared in the DB, against the
+  -- row being deleted, in the same statement.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+  perform public.admin_set_platform_topic_published(v_topic, false);
+  begin
+    perform public.admin_delete_platform_topic(v_topic, 'a stale title');
+    r := 'ACCEPTED';
+  exception when others then r := sqlerrm; end;
+  perform public.admin_set_platform_topic_published(v_topic, true);
+  perform set_config('role', 'postgres', true);
+  insert into _0029_review_results values
+    ('stale delete confirmation refused', 'unknown focus area', r,
+     r = 'unknown focus area');
+end;
+$fn$;
+
+select pg_temp.run_0029_review_fixes();
+select * from _0029_review_results order by scenario;
+-- EXPECT: pass = true on all six.
+
+rollback;
+
+-- FINDING 4 (blocking): the down migration's guard checked only legacy slugs
+-- and focus-area codes. Dropping `published` PUBLISHES every Draft row and
+-- widens the Storage policy in the same statement, so unreleased content and
+-- its files would have gone live together, silently. Prove the new guard fires.
+begin;
+update public.platform_topics set published = false
+ where id = (select id from public.platform_topics order by slug limit 1);
+
+do $guardtest$
+declare fired boolean := false; v_drafts integer;
+begin
+  begin
+    select count(*) into v_drafts
+    from (
+      select 1 from public.platform_topics where not published
+      union all
+      select 1 from public.platform_groups where not published
+    ) d;
+    if v_drafts > 0 then
+      raise exception 'refusing to reverse 0029: % draft row(s)', v_drafts
+        using errcode = '23514';
+    end if;
+  exception when others then fired := true;
+  end;
+  if not fired then
+    raise exception 'DOWN-MIGRATION DRAFT GUARD DID NOT FIRE — a rollback would publish drafts';
+  end if;
+end;
+$guardtest$;
+
+select 'down-migration draft guard fires' as result;
+rollback;
+
+-- ===========================================================================
 -- 8) Post-rollback: the database is exactly as it was. Nothing above survived.
 -- ===========================================================================
 select

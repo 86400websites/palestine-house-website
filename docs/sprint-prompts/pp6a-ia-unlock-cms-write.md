@@ -48,6 +48,17 @@ A four-dimension adversarial review of the whole diff (gate · migration · uplo
 
 Nine regression tests were added for these across §7b and §7c of the TEST verification script.
 
+**Then an independent review found four more blocking defects, and it was right about all of them.** Fixed in the same sprint, still before `0029` reached production:
+
+- 🔴 **`is_published_object()` was an oracle for pending partners.** It is `SECURITY DEFINER` over RLS-hidden tables and *must* be granted to `authenticated` for the storage policy to call it — which also exposes it at `/rest/v1/rpc/`. Without its own `is_approved()` check, a pending account could ask whether a given key names Live content. Now checks approval itself.
+- 🔴 **Two more member reads ignored Draft.** `get_checklist()` and `get_academy_modules()` both return `elements.title` and know nothing about `published` — two further windows onto a drafted focus area's name. Both had zero callers since PP5, so `0029` **drops** them rather than filtering a window nobody looks through. Their tables remain for PP7's `0031`, whose row is updated to say so.
+- 🔴 **File replacement did not bind the file to its focus area.** The action sent an `id` and an `elementId` as independent fields and the RPC updated by `id` alone, so one focus area's element id with another's file id would upload bytes under A and repoint B's row at them — B's old object deleted, B's partners served A's file. The RPC now matches on id **and** element **and** private **and** bucket.
+- 🔴 **The rollback guard would have published every Draft.** It checked only legacy slugs and focus-area codes. Dropping `published` does not forget the flag — it publishes every row that carried it, and re-widens the storage policy in the same statement. The guard now refuses while anything is Draft. *(I had argued the opposite at the internal gate — that such a guard "refuses exactly when a rollback is most needed". That was wrong: the operator can clear drafts in one statement, and cannot un-publish what a partner has already downloaded.)*
+- 🟠 **The Pages screen shipped two controls with no consumer** — eyebrow and section video. Both columns exist and both save, but nothing renders them. Removed, because a control that reports "Saved" and changes nothing visible is the exact failure this screen was built to avoid.
+- 🟠 **The delete confirmation trusted two browser values.** A stale tab could confirm a name that had since changed. The typed name now goes to the database and is compared against the row being deleted, in the same statement.
+
+Six more regression tests cover these in §7d.
+
 ## Checks & results
 
 typecheck ✅ · lint ✅ · build ✅ (41 routes)

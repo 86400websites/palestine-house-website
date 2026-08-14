@@ -35,6 +35,7 @@ do $guard$
 declare
   v_bad_slug integer;
   v_bad_fac  integer;
+  v_drafts   integer;
 begin
   select count(*) into v_bad_slug
   from public.elements where slug !~ '^[a-k][1-3]$';
@@ -47,6 +48,29 @@ begin
     raise exception
       'refusing to reverse 0029: % element row(s) have post-0029 slugs and % have no A-K focus area. These are real content. Reverse 0030 (the content migration) first, or fix forward.',
       v_bad_slug, v_bad_fac
+      using errcode = '23514';
+  end if;
+
+  /* Refuse while ANYTHING is Draft. Dropping `published` does not merely forget
+     the flag — it PUBLISHES every row that carried it, and the same statement
+     widens the Storage policy back, so unreleased content and its files go live
+     together, silently. Added after the independent review, 2026-08-14; the
+     earlier reasoning ("a guard would refuse exactly when a rollback is most
+     needed") was wrong, because the operator can clear this in one statement
+     and cannot un-publish content a partner has already downloaded.
+       set them Live deliberately:  update platform_topics set published = true;
+       or remove them:              via admin_delete_platform_topic. */
+  select count(*) into v_drafts
+  from (
+    select 1 from public.platform_topics where not published
+    union all
+    select 1 from public.platform_groups where not published
+  ) d;
+
+  if v_drafts > 0 then
+    raise exception
+      'refusing to reverse 0029: % topic(s)/group(s) are Draft. Dropping `published` would publish them and widen Storage access in the same statement. Set them Live or delete them first.',
+      v_drafts
       using errcode = '23514';
   end if;
 end;
@@ -64,9 +88,9 @@ $guard$;
 -- for a reversal but is the reason this file is not something to run casually —
 -- see the header.
 drop function if exists public.admin_reorder_resource_files(uuid[]);
-drop function if exists public.admin_delete_resource_file(uuid);
+drop function if exists public.admin_delete_resource_file(uuid, text);
 drop function if exists public.admin_update_resource_meta(uuid, text, text, text, text, integer);
-drop function if exists public.admin_replace_resource_file(uuid, text);
+drop function if exists public.admin_replace_resource_file(uuid, uuid, text);
 drop function if exists public.admin_register_resource_file(
   uuid, text, text, text, text, text, text, integer);
 drop function if exists public.admin_list_resource_files(uuid);
@@ -95,7 +119,7 @@ alter table public.resources drop constraint if exists resources_private_needs_e
 
 drop function if exists public.admin_reorder_platform_groups(uuid[]);
 drop function if exists public.admin_reorder_platform_topics(uuid[]);
-drop function if exists public.admin_delete_platform_topic(uuid);
+drop function if exists public.admin_delete_platform_topic(uuid, text);
 drop function if exists public.admin_set_platform_topic_published(uuid, boolean);
 drop function if exists public.admin_upsert_platform_topic(
   uuid, uuid, text, text, text, text, text, text, text, text, integer, boolean, text, text);
@@ -267,6 +291,67 @@ $$;
 
 revoke execute on function public.get_elements() from public, anon;
 grant execute on function public.get_elements() to authenticated;
+
+-- Restore the two legacy member reads 0029 dropped (0012 / 0015), verbatim.
+-- Their tables were never touched, so these come back working.
+create or replace function public.get_checklist()
+returns table (
+  id                uuid,
+  element_id        uuid,
+  element_code      text,
+  element_title     text,
+  focus_area_code   text,
+  group_label       text,
+  gate              integer,
+  item_text         text,
+  required_document text,
+  sort_order        integer
+)
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select ci.id, ci.element_id, e.code, e.title, e.focus_area_code,
+         ci.group_label, ci.gate, ci.item_text, ci.required_document,
+         ci.sort_order
+  from public.checklist_items ci
+  join public.elements e on e.id = ci.element_id
+  where public.is_approved()
+  order by e.focus_area_code, e.sort_order, ci.sort_order;
+$$;
+
+revoke execute on function public.get_checklist() from public, anon;
+grant execute on function public.get_checklist() to authenticated;
+
+create or replace function public.get_academy_modules()
+returns table (
+  id            uuid,
+  element_id    uuid,
+  element_slug  text,
+  element_code  text,
+  element_title text,
+  title         text,
+  one_line      text,
+  length        text,
+  youtube_url   text,
+  sort_order    integer
+)
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select am.id, am.element_id, e.slug, e.code, e.title,
+         am.title, am.one_line, am.length, am.youtube_url, am.sort_order
+  from public.academy_modules am
+  join public.elements e on e.id = am.element_id
+  where public.is_approved()
+  order by e.focus_area_code, e.sort_order, am.sort_order;
+$$;
+
+revoke execute on function public.get_academy_modules() from public, anon;
+grant execute on function public.get_academy_modules() to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 3) Restore the 0026 admin_upsert_element body (narrow guards, required

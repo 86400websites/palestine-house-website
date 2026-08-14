@@ -18,7 +18,15 @@ import {
    Nothing on screen is a path, an id or a bucket name. The one field that
    mentions a file — the hero photo — takes the site-relative path it already
    uses, shown with an example, because these five photos are shipped assets
-   rather than uploads. Uploading arrives with the Files screen. */
+   rather than uploads. Uploading arrives with the Files screen.
+
+   DELIBERATELY ABSENT: the eyebrow and the section video link. Both columns
+   exist and both are editable by the RPC, but NOTHING RENDERS THEM — the hero
+   shows title and lead only, and no section-level video button exists. Shipping
+   a control that reports "Saved" and changes nothing a partner can see is the
+   same failure this screen was built to avoid (get_platform_sections had zero
+   call sites until PP6a wrapped it). They return when a consumer does. Removed
+   after the independent review, 2026-08-14. */
 
 export type PageRow = {
   slug: string;
@@ -154,18 +162,8 @@ function PageForm({
             defaultValue={page.label}
           />
           <span className="adm-field-hint">
-            Shown in the menu and on the browser tab.
+            Shown on the browser tab and in search results.
           </span>
-        </label>
-
-        <label className="adm-form-field">
-          <span className="adm-field-label">Small line above the heading</span>
-          <input
-            className="adm-input"
-            name="eyebrow"
-            maxLength={200}
-            defaultValue={page.eyebrow ?? ""}
-          />
         </label>
 
         <label className="adm-form-field">
@@ -220,20 +218,6 @@ function PageForm({
           <span className="adm-field-hint">
             Which part of the photo stays in view when it crops. Left to right,
             then top to bottom — “50% 50%” is the centre.
-          </span>
-        </label>
-
-        <label className="adm-form-field">
-          <span className="adm-field-label">Video link</span>
-          <input
-            className="adm-input"
-            name="youtubeUrl"
-            maxLength={500}
-            defaultValue={page.youtube_url ?? ""}
-            placeholder="https://www.youtube.com/watch?v=…"
-          />
-          <span className="adm-field-hint">
-            Optional. Blank is fine — nothing breaks without it.
           </span>
         </label>
 

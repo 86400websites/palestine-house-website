@@ -185,6 +185,10 @@ function focusAreaMessage(dbMessage: string | undefined): string {
       return "Remove its files first, then you can delete it.";
     case "unknown group":
       return "Choose a group for this focus area.";
+    case "unknown focus area":
+      /* Also what a mistyped delete confirmation looks like now: the RPC
+         matches on id AND title, so a mismatch simply finds no row. */
+      return "The name didn’t match, so nothing was deleted. If it was renamed recently, reload the page.";
     case "title is required":
       return "Please add a title before saving.";
     case "code is required":
@@ -358,20 +362,17 @@ export async function deleteFocusAreaAction(
     confirm: formData.get("confirm"),
   });
   if (!parsed.success) return { ok: false, message: GENERIC };
-  if (
-    parsed.data.confirm.toLowerCase() !== parsed.data.title.trim().toLowerCase()
-  ) {
-    return {
-      ok: false,
-      message: "The name didn’t match, so nothing was deleted.",
-    };
-  }
 
   const guard = await adminGuard();
   if (!guard.ok) return { ok: false, message: guard.message };
 
+  /* The typed name is compared in the DATABASE, against the row being deleted.
+     Comparing it here against the title the form was rendered with lets a stale
+     tab confirm a name that has since changed and delete whatever now holds
+     that id. Found by the independent review, 2026-08-14. */
   const { error } = await guard.supabase.rpc("admin_delete_platform_topic", {
     p_id: parsed.data.id,
+    p_confirm_title: parsed.data.confirm,
   });
   if (error) return { ok: false, message: focusAreaMessage(error.message) };
 

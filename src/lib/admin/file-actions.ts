@@ -158,6 +158,8 @@ function fileMessage(dbMessage: string | undefined): string {
       return "There is already a guide file on this focus area. Replace it instead of adding a second one.";
     case "code is required":
       return "Please give the template a short code, like T01.";
+    case "unknown file":
+      return "The name didn’t match, so nothing was deleted. If it was renamed recently, reload the page.";
     case "unknown focus area":
       return "That focus area no longer exists — reload the page.";
     case "invalid storage path":
@@ -314,9 +316,17 @@ export async function replaceFileAction(
   if (upErr) return { ok: false, message: GENERIC };
 
   // 2) repoint the row; it returns the key of the file we just replaced
+  /* p_element_id is matched against the row INSIDE the RPC, not merely sent
+     alongside it. The two used to be independent client-controlled fields, so
+     one focus area's element id with another's file id repointed the wrong row
+     at freshly uploaded bytes. Found by the independent review, 2026-08-14. */
   const { data, error: rpcErr } = await guard.supabase.rpc(
     "admin_replace_resource_file",
-    { p_id: parsed.data.id, p_storage_path: path },
+    {
+      p_id: parsed.data.id,
+      p_element_id: parsed.data.elementId,
+      p_storage_path: path,
+    },
   );
   if (rpcErr) {
     /* The row still points at the old object, so the old file keeps working —
@@ -396,17 +406,17 @@ export async function deleteFileAction(
     confirm: formData.get("confirm"),
   });
   if (!parsed.success) return { ok: false, message: GENERIC };
-  if (
-    parsed.data.confirm.toLowerCase() !== parsed.data.title.trim().toLowerCase()
-  ) {
-    return { ok: false, message: "The name didn’t match, so nothing was deleted." };
-  }
 
   const guard = await adminGuard();
   if (!guard.ok) return { ok: false, message: guard.message };
 
+  /* The typed name goes to the DATABASE, which compares it against the row it
+     is about to delete, in the same statement. Comparing here against a title
+     the form was rendered with lets a stale tab confirm a name that has since
+     changed. Found by the independent review, 2026-08-14. */
   const { data, error } = await guard.supabase.rpc("admin_delete_resource_file", {
     p_id: parsed.data.id,
+    p_confirm_title: parsed.data.confirm,
   });
   if (error) return { ok: false, message: fileMessage(error.message) };
 
