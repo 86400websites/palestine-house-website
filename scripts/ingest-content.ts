@@ -70,6 +70,21 @@ const SRC = path.join(
   "docs/source-assets/Resource/Palestine House Website Content - Complet and Formatted",
 );
 const SPEC_OUT = path.join(ROOT, "docs/content-v2-spec.json");
+
+/* THE MANIFEST: which files belong to which focus area, by name.
+
+   Counts are not a shape. Swapping one template between 1.2 and 1.4 — which
+   both expect five — leaves the document counts, the number set, the per-area
+   counts and the total of 88 all passing, while the loader files both under
+   the wrong focus area and a partner downloads the wrong document. The only
+   assertion that catches it is the set of filenames itself. Raised by the
+   independent review, 2026-08-15.
+
+   Regenerate DELIBERATELY with --update-manifest when the owner really does
+   add, remove or move a file; the diff then shows exactly what moved, which is
+   the point of it being committed. */
+const MANIFEST_OUT = path.join(ROOT, "docs/content-v2-manifest.json");
+const UPDATE_MANIFEST = process.argv.includes("--update-manifest");
 const TOPIC_PHOTO_DIR = path.join(ROOT, "public/assets/workspace/topics");
 
 const DRY_RUN = process.argv.includes("--dry-run");
@@ -240,12 +255,21 @@ function resourceType(name: string): ResourceType {
  * and a split on the first `.!?` truncates the owner's sentence mid-quote. A
  * terminator only ends the sentence when it is outside quotation marks AND is
  * followed by the end of the line or by whitespace and a capital. */
-/* Full stops that do not end a sentence. Lower-cased and matched as suffixes of
-   the text up to and including the stop, so "e.g." matches on its final dot but
-   not on the one after the "e". */
-const ABBREVIATIONS = [
-  "e.g.", "i.e.", "etc.", "vs.", "no.", "fig.", "approx.",
-  "mr.", "mrs.", "ms.", "dr.", "prof.", "st.",
+/* Abbreviations whose full stop can NEVER end a sentence, because something
+   always follows them in the same clause. Lower-cased and matched as suffixes
+   of the text up to and including the stop.
+
+   ⚠️ "etc." is deliberately NOT here, and the distinction is the point: it is
+   the one abbreviation that routinely DOES end a sentence — "We use forms, etc.
+   Partners follow the process." Treating it as never-terminal swallowed the
+   next sentence into the card summary and still satisfied the length and
+   punctuation asserts, so nothing caught it. Abbreviations that may terminate
+   fall through to the ordinary test (end of line, or whitespace then a
+   capital), which resolves that example correctly. Raised by the independent
+   review, 2026-08-15. */
+const NEVER_TERMINAL = [
+  "e.g.", "i.e.", "vs.", "no.", "fig.", "approx.", "cf.",
+  "mr.", "mrs.", "ms.", "dr.", "prof.", "st.", "rev.",
 ];
 
 function splitFirstSentence(text: string): { first: string; rest: string } {
@@ -268,7 +292,7 @@ function splitFirstSentence(text: string): { first: string; rest: string } {
        first sentence onto the card. Raised by the independent review. */
     if (ch === ".") {
       const before = text.slice(0, i + 1).toLowerCase();
-      if (ABBREVIATIONS.some((a) => before.endsWith(a))) continue;
+      if (NEVER_TERMINAL.some((a) => before.endsWith(a))) continue;
     }
 
     /* Consume any closing quote that belongs to the sentence being ended. */
@@ -333,6 +357,9 @@ export interface FocusAreaEntry {
      Registered with doc_key='guide', so the partial unique index allows exactly
      one per focus area and the templates-grid predicate excludes it. */
   guideFile: { fileName: string; relPath: string; title: string };
+  /* Carried so the manifest can assert WHICH document was read, not merely that
+     one was. */
+  overviewFile: string;
   photo: { source: string; target: string; imagePath: string };
   templates: TemplateEntry[];
   sourceDir: string;
@@ -588,6 +615,7 @@ async function parseFocusArea(
     guideMd,
     /* Same naming rule as the templates: the delivered filename, minus its
        extension and version suffix, never re-worded. */
+    overviewFile,
     guideFile: {
       fileName: guideFile,
       relPath: path.relative(SRC, path.join(faDir, guideFile)).split(path.sep).join("/"),
@@ -610,6 +638,71 @@ async function parseFocusArea(
       summaryChars: summary.length,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// The manifest — WHICH files belong WHERE, checked by name
+// ---------------------------------------------------------------------------
+type Manifest = Record<
+  string,
+  { overview: string; guide: string; templates: string[] }
+>;
+
+function manifestOf(focusAreas: FocusAreaEntry[]): Manifest {
+  const out: Manifest = {};
+  for (const f of focusAreas) {
+    out[f.number] = {
+      overview: f.overviewFile,
+      guide: f.guideFile.fileName,
+      templates: f.templates.map((t) => t.fileName).sort(),
+    };
+  }
+  return out;
+}
+
+async function checkManifest(focusAreas: FocusAreaEntry[]): Promise<void> {
+  const current = manifestOf(focusAreas);
+
+  if (UPDATE_MANIFEST || !(await exists(MANIFEST_OUT))) {
+    await fs.writeFile(MANIFEST_OUT, `${JSON.stringify(current, null, 2)}\n`, "utf8");
+    console.log(
+      `\n${UPDATE_MANIFEST ? "Rewrote" : "Created"} ${path.relative(ROOT, MANIFEST_OUT)} — ` +
+        "review this diff: it is the record of which file belongs to which focus area.",
+    );
+    return;
+  }
+
+  const expected = JSON.parse(await fs.readFile(MANIFEST_OUT, "utf8")) as Manifest;
+  const problems: string[] = [];
+  const numbers = new Set([...Object.keys(expected), ...Object.keys(current)]);
+
+  for (const n of [...numbers].sort()) {
+    const want = expected[n];
+    const got = current[n];
+    if (!want) problems.push(`${n}: not in the manifest at all`);
+    else if (!got) problems.push(`${n}: in the manifest but not extracted`);
+    else {
+      if (want.overview !== got.overview) {
+        problems.push(`${n}: Overview is "${got.overview}", manifest says "${want.overview}"`);
+      }
+      if (want.guide !== got.guide) {
+        problems.push(`${n}: Guide is "${got.guide}", manifest says "${want.guide}"`);
+      }
+      const added = got.templates.filter((t) => !want.templates.includes(t));
+      const gone = want.templates.filter((t) => !got.templates.includes(t));
+      if (added.length) problems.push(`${n}: unexpected template(s) ${added.join(", ")}`);
+      if (gone.length) problems.push(`${n}: missing template(s) ${gone.join(", ")}`);
+    }
+  }
+
+  if (problems.length) {
+    fail(
+      "manifest",
+      `the delivered files no longer match docs/content-v2-manifest.json:\n  - ` +
+        problems.join("\n  - ") +
+        `\nIf the owner really changed the content, re-run with --update-manifest and review the diff.`,
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -678,6 +771,8 @@ async function buildSpec(): Promise<ContentSpec> {
       );
     }
   }
+
+  await checkManifest(focusAreas);
 
   return {
     generatedBy: "scripts/ingest-content.ts (PP6b)",

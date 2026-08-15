@@ -167,10 +167,19 @@ function classifyLine(
       marker = true;
     }
   }
-  for (const pattern of COVER_PATTERNS) {
-    const next = rest.replace(pattern, "");
-    if (next !== rest) marker = true;
-    rest = next;
+  /* THE DECORATIONS ONLY COUNT ON A LINE THAT ALREADY CARRIES A BANNER.
+     "| 10 Steps" and "— Section 13" never stand alone in the real covers: they
+     trail the playbook subtitle. Applied unconditionally they made a line whose
+     entire content was `## Section 3` compact to nothing, classify as cover,
+     AND set the marker that licenses removal — so a legitimate section heading
+     under a SIMPLE GUIDE banner was deleted from the reader. Found by the
+     independent review, 2026-08-15. Gating them behind a phrase match on the
+     same line keeps every real cover working and makes a bare decoration line
+     ordinary content, which is what it is. */
+  if (marker) {
+    for (const pattern of COVER_PATTERNS) {
+      rest = rest.replace(pattern, "");
+    }
   }
 
   /* Only if NOTHING of substance survives. A line like "ORG STRUCTURE & ROLES
@@ -219,7 +228,15 @@ export function stripGuideCover(
 ): string {
   if (!markdown) return "";
 
-  const titleKeys = titles.map(compact).filter(Boolean);
+  /* LONGEST FIRST. Subtraction is greedy and order-dependent: given "Plan" and
+     "Plan an Event", removing the short key first leaves "ANEVENT" behind and
+     the cover line survives, while the other order clears it. Sorting makes the
+     result independent of the order the caller happened to pass them in.
+     Raised by the independent review, 2026-08-15. */
+  const titleKeys = titles
+    .map(compact)
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
   const sectionKey = compact(sectionLabel ?? "");
   const lines = markdown.split(/\r?\n/);
 
@@ -242,7 +259,6 @@ export function stripGuideCover(
        is conservative. Found by the independent review, 2026-08-15.
        `removed` bounds what may be deleted; `inspected` merely stops the scan
        from wandering, and is slack enough to finish any wrapped title. */
-    if (removed >= MAX_COVER_LINES) break;
     if (inspected >= MAX_COVER_LINES + MAX_TITLE_LINES) break;
     inspected += 1;
 
@@ -250,6 +266,18 @@ export function stripGuideCover(
     /* null = a title was mid-flight and this line did not continue it. Break
        WITHOUT advancing `cut`, so the held-back lines survive. */
     if (!verdict) break;
+
+    /* THE CAP IS REACHED AND THERE IS STILL COVER TO COME — so this is not a
+       cover block this function understands. Return the document untouched
+       rather than commit a partial strip: a partial strip is what made the
+       function non-idempotent, because a second pass would then finish the job
+       the first one abandoned. Nine banner lines produced exactly that.
+       Refusing is also the conservative answer — showing a banner is better
+       than half-removing one. Found by the independent review, 2026-08-15. */
+    if (removed >= MAX_COVER_LINES) {
+      if (verdict.cover) return markdown;
+      break;
+    }
 
     if (verdict.cover) {
       if (verdict.marker) sawMarker = true;
@@ -264,8 +292,18 @@ export function stripGuideCover(
       continue;
     }
 
-    /* Not cover on its own — but it may be the opening of a wrapped title. */
-    const tail = pending ? "" : unfinishedTitleTail(verdict.residue, titleKeys);
+    /* Not cover on its own — but it may be the opening of a wrapped title.
+
+       A MARKDOWN HEADING IS NEVER CONSUMED THIS WAY. Two consecutive headings
+       whose text happens to concatenate to the topic's title are structure the
+       owner wrote, not a wrapped cover title — and the wrapped covers that
+       actually exist use bold, not headings, so refusing headings here costs
+       nothing real. Without it, `## Connect to the Wider Palestine` followed by
+       `## House Network` was deleted from a body that merely had a banner
+       above it. Found by the independent review, 2026-08-15. */
+    const isHeading = /^\s*#/.test(lines[i]);
+    const tail =
+      pending || isHeading ? "" : unfinishedTitleTail(verdict.residue, titleKeys);
     if (!tail) break;
     pending = tail;
     provisional += 1;

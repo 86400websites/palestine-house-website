@@ -81,7 +81,9 @@ function slugify(value: string): string {
 
 function extensionOf(name: string): string {
   const dot = name.lastIndexOf(".");
-  return dot < 0 ? "" : name.slice(dot + 1).toLowerCase();
+  /* trim(): a trailing space in a filename — allowed by OneDrive and Windows —
+     otherwise yields "docx " and is rejected by an otherwise correct check. */
+  return dot < 0 ? "" : name.slice(dot + 1).toLowerCase().trim();
 }
 
 type Checked = { ok: true; ext: string } | { ok: false; message: string };

@@ -350,6 +350,83 @@ check(
   ["    const keep = true;", "", "after"].join("\n"),
 );
 
+/* ------------------------------------------------------------------ *
+ * Second review round, 2026-08-15. Four more ways the block could eat
+ * structure the owner wrote.
+ * ------------------------------------------------------------------ */
+
+check(
+  "REVIEW2: a bare `## Section 3` heading is content, not cover decoration",
+  stripGuideCover(
+    body("# SIMPLE GUIDE", "## Section 3", "This is the third substantive section."),
+    ["Plan an Event", "Plan an Event"],
+    "Program",
+  ),
+  body("## Section 3", "This is the third substantive section."),
+);
+
+check(
+  "REVIEW2: the decoration still comes off when it trails a real banner",
+  stripGuideCover(
+    body(
+      "__SIMPLE GUIDE__",
+      "__Community Partnerships__",
+      "Palestine House Local Operations Playbook — Section 14",
+      "For Local Partners and House Teams",
+    ),
+    ["Community Partnerships", "Community Partnerships"],
+    "Operate",
+  ),
+  "For Local Partners and House Teams",
+);
+
+check(
+  "REVIEW2: two HEADINGS that concatenate to the title are structure, not a wrapped cover",
+  stripGuideCover(
+    body(
+      "# SIMPLE GUIDE",
+      "## Connect to the Wider Palestine",
+      "## House Network",
+      "Real content.",
+    ),
+    [
+      "Connect to the Wider Palestine House Network",
+      "Connect to the Wider Palestine House Network",
+    ],
+    "Program",
+  ),
+  body("## Connect to the Wider Palestine", "## House Network", "Real content."),
+);
+
+check(
+  "REVIEW2: title keys give the same answer whatever order they arrive in",
+  stripGuideCover(
+    body("__SIMPLE GUIDE__", "__Plan an Event__", "Real content."),
+    ["Plan", "Plan an Event"],
+    "Program",
+  ),
+  stripGuideCover(
+    body("__SIMPLE GUIDE__", "__Plan an Event__", "Real content."),
+    ["Plan an Event", "Plan"],
+    "Program",
+  ),
+);
+
+/* A prefix longer than the removal cap is not a cover block this function
+ * understands, so it returns the document untouched rather than strip part of
+ * it — a partial strip is what a second pass would then finish, which is
+ * exactly the non-idempotence the review found. */
+{
+  const nine = body(...Array(9).fill("SIMPLE GUIDE"), "Real content.");
+  const once = stripGuideCover(nine, ["X", "X"], "Setup");
+  check("REVIEW2: a prefix beyond the cap is left alone entirely", once, nine);
+  check(
+    "REVIEW2: and is therefore idempotent",
+    stripGuideCover(once, ["X", "X"], "Setup"),
+    once,
+  );
+}
+
 /* f(f(x)) === f(x). A long cover block used to exhaust one shared budget
  * partway through a wrapped title: the first call kept the title and a second
  * call removed it. Two bounds now — what may be removed, and how far the scan

@@ -11,4 +11,5 @@
 #
 # Pinned narrowly, to generated artefacts only. Ordinary source keeps the
 # repo's existing behaviour.
-docs/content-v2-spec.json text eol=lf
+docs/content-v2-spec.json     text eol=lf
+docs/content-v2-manifest.json text eol=lf

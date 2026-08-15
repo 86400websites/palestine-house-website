@@ -86,6 +86,10 @@ const DRY_RUN = process.argv.includes("--dry-run");
 const ALL = process.argv.includes("--all");
 /* Permission to rewrite a focus area partners can already see. Off by default. */
 const ALLOW_LIVE = process.argv.includes("--allow-live");
+/* Re-upload the bytes of files that are already registered. Off by default,
+   because matching by code cannot tell an edited document from an unchanged
+   one — see replaceBytes(). */
+const REPLACE_FILES = process.argv.includes("--replace-files");
 const FOCUS = (() => {
   const i = process.argv.indexOf("--focus");
   return i === -1 ? null : process.argv[i + 1];
@@ -357,6 +361,92 @@ async function putFile(
    doc_key, both of which the database itself constrains to be unique there. */
 type ExistingFile = { id: string; title: string; code: string | null; doc_key: string | null };
 
+/* A CODE IS NOT A STABLE IDENTITY, so before trusting one, prove it has not
+   moved. Codes are T01..Tnn assigned by alphabetical filename order, so
+   renaming "Palestine House Setup Checklist.docx" to "A Palestine House Setup
+   Checklist.docx" makes it T01 and demotes the Brand Guide to T02. Matching on
+   code alone would then relabel each file as the other — both downloads
+   silently wrong, and no error anywhere. Found by the independent review,
+   2026-08-15.
+
+   A pure rename stays safe and is still handled as a rename: the old title
+   simply disappears from the spec. A SWAP is refused, and detecting it is
+   exact — the title currently registered under this code turning up in the spec
+   under a DIFFERENT code is precisely what a reordering looks like, and cannot
+   arise any other way.
+
+   Called from the preflight, before anything is written, and again inside the
+   file loop so it cannot be bypassed by a future caller. */
+function assertCodesHaveNotShifted(fa: FocusAreaEntry, existing: ExistingFile[]): void {
+  for (const t of fa.templates) {
+    const clash = existing.find((r) => r.doc_key === null && r.code === t.code);
+    if (!clash || clash.title === t.title) continue;
+    const movedTo = fa.templates.find(
+      (x) => x.title === clash.title && x.code !== t.code,
+    );
+    if (movedTo) {
+      throw new Error(
+        `Template codes have shifted on "${fa.title}". ${t.code} is registered as ` +
+          `"${clash.title}", which the spec now calls ${movedTo.code}. Codes come from ` +
+          `alphabetical filename order, so a renamed or inserted file re-labels the ones ` +
+          `after it — continuing would attach each file's name to the other's bytes. ` +
+          `Fix the codes in the CMS, or delete this focus area's files and re-load it. ` +
+          `Nothing has been written.`,
+      );
+    }
+  }
+}
+
+/* PUSH NEW BYTES for a file that is already registered.
+   Matching by code means an EDITED source document under an unchanged filename
+   is not noticed — the row is found, nothing is re-uploaded, and the partner
+   keeps downloading the old version. Detecting that automatically would need
+   the stored object's size or hash, and `admin_list_resource_files` withholds
+   the storage path by design, so this is deliberate rather than automatic:
+   --replace-files re-uploads the targeted focus areas through the CMS's own
+   replace lifecycle. Raised by the independent review, 2026-08-15. */
+async function replaceBytes(
+  db: SupabaseClient,
+  row: ExistingFile,
+  fa: FocusAreaEntry,
+  source: { fileName: string; relPath: string; title: string; code?: string },
+  topic: TopicRow,
+): Promise<void> {
+  const ext = path.extname(source.fileName).slice(1).toLowerCase();
+  const contentType = CONTENT_TYPE[ext];
+  if (!contentType) throw new Error(`unsupported file type ".${ext}"`);
+
+  const key = objectKey(
+    topic.element_slug,
+    source.code ? slugify(source.code) || "file" : "guide",
+    source.title,
+    ext,
+  );
+  const bytes = await fs.readFile(path.join(SRC, source.relPath));
+  const { error: upErr } = await db.storage
+    .from(BUCKET)
+    .upload(key, bytes, { contentType, upsert: false });
+  if (upErr) throw new Error(`upload ${key}: ${upErr.message}`);
+
+  /* The RPC matches on id AND element AND private AND bucket, and hands back
+     the key it replaced. If it refuses, the row still points at the old object,
+     so the new one is the only thing to take away. */
+  const { data, error } = await db.rpc("admin_replace_resource_file", {
+    p_id: row.id,
+    p_element_id: topic.element_id,
+    p_storage_path: key,
+  });
+  if (error) {
+    await db.storage.from(BUCKET).remove([key]);
+    throw new Error(`replace "${row.title}" on ${fa.number}: ${error.message}`);
+  }
+  const oldPath = typeof data === "string" ? data : null;
+  if (oldPath && oldPath !== key) {
+    await db.storage.from(BUCKET).remove([oldPath]);
+  }
+  step(`replaced bytes for "${row.title}" (${bytes.length.toLocaleString()} bytes)`);
+}
+
 async function renameIfNeeded(
   db: SupabaseClient,
   row: ExistingFile,
@@ -393,7 +483,12 @@ async function uploadFiles(
   const existingGuide = existing.find((r) => r.doc_key === "guide");
   if (existingGuide) {
     step(`guide file already registered`);
-    if (!DRY_RUN) await renameIfNeeded(db, existingGuide, fa.guideFile.title);
+    if (!DRY_RUN) {
+      if (REPLACE_FILES) {
+        await replaceBytes(db, existingGuide, fa, fa.guideFile, topic);
+      }
+      await renameIfNeeded(db, existingGuide, fa.guideFile.title);
+    }
   } else if (DRY_RUN) {
     step(`WOULD upload guide file "${fa.guideFile.title}"`);
   } else {
@@ -411,13 +506,18 @@ async function uploadFiles(
     step(`uploaded + registered GUIDE "${fa.guideFile.title}" (${size.toLocaleString()} bytes)`);
   }
 
+  assertCodesHaveNotShifted(fa, existing);
+
   for (const t of fa.templates) {
-    /* Matched on CODE, not on title — see ExistingFile. A retitled template is
-       the same template. */
+    /* Matched on CODE, having just proved above that no code has moved. A
+       retitled template is the same template. */
     const already = existing.find((r) => r.doc_key === null && r.code === t.code);
     if (already) {
       step(`template ${t.code} already registered`);
-      if (!DRY_RUN) await renameIfNeeded(db, already, t.title);
+      if (!DRY_RUN) {
+        if (REPLACE_FILES) await replaceBytes(db, already, fa, t, topic);
+        await renameIfNeeded(db, already, t.title);
+      }
       continue;
     }
     const ext = path.extname(t.fileName).slice(1).toLowerCase();
@@ -477,6 +577,43 @@ async function main(): Promise<void> {
     `PP6b content load — ${targets.length} focus area(s) — ${DRY_RUN ? "DRY RUN" : "LIVE"}`,
   );
   const db = await connect();
+
+  /* PREFLIGHT, BEFORE ANY MUTATION ANYWHERE.
+     The Live guard used to sit inside upsertFocusArea, which runs third — so a
+     refused run had already copied a photograph into the working tree and could
+     already have created a published group on TEST. A command that advertises
+     "I will not touch a Live focus area" must decide that before it touches
+     anything at all. Raised by the independent review, 2026-08-15. */
+  const { data: preRows, error: preErr } = await db.rpc("admin_list_platform_topics");
+  if (preErr) throw preErr;
+  const known = (preRows as TopicRow[] | null) ?? [];
+
+  if (!ALLOW_LIVE) {
+    const live = targets
+      .map((fa) => known.find((t) => t.slug === fa.slug))
+      .filter((t): t is TopicRow => Boolean(t?.published));
+    if (live.length) {
+      throw new Error(
+        `${live.length} of the targeted focus area(s) are LIVE: ${live
+          .map((t) => `/${t.slug}`)
+          .join(", ")}. Re-running would rewrite content partners can already ` +
+          `see. Move them back to Draft in the CMS, or pass --allow-live if that is what you intend. ` +
+          `Nothing has been written.`,
+      );
+    }
+  }
+
+  /* The code-shift check belongs here too, for the same reason: it decides that
+     the run is unsafe, so it must decide it before the run has written anything. */
+  for (const fa of targets) {
+    const topic = known.find((t) => t.slug === fa.slug);
+    if (!topic) continue;
+    const { data, error } = await db.rpc("admin_list_resource_files", {
+      p_element_id: topic.element_id,
+    });
+    if (error) throw error;
+    assertCodesHaveNotShifted(fa, (data as ExistingFile[] | null) ?? []);
+  }
 
   for (const fa of targets) {
     console.log(`\n${fa.number} ${fa.title}`);

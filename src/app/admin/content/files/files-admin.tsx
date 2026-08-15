@@ -47,7 +47,16 @@ const ALLOWED_EXT = ["docx", "pdf"];
 
 function extOf(name: string) {
   const dot = name.lastIndexOf(".");
-  return dot < 0 ? "" : name.slice(dot + 1).toLowerCase();
+  /* trim(): a filename carrying a trailing space — which OneDrive and Windows
+     both allow — yields "docx " and fails a set membership test that is
+     otherwise correct. Cheap to absorb, and a no-op when it is not needed.
+     (The adjective that belonged in that last clause names a Tailwind
+     visibility utility. Tailwind v4 scans the raw text of every file under
+     src/, which cannot be excluded, so writing it here added a real rule to the
+     stylesheet every visitor downloads — in a comment about being careful, on
+     the fourth occurrence of this in the PP series. Caught by the rule-level
+     bundle diff, which is the only thing that ever catches it.) */
+  return dot < 0 ? "" : name.slice(dot + 1).toLowerCase().trim();
 }
 
 /* SAY WHAT WAS WRONG WITH IT (PP6b, 2026-08-15).

@@ -1,0 +1,222 @@
+{
+  "1.1": {
+    "overview": "Get Legally Ready Overview.docx",
+    "guide": "Get Legally Ready Simple Guide.docx",
+    "templates": [
+      "Palestine House Brand Guide.docx",
+      "Palestine House Setup Checklist.docx"
+    ]
+  },
+  "1.2": {
+    "overview": "Plan The Money_Overview_V.1.docx",
+    "guide": "Plan the Money - Simple Guide_V.1.docx",
+    "templates": [
+      "Palestine House 12-Month Budget Template_V.1.docx",
+      "Palestine House Cash Flow Template_V.1.docx",
+      "Palestine House Opening Cost Checklist_V.1.docx",
+      "Palestine House Revenue Ideas_V.1.docx",
+      "Palestine House Startup Budget_V.1.docx"
+    ]
+  },
+  "1.3": {
+    "overview": "Find and Prepare the Space Overview_V.1.docx",
+    "guide": "Find and Prepare the Space - Simple Guide_V.1.docx",
+    "templates": [
+      "Basic Furniture & Equipment List_V.1.docx",
+      "Pre-Opening Venue Checklist_V.1.docx",
+      "Venue Comparison Sheet_V.1.docx",
+      "Venue Selection Checklist_V.1.docx"
+    ]
+  },
+  "1.4": {
+    "overview": "Build the small team Overview_V.1.docx",
+    "guide": "Build the small team Simple Guide_V.1.docx",
+    "templates": [
+      "New Team Member Checklist_V.1.docx",
+      "Role Description House Lead_V.1.docx",
+      "Role Description Operations & Admin_V.1.docx",
+      "Role Description Programming_Community_V.1.docx",
+      "Simple Team Structure_V.1.docx"
+    ]
+  },
+  "1.5": {
+    "overview": "Get Ready to Open Overview_V.1.docx",
+    "guide": "Get Ready to Open - Simple Guide_V.1.docx",
+    "templates": [
+      "30-Day Opening Checklist_V.1.docx",
+      "90-Day Opening Checklist_V.1.docx",
+      "Opening Day Run Sheet_V.1.docx",
+      "Opening Week Checklist_V.1.docx"
+    ]
+  },
+  "2.1": {
+    "overview": "Money Overview_V.1.docx",
+    "guide": "Money - Simple Guide_V.1.docx",
+    "templates": [
+      "Cash Flow Sheet_V.1.docx",
+      "Expense Form_V.1.docx",
+      "Monthly Finance Summary_V.1.docx",
+      "Simple Financial Policy_V.1.docx",
+      "Supplier Payment Tracker_V.1.docx"
+    ]
+  },
+  "2.2": {
+    "overview": "Daily House Operations Overview_V.1.docx",
+    "guide": "Daily House Operations - Simple Guide_V.1.docx",
+    "templates": [
+      "Cleaning Checklist_V.1.docx",
+      "Daily Closing Checklist_V.1.docx",
+      "Daily Opening Checklist_V.1.docx",
+      "Incident Form_V.1.docx",
+      "Maintenance Log_V.1.docx",
+      "Weekly House Checklist_V.1.docx"
+    ]
+  },
+  "2.3": {
+    "overview": "Food and Beverage Overview_V.1.docx",
+    "guide": "Food and Beverage - Simple Guide_V.1.docx",
+    "templates": [
+      "Daily F and B Sales Sheet_V.1.docx",
+      "Food Safety Checklist_V.1.docx",
+      "Food and Beverage Stock Sheet_V.1.docx",
+      "Kitchen Opening and Closing Checklist_V.1.docx",
+      "Menu Costing Sheet_V.1.docx",
+      "Simple Menu Template_V.1.docx"
+    ]
+  },
+  "2.4": {
+    "overview": "Members and Visitors Overview_V.1.docx",
+    "guide": "Members and Visitors - Simple Guide_V.1.docx",
+    "templates": [
+      "Membership Form_V.1.docx",
+      "Membership Renewal Message_V.1.docx",
+      "New Member Welcome Template_V.1.docx",
+      "Simple Member List_V.1.docx",
+      "Visitor Feedback Form_V.1.docx"
+    ]
+  },
+  "2.5": {
+    "overview": "Team Overview_V.1.docx",
+    "guide": "Team - Simple Guide_V.1.docx",
+    "templates": [
+      "Leave Request Form_V.1.docx",
+      "Monthly Team Check-In Form_V.1.docx",
+      "Simple Role and Responsiblity Sheet_V.1.docx",
+      "Weekly Staff Schedule_V.1.docx"
+    ]
+  },
+  "2.6": {
+    "overview": "Monthly Check Up Overview_V.1.docx",
+    "guide": "Monthly Check Up - Simple Guide_V.1.docx",
+    "templates": [
+      "Monthly Action List_V.1.docx",
+      "One-Page Monthly House Report_V.1.docx",
+      "Simple KPI Sheet_V.1.docx"
+    ]
+  },
+  "3.1": {
+    "overview": "Plan the Calendar Overview_V.1.docx",
+    "guide": "Plan the Calendar - Simple Guide_V.1.docx",
+    "templates": [
+      "Event Budget Template_V.1.docx",
+      "Monthly Programming Calendar_V.1.docx",
+      "Simple Event Idea Form_V.1.docx"
+    ]
+  },
+  "3.2": {
+    "overview": "Plan an Event Overview_V.1.docx",
+    "guide": "Plan an Event - Simple Guide_V.1.docx",
+    "templates": [
+      "Event Checklist_V.1.docx",
+      "Event Feedback Form_V.1.docx",
+      "Event Run Sheet_V.1.docx",
+      "Guest List_V.1.docx",
+      "Simple Event Budget_V.1.docx"
+    ]
+  },
+  "3.3": {
+    "overview": "Work with Artists and Speakers Overview_V.1.docx",
+    "guide": "Work with Artists and Speakers - Simple Guide_V.1.docx",
+    "templates": [
+      "Artist Hospitality Checklist_V.1.docx",
+      "Artist Information Form_V.1.docx",
+      "Artist Payment Form_V.1.docx",
+      "Simple Artist Agreement_V.1.docx",
+      "Simple Speaker Agreement_V.1.docx"
+    ]
+  },
+  "3.4": {
+    "overview": "Promote the Event Overview_V.1.docx",
+    "guide": "Promote the Event - Simple Guide_V.1.docx",
+    "templates": [
+      "Email Invitation Template_V.1.docx",
+      "Event Invitation Template_V.1.docx",
+      "Event Marketing Checklist_V.1.docx",
+      "Social Media Post Template_V.1.docx"
+    ]
+  },
+  "3.5": {
+    "overview": "Learn from the Event Overview_V.1.docx",
+    "guide": "Learn from the Event - Simple Guide_V.1.docx",
+    "templates": [
+      "Audience Feedback Form_V.1.docx",
+      "One-Page Event Review_V.1.docx"
+    ]
+  },
+  "3.6": {
+    "overview": "Connect to the Wider Palestine House Network Overview_V.1.docx",
+    "guide": "Connect to the Wider Palestine House Network - Simple Guide_V.1.docx",
+    "templates": [
+      "Artist Request Form_V.1.docx",
+      "Community Program Participation Form_V.1.docx",
+      "House-toHouse Collaboration Request_V.1.docx",
+      "Programming Support Request_V.1.docx"
+    ]
+  },
+  "4.1": {
+    "overview": "Marketing Overview_V.1.docx",
+    "guide": "Marketing - Simple Guide_V.1.docx",
+    "templates": [
+      "Monthly Content Calendar_V.1.docx",
+      "Newsletter Template_V.1.docx",
+      "Photography Brief_V.1.docx",
+      "Press Release Template_V.1.docx",
+      "Simple Marketing Plan_V.1.docx"
+    ]
+  },
+  "4.2": {
+    "overview": "Sponsorship and Fundraising Overview_V.1.docx",
+    "guide": "Sponsorship and Fundraising - Simple Guide_V.1.docx",
+    "templates": [
+      "Grant Opportunity List_V.1.docx",
+      "Simple Grant Application Template_V.1.docx",
+      "Simple Partnership Agreement_V.1.docx",
+      "Simple Sponsorship Proposal_V.1.docx",
+      "Sponsor List Template_V.1.docx"
+    ]
+  },
+  "4.3": {
+    "overview": "Partnerships Overview_V.1.docx",
+    "guide": "Partnerships - Simple Guide_V.1.docx",
+    "templates": [
+      "Partner List_V.1.docx",
+      "Simple MOU_V.1.docx",
+      "Simple Partnership Proposal_V.1.docx"
+    ]
+  },
+  "4.4": {
+    "overview": "Ask Community Support for Help Overview_V.1.docx",
+    "guide": "Ask Community Support for Help - Simple Guide_V.1.docx",
+    "templates": [
+      "Simple Support Request Form_V.1.docx"
+    ]
+  },
+  "4.5": {
+    "overview": "Learn from Other Palestine Houses Overview_V.1.docx",
+    "guide": "Learn from Other Palestine Houses - Simple Guide_V.1.docx",
+    "templates": [
+      "Good Idea Sharing Template_V.1.docx",
+      "Success Story Template_V.1.docx"
+    ]
+  }
+}
