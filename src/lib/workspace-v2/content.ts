@@ -420,11 +420,21 @@ export const getTopicGuide = cache(
          the reader prints the title as its h1, and 21 of the 33 bodies then
          reprinted it immediately underneath. Both titles are passed because
          they disagree on three topics — "Retail Shop Operations" vs "Retail /
-         Shop Operations", and the accented "Aswātna". */
+         Shop Operations", and the accented "Aswātna".
+
+         The SECTION LABEL is passed as a third key (PP6b, 2026-08-15). The
+         owner's delivered guides open one line higher than the original 33 —
+         `Palestine House: Set up` — and without the label that line keeps a
+         "SETUP" residue, is read as content, and the whole cover block survives.
+         The STATIC spec label is deliberately the source rather than the
+         CMS-editable one: the words are baked into the exported document, so
+         renaming a page in the CMS must not change what a body is matched
+         against. `about` carries no focus areas, hence the four-section type. */
       bodyHtml: renderMarkdown(
         stripGuideCover(element?.simple_guide_md, [
           row.title,
           element?.title ?? "",
+          PLATFORM_PAGES[section].label,
         ]),
       ),
       file: guides.get(row.element_id) ?? null,

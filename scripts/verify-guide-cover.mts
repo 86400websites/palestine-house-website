@@ -141,8 +141,174 @@ check(
 );
 
 /* ------------------------------------------------------------------ *
+ * The owner's DELIVERED content (PP6b, 2026-08-15). A different export,
+ * a different cover shape, and — measured before any of this was written
+ * — stripGuideCover fired on ZERO of the 22.
+ *
+ * Two things changed. Every delivered document carries Word bookmark
+ * anchors (19-21 each; none of the original 33 carry any), whose ids
+ * survive compaction and read as content. And the cover opens one line
+ * higher, on `Palestine House: <Section>`, whose section label was not
+ * cover vocabulary. The third argument is that label.
+ *
+ * Every case below is a VERBATIM opening from the delivered files.
+ * ------------------------------------------------------------------ */
+
+check(
+  "delivered: Setup — leading anchor + section line (1.1, verbatim)",
+  stripGuideCover(
+    body(
+      '<a id="get-legally-ready-simple-guide"></a>Palestine House: Set up',
+      "Get Legally Ready Simple Guide",
+      '<a id="step-1.-register-our-local-entity"></a>',
+      "Step 1. Register Our Local Entity",
+      "We first check whether we need to register a company.",
+    ),
+    ["Get Legally Ready", "Get Legally Ready", "Setup"],
+  ),
+  body(
+    "Step 1. Register Our Local Entity",
+    "We first check whether we need to register a company.",
+  ),
+);
+
+check(
+  "delivered: Support — anchor MID-LINE inside bold (4.5, verbatim)",
+  stripGuideCover(
+    body(
+      '__Palestine House__<a id="step-1.-register-our-local-entity"></a>: __Support __',
+      "__Learn from Other Palestine Houses Simple Guide__",
+      "__Step 1. Share a Good Idea When It Works__",
+    ),
+    [
+      "Learn from Other Palestine Houses",
+      "Learn from Other Palestine Houses",
+      "Support",
+    ],
+  ),
+  "__Step 1. Share a Good Idea When It Works__",
+);
+
+check(
+  "delivered: Operate — section label differs from the topic title (2.6)",
+  stripGuideCover(
+    body(
+      '<a id="get-legally-ready"></a>__Palestine House: Operate__',
+      "__Monthly Check-Up Simple Guide__",
+      '## <a id="step-1"></a>__Step 1. Book the Same Hour Every Month__',
+    ),
+    ["Monthly Check-Up", "Monthly Check-Up", "Operate"],
+  ),
+  '## <a id="step-1"></a>__Step 1. Book the Same Hour Every Month__',
+);
+
+check(
+  "delivered: Program — the fourth section label (3.5)",
+  stripGuideCover(
+    body(
+      '<a id="get-legally-ready"></a>__Palestine House: Program__',
+      "__Learn the Event Simple Guide__",
+      "After every event, we take a few minutes to look back.",
+    ),
+    ["Learn the Event", "Learn the Event", "Program"],
+  ),
+  "After every event, we take a few minutes to look back.",
+);
+
+check(
+  "delivered: a title WRAPPED over two cover lines (3.6, verbatim)",
+  stripGuideCover(
+    body(
+      '<a id="get-legally-ready"></a>__Palestine House: Program__',
+      "__Connect to the Wider Palestine__",
+      "__House Network Simple Guide__",
+      "__Step 1. Ask for Programming Support__",
+    ),
+    [
+      "Connect to the Wider Palestine House Network",
+      "Connect to the Wider Palestine House Network",
+      "Program",
+    ],
+  ),
+  "__Step 1. Ask for Programming Support__",
+);
+
+/* ------------------------------------------------------------------ *
  * Boundary cases — what must NOT be removed.
  * ------------------------------------------------------------------ */
+
+check(
+  "a wrapped title that never completes deletes NOTHING it held back",
+  stripGuideCover(
+    body(
+      "__SIMPLE GUIDE__",
+      "Connect to the Wider Palestine",
+      "and then something else entirely.",
+    ),
+    [
+      "Connect to the Wider Palestine House Network",
+      "Connect to the Wider Palestine House Network",
+      "Program",
+    ],
+  ),
+  body("Connect to the Wider Palestine", "and then something else entirely."),
+);
+
+check(
+  "a continuation must match from the START of the line, not anywhere in it",
+  stripGuideCover(
+    body(
+      "__SIMPLE GUIDE__",
+      "Connect to the Wider Palestine",
+      "Our House Network is thriving.",
+    ),
+    [
+      "Connect to the Wider Palestine House Network",
+      "Connect to the Wider Palestine House Network",
+      "Program",
+    ],
+  ),
+  body("Connect to the Wider Palestine", "Our House Network is thriving."),
+);
+
+check(
+  "an anchor around REAL TEXT is content and is never stripped",
+  stripGuideCover(
+    body('<a href="https://example.org">Read the local rules</a>', "More."),
+    ["Get Legally Ready", "Get Legally Ready", "Setup"],
+  ),
+  body('<a href="https://example.org">Read the local rules</a>', "More."),
+);
+
+check(
+  "a kept line keeps its anchors verbatim — classification only",
+  stripGuideCover(
+    body(
+      '<a id="c"></a>Palestine House: Setup',
+      '<a id="d"></a>Step 1. Do the thing.',
+    ),
+    ["Whatever", "Whatever", "Setup"],
+  ),
+  '<a id="d"></a>Step 1. Do the thing.',
+);
+
+check(
+  "the section label alone does not license a removal without a marker",
+  stripGuideCover(
+    body("Setup", "The first real paragraph."),
+    ["Get Legally Ready", "Get Legally Ready", "Setup"],
+  ),
+  body("Setup", "The first real paragraph."),
+);
+
+check(
+  "a heading naming ANOTHER section survives — the label is scoped",
+  stripGuideCover(
+    body("__SIMPLE GUIDE__", "Support"),
+    ["Get Legally Ready", "Get Legally Ready", "Setup"],
+  ),
+  "Support",
+);
 
 check(
   "a leading non-Latin line is CONTENT, not punctuation (review finding)",
