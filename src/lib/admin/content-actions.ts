@@ -242,9 +242,18 @@ export async function saveFocusAreaAction(
     /* Read RAW, not through field(): "" must survive as "" so the owner can
        clear the guide. field() maps "" to undefined, which the RPC reads as
        "not supplied" and leaves the old text in place — meaning an emptied
-       textarea would silently come back. Found on TEST, 2026-08-14. */
+       textarea would silently come back. Found on TEST, 2026-08-14.
+
+       NORMALISE LINE ENDINGS (PP6b, 2026-08-15). HTML requires a textarea to
+       submit its value with CRLF line breaks, whatever was put into it. The
+       ingested guide bodies use LF, so without this EVERY save rewrote the
+       owner's prose — adding a carriage return to all 154 lines of the pilot's
+       guide and growing it from 3,933 to 4,087 characters — even when the edit
+       was only to the photograph. Invisible in the reader, and precisely the
+       kind of silent edit to approved content this project forbids. Found by
+       changing a photo in the CMS and looking at what the row did. */
     simpleGuideMd: formData.has("simpleGuideMd")
-      ? String(formData.get("simpleGuideMd") ?? "")
+      ? String(formData.get("simpleGuideMd") ?? "").replace(/\r\n?/g, "\n")
       : undefined,
   });
   if (!parsed.success) {

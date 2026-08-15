@@ -12,6 +12,7 @@ import {
   createGroupAction,
   type AdminContentState,
 } from "@/lib/admin/content-actions";
+import { TOPIC_PHOTOS } from "@/lib/workspace-v2/topic-photos";
 
 /* Focus areas admin (PP6a) — the screen the owner actually lives in.
 
@@ -278,6 +279,27 @@ function FocusAreaForm({
   const [title, setTitle] = React.useState(topic?.title ?? "");
   const [description, setDescription] = React.useState(topic?.description ?? "");
   const [intro, setIntro] = React.useState(topic?.intro ?? "");
+  const [imagePath, setImagePath] = React.useState(topic?.image_path ?? "");
+  const [imagePosition, setImagePosition] = React.useState(
+    topic?.image_position ?? "",
+  );
+
+  /* The photo list, plus WHATEVER THIS ROW ALREADY USES if that is not in it.
+     Without the second half, opening a focus area whose photograph is not in
+     the pool would show the first option selected and Save would quietly change
+     the picture — the same class of defect as PP6a's Pages screen, which nulled
+     five columns it could not display. A select can only ever offer what it
+     lists, so it has to list what it found. */
+  const photoOptions = React.useMemo(() => {
+    const current = topic?.image_path?.trim();
+    if (!current || TOPIC_PHOTOS.some((p) => p.path === current)) {
+      return TOPIC_PHOTOS;
+    }
+    return [
+      { file: current, label: `${current.split("/").pop()} (in use)`, path: current },
+      ...TOPIC_PHOTOS,
+    ];
+  }, [topic?.image_path]);
   /* Rule 7: Save stays off until something actually changes, so an accidental
      click cannot rewrite a row with what it already said. */
   const [dirty, setDirty] = React.useState(false);
@@ -446,19 +468,54 @@ function FocusAreaForm({
           </div>
         </div>
 
+        {/* PP6b: a chooser, not a text box. This field used to ask the owner to
+            type "/assets/workspace/topics/legal-compliance-and-risk.jpg", which
+            contradicted rule 5 above and the sprint whose gate is that he can
+            work the CMS without help. The photographs are the ones already in
+            the product (D-PP-o reuses them), so this is a list, not an upload. */}
         <label className="adm-form-field">
           <span className="adm-field-label">Photo</span>
-          <input
-            className="adm-input"
+          <select
+            className="adm-select"
             name="imagePath"
-            maxLength={300}
-            defaultValue={topic?.image_path ?? ""}
-            placeholder="/assets/workspace/topics/legal-compliance-and-risk.jpg"
-            onChange={touch}
-          />
+            value={imagePath}
+            onChange={(e) => {
+              setImagePath(e.target.value);
+              touch();
+            }}
+          >
+            <option value="">No photo — plain panel</option>
+            {photoOptions.map((p) => (
+              <option key={p.path} value={p.path}>
+                {p.label}
+              </option>
+            ))}
+          </select>
           <span className="adm-field-hint">
-            Leave blank and the card shows a plain panel.
+            {imagePath
+              ? "Shown across the top of the card."
+              : "Leave blank and the card shows a plain panel."}
           </span>
+          {imagePath ? (
+            /* Plain <img>: next/image optimises, which is right for the partner
+               pages and pointless for a 120px admin thumbnail — and it would put
+               a loader between the owner and the thing he is choosing. */
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imagePath}
+              alt=""
+              style={{
+                marginTop: "0.5rem",
+                width: "100%",
+                maxWidth: "260px",
+                aspectRatio: "16 / 10",
+                objectFit: "cover",
+                objectPosition: imagePosition || "50% 50%",
+                borderRadius: "var(--radius)",
+                border: "1px solid var(--border)",
+              }}
+            />
+          ) : null}
         </label>
 
         <label className="adm-form-field">
@@ -467,9 +524,12 @@ function FocusAreaForm({
             className="adm-input"
             name="imagePosition"
             maxLength={60}
-            defaultValue={topic?.image_position ?? ""}
+            value={imagePosition}
             placeholder="50% 50%"
-            onChange={touch}
+            onChange={(e) => {
+              setImagePosition(e.target.value);
+              touch();
+            }}
           />
         </label>
 
