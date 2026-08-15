@@ -291,6 +291,12 @@ export interface FocusAreaEntry {
   code: string; // elements.code — the delivered number
   summary: string; // platform_topics.description — the Overview's first sentence
   guideMd: string; // elements.simple_guide_md — Overview remainder + the guide
+  /* The Simple Guide document itself, offered as the card's "Download Now".
+     The same words the reader shows, as a file the partner can keep — which is
+     why it is the delivered .docx and not something generated from the text.
+     Registered with doc_key='guide', so the partial unique index allows exactly
+     one per focus area and the templates-grid predicate excludes it. */
+  guideFile: { fileName: string; relPath: string; title: string };
   photo: { source: string; target: string; imagePath: string };
   templates: TemplateEntry[];
   sourceDir: string;
@@ -494,6 +500,17 @@ async function parseFocusArea(
     code: number,
     summary,
     guideMd,
+    /* Same naming rule as the templates: the delivered filename, minus its
+       extension and version suffix, never re-worded. */
+    guideFile: {
+      fileName: guideFile,
+      relPath: path.relative(SRC, path.join(faDir, guideFile)).split(path.sep).join("/"),
+      title: path
+        .basename(guideFile, path.extname(guideFile))
+        .replace(/_V\.\d+(\.\d+)*$/i, "")
+        .replace(/\s*-\s*$/, "")
+        .trim(),
+    },
     photo: {
       source: photoSource,
       target: `${slug}.jpg`,

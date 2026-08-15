@@ -96,6 +96,7 @@ interface FocusAreaEntry {
   code: string;
   summary: string;
   guideMd: string;
+  guideFile: { fileName: string; relPath: string; title: string };
   photo: { source: string; target: string; imagePath: string };
   templates: TemplateEntry[];
 }
@@ -255,7 +256,51 @@ async function upsertFocusArea(
   return row;
 }
 
-async function uploadTemplates(
+/* One upload: the object first, then the row, and if the row is refused take
+   the object back out. Identical in ordering to src/lib/admin/file-actions.ts,
+   because a loader that compensates differently from the CMS is a second
+   contract nobody is maintaining. */
+async function putFile(
+  db: SupabaseClient,
+  args: {
+    elementId: string;
+    absSourcePath: string;
+    key: string;
+    title: string;
+    docKey: "guide" | null;
+    code: string | null;
+    type: string;
+    sortOrder: number;
+  },
+): Promise<number> {
+  const ext = path.extname(args.key).slice(1).toLowerCase();
+  const contentType = CONTENT_TYPE[ext];
+  if (!contentType) throw new Error(`unsupported file type ".${ext}" for ${args.key}`);
+
+  const bytes = await fs.readFile(args.absSourcePath);
+  const { error: upErr } = await db.storage
+    .from(BUCKET)
+    .upload(args.key, bytes, { contentType, upsert: true });
+  if (upErr) throw new Error(`upload ${args.key}: ${upErr.message}`);
+
+  const { error: regErr } = await db.rpc("admin_register_resource_file", {
+    p_element_id: args.elementId,
+    p_storage_path: args.key,
+    p_title: args.title,
+    p_doc_key: args.docKey,
+    p_code: args.code,
+    p_type: args.type,
+    p_version: "v1",
+    p_sort_order: args.sortOrder,
+  });
+  if (regErr) {
+    await db.storage.from(BUCKET).remove([args.key]);
+    throw new Error(`register "${args.title}": ${regErr.message}`);
+  }
+  return bytes.length;
+}
+
+async function uploadFiles(
   db: SupabaseClient,
   fa: FocusAreaEntry,
   topic: TopicRow,
@@ -264,7 +309,32 @@ async function uploadTemplates(
     p_element_id: topic.element_id,
   });
   if (error) throw error;
-  const existing = (data as { id: string; title: string; code: string | null }[] | null) ?? [];
+  const existing =
+    (data as { id: string; title: string; code: string | null; doc_key: string | null }[] | null) ??
+    [];
+
+  /* The guide FILE — the Simple Guide document itself, behind the card's
+     "Download Now". Without it that button honestly says "coming soon", which
+     is correct but is not the finished experience. doc_key='guide' keeps it out
+     of the templates grid and the partial unique index allows only one. */
+  if (existing.some((r) => r.doc_key === "guide")) {
+    step(`guide file "${fa.guideFile.title}" already registered`);
+  } else if (DRY_RUN) {
+    step(`WOULD upload guide file "${fa.guideFile.title}"`);
+  } else {
+    const ext = path.extname(fa.guideFile.fileName).slice(1).toLowerCase();
+    const size = await putFile(db, {
+      elementId: topic.element_id,
+      absSourcePath: path.join(SRC, fa.guideFile.relPath),
+      key: objectKey(topic.element_slug, "guide", fa.guideFile.title, ext),
+      title: fa.guideFile.title,
+      docKey: "guide",
+      code: null,
+      type: "guide",
+      sortOrder: 0,
+    });
+    step(`uploaded + registered GUIDE "${fa.guideFile.title}" (${size.toLocaleString()} bytes)`);
+  }
 
   for (const t of fa.templates) {
     const already = existing.find((r) => r.title === t.title && r.code === t.code);
@@ -273,41 +343,22 @@ async function uploadTemplates(
       continue;
     }
     const ext = path.extname(t.fileName).slice(1).toLowerCase();
-    const contentType = CONTENT_TYPE[ext];
-    if (!contentType) throw new Error(`unsupported file type ".${ext}" for ${t.fileName}`);
-
     const key = objectKey(topic.element_slug, slugify(t.code) || "file", t.title, ext);
     if (DRY_RUN) {
       step(`WOULD upload ${t.code} "${t.title}" -> ${key}`);
       continue;
     }
-
-    const bytes = await fs.readFile(path.join(SRC, t.relPath));
-
-    /* THE COMPENSATION CONTRACT, identical to src/lib/admin/file-actions.ts:
-       object first, then the row; if the row fails, take the object back out.
-       `upsert: true` here and not there, because a re-run of this script is
-       expected and a half-finished previous run must not wedge it. */
-    const { error: upErr } = await db.storage
-      .from(BUCKET)
-      .upload(key, bytes, { contentType, upsert: true });
-    if (upErr) throw new Error(`upload ${key}: ${upErr.message}`);
-
-    const { error: regErr } = await db.rpc("admin_register_resource_file", {
-      p_element_id: topic.element_id,
-      p_storage_path: key,
-      p_title: t.title,
-      p_doc_key: null, // a template, not the one guide file
-      p_code: t.code,
-      p_type: t.type,
-      p_version: "v1",
-      p_sort_order: t.sortOrder,
+    const size = await putFile(db, {
+      elementId: topic.element_id,
+      absSourcePath: path.join(SRC, t.relPath),
+      key,
+      title: t.title,
+      docKey: null, // a template, not the one guide file
+      code: t.code,
+      type: t.type,
+      sortOrder: t.sortOrder,
     });
-    if (regErr) {
-      await db.storage.from(BUCKET).remove([key]);
-      throw new Error(`register ${t.code} "${t.title}": ${regErr.message}`);
-    }
-    step(`uploaded + registered ${t.code} "${t.title}" (${bytes.length.toLocaleString()} bytes)`);
+    step(`uploaded + registered ${t.code} "${t.title}" (${size.toLocaleString()} bytes)`);
   }
 }
 
@@ -358,7 +409,7 @@ async function main(): Promise<void> {
     const groupId = await ensureGroup(db, section.slug, section.groupSlug, section.groupName);
     const topic = await upsertFocusArea(db, fa, groupId);
     if (topic) {
-      await uploadTemplates(db, fa, topic);
+      await uploadFiles(db, fa, topic);
       step(topic.published ? "state: LIVE (unchanged by this script)" : "state: DRAFT");
     } else {
       /* Dry run against a focus area that does not exist yet: there is no
@@ -373,10 +424,15 @@ async function main(): Promise<void> {
   }
 
   await db.auth.signOut();
+  /* Precise rather than reassuring: anything this run CREATED is a Draft, but a
+     focus area that already existed keeps whatever state the owner put it in —
+     this script never publishes and never un-publishes. Saying "everything is a
+     Draft" after updating a Live row would be a false statement about exactly
+     the thing the sprint is careful about. */
   console.log(
     DRY_RUN
       ? "\nDry run complete — nothing written."
-      : "\nLoad complete. Everything created is a DRAFT: publish from /admin/content/focus-areas.",
+      : "\nLoad complete. Anything CREATED here is a Draft; anything that already existed keeps its current state. Publish from /admin/content/focus-areas.",
   );
 }
 
