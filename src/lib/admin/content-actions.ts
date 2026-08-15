@@ -249,9 +249,16 @@ export async function saveFocusAreaAction(
        ingested guide bodies use LF, so without this EVERY save rewrote the
        owner's prose — adding a carriage return to all 154 lines of the pilot's
        guide and growing it from 3,933 to 4,087 characters — even when the edit
-       was only to the photograph. Invisible in the reader, and precisely the
-       kind of silent edit to approved content this project forbids. Found by
-       changing a photo in the CMS and looking at what the row did. */
+       was only to the photograph. It never showed in the reader, and it is
+       precisely the kind of silent edit to approved content this project
+       forbids. Found by changing a photo in the CMS and reading the row back.
+
+       (The word that belonged in that second sentence names a Tailwind
+       visibility utility, and Tailwind v4 scans the raw text of every file
+       under src/, which cannot be excluded. Written plainly it added a real
+       rule to the stylesheet every visitor downloads — the third time this
+       sprint series has hit that mechanism, and the reason globals.css now
+       excludes docs/, supabase/ and scripts/.) */
     simpleGuideMd: formData.has("simpleGuideMd")
       ? String(formData.get("simpleGuideMd") ?? "").replace(/\r\n?/g, "\n")
       : undefined,
