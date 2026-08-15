@@ -78,6 +78,25 @@ const EXPECTED_SECTIONS = 4;
 const EXPECTED_FOCUS_AREAS = 22;
 const EXPECTED_TEMPLATES = 88;
 
+/* THE EXPECTED SHAPE, focus area by focus area, from
+   `docs/content-migration-map.md` §4.
+
+   Totals alone are not an assertion. A template moved from one focus area to
+   another leaves both folders non-empty and the grand total at 88, so 4/22/88
+   would still pass while a partner found the file under the wrong heading; and
+   a missing or duplicated focus-area number would pass as long as the count
+   came out right. Raised by the independent review, 2026-08-15.
+
+   Per-area counts and the complete set of numbers close both. If the owner
+   genuinely adds or moves a template, this is a one-line edit and a deliberate
+   one — which is the point. */
+const EXPECTED_TEMPLATE_COUNTS: Record<string, number> = {
+  "1.1": 2, "1.2": 5, "1.3": 4, "1.4": 5, "1.5": 4,
+  "2.1": 5, "2.2": 6, "2.3": 6, "2.4": 5, "2.5": 4, "2.6": 3,
+  "3.1": 3, "3.2": 5, "3.3": 5, "3.4": 4, "3.5": 2, "3.6": 4,
+  "4.1": 5, "4.2": 5, "4.3": 3, "4.4": 1, "4.5": 2,
+};
+
 /* The delivered folders are numbered 1..4 and the platform's four toolkit
    sections are fixed by `platform_sections_slug_shape`, so this is a mapping,
    not a guess. Each document also DECLARES its own section on its first line
@@ -221,6 +240,14 @@ function resourceType(name: string): ResourceType {
  * and a split on the first `.!?` truncates the owner's sentence mid-quote. A
  * terminator only ends the sentence when it is outside quotation marks AND is
  * followed by the end of the line or by whitespace and a capital. */
+/* Full stops that do not end a sentence. Lower-cased and matched as suffixes of
+   the text up to and including the stop, so "e.g." matches on its final dot but
+   not on the one after the "e". */
+const ABBREVIATIONS = [
+  "e.g.", "i.e.", "etc.", "vs.", "no.", "fig.", "approx.",
+  "mr.", "mrs.", "ms.", "dr.", "prof.", "st.",
+];
+
 function splitFirstSentence(text: string): { first: string; rest: string } {
   const OPEN = new Set(['"', "“", "‘"]);
   const CLOSE = new Set(['"', "”", "’"]);
@@ -234,6 +261,15 @@ function splitFirstSentence(text: string): { first: string; rest: string } {
     else if (CLOSE.has(ch) && quoted) quoted = false;
     if (quoted) continue;
     if (ch !== "." && ch !== "!" && ch !== "?") continue;
+
+    /* An abbreviation's full stop is not a sentence ending. None of the 22
+       delivered summaries contains one today, but PP6c reruns this over content
+       that can change and a wrong split here silently truncates the owner's
+       first sentence onto the card. Raised by the independent review. */
+    if (ch === ".") {
+      const before = text.slice(0, i + 1).toLowerCase();
+      if (ABBREVIATIONS.some((a) => before.endsWith(a))) continue;
+    }
 
     /* Consume any closing quote that belongs to the sentence being ended. */
     let end = i + 1;
@@ -389,10 +425,20 @@ async function parseFocusArea(
   if (!number) fail(where, "folder name has no N.M prefix");
 
   const files = await listFiles(faDir);
-  const overviewFile = files.find((f) => /overview/i.test(f) && /\.docx$/i.test(f));
-  const guideFile = files.find((f) => /simple\s*guide/i.test(f) && /\.docx$/i.test(f));
-  if (!overviewFile) fail(where, "no Overview .docx");
-  if (!guideFile) fail(where, "no Simple Guide .docx");
+  /* EXACTLY ONE of each, not "the first one found". `find()` silently picks a
+     winner, so a stray "Overview-old.docx" left beside the real one would be
+     ingested or ignored at random while every total still came out at 4/22/88.
+     Raised by the independent review, 2026-08-15. */
+  const overviews = files.filter((f) => /overview/i.test(f) && /\.docx$/i.test(f));
+  const guides = files.filter((f) => /simple\s*guide/i.test(f) && /\.docx$/i.test(f));
+  if (overviews.length !== 1) {
+    fail(where, `expected exactly 1 Overview .docx, found ${overviews.length}: ${overviews.join(" | ")}`);
+  }
+  if (guides.length !== 1) {
+    fail(where, `expected exactly 1 Simple Guide .docx, found ${guides.length}: ${guides.join(" | ")}`);
+  }
+  const overviewFile = overviews[0];
+  const guideFile = guides[0];
 
   const overviewMd = await toMarkdown(path.join(faDir, overviewFile));
   const guideMdRaw = await toMarkdown(path.join(faDir, guideFile));
@@ -565,6 +611,32 @@ async function buildSpec(): Promise<ContentSpec> {
   }
   if (templates !== EXPECTED_TEMPLATES) {
     fail("totals", `expected ${EXPECTED_TEMPLATES} templates, extracted ${templates}`);
+  }
+
+  /* The complete NUMBER SET, so a missing 3.4 cannot be masked by a duplicated
+     3.3, and the PER-AREA counts, so a template cannot migrate between focus
+     areas unnoticed. Totals are not a shape. */
+  const found = focusAreas.map((f) => f.number).sort();
+  const wanted = Object.keys(EXPECTED_TEMPLATE_COUNTS).sort();
+  const missing = wanted.filter((n) => !found.includes(n));
+  const unexpected = found.filter((n) => !wanted.includes(n));
+  const duplicated = found.filter((n, i) => found.indexOf(n) !== i);
+  if (missing.length || unexpected.length || duplicated.length) {
+    fail(
+      "totals",
+      `focus-area numbers do not match the expected set — missing [${missing}], ` +
+        `unexpected [${unexpected}], duplicated [${duplicated}]`,
+    );
+  }
+  for (const f of focusAreas) {
+    const want = EXPECTED_TEMPLATE_COUNTS[f.number];
+    if (f.templates.length !== want) {
+      fail(
+        f.sourceDir,
+        `expected ${want} templates for ${f.number}, found ${f.templates.length} ` +
+          `(content-migration-map.md §4). If the owner really changed this, update EXPECTED_TEMPLATE_COUNTS.`,
+      );
+    }
   }
 
   return {

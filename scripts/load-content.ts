@@ -38,10 +38,24 @@
  * before a single request, and the credentials are read out of `.env.local` by
  * this script — they are never passed on a command line or printed.
  *
- * IDEMPOTENT. Re-running finds what it created last time (group by slug, focus
- * area by slug, file by title+code) and updates instead of duplicating, so a
- * partial run can simply be repeated. It never publishes: `p_published` is left
- * null on update, which the RPC reads as "leave the current state alone".
+ * IDEMPOTENT. Re-running finds what it created last time — group by slug, focus
+ * area by slug, and a file by its CODE (or doc_key for the guide, never by its
+ * title, which changes) — and updates instead of duplicating, so a partial run
+ * can simply be repeated.
+ *
+ * WHAT "IT NEVER PUBLISHES" DOES AND DOES NOT MEAN. Stated too broadly at first
+ * and corrected by the independent review, 2026-08-15:
+ *   - it never sets a focus area Live. `p_published` is null on update, which
+ *     the RPC reads as "leave the current state alone", and creates default to
+ *     Draft.
+ *   - it DOES create a group published, matching the CMS's own createGroupAction:
+ *     a group is only a heading, an unpublished one would hide every focus area
+ *     filed under it, and a group with no published topic returns no rows to a
+ *     partner anyway — so it is invisible until its first focus area goes Live.
+ *   - and updating an already-LIVE focus area would put new words in front of
+ *     partners immediately, which is a publishing act even though no flag
+ *     moved. It therefore REFUSES to touch a Live row unless --allow-live is
+ *     passed deliberately.
  */
 
 import { promises as fs } from "node:fs";
@@ -70,6 +84,8 @@ const CONTENT_TYPE: Record<string, string> = {
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const ALL = process.argv.includes("--all");
+/* Permission to rewrite a focus area partners can already see. Off by default. */
+const ALLOW_LIVE = process.argv.includes("--allow-live");
 const FOCUS = (() => {
   const i = process.argv.indexOf("--focus");
   return i === -1 ? null : process.argv[i + 1];
@@ -120,8 +136,20 @@ function slugify(value: string): string {
     .replace(/-+$/g, "");
 }
 
+/* A UNIQUE key per create, exactly as src/lib/admin/file-actions.ts does.
+   PP6b first used a deterministic key so re-runs would be idempotent, and the
+   independent review showed what that costs: `upsert: true` plus a lookup that
+   could miss an existing row meant a create could overwrite a LIVE object, fail
+   registration on the unique (bucket, path), and then have its compensation
+   delete the object the original row still pointed at. A harmless rename would
+   have broken a working download.
+   Idempotence does not need a predictable key — it needs a stable IDENTITY to
+   match on, which is now the template code (or doc_key for the guide). With
+   that, a create only ever happens for a file that has no row, so a fresh key
+   can never collide with anything in use. */
 function objectKey(elementSlug: string, prefix: string, title: string, ext: string): string {
-  return `${elementSlug}/${prefix}-${slugify(title) || "file"}.${ext}`;
+  const tail = Date.now().toString(36);
+  return `${elementSlug}/${prefix}-${slugify(title) || "file"}-${tail}.${ext}`;
 }
 
 function step(message: string): void {
@@ -219,6 +247,21 @@ async function upsertFocusArea(
   const rows = (data as TopicRow[] | null) ?? [];
   const existing = rows.find((t) => t.slug === fa.slug) ?? null;
 
+  /* REFUSE TO REWRITE LIVE CONTENT WITHOUT BEING TOLD TO.
+     This script never changes the Draft/Live flag — but that is not the same as
+     being safe on a Live row. Re-running it over a published focus area
+     rewrites its summary, photograph and guide, and those land in front of
+     partners immediately with no review step in between. Over 22 focus areas at
+     PP6c that is a content-publishing event disguised as a re-run.
+     Draft rows are freely updated; a Live one needs --allow-live, said out
+     loud. Raised by the independent review, 2026-08-15. */
+  if (existing?.published && !ALLOW_LIVE) {
+    throw new Error(
+      `"${fa.title}" (/${fa.slug}) is LIVE. Re-running would rewrite content partners can already see. ` +
+        `Move it back to Draft in the CMS, or pass --allow-live if that is what you intend.`,
+    );
+  }
+
   if (DRY_RUN) {
     step(`WOULD ${existing ? "update" : "create"} focus area "${fa.title}" (/${fa.slug})`);
     return existing;
@@ -278,9 +321,14 @@ async function putFile(
   if (!contentType) throw new Error(`unsupported file type ".${ext}" for ${args.key}`);
 
   const bytes = await fs.readFile(args.absSourcePath);
+  /* upsert:FALSE, like the CMS. With a unique key a collision means something
+     is genuinely wrong, and failing loudly is right; overwriting would risk
+     clobbering bytes another row depends on. It also makes the compensation
+     below provably safe: if the upload failed we wrote nothing, so there is
+     nothing of anyone else's to remove. */
   const { error: upErr } = await db.storage
     .from(BUCKET)
-    .upload(args.key, bytes, { contentType, upsert: true });
+    .upload(args.key, bytes, { contentType, upsert: false });
   if (upErr) throw new Error(`upload ${args.key}: ${upErr.message}`);
 
   const { error: regErr } = await db.rpc("admin_register_resource_file", {
@@ -294,10 +342,37 @@ async function putFile(
     p_sort_order: args.sortOrder,
   });
   if (regErr) {
+    /* Safe to remove: the upload above succeeded with upsert:false, so this key
+       did not exist a moment ago and belongs to nobody else. */
     await db.storage.from(BUCKET).remove([args.key]);
     throw new Error(`register "${args.title}": ${regErr.message}`);
   }
   return bytes.length;
+}
+
+/* A file's stable identity, which is NOT its title. Titles come from filenames
+   and change when the owner tidies a name; matching on one meant a rename read
+   as "a new file", with the consequences described on objectKey above. A
+   template is identified by its code within its focus area, and the guide by
+   doc_key, both of which the database itself constrains to be unique there. */
+type ExistingFile = { id: string; title: string; code: string | null; doc_key: string | null };
+
+async function renameIfNeeded(
+  db: SupabaseClient,
+  row: ExistingFile,
+  title: string,
+): Promise<void> {
+  if (row.title === title) return;
+  const { error } = await db.rpc("admin_update_resource_meta", {
+    p_id: row.id,
+    p_title: title,
+    p_code: row.code,
+    p_type: null,
+    p_version: null,
+    p_sort_order: null,
+  });
+  if (error) throw new Error(`rename "${row.title}" -> "${title}": ${error.message}`);
+  step(`renamed "${row.title}" -> "${title}" (metadata only; the file did not move)`);
 }
 
 async function uploadFiles(
@@ -309,16 +384,16 @@ async function uploadFiles(
     p_element_id: topic.element_id,
   });
   if (error) throw error;
-  const existing =
-    (data as { id: string; title: string; code: string | null; doc_key: string | null }[] | null) ??
-    [];
+  const existing = (data as ExistingFile[] | null) ?? [];
 
   /* The guide FILE — the Simple Guide document itself, behind the card's
      "Download Now". Without it that button honestly says "coming soon", which
      is correct but is not the finished experience. doc_key='guide' keeps it out
      of the templates grid and the partial unique index allows only one. */
-  if (existing.some((r) => r.doc_key === "guide")) {
-    step(`guide file "${fa.guideFile.title}" already registered`);
+  const existingGuide = existing.find((r) => r.doc_key === "guide");
+  if (existingGuide) {
+    step(`guide file already registered`);
+    if (!DRY_RUN) await renameIfNeeded(db, existingGuide, fa.guideFile.title);
   } else if (DRY_RUN) {
     step(`WOULD upload guide file "${fa.guideFile.title}"`);
   } else {
@@ -337,9 +412,12 @@ async function uploadFiles(
   }
 
   for (const t of fa.templates) {
-    const already = existing.find((r) => r.title === t.title && r.code === t.code);
+    /* Matched on CODE, not on title — see ExistingFile. A retitled template is
+       the same template. */
+    const already = existing.find((r) => r.doc_key === null && r.code === t.code);
     if (already) {
-      step(`template ${t.code} "${t.title}" already registered`);
+      step(`template ${t.code} already registered`);
+      if (!DRY_RUN) await renameIfNeeded(db, already, t.title);
       continue;
     }
     const ext = path.extname(t.fileName).slice(1).toLowerCase();

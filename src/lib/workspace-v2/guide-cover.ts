@@ -77,6 +77,12 @@ function stripEmptyAnchors(line: string): string {
    a backstop, not the mechanism — the "first unrecognised line wins" rule is. */
 const MAX_COVER_LINES = 8;
 
+/* How many extra lines the scan may look at beyond what it is allowed to
+   remove, so that a title wrapped over several lines can still finish inside a
+   maximum-length cover block. Slack for the scan only — it never raises the
+   number of lines that may be deleted. */
+const MAX_TITLE_LINES = 4;
+
 /* Letters and digits only, accents folded, upper-cased. Collapses every way the
    export writes the same words: `__S I M P L E   G U I D E__`, `# SIMPLE
    GUIDE`, `Aswātna` vs `Aswatna`, `Retail / Shop Operations` vs `Retail Shop
@@ -110,6 +116,9 @@ type LineVerdict = {
 function classifyLine(
   line: string,
   titleKeys: string[],
+  /* The compacted section label ("SETUP"), or "". Deliberately NOT one of the
+     titleKeys — see the note on `stripGuideCover`. */
+  sectionKey: string,
   /* An unconsumed tail of a title key, carried over from the previous line —
      see the two-line title note on `stripGuideCover`. */
   pending: string,
@@ -127,11 +136,30 @@ function classifyLine(
     rest = rest.slice(pending.length);
   }
 
+  /* THE SECTION LABEL IS SUBTRACTED ONLY FROM A LINE THAT ALSO NAMES PALESTINE
+     HOUSE, and this restriction is the whole of its safety.
+
+     PP6b first passed the label as an ordinary title key. Title keys are
+     subtracted from ANYWHERE in a line, and the label is a short, ordinary
+     English word, so a guide whose own first heading was "## Program" had that
+     heading deleted whenever a SIMPLE GUIDE banner sat above it — owner content
+     destroyed by a body-shape coincidence. Found by the independent review,
+     2026-08-15; the sprint's own test missed it because it paired a "Support"
+     heading with a "Setup" label instead of the section's own name.
+
+     The real cover line is `Palestine House: Set up`, so requiring the
+     PALESTINE HOUSE marker on the same line costs nothing real and makes the
+     dangerous case impossible: a bare `## Program` no longer qualifies. */
+  const namesPalestineHouse = rest.includes("PALESTINEHOUSE");
+
   let marker = false;
 
   for (const key of titleKeys) {
     if (!key) continue;
     while (rest.includes(key)) rest = rest.replace(key, "");
+  }
+  if (sectionKey && namesPalestineHouse) {
+    while (rest.includes(sectionKey)) rest = rest.replace(sectionKey, "");
   }
   for (const phrase of COVER_PHRASES) {
     while (rest.includes(phrase)) {
@@ -166,15 +194,13 @@ function unfinishedTitleTail(residue: string, titleKeys: string[]): string {
   return "";
 }
 
-/* `titles` is everything the cover block may repeat back at the reader, not
-   only the topic's own name. Two entries were enough for the original 33, whose
-   covers said SIMPLE GUIDE / <title> / <playbook subtitle>. The delivered
-   content opens one line higher — `Palestine House: Set up` — so the caller now
-   also passes the SECTION LABEL, which is the only part of that line the cover
-   vocabulary does not already account for. Passing it (rather than adding
-   "SETUP"/"OPERATE"/"PROGRAM"/"SUPPORT" to COVER_PHRASES) keeps the vocabulary
-   scoped to the one section a given body belongs to, so a body that legitimately
-   opens with a heading naming a DIFFERENT section is untouched.
+/* `titles` is the topic's own name, in the spellings that disagree across the
+   two tables. `sectionLabel` is SEPARATE and is not a title key: it is only ever
+   subtracted from a line that also names Palestine House, because it is a short
+   ordinary word and subtracting it freely deleted a legitimate `## Program`
+   heading (independent review, 2026-08-15). Passing it as a third argument
+   rather than a third array is deliberate — the array is subtracted globally and
+   the label must not be.
 
    A TITLE MAY ARRIVE IN PIECES. One of the 22 delivered covers wraps its title
    over two lines — `Connect to the Wider Palestine` / `House Network Simple
@@ -189,23 +215,38 @@ function unfinishedTitleTail(residue: string, titleKeys: string[]): string {
 export function stripGuideCover(
   markdown: string | null | undefined,
   titles: readonly string[],
+  sectionLabel?: string,
 ): string {
   if (!markdown) return "";
 
   const titleKeys = titles.map(compact).filter(Boolean);
+  const sectionKey = compact(sectionLabel ?? "");
   const lines = markdown.split(/\r?\n/);
 
   let cut = 0; // index of the first line that is KEPT — confirmed cover only
-  let seen = 0; // non-blank lines inspected
+  let removed = 0; // CONFIRMED cover lines, i.e. lines actually cut
+  let inspected = 0; // every non-blank line looked at, provisional ones included
   let sawMarker = false; // the prefix proved itself to be a cover block
   let pending = ""; // unmatched tail of a title still being consumed
   let provisionalMarker = false; // markers seen only on held-back lines
+  let provisional = 0; // non-blank lines held back pending a title completing
 
   for (let i = 0; i < lines.length; i += 1) {
     if (!lines[i].trim()) continue;
-    if (seen >= MAX_COVER_LINES) break;
+    /* TWO BOUNDS, and separating them is what makes the function idempotent.
+       A single counter covering both confirmed and provisional lines meant a
+       long cover block could exhaust the budget midway through a wrapped title:
+       the first call kept the title, and a second call — now starting past the
+       lines the first had removed — removed it. f(f(x)) !== f(x) on a function
+       that edits an owner's document is not acceptable even when the difference
+       is conservative. Found by the independent review, 2026-08-15.
+       `removed` bounds what may be deleted; `inspected` merely stops the scan
+       from wandering, and is slack enough to finish any wrapped title. */
+    if (removed >= MAX_COVER_LINES) break;
+    if (inspected >= MAX_COVER_LINES + MAX_TITLE_LINES) break;
+    inspected += 1;
 
-    const verdict = classifyLine(lines[i], titleKeys, pending);
+    const verdict = classifyLine(lines[i], titleKeys, sectionKey, pending);
     /* null = a title was mid-flight and this line did not continue it. Break
        WITHOUT advancing `cut`, so the held-back lines survive. */
     if (!verdict) break;
@@ -216,7 +257,9 @@ export function stripGuideCover(
       if (provisionalMarker) sawMarker = true;
       pending = "";
       provisionalMarker = false;
-      seen += 1;
+      /* This line, plus every line held back waiting for it. */
+      removed += provisional + 1;
+      provisional = 0;
       cut = i + 1;
       continue;
     }
@@ -225,10 +268,10 @@ export function stripGuideCover(
     const tail = pending ? "" : unfinishedTitleTail(verdict.residue, titleKeys);
     if (!tail) break;
     pending = tail;
+    provisional += 1;
     if (verdict.marker) provisionalMarker = true;
-    seen += 1;
-    /* Deliberately NOT advancing `cut`: nothing is removed until the title
-       completes on a later line. */
+    /* Deliberately NOT advancing `cut` or `removed`: nothing is removed until
+       the title completes on a later line. */
   }
 
   /* A title on its own is NOT enough to delete. The candidate prefix must
@@ -243,5 +286,13 @@ export function stripGuideCover(
   const kept = lines.slice(cut).join("\n");
   /* If the whole document was cover matter, keep the original: showing the
      banner is better than showing nothing. */
-  return kept.trim() ? kept.replace(/^\s+/, "") : markdown;
+  if (!kept.trim()) return markdown;
+
+  /* Drop only the BLANK LINES the cut left behind — never the indentation of
+     the first surviving line. `^\s+` did both, so a body whose first real line
+     was indented came back dedented; in Markdown a four-space indent is a code
+     block, so that silently changed how an owner's document rendered. The file
+     promises kept lines verbatim and now keeps that promise. Found by the
+     independent review, 2026-08-15. */
+  return kept.replace(/^(?:[ \t]*\r?\n)+/, "");
 }
