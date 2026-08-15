@@ -51,9 +51,24 @@ The same applies to the 33 `simple_guide_md` bodies and the 33 `overview_md` / `
 |---|---|---|
 | objects | 297 | 297 |
 | total bytes | 5,320,962 | 5,320,962 |
-| `md5(string_agg(name‖eTag‖size order by name))` | `27e3e6efccf33eebedf60ad0aa45c2cc` | `27e3e6efccf33eebedf60ad0aa45c2cc` |
+| `md5(string_agg(name‖unquoted-eTag‖size order by name))` | `6fde792718130d12071b69459f9d70ab` | `6fde792718130d12071b69459f9d70ab` |
 
 TEST carries 300 objects in the bucket — the 297 plus the pilot's 3. **So PP6c exports from TEST and *proves* the result is a backup of PROD's bytes**: each downloaded file's MD5 must equal its stored eTag, and the aggregate fingerprint recomputed from disk must equal the value above. That is a claim anyone can re-check in one query, which is the point.
+
+The exact query, and **the `replace()` is load-bearing**:
+
+```sql
+select md5(string_agg(
+         name ||'|'|| replace(metadata->>'eTag','"','') ||'|'|| (metadata->>'size'),
+         E'\n' order by name))
+from storage.objects where bucket_id = 'resources';
+```
+
+> ⚠️ **Storage stores the eTag QUOTED** — `"57962cf1…"` — and the 6c-a kickoff fingerprinted `metadata->>'eTag'` directly, giving **`27e3e6efccf33eebedf60ad0aa45c2cc`**. That value is a perfectly correct fingerprint of the same 297 objects, but **no downloaded file can ever reproduce it**, because a real file hashes to bare hex. The canonical form above, `6fde792718130d12071b69459f9d70ab`, is the one a backup can be checked against, and it is the one recorded everywhere else in these docs.
+>
+> **The first live run of `scripts/backup-297-objects.ts` is what found this**, and the way it found it is the argument for layered assertions over one clever check: assertions 1–3 (**every MD5 matches its eTag · 297 objects · 5,320,962 bytes**) all passed, so the *data* was never in doubt for a moment — only the formula. A lone fingerprint check would have said "backup invalid" on the one step in this project that cannot be retried after the fact.
+
+**✅ Executed and verified 2026-08-16 (PP6c step 6c-b).** 297 objects · 5,320,962 bytes · fingerprint `6fde792718130d12071b69459f9d70ab`, agreed **three independent ways**: production's own metadata, the export script's computation from the downloaded bytes, and a separate `find` + `md5sum` + `stat` pipeline over the files on disk. Manifest (committed): `docs/archive-297-manifest.json`. Bytes (gitignored): `docs/source-assets/_archive-297-templates/`, 33 folders.
 
 ---
 
