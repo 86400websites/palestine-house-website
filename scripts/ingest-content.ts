@@ -1,50 +1,55 @@
 /**
- * scripts/ingest-content.ts — S5 one-time, IDEMPOTENT content ingestion.
+ * scripts/ingest-content.ts — PP6b EXTRACTOR.
  *
- * Loads the FULL existing Palestine House content into the database and the two
- * Storage buckets so the owner never hand-uploads. This is a SANCTIONED ADMIN OP,
- * NOT app code: it runs locally, reads its Supabase target from .env.local, and uses
- * the Supabase secret (service_role) key — which the APP never does (TECH-ARCHITECTURE §7).
+ * Reads the owner's delivered content off disk and turns it into ONE reviewable
+ * JSON file, `docs/content-v2-spec.json`. It touches no database, needs no
+ * secret, and writes nothing else. Loading is a separate step with a separate
+ * script (`scripts/load-content.ts`), because parsing 132 Word documents and
+ * writing to a database are different jobs with different failure modes and
+ * very different blast radii.
  *
- * Target project (set in .env.local — DEDICATED vars so the app's own NEXT_PUBLIC_*
- * can stay pointed elsewhere; the script defaults to TEST and REFUSES any other
- * project unless --i-understand-not-test is passed deliberately):
- *   SUPABASE_INGEST_URL=https://sdszcralogcrujtyghig.supabase.co   (TEST)
- *   SUPABASE_INGEST_SECRET_KEY=sb_secret_…                          (TEST secret)
- * (falls back to NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SECRET_KEY if the dedicated vars
- * are absent). Run against the TEST project first; the human ships prod deliberately.
+ *   pnpm exec tsx scripts/ingest-content.ts            # extract + write the spec
+ *   pnpm exec tsx scripts/ingest-content.ts --dry-run  # report only
  *
- * What it does (all upserts on content-stable natural keys, so re-running never
- * changes ids and preserves every user's checklist_progress):
- *   - elements          (30) — slug a1..j3, focus area, title, one_line, per-tab bodies
- *   - checklist_items   (200+) — parsed from each topic's Operational Checklist table
- *   - academy_modules   (30) — body = the Simple Guide (the locked Academy-body mapping)
- *   - resources         (267 templates + 2 booklets) — metadata rows
- *   - Storage           — 267 templates -> private `resources` bucket; 2 booklets -> public `booklets`
+ * WHAT REPLACED WHAT, AND WHY (PP6b, 2026-08-15)
+ * ----------------------------------------------
+ * This file used to ingest the S5 curriculum: 30 focus areas, 267 templates,
+ * plus `checklist_items` and `academy_modules`. All of that is gone.
+ *   - its source directory, `docs/source-assets/resources/2. Focus Areas/`, no
+ *     longer exists on disk;
+ *   - it hard-failed unless it found exactly 30 focus areas and 267 templates,
+ *     and the delivered content is 22 and 88;
+ *   - and its write half fed `checklist_items` and `academy_modules`, which are
+ *     retired tables whose read RPCs `0029` has already dropped. CLAUDE.md
+ *     forbids adding a caller to them, so "rewrite the front half" was not
+ *     enough — the back half had to go too.
  *
- * Sources (canonical, never invented):
- *   - docs/page-copy/06-elements/_index.md       -> A1..J3 codes, titles, md filenames
- *   - docs/page-copy/06-elements/<slug>.md       -> per-topic one_line
- *   - docs/page-copy/01-public-pages/focus-areas.md -> the canonical A..J focus-area names (below)
- *   - docs/source-assets/resources/2. Focus Areas/.. -> the per-topic .docx bodies + Templates/
- *   - docs/source-assets/resources/1. Playbook-Booklet/.. -> the 2 public booklet PDFs
+ * THE SOURCE (gitignored — OneDrive is canon)
+ * -------------------------------------------
+ * `docs/source-assets/Resource/Palestine House Website Content - Complet and
+ * Formatted/` — 132 .docx, 4 sections, 22 focus areas, 22 Overviews, 22 Simple
+ * Guides, 88 templates. The map, the decisions and the full trap list are in
+ * `docs/content-migration-map.md`.
  *
- * Usage:
- *   pnpm tsx scripts/ingest-content.ts --dry-run   # parse + report only (no DB, no secret needed)
- *   pnpm tsx scripts/ingest-content.ts             # ingest into the DB pointed at by .env.local
+ * THE TWO RULES THAT GOVERN EVERYTHING BELOW
+ * ------------------------------------------
+ *   1. Read the title from INSIDE the document, never from the folder name.
+ *      Six of the 22 folders disagree with their documents, and the folder names
+ *      carry typos the owner never wrote.
+ *   2. Never rewrite the owner's wording. Where his file says `Responsiblity` or
+ *      `House-toHouse`, so does the platform. Cleaning it up here would be an
+ *      invisible edit to approved content.
  *
- * Packs (FA11): `--pack food` ingests ONLY Focus Area K ("Café & Culinary
- * Experience", k1..k3) from `docs/source-assets/resources/2. Focus Areas/
- * 11. Café & Culinary Experience/` — its `_pack.md` supplies the K titles +
- * one-lines (docs/page-copy has no K rows yet). Additive and idempotent: the
- * model contains only K, so A–J rows are never touched. No booklets. The
- * default `--pack full` behaviour (all 30 topics from _index.md) is unchanged.
+ * FAIL LOUDLY. Every structural expectation is asserted, not assumed: the
+ * section a document declares must match the folder it sits in, the Overview and
+ * the Guide must agree on the title, and the totals must come out at 4 / 22 / 88.
+ * A silent partial extraction feeding a content load is the failure this script
+ * exists to make impossible.
  */
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 // ---- mammoth (script-only devDep, ships no TS types) loaded via require + a typed shim ----
 interface MammothResult {
@@ -52,9 +57,7 @@ interface MammothResult {
   messages: { type: string; message: string }[];
 }
 interface Mammoth {
-  convertToHtml(input: { path: string } | { buffer: Buffer }): Promise<MammothResult>;
-  convertToMarkdown(input: { path: string } | { buffer: Buffer }): Promise<MammothResult>;
-  extractRawText(input: { path: string } | { buffer: Buffer }): Promise<MammothResult>;
+  convertToMarkdown(input: { path: string }): Promise<MammothResult>;
 }
 const mammoth = createRequire(import.meta.url)("mammoth") as Mammoth;
 
@@ -62,72 +65,101 @@ const mammoth = createRequire(import.meta.url)("mammoth") as Mammoth;
 // Constants
 // ---------------------------------------------------------------------------
 const ROOT = process.cwd();
-const COPY_ELEMENTS = path.join(ROOT, "docs/page-copy/06-elements");
-const INDEX_MD = path.join(COPY_ELEMENTS, "_index.md");
-const SRC = path.join(ROOT, "docs/source-assets/resources");
-const FOCUS_AREAS_DIR = path.join(SRC, "2. Focus Areas");
-const BOOKLETS_DIR = path.join(SRC, "1. Playbook-Booklet");
+const SRC = path.join(
+  ROOT,
+  "docs/source-assets/Resource/Palestine House Website Content - Complet and Formatted",
+);
+const SPEC_OUT = path.join(ROOT, "docs/content-v2-spec.json");
+const TOPIC_PHOTO_DIR = path.join(ROOT, "public/assets/workspace/topics");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
-// --pack full (default) | food — which content pack to build + ingest.
-const PACK: "full" | "food" = (() => {
-  const i = process.argv.indexOf("--pack");
-  if (i === -1) return "full";
-  const v = process.argv[i + 1];
-  if (v !== "full" && v !== "food") throw new Error(`Unknown --pack "${v}" (use: full | food)`);
-  return v;
-})();
+const EXPECTED_SECTIONS = 4;
+const EXPECTED_FOCUS_AREAS = 22;
+const EXPECTED_TEMPLATES = 88;
 
-// Canonical focus-area names (docs/page-copy/01-public-pages/focus-areas.md, lines 24-33).
-const FOCUS_NAME: Record<string, string> = {
-  A: "The House Promise",
-  B: "Operating Model & Governance",
-  C: "People System",
-  D: "Programming & Cultural Quality",
-  E: "Membership, Community & Service",
-  F: "Operations Engine",
-  G: "Marketing, Communications & Growth",
-  H: "Finance, Reporting & Sustainability",
-  I: "Quality Control & Continuous Improvement",
-  J: "Appendices & Tools Library",
-  // FA11 (2026-07-17): Focus Area 11 — owner-approved name, folder prefix "11.".
-  K: "Café & Culinary Experience",
+/* The delivered folders are numbered 1..4 and the platform's four toolkit
+   sections are fixed by `platform_sections_slug_shape`, so this is a mapping,
+   not a guess. Each document also DECLARES its own section on its first line
+   ("Palestine House: Set Up"), and that declaration is checked against this
+   table — a document filed under the wrong number fails the run.
+
+   `declares` is compared after folding away case, spaces and punctuation, so
+   the delivered "Set Up" and "Set up" both reduce to "setup". */
+const SECTIONS = [
+  { prefix: "1", slug: "setup", label: "Setup", declares: "setup" },
+  { prefix: "2", slug: "operate", label: "Operate", declares: "operate" },
+  { prefix: "3", slug: "program", label: "Program", declares: "program" },
+  { prefix: "4", slug: "support", label: "Support", declares: "support" },
+] as const;
+
+/* One group per section (D-PP-n). The CMS derives a group's slug from its name,
+   so these names are chosen to produce the slugs recorded in
+   content-migration-map.md §3. A section with exactly one group renders as a
+   flat list with no accordion header, which is why the name is never shown to a
+   partner — it exists so the CMS has something to file focus areas under. */
+const GROUP_NAME_SUFFIX = "focus areas";
+
+/* D-PP-o: the 22 new focus areas reuse 22 of the 33 existing photographs,
+   remapped by subject. Source of truth for this table is
+   `docs/content-migration-map.md` §4; the owner reviews 1.1's at the pilot and
+   the other 21 before PP6c goes Live. Each source file is asserted to exist. */
+const PHOTO_BY_NUMBER: Record<string, string> = {
+  "1.1": "legal-compliance-and-risk",
+  "1.2": "business-model-and-revenue",
+  "1.3": "facility-operations",
+  "1.4": "org-structure-and-roles",
+  "1.5": "launching-a-new-house",
+  "2.1": "financial-operations-and-controls",
+  "2.2": "operating-model",
+  "2.3": "food-and-beverage-operations",
+  "2.4": "membership-model-and-benefits",
+  "2.5": "hiring-onboarding-and-training",
+  "2.6": "reporting-kpis-and-audits",
+  "3.1": "programming-model-and-pillars",
+  "3.2": "event-production-sops",
+  "3.3": "aswatna-studio-collaboration",
+  "3.4": "local-marketing-playbook",
+  "3.5": "customer-service-and-recovery",
+  "3.6": "global-campaigns",
+  "4.1": "brand-experience-standards",
+  "4.2": "sustainability-and-impact",
+  "4.3": "community-partnerships",
+  "4.4": "crisis-management",
+  "4.5": "continuous-improvement-and-knowledge-sharing",
 };
 
-const RESOURCES_BUCKET = "resources"; // PRIVATE — the 267 templates
-const BOOKLETS_BUCKET = "booklets"; // PUBLIC — the 2 booklets
-
-type ResourceType = "form" | "script" | "log" | "report" | "approval" | "guide" | "booklet";
+/* The seven values `resources_type_check` allows. Rendered nowhere — this is
+   bookkeeping, kept only so the column carries something honest. */
+type ResourceType =
+  | "form"
+  | "script"
+  | "log"
+  | "report"
+  | "approval"
+  | "guide"
+  | "booklet";
 
 // ---------------------------------------------------------------------------
 // Small helpers
 // ---------------------------------------------------------------------------
-function normTitle(s: string): string {
-  return s
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "") // strip diacritics (ā -> a)
-    .toLowerCase()
-    .replace(/^\s*\d+\.\s*/, "") // strip leading "N. " ordering prefix
-    .replace(/&/g, " and ")
-    .replace(/\//g, " ")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()
-    .replace(/\s+/g, " ");
+
+/* An anchor element with an empty body. Word's exporter emits one per bookmark
+   and the delivered documents are full of them (19-21 each; the previous 33
+   carried none). They are removed from the STORED text here, so the reader and
+   the CMS textarea both show clean prose. They are also handled independently
+   at render time by src/lib/workspace-v2/guide-cover.ts, for anything pasted
+   through the CMS later. Only empty elements match, so no text can be lost. */
+const EMPTY_ANCHOR = /<a\b[^>]*>\s*<\/a>/gi;
+
+function stripAnchors(value: string): string {
+  return value.replace(EMPTY_ANCHOR, "");
 }
 
-function kebab(s: string): string {
-  return s
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-// Light cleanup of mammoth markdown: undo the backslash-escapes it adds.
+/* Undo mammoth's backslash escaping and normalise blank runs. Unchanged from
+   the previous version of this script — it is the one piece that still applies. */
 function cleanMd(md: string): string {
-  return md
+  return stripAnchors(md)
     .replace(/\r\n/g, "\n")
     .replace(/\\([^\w\s])/g, "$1")
     .replace(/[ \t]+\n/g, "\n")
@@ -135,20 +167,38 @@ function cleanMd(md: string): string {
     .trim();
 }
 
-function decodeEntities(s: string): string {
-  return s
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&nbsp;/g, " ");
-}
-
-function cellText(html: string): string {
-  return decodeEntities(html.replace(/<[^>]+>/g, " "))
+/* A line reduced to its words, for STRUCTURAL comparison only. Never stored. */
+function plain(line: string): string {
+  return stripAnchors(line)
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/[*_`]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function fold(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+/* Byte-for-byte the slugify the CMS uses (src/lib/admin/content-actions.ts).
+   It is duplicated rather than imported because that module is a "use server"
+   boundary and cannot be loaded into a plain Node script — but the two must not
+   drift, or a focus area created by this script would get a different address
+   from one created through the form. The regression check for that is that a
+   re-run of the loader finds the row it created last time. */
+function slugify(title: string): string {
+  return title
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80)
+    .replace(/-+$/g, "");
 }
 
 function resourceType(name: string): ResourceType {
@@ -156,25 +206,47 @@ function resourceType(name: string): ResourceType {
   if (/\bscript\b/.test(n)) return "script";
   if (/\blog\b/.test(n)) return "log";
   if (/report|summary|dashboard|kpi/.test(n)) return "report";
-  if (/approval|sign-?off|escalation|breach|request to hq/.test(n)) return "approval";
+  if (/approval|sign-?off|escalation|breach|request to hq/.test(n))
+    return "approval";
   if (/guide|reference|card|playbook|\bsop\b|policy|framework|matrix|protocol/.test(n))
     return "guide";
   return "form";
 }
 
-function contentTypeFor(ext: string): string {
-  switch (ext.toLowerCase()) {
-    case ".docx":
-      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    case ".xlsx":
-      return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    case ".pdf":
-      return "application/pdf";
-    case ".pptx":
-      return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-    default:
-      return "application/octet-stream";
+/* The first sentence, and everything after it.
+ *
+ * QUOTE-AWARE, and that is load-bearing rather than tidy: focus area 2.6 opens
+ *   Instead of complex performance management, we have one monthly "How are we
+ *   doing?" review.
+ * and a split on the first `.!?` truncates the owner's sentence mid-quote. A
+ * terminator only ends the sentence when it is outside quotation marks AND is
+ * followed by the end of the line or by whitespace and a capital. */
+function splitFirstSentence(text: string): { first: string; rest: string } {
+  const OPEN = new Set(['"', "“", "‘"]);
+  const CLOSE = new Set(['"', "”", "’"]);
+  let quoted = false;
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i];
+    /* A straight quote is both marks, so toggle; the curly ones are directional.
+       The apostrophe in "don't" is U+2019, which would close an unopened quote —
+       hence only closing while actually inside one. */
+    if (OPEN.has(ch) && !quoted) quoted = true;
+    else if (CLOSE.has(ch) && quoted) quoted = false;
+    if (quoted) continue;
+    if (ch !== "." && ch !== "!" && ch !== "?") continue;
+
+    /* Consume any closing quote that belongs to the sentence being ended. */
+    let end = i + 1;
+    while (end < text.length && CLOSE.has(text[end])) end += 1;
+
+    const after = text.slice(end);
+    if (!after.trim()) return { first: text.slice(0, end).trim(), rest: "" };
+    const next = after.match(/^\s+(\S)/);
+    if (next && next[1] === next[1].toUpperCase()) {
+      return { first: text.slice(0, end).trim(), rest: after.trim() };
+    }
   }
+  return { first: text.trim(), rest: "" };
 }
 
 async function listFiles(dir: string): Promise<string[]> {
@@ -194,614 +266,356 @@ async function exists(p: string): Promise<boolean> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Parse the canonical A1..J3 index
-// ---------------------------------------------------------------------------
-interface IndexEntry {
-  code: string; // A1
-  slug: string; // a1
-  title: string; // canonical title
-  templateCount: number;
-  mdFile: string; // a1-....md ("" for pack entries — one_line is inline instead)
-  one_line?: string | null; // pack entries only (from _pack.md)
-}
-
-async function parseIndex(): Promise<IndexEntry[]> {
-  const text = await fs.readFile(INDEX_MD, "utf8");
-  const out: IndexEntry[] = [];
-  for (const line of text.split("\n")) {
-    // | A1 | Title | status | 10 | `a1-...md` |
-    const m = line.match(
-      /^\|\s*([A-J][1-3])\s*\|\s*([^|]+?)\s*\|\s*[^|]*?\s*\|\s*(\d+)\s*\|\s*`([^`]+)`\s*\|/,
-    );
-    if (!m) continue;
-    const code = m[1];
-    out.push({
-      code,
-      slug: code.toLowerCase(),
-      title: m[2].trim(),
-      templateCount: parseInt(m[3], 10),
-      mdFile: m[4].trim(),
-    });
-  }
-  if (out.length !== 30) throw new Error(`_index.md: expected 30 topics, parsed ${out.length}`);
-  return out;
-}
-
-async function readOneLine(mdFile: string): Promise<string | null> {
-  const p = path.join(COPY_ELEMENTS, mdFile);
-  if (!(await exists(p))) return null;
-  const text = await fs.readFile(p, "utf8");
-  // > One line (page intro): **....**
-  const m = text.match(/One line[^:]*:\s*\*\*(.+?)\*\*/s);
-  return m ? m[1].replace(/\s+/g, " ").trim() : null;
+function fail(where: string, message: string): never {
+  throw new Error(`${where}: ${message}`);
 }
 
 // ---------------------------------------------------------------------------
-// Map each on-disk topic folder to its code (by normalized title + focus letter)
+// The model
 // ---------------------------------------------------------------------------
-interface TopicFolder {
-  code: string;
-  letter: string;
-  dir: string;
-}
-
-async function mapTopicFolders(index: IndexEntry[]): Promise<TopicFolder[]> {
-  const byNorm = new Map<string, IndexEntry>();
-  for (const e of index) byNorm.set(e.code[0] + "|" + normTitle(e.title), e);
-
-  const result: TopicFolder[] = [];
-  const usedCodes = new Set<string>();
-  const focusDirs = await listDirs(FOCUS_AREAS_DIR);
-
-  for (const fd of focusDirs) {
-    const num = parseInt(fd.match(/^(\d+)\./)?.[1] ?? "", 10);
-    if (!num || num < 1 || num > 10) throw new Error(`Focus folder has no 1-10 prefix: "${fd}"`);
-    const letter = String.fromCharCode(64 + num); // 1->A .. 10->J
-    const topicDirs = await listDirs(path.join(FOCUS_AREAS_DIR, fd));
-    for (const td of topicDirs) {
-      const key = letter + "|" + normTitle(td);
-      const entry = byNorm.get(key);
-      if (!entry) {
-        throw new Error(
-          `No A1..J3 match for topic folder "${td}" under focus ${letter} (normalized "${normTitle(td)}")`,
-        );
-      }
-      if (usedCodes.has(entry.code)) throw new Error(`Code ${entry.code} matched twice`);
-      usedCodes.add(entry.code);
-      result.push({ code: entry.code, letter, dir: path.join(FOCUS_AREAS_DIR, fd, td) });
-    }
-  }
-  if (result.length !== 30)
-    throw new Error(`Expected 30 topic folders, mapped ${result.length}`);
-  return result;
-}
-
-// ---------------------------------------------------------------------------
-// FA11 food pack: Focus Area K only. `_pack.md` inside the area folder plays
-// the `_index.md` role (K1..K3 code | title | template count | one-line) since
-// docs/page-copy carries no K rows yet. Same normalized-title folder matching
-// and duplicate/missing guards as the full run; throws unless exactly 3 topics.
-// ---------------------------------------------------------------------------
-async function parseFoodPack(): Promise<{ index: IndexEntry[]; folders: TopicFolder[] }> {
-  const areaDirs = (await listDirs(FOCUS_AREAS_DIR)).filter((d) => /^11\./.test(d));
-  if (areaDirs.length !== 1)
-    throw new Error(
-      `--pack food expects exactly one "11. …" folder under "${FOCUS_AREAS_DIR}", found ${areaDirs.length}`,
-    );
-  const areaDir = path.join(FOCUS_AREAS_DIR, areaDirs[0]);
-
-  const packMd = path.join(areaDir, "_pack.md");
-  if (!(await exists(packMd)))
-    throw new Error(`--pack food needs the K metadata file: "${packMd}"`);
-  const text = await fs.readFile(packMd, "utf8");
-
-  const index: IndexEntry[] = [];
-  for (const line of text.split("\n")) {
-    // | K1 | Title | 10 | one line |
-    const m = line.match(/^\|\s*(K[1-3])\s*\|\s*([^|]+?)\s*\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|/);
-    if (!m) continue;
-    const one_line = m[4].replace(/\s+/g, " ").trim();
-    if (!one_line) throw new Error(`_pack.md: ${m[1]} has an empty one-line`);
-    index.push({
-      code: m[1],
-      slug: m[1].toLowerCase(),
-      title: m[2].trim(),
-      templateCount: parseInt(m[3], 10),
-      mdFile: "",
-      one_line,
-    });
-  }
-  if (index.length !== 3)
-    throw new Error(`_pack.md: expected the 3 K1..K3 rows, parsed ${index.length}`);
-
-  const byNorm = new Map(index.map((e) => ["K|" + normTitle(e.title), e]));
-  const folders: TopicFolder[] = [];
-  const usedCodes = new Set<string>();
-  for (const td of await listDirs(areaDir)) {
-    const entry = byNorm.get("K|" + normTitle(td));
-    if (!entry) {
-      throw new Error(
-        `No K1..K3 match for topic folder "${td}" (normalized "${normTitle(td)}")`,
-      );
-    }
-    if (usedCodes.has(entry.code)) throw new Error(`Code ${entry.code} matched twice`);
-    usedCodes.add(entry.code);
-    folders.push({ code: entry.code, letter: "K", dir: path.join(areaDir, td) });
-  }
-  if (folders.length !== 3)
-    throw new Error(`Expected the 3 K topic folders, mapped ${folders.length}`);
-  return { index, folders };
-}
-
-// ---------------------------------------------------------------------------
-// Per-topic docx discovery (suffix glob — filenames are inconsistent)
-// ---------------------------------------------------------------------------
-// Normalize a filename for tolerant matching: strip diacritics + collapse every
-// non-alphanumeric run to a single space (so "_What_To_Watch_Out_For_fixed.docx"
-// and "_WTWOF.docx" are both reachable).
-function normName(s: string): string {
-  return s
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-// Pick the first .docx whose normalized name contains any needle (and no excluded
-// needle). Tolerates the inconsistent per-topic filenames.
-function pickByContains(files: string[], needles: string[], exclude: string[] = []): string | null {
-  for (const f of files) {
-    if (!/\.docx$/i.test(f)) continue;
-    const n = normName(f);
-    if (exclude.some((e) => n.includes(e))) continue;
-    if (needles.some((ndl) => n.includes(ndl))) return f;
-  }
-  return null;
-}
-
-async function docxToMarkdown(file: string): Promise<string | null> {
-  const r = await mammoth.convertToMarkdown({ path: file });
-  const v = cleanMd(r.value);
-  return v.length ? v : null;
-}
-
-// ---------------------------------------------------------------------------
-// Checklist parsing: HTML table -> items
-// ---------------------------------------------------------------------------
-interface ChecklistItem {
-  group_label: string | null;
-  gate: number | null;
-  item_text: string;
-  required_document: string | null;
-  sort_order: number;
-}
-
-async function parseChecklist(file: string): Promise<ChecklistItem[]> {
-  const html = (await mammoth.convertToHtml({ path: file })).value;
-  const items: ChecklistItem[] = [];
-  let currentSection: string | null = null;
-  let sort = 0;
-
-  const tables = html.match(/<table[\s\S]*?<\/table>/gi) ?? [];
-  for (const table of tables) {
-    const rows = table.match(/<tr[\s\S]*?<\/tr>/gi) ?? [];
-    let itemCol = 1;
-    let docCol = 4;
-    let numCol = 0;
-    let headerSeen = false;
-
-    for (const row of rows) {
-      const cells = (row.match(/<t[dh][\s\S]*?<\/t[dh]>/gi) ?? []).map(cellText);
-      const nonEmpty = cells.filter(Boolean);
-      if (nonEmpty.length === 0) continue;
-
-      // Section header (one spanning cell starting with SECTION). Strip the
-      // "SECTION A:" / "SECTION:" prefix (the FA11 food docx carry no letter
-      // token) so group labels stay clean across packs.
-      if (nonEmpty.length === 1 && /^section\b/i.test(nonEmpty[0])) {
-        currentSection = nonEmpty[0].replace(/^section\s*[a-z0-9]*\s*[:\-—]\s*/i, "").trim() || nonEmpty[0].trim();
-        continue;
-      }
-      // Skip completion-gate / how-to rows
-      if (nonEmpty.length === 1 && /^(completion gate|how to use|pass =|fail =)/i.test(nonEmpty[0]))
-        continue;
-
-      // Header row: locate the columns by their labels
-      const lower = cells.map((c) => c.toLowerCase());
-      const itemIdx = lower.findIndex((c) => c === "checklist item" || c === "item");
-      if (!headerSeen && itemIdx >= 0) {
-        headerSeen = true;
-        itemCol = itemIdx;
-        const di = lower.findIndex((c) => c.includes("required document"));
-        if (di >= 0) docCol = di;
-        const ni = lower.findIndex((c) => c === "#" || c === "no" || c === "item #");
-        numCol = ni >= 0 ? ni : 0;
-        continue;
-      }
-
-      // Item row: numbered first cell + non-trivial item text
-      const num = cells[numCol]?.trim() ?? "";
-      const itemText = cells[itemCol]?.trim() ?? "";
-      if (/^\d{1,3}$/.test(num) && itemText.length > 3) {
-        sort += 1;
-        const doc = cells[docCol]?.trim();
-        items.push({
-          group_label: currentSection,
-          gate: null,
-          item_text: itemText,
-          required_document: doc && doc.length ? doc : null,
-          sort_order: sort,
-        });
-      }
-    }
-  }
-  return items;
-}
-
-// ---------------------------------------------------------------------------
-// Build the full content model from disk
-// ---------------------------------------------------------------------------
-interface ElementRow {
-  slug: string;
-  code: string;
-  focus_area_code: string;
-  focus_area_name: string;
-  title: string;
-  one_line: string | null;
-  overview_md: string | null;
-  simple_guide_md: string | null;
-  watch_out_for_md: string | null;
-  sort_order: number;
-}
-interface TemplateFile {
-  code: string;
-  absPath: string;
+export interface TemplateEntry {
+  code: string; // T01, T02 … the badge on the card
+  title: string; // the delivered filename, verbatim, minus the version suffix
   fileName: string;
-  storagePath: string;
-  title: string;
+  relPath: string; // relative to SRC, so the spec is readable and portable
   type: ResourceType;
-  sort_order: number;
-}
-interface Model {
-  elements: ElementRow[];
-  checklistByCode: Map<string, ChecklistItem[]>;
-  academyByCode: Map<string, { title: string; one_line: string | null; body_md: string | null }>;
-  templates: TemplateFile[];
-  booklets: { absPath: string; fileName: string; title: string }[];
-  wtwMissing: string[];
+  sortOrder: number;
 }
 
-async function buildModel(): Promise<Model> {
-  let index: IndexEntry[];
-  let folders: TopicFolder[];
-  if (PACK === "food") {
-    ({ index, folders } = await parseFoodPack());
-  } else {
-    index = await parseIndex();
-    folders = await mapTopicFolders(index);
-  }
-  const byCode = new Map(index.map((e) => [e.code, e]));
+export interface FocusAreaEntry {
+  number: string; // "1.1"
+  sectionSlug: string;
+  groupSlug: string;
+  slug: string;
+  title: string;
+  code: string; // elements.code — the delivered number
+  summary: string; // platform_topics.description — the Overview's first sentence
+  guideMd: string; // elements.simple_guide_md — Overview remainder + the guide
+  photo: { source: string; target: string; imagePath: string };
+  templates: TemplateEntry[];
+  sourceDir: string;
+  stats: { overviewChars: number; guideChars: number; summaryChars: number };
+}
 
-  const elements: ElementRow[] = [];
-  const checklistByCode = new Map<string, ChecklistItem[]>();
-  const academyByCode = new Map<string, { title: string; one_line: string | null; body_md: string | null }>();
-  const templates: TemplateFile[] = [];
-  const wtwMissing: string[] = [];
-
-  for (const tf of folders.sort((a, b) => a.code.localeCompare(b.code))) {
-    const entry = byCode.get(tf.code)!;
-    const files = await listFiles(tf.dir);
-    // Exclude "video script" everywhere so it never gets mistaken for a body file.
-    const overviewF = pickByContains(files, ["overview"], ["video"]);
-    const guideF = pickByContains(files, ["simple guide", "simpleguide"], ["video"]);
-    const checklistF = pickByContains(files, ["checklist"], ["video"]);
-    const wtwF = pickByContains(
-      files,
-      ["what to watch out for", "watch out for", "wtwof", "wtwo"],
-      ["video"],
-    );
-
-    const overview_md = overviewF ? await docxToMarkdown(path.join(tf.dir, overviewF)) : null;
-    const simple_guide_md = guideF ? await docxToMarkdown(path.join(tf.dir, guideF)) : null;
-    const watch_out_for_md = wtwF ? await docxToMarkdown(path.join(tf.dir, wtwF)) : null;
-    if (!wtwF) wtwMissing.push(tf.code);
-
-    const one_line = entry.one_line ?? (entry.mdFile ? await readOneLine(entry.mdFile) : null);
-
-    elements.push({
-      slug: entry.slug,
-      code: tf.code,
-      focus_area_code: tf.letter,
-      focus_area_name: FOCUS_NAME[tf.letter],
-      title: entry.title,
-      one_line,
-      overview_md,
-      simple_guide_md,
-      watch_out_for_md,
-      sort_order: parseInt(tf.code[1], 10),
-    });
-
-    // Academy body = the Simple Guide (locked mapping)
-    academyByCode.set(tf.code, { title: entry.title, one_line, body_md: simple_guide_md });
-
-    // Checklist
-    const items = checklistF ? await parseChecklist(path.join(tf.dir, checklistF)) : [];
-    checklistByCode.set(tf.code, items);
-
-    // Templates
-    const templatesDir = path.join(tf.dir, "Templates");
-    if (await exists(templatesDir)) {
-      const tfiles = (await listFiles(templatesDir)).sort();
-      let idx = 0;
-      for (const fn of tfiles) {
-        idx += 1;
-        const ext = path.extname(fn);
-        const base = fn.slice(0, fn.length - ext.length);
-        const m = base.match(/^T(\d+)\s*[—–-]\s*(.+)$/);
-        const tnum = m ? parseInt(m[1], 10) : idx;
-        const cleanName = (m ? m[2] : base).trim();
-        templates.push({
-          code: tf.code,
-          absPath: path.join(templatesDir, fn),
-          fileName: fn,
-          storagePath: `${tf.code.toLowerCase()}/t${String(tnum).padStart(2, "0")}-${kebab(cleanName)}${ext.toLowerCase()}`,
-          title: cleanName,
-          type: resourceType(cleanName),
-          sort_order: tnum,
-        });
-      }
-    }
-  }
-
-  // Booklets (public) — full pack only; the food pack ships no booklets.
-  const booklets: { absPath: string; fileName: string; title: string }[] = [];
-  if (PACK === "full" && (await exists(BOOKLETS_DIR))) {
-    for (const fn of (await listFiles(BOOKLETS_DIR)).filter((f) => /\.pdf$/i.test(f)).sort()) {
-      const m = fn.match(/^Booklet_([A-Z])_(.+)\.pdf$/i);
-      const title = m
-        ? `Booklet ${m[1].toUpperCase()} — ${m[2].replace(/_/g, " ")}`
-        : fn.replace(/_/g, " ").replace(/\.pdf$/i, "");
-      booklets.push({ absPath: path.join(BOOKLETS_DIR, fn), fileName: fn, title });
-    }
-  }
-
-  return { elements, checklistByCode, academyByCode, templates, booklets, wtwMissing };
+export interface ContentSpec {
+  generatedBy: string;
+  source: string;
+  sections: { slug: string; label: string; groupSlug: string; groupName: string }[];
+  totals: { sections: number; focusAreas: number; templates: number };
+  focusAreas: FocusAreaEntry[];
 }
 
 // ---------------------------------------------------------------------------
-// DB + Storage ingestion (idempotent upserts)
+// Parsing one focus area
 // ---------------------------------------------------------------------------
-function getEnv(): { url: string; secret: string } {
-  try {
-    process.loadEnvFile(path.join(ROOT, ".env.local"));
-  } catch {
-    /* fall through to process.env (CI / exported vars) */
+
+/* Every delivered document opens the same way:
+ *
+ *     Palestine House: <Section>      <- the section it declares
+ *     <Title>                         <- ONE OR MORE lines: 3.6 wraps
+ *     Overview                        <- Overviews only
+ *     <first prose line>
+ *
+ * The Guide's title line ends " Simple Guide" instead of being followed by an
+ * Overview heading. Reading the title as "the second line" is wrong, which is
+ * how the migration map came to record 3.6's title as "Connect to the Wider
+ * Palestine". The block runs until the terminator, however many lines it takes.
+ */
+function parseCover(
+  lines: string[],
+  where: string,
+  section: (typeof SECTIONS)[number],
+  /* Returns null while the line is still title (or not yet the end), and the
+     title fragment CARRIED BY the terminator line otherwise — "" for the
+     Overview, whose "Overview" heading is a separator and not part of the name,
+     and the leading words for the Guide, whose terminator IS the last title
+     line ("<Title> Simple Guide"). Conflating those two produced the title
+     "Get Legally Ready Overview" on the first run. */
+  terminator: (line: string) => string | null,
+): { title: string; bodyStart: number } {
+  const head = plain(lines[0] ?? "");
+  const declared = head.match(/^Palestine House\s*:\s*(.+)$/i)?.[1];
+  if (!declared) {
+    fail(where, `first line is not "Palestine House: <Section>" — got ${JSON.stringify(head)}`);
   }
-  // Prefer the DEDICATED ingestion vars so this admin op can target TEST while the
-  // app's NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SECRET_KEY stay pointed wherever local
-  // dev needs them. Set these two in .env.local to the TEST project before running:
-  //   SUPABASE_INGEST_URL=https://sdszcralogcrujtyghig.supabase.co
-  //   SUPABASE_INGEST_SECRET_KEY=sb_secret_…   (the TEST project's secret key)
-  const url = process.env.SUPABASE_INGEST_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const secret = process.env.SUPABASE_INGEST_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
-  if (!url)
-    throw new Error("Missing SUPABASE_INGEST_URL (or NEXT_PUBLIC_SUPABASE_URL) in .env.local");
-  if (!secret)
-    throw new Error(
-      "Missing SUPABASE_INGEST_SECRET_KEY (or SUPABASE_SECRET_KEY) in .env.local — the sb_secret_… key for the TEST project",
-    );
-  return { url, secret };
-}
-
-async function ensureBucket(db: SupabaseClient, id: string, isPublic: boolean): Promise<void> {
-  const { error } = await db.storage.createBucket(id, { public: isPublic });
-  if (error && !/already exists/i.test(error.message)) throw error;
-}
-
-async function pool<T>(items: T[], size: number, fn: (t: T) => Promise<void>): Promise<void> {
-  for (let i = 0; i < items.length; i += size) {
-    await Promise.all(items.slice(i, i + size).map(fn));
-  }
-}
-
-async function ingest(model: Model): Promise<void> {
-  const { url, secret } = getEnv();
-  const host = new URL(url).host;
-  console.log(`\nIngesting into: ${host}`);
-
-  // Safety: this script defaults to the TEST project. Production ingestion is run
-  // DELIBERATELY by the human (WORKFLOW §14 / SUPABASE-MCP-SAFETY) and must pass
-  // --i-understand-not-test, so a mis-pointed .env.local can never write prod by accident.
-  const TEST_REF = "sdszcralogcrujtyghig";
-  const parsed = new URL(url);
-  // Exact-host match over https (NOT a substring include) so a look-alike host such as
-  // `${TEST_REF}.evil.example` can never pass the guard and receive the secret/writes.
-  const isTestTarget = parsed.protocol === "https:" && parsed.hostname === `${TEST_REF}.supabase.co`;
-  if (!isTestTarget && !process.argv.includes("--i-understand-not-test")) {
-    throw new Error(
-      `Refusing to ingest into non-TEST target "${host}". This script targets the TEST project ` +
-        `(https://${TEST_REF}.supabase.co). To run it against another project, pass --i-understand-not-test deliberately.`,
+  if (fold(declared) !== section.declares) {
+    fail(
+      where,
+      `declares section ${JSON.stringify(declared.trim())} but sits under ${section.slug}`,
     );
   }
 
-  const db = createClient(url, secret, { auth: { persistSession: false } });
+  const titleParts: string[] = [];
+  for (let i = 1; i < lines.length && i <= 6; i += 1) {
+    const text = plain(lines[i]);
+    if (!text) continue;
+    const carried = terminator(text);
+    if (carried !== null) {
+      if (carried) titleParts.push(carried);
+      const title = titleParts.join(" ").replace(/\s+/g, " ").trim();
+      if (!title) fail(where, "no title found above the cover terminator");
+      return { title, bodyStart: i + 1 };
+    }
+    titleParts.push(text);
+  }
+  fail(where, "cover block never terminated within 6 lines");
+}
 
-  // 1) elements -> get ids
-  const { data: elementRows, error: elErr } = await db
-    .from("elements")
-    .upsert(model.elements, { onConflict: "slug" })
-    .select("id, slug, code");
-  if (elErr) throw elErr;
-  const idByCode = new Map<string, string>();
-  for (const r of elementRows ?? []) idByCode.set((r as { code: string }).code, (r as { id: string }).id);
-  console.log(`elements upserted: ${elementRows?.length ?? 0}`);
+async function toMarkdown(file: string): Promise<string> {
+  const raw = (await mammoth.convertToMarkdown({ path: file })).value;
+  const md = cleanMd(raw);
+  /* If an anchor with real text inside it ever appears, the empty-anchor strip
+     above is no longer sufficient and this script must be revisited before it
+     silently changes what a partner reads. */
+  if (/<a\b/i.test(md)) {
+    fail(path.basename(file), "contains a non-empty <a> element — review before ingesting");
+  }
+  return md;
+}
 
-  // 2) checklist_items
-  const checklistRows = [...model.checklistByCode.entries()].flatMap(([code, items]) =>
-    items.map((it) => ({
-      element_id: idByCode.get(code),
-      group_label: it.group_label,
-      gate: it.gate,
-      item_text: it.item_text,
-      required_document: it.required_document,
-      sort_order: it.sort_order,
-    })),
+async function parseFocusArea(
+  section: (typeof SECTIONS)[number],
+  faDir: string,
+  folderName: string,
+): Promise<FocusAreaEntry> {
+  const where = `${section.slug}/${folderName}`;
+  const number = folderName.match(/^(\d+\.\d+)/)?.[1];
+  if (!number) fail(where, "folder name has no N.M prefix");
+
+  const files = await listFiles(faDir);
+  const overviewFile = files.find((f) => /overview/i.test(f) && /\.docx$/i.test(f));
+  const guideFile = files.find((f) => /simple\s*guide/i.test(f) && /\.docx$/i.test(f));
+  if (!overviewFile) fail(where, "no Overview .docx");
+  if (!guideFile) fail(where, "no Simple Guide .docx");
+
+  const overviewMd = await toMarkdown(path.join(faDir, overviewFile));
+  const guideMdRaw = await toMarkdown(path.join(faDir, guideFile));
+
+  const overviewLines = overviewMd.split("\n");
+  const guideLines = guideMdRaw.split("\n");
+
+  const ov = parseCover(overviewLines, `${where} [Overview]`, section, (t) =>
+    /^overview$/i.test(t) ? "" : null,
   );
-  const { error: ciErr } = await db
-    .from("checklist_items")
-    .upsert(checklistRows, { onConflict: "element_id,item_text" });
-  if (ciErr) throw ciErr;
-  console.log(`checklist_items upserted: ${checklistRows.length}`);
+  const gd = parseCover(guideLines, `${where} [Simple Guide]`, section, (t) =>
+    /simple\s*guide$/i.test(t) ? t.replace(/\s*Simple Guide\s*$/i, "").trim() : null,
+  );
 
-  // 3) academy_modules
-  const academyRows = [...model.academyByCode.entries()].map(([code, a]) => ({
-    element_id: idByCode.get(code),
-    title: a.title,
-    one_line: a.one_line,
-    length: null,
-    youtube_url: null,
-    body_md: a.body_md,
-    sort_order: parseInt(code[1], 10),
-  }));
-  const { error: amErr } = await db
-    .from("academy_modules")
-    .upsert(academyRows, { onConflict: "element_id" });
-  if (amErr) throw amErr;
-  console.log(`academy_modules upserted: ${academyRows.length}`);
+  /* Two independent documents naming the same focus area. If they disagree, a
+     human has to choose — this script must not. */
+  if (fold(ov.title) !== fold(gd.title)) {
+    fail(
+      where,
+      `Overview says ${JSON.stringify(ov.title)} but the Simple Guide says ${JSON.stringify(gd.title)}`,
+    );
+  }
+  const title = ov.title;
 
-  // 4) resources (templates + booklets)
-  const templateRows = model.templates.map((t) => ({
-    title: t.title,
-    type: t.type,
-    focus_area_code: t.code[0],
-    element_id: idByCode.get(t.code),
-    version: "v1",
-    storage_bucket: RESOURCES_BUCKET,
-    storage_path: t.storagePath,
-    is_public: false,
-    sort_order: t.sort_order,
-  }));
-  const bookletRows = model.booklets.map((b, i) => ({
-    title: b.title,
-    type: "booklet" as const,
-    focus_area_code: null,
-    element_id: null,
-    version: "v1",
-    storage_bucket: BOOKLETS_BUCKET,
-    storage_path: b.fileName,
-    is_public: true,
-    sort_order: i + 1,
-  }));
-  const { error: rErr } = await db
-    .from("resources")
-    .upsert([...templateRows, ...bookletRows], { onConflict: "storage_bucket,storage_path" });
-  if (rErr) throw rErr;
-  console.log(`resources upserted: ${templateRows.length} templates + ${bookletRows.length} booklets`);
+  /* D-PP-m — the split. The Overview's opening sentence becomes the card
+     summary; everything after it becomes the head of the Simple Guide, so it is
+     the first thing a partner reads on Read Now. No Overview card returns, and
+     no heading is invented to introduce it: inventing one would be writing copy. */
+  const overviewBody = overviewLines
+    .slice(ov.bodyStart)
+    .join("\n")
+    .replace(/^\s+/, "")
+    .trimEnd();
+  const firstLineEnd = overviewBody.indexOf("\n");
+  const firstLine = (firstLineEnd === -1 ? overviewBody : overviewBody.slice(0, firstLineEnd)).trim();
+  const afterFirstLine = firstLineEnd === -1 ? "" : overviewBody.slice(firstLineEnd + 1);
+  const { first: summary, rest: firstLineRest } = splitFirstSentence(firstLine);
 
-  // 5) Storage uploads (idempotent: upsert)
-  await ensureBucket(db, RESOURCES_BUCKET, false);
-  await ensureBucket(db, BOOKLETS_BUCKET, true);
+  if (summary.length < 25) {
+    fail(where, `summary looks truncated (${summary.length} chars): ${JSON.stringify(summary)}`);
+  }
+  if (!/[.!?]["”’]?$/.test(summary)) {
+    fail(where, `summary does not end on a sentence terminator: ${JSON.stringify(summary)}`);
+  }
 
-  let up = 0;
-  let fail = 0;
-  await pool(model.templates, 8, async (t) => {
-    const buf = await fs.readFile(t.absPath);
-    const { error } = await db.storage
-      .from(RESOURCES_BUCKET)
-      .upload(t.storagePath, buf, { upsert: true, contentType: contentTypeFor(path.extname(t.fileName)) });
-    if (error) {
-      fail += 1;
-      console.error(`  upload FAILED ${t.storagePath}: ${error.message}`);
-    } else up += 1;
+  const overviewRest = [firstLineRest, afterFirstLine.trim()].filter(Boolean).join("\n\n");
+  const guideBody = guideLines.slice(gd.bodyStart).join("\n").replace(/^\s+/, "").trimEnd();
+  if (!guideBody.trim()) fail(where, "Simple Guide has no body after its cover");
+  const guideMd = [overviewRest, guideBody].filter(Boolean).join("\n\n");
+
+  /* Templates. The folder is called Template-Samples, Template or Templates
+     depending on the focus area — all three are accepted, and exactly one must
+     be present. */
+  const subDirs = await listDirs(faDir);
+  if (subDirs.length !== 1) {
+    fail(where, `expected exactly one templates folder, found ${subDirs.length}`);
+  }
+  if (!/^templates?(-samples)?$/i.test(subDirs[0])) {
+    fail(where, `unexpected templates folder name ${JSON.stringify(subDirs[0])}`);
+  }
+  const tmplDir = path.join(faDir, subDirs[0]);
+  const tmplFiles = (await listFiles(tmplDir)).filter((f) => /\.docx$/i.test(f)).sort();
+  if (tmplFiles.length === 0) fail(where, "templates folder is empty");
+
+  const templates: TemplateEntry[] = tmplFiles.map((fileName, i) => {
+    const ext = path.extname(fileName);
+    /* THE TEMPLATE TITLE RULE (settled at PP6b, one rule for all 88): the
+       delivered filename, minus its extension and minus the `_V.1` version
+       suffix, and nothing else. The owner's wording is never edited — where his
+       file says "Responsiblity" or "House-toHouse", so does the card. The
+       cleaned-up names in content-migration-map.md §4 are therefore a summary,
+       not the source; PP6c re-syncs that table from this spec. */
+    const base = fileName.slice(0, fileName.length - ext.length);
+    const templateTitle = base.replace(/_V\.\d+(\.\d+)*$/i, "").trim();
+    if (/_V\.\d/i.test(templateTitle)) {
+      fail(where, `unhandled version suffix in ${JSON.stringify(fileName)}`);
+    }
+    if (!templateTitle) fail(where, `template filename reduces to nothing: ${fileName}`);
+    return {
+      code: `T${String(i + 1).padStart(2, "0")}`,
+      title: templateTitle,
+      fileName,
+      relPath: path.relative(SRC, path.join(tmplDir, fileName)).split(path.sep).join("/"),
+      type: resourceType(templateTitle),
+      sortOrder: i + 1,
+    };
   });
-  await pool(model.booklets, 4, async (b) => {
-    const buf = await fs.readFile(b.absPath);
-    const { error } = await db.storage
-      .from(BOOKLETS_BUCKET)
-      .upload(b.fileName, buf, { upsert: true, contentType: "application/pdf" });
-    if (error) {
-      fail += 1;
-      console.error(`  booklet upload FAILED ${b.fileName}: ${error.message}`);
-    } else up += 1;
-  });
-  console.log(`storage uploads: ${up} ok, ${fail} failed`);
-  if (fail > 0) throw new Error(`${fail} file upload(s) failed`);
+
+  const photoSlug = PHOTO_BY_NUMBER[number];
+  if (!photoSlug) fail(where, `no photograph mapped for ${number} (content-migration-map.md §4)`);
+  const photoSource = `${photoSlug}.jpg`;
+  if (!(await exists(path.join(TOPIC_PHOTO_DIR, photoSource)))) {
+    fail(where, `mapped photograph is missing: public/assets/workspace/topics/${photoSource}`);
+  }
+
+  const slug = slugify(title);
+  if (!slug) fail(where, `title does not make a usable web address: ${JSON.stringify(title)}`);
+
+  return {
+    number,
+    sectionSlug: section.slug,
+    groupSlug: slugify(`${section.label} ${GROUP_NAME_SUFFIX}`),
+    slug,
+    title,
+    code: number,
+    summary,
+    guideMd,
+    photo: {
+      source: photoSource,
+      target: `${slug}.jpg`,
+      imagePath: `/assets/workspace/topics/${slug}.jpg`,
+    },
+    templates,
+    sourceDir: path.relative(SRC, faDir).split(path.sep).join("/"),
+    stats: {
+      overviewChars: overviewMd.length,
+      guideChars: guideMd.length,
+      summaryChars: summary.length,
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
-// Report (dry-run + post-run summary)
+// Build
 // ---------------------------------------------------------------------------
-function report(model: Model): void {
-  const ex =
-    PACK === "food"
-      ? { elements: "3", checklist: "90", academy: "3", templates: "30", booklets: "0" }
-      : { elements: "30", checklist: "200+", academy: "30", templates: "267", booklets: "2" };
-  const checklistTotal = [...model.checklistByCode.values()].reduce((n, a) => n + a.length, 0);
-  console.log("\n================ CONTENT MODEL ================");
-  console.log(`elements         : ${model.elements.length} (expect ${ex.elements})`);
-  console.log(`checklist_items  : ${checklistTotal} (expect ${ex.checklist})`);
-  console.log(`academy_modules  : ${model.academyByCode.size} (expect ${ex.academy})`);
-  console.log(`templates        : ${model.templates.length} (expect ${ex.templates})`);
-  console.log(`booklets         : ${model.booklets.length} (expect ${ex.booklets})`);
-  console.log(`WTW missing (-> null): ${model.wtwMissing.sort().join(", ") || "(none)"}`);
+async function buildSpec(): Promise<ContentSpec> {
+  if (!(await exists(SRC))) fail("source", `not found: ${SRC}`);
 
-  console.log("\nPer-topic checklist counts:");
-  for (const e of model.elements) {
-    const n = model.checklistByCode.get(e.code)?.length ?? 0;
-    const flag = n === 0 ? "  <-- ZERO" : "";
-    const tmpl = model.templates.filter((t) => t.code === e.code).length;
+  const sectionDirs = (await listDirs(SRC)).sort();
+  if (sectionDirs.length !== EXPECTED_SECTIONS) {
+    fail("source", `expected ${EXPECTED_SECTIONS} section folders, found ${sectionDirs.length}`);
+  }
+
+  const focusAreas: FocusAreaEntry[] = [];
+  const seenSlugs = new Set<string>();
+
+  for (const dirName of sectionDirs) {
+    const prefix = dirName.match(/^(\d+)\./)?.[1];
+    const section = SECTIONS.find((s) => s.prefix === prefix);
+    if (!section) fail("source", `section folder has no known 1-4 prefix: ${dirName}`);
+
+    for (const folderName of (await listDirs(path.join(SRC, dirName))).sort()) {
+      const entry = await parseFocusArea(
+        section,
+        path.join(SRC, dirName, folderName),
+        folderName,
+      );
+      if (seenSlugs.has(entry.slug)) {
+        fail(entry.sourceDir, `two focus areas produce the same address "${entry.slug}"`);
+      }
+      seenSlugs.add(entry.slug);
+      focusAreas.push(entry);
+    }
+  }
+
+  const templates = focusAreas.reduce((n, f) => n + f.templates.length, 0);
+  if (focusAreas.length !== EXPECTED_FOCUS_AREAS) {
+    fail("totals", `expected ${EXPECTED_FOCUS_AREAS} focus areas, extracted ${focusAreas.length}`);
+  }
+  if (templates !== EXPECTED_TEMPLATES) {
+    fail("totals", `expected ${EXPECTED_TEMPLATES} templates, extracted ${templates}`);
+  }
+
+  return {
+    generatedBy: "scripts/ingest-content.ts (PP6b)",
+    source:
+      "docs/source-assets/Resource/Palestine House Website Content - Complet and Formatted",
+    sections: SECTIONS.map((s) => ({
+      slug: s.slug,
+      label: s.label,
+      groupSlug: slugify(`${s.label} ${GROUP_NAME_SUFFIX}`),
+      groupName: `${s.label} ${GROUP_NAME_SUFFIX}`,
+    })),
+    totals: { sections: EXPECTED_SECTIONS, focusAreas: focusAreas.length, templates },
+    focusAreas,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Report
+// ---------------------------------------------------------------------------
+function report(spec: ContentSpec): void {
+  console.log("\n================ CONTENT MODEL (v2) ================");
+  console.log(`sections    : ${spec.totals.sections}`);
+  console.log(`focus areas : ${spec.totals.focusAreas}`);
+  console.log(`templates   : ${spec.totals.templates}`);
+
+  let lastSection = "";
+  for (const f of spec.focusAreas) {
+    if (f.sectionSlug !== lastSection) {
+      lastSection = f.sectionSlug;
+      console.log(`\n--- ${f.sectionSlug} ---`);
+    }
     console.log(
-      `  ${e.code} ${e.title.padEnd(44).slice(0, 44)} items=${String(n).padStart(2)} templates=${String(tmpl).padStart(2)}${flag}`,
+      `  ${f.number}  ${f.title.padEnd(46).slice(0, 46)} /${f.slug}`.padEnd(100) +
+        `templates=${String(f.templates.length).padStart(2)} guide=${String(f.stats.guideChars).padStart(5)} summary=${String(f.stats.summaryChars).padStart(3)}`,
     );
+    console.log(`        photo: ${f.photo.source} -> ${f.photo.target}`);
+    console.log(`        summary: ${f.summary}`);
   }
 
-  const spotCode = PACK === "food" ? "K1" : "A1";
-  const spot = model.elements.find((e) => e.code === spotCode);
-  if (spot) {
-    console.log(`\nSpot-check ${spotCode}:`);
-    console.log(`  one_line: ${spot.one_line}`);
-    console.log(`  overview_md chars: ${spot.overview_md?.length ?? 0}`);
-    console.log(`  simple_guide_md chars: ${spot.simple_guide_md?.length ?? 0}`);
-    console.log(`  watch_out_for_md chars: ${spot.watch_out_for_md?.length ?? 0}`);
-    console.log(`  first checklist item: ${model.checklistByCode.get(spotCode)?.[0]?.item_text?.slice(0, 90)}`);
-  }
+  const longest = [...spec.focusAreas].sort(
+    (a, b) => b.stats.summaryChars - a.stats.summaryChars,
+  )[0];
+  const shortest = [...spec.focusAreas].sort(
+    (a, b) => a.stats.summaryChars - b.stats.summaryChars,
+  )[0];
+  console.log(
+    `\nsummary length: ${shortest.stats.summaryChars}-${longest.stats.summaryChars} chars` +
+      ` (shortest ${shortest.number}, longest ${longest.number})`,
+  );
 }
 
 // ---------------------------------------------------------------------------
 async function main(): Promise<void> {
-  console.log(
-    `S5 content ingestion — pack: ${PACK} — ${DRY_RUN ? "DRY RUN (no DB writes)" : "LIVE"}`,
-  );
-  const model = await buildModel();
-  report(model);
-
-  if (PACK === "food") {
-    // The food pack is small and fully known: any mismatch is a hard error.
-    if (model.elements.length !== 3) throw new Error("Food pack: element count != 3");
-    for (const e of model.elements) {
-      const n = model.checklistByCode.get(e.code)?.length ?? 0;
-      if (n !== 30) throw new Error(`Food pack: ${e.code} checklist items ${n} != 30`);
-    }
-    if (model.templates.length !== 30) throw new Error("Food pack: template count != 30");
-    if (model.wtwMissing.length > 0)
-      throw new Error(`Food pack: What-To-Watch-Out-For missing for ${model.wtwMissing.join(", ")}`);
-  } else {
-    if (model.elements.length !== 30) throw new Error("Element count != 30");
-    if (model.templates.length !== 267)
-      console.warn(`WARNING: template count ${model.templates.length} != 267`);
-  }
+  console.log(`PP6b content extraction — ${DRY_RUN ? "DRY RUN (no spec written)" : "writing the spec"}`);
+  const spec = await buildSpec();
+  report(spec);
 
   if (DRY_RUN) {
-    console.log("\nDry run complete — no database or storage changes made.");
+    console.log("\nDry run complete — nothing written.");
     return;
   }
-  await ingest(model);
-  console.log("\nIngestion complete.");
+  await fs.writeFile(SPEC_OUT, `${JSON.stringify(spec, null, 2)}\n`, "utf8");
+  console.log(`\nWrote ${path.relative(ROOT, SPEC_OUT)}`);
+  console.log("No database was touched — loading is scripts/load-content.ts.");
 }
 
 main().catch((e) => {
-  console.error("\nINGEST FAILED:", e instanceof Error ? e.message : e);
+  console.error("\nEXTRACTION FAILED:", e instanceof Error ? e.message : e);
   process.exit(1);
 });
