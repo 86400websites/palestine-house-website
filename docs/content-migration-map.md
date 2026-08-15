@@ -41,7 +41,19 @@ Five independent attempts to refute "this is a replacement, not an upload" all f
 
 A `.down.sql` restores deleted **rows**. It cannot restore deleted **Storage objects**. Before `0030` deletes the 297 template files from the private bucket, PP6c **must** export all 297 objects to a cold backup folder in the owner's OneDrive (`docs/source-assets/_archive-297-templates/`, gitignored) and record the object count + total bytes in the sprint record. ~5 MB. This is a hard exit-gate item, not a nice-to-have.
 
-The same applies to the 33 `simple_guide_md` bodies (~1.6 MB of finished prose) and the 33 `overview_md` / `watch_out_for_md` bodies: `0030`'s down-migration must carry them as literal inserts, or they are gone.
+The same applies to the 33 `simple_guide_md` bodies and the 33 `overview_md` / `watch_out_for_md` bodies: `0030`'s down-migration must carry them as literal inserts, or they are gone.
+
+⚠️ **Sizes corrected at the PP6c kickoff, 2026-08-16, measured on PROD read-only.** This section previously read "the 33 `simple_guide_md` bodies (~1.6 MB of finished prose)". That figure is **all three body columns combined — 1,577,160 characters**. `simple_guide_md` **alone is 630,020**. Recorded because `0030.down.sql` carries these as literal inserts and sizing it off the wrong number is the kind of surprise that arrives late.
+
+⭐ **And the object backup is cheaper than it looked.** The objects that must survive are **production's**, which appeared to require production Storage credentials. Verified read-only across both projects, **TEST's 297 legacy objects are byte-identical to PROD's 297** — same names, same eTags, same sizes:
+
+| | PROD | TEST (legacy 297 only) |
+|---|---|---|
+| objects | 297 | 297 |
+| total bytes | 5,320,962 | 5,320,962 |
+| `md5(string_agg(name‖eTag‖size order by name))` | `27e3e6efccf33eebedf60ad0aa45c2cc` | `27e3e6efccf33eebedf60ad0aa45c2cc` |
+
+TEST carries 300 objects in the bucket — the 297 plus the pilot's 3. **So PP6c exports from TEST and *proves* the result is a backup of PROD's bytes**: each downloaded file's MD5 must equal its stored eTag, and the aggregate fingerprint recomputed from disk must equal the value above. That is a claim anyone can re-check in one query, which is the point.
 
 ---
 
@@ -69,6 +81,16 @@ The `about` section (`num` 0, the `/dashboard` landing) is unchanged and carries
 
 ## 4. Focus areas, photos and templates
 
+> ⚠️ **Re-checked at the PP6c kickoff, 2026-08-16, against a freshly regenerated `docs/content-v2-spec.json`.** All 22 **titles, slugs, photo sources and per-area template counts match** — the corrections made at the PP6b kickoff held. **Three template-name blocks did not, and in all three the spec is right and this table was wrong**, because this table cleaned up wording the owner actually wrote. The partner-visible template title is the delivered filename minus its extension and minus `_V.1`, verbatim — one rule for all 88, settled at PP6b step 6b-c:
+>
+> | # | This table said | The spec says (and ships) | Why |
+> |---|---|---|---|
+> | 1.2 | `12-Month Budget Template`, ×5 | `Palestine House 12-Month Budget Template`, ×5 | the `Palestine House ` prefix is the owner's, on all five files |
+> | 2.5 | `Simple Role and Responsibility Sheet` | `Simple Role and Responsiblity Sheet` | his typo, carried verbatim — cleaning it is an invisible edit to approved content |
+> | 2.3 | Stock Sheet listed 2nd | Stock Sheet 3rd | the spec sorts filenames by ASCII, where `S` precedes `a`, and **that order assigns the `T01…Tnn` codes** |
+>
+> The rows below are corrected. **The spec is the source; this table is a summary for reading.**
+
 **Photo column** = the existing file in `public/assets/workspace/topics/<slug>.jpg`, **copied** (not renamed) to the new slug in PP6c. Copying keeps the live 33 rendering until cutover; the 33 originals and the 11 unused ones are deleted in PP7's cleanup.
 
 ### Setup — 5 focus areas · 20 templates
@@ -76,7 +98,7 @@ The `about` section (`num` 0, the `/dashboard` landing) is unchanged and carries
 | # | Focus area | Provisional slug | Photo reused from | Templates |
 |---|---|---|---|---|
 | 1.1 | Get Legally Ready | `get-legally-ready` | `legal-compliance-and-risk` | 2 — Palestine House Brand Guide · Palestine House Setup Checklist |
-| 1.2 | Plan the Money | `plan-the-money` | `business-model-and-revenue` | 5 — 12-Month Budget Template · Cash Flow Template · Opening Cost Checklist · Revenue Ideas · Startup Budget |
+| 1.2 | Plan the Money | `plan-the-money` | `business-model-and-revenue` | 5 — Palestine House 12-Month Budget Template · Palestine House Cash Flow Template · Palestine House Opening Cost Checklist · Palestine House Revenue Ideas · Palestine House Startup Budget |
 | 1.3 | Find and Prepare the Space | `find-and-prepare-the-space` | `facility-operations` | 4 — Basic Furniture & Equipment List · Pre-Opening Venue Checklist · Venue Comparison Sheet · Venue Selection Checklist |
 | 1.4 | Build **a** Small Team ⚠️ | `build-a-small-team` | `org-structure-and-roles` | 5 — New Team Member Checklist · Role Description House Lead · Role Description Operations & Admin · Role Description Programming_Community · Simple Team Structure |
 | 1.5 | Get Ready **To** Open ⚠️ | `get-ready-to-open` | `launching-a-new-house` | 4 — 30-Day Opening Checklist · 90-Day Opening Checklist · Opening Day Run Sheet · Opening Week Checklist |
@@ -87,9 +109,9 @@ The `about` section (`num` 0, the `/dashboard` landing) is unchanged and carries
 |---|---|---|---|---|
 | 2.1 | Money | `money` | `financial-operations-and-controls` | 5 — Cash Flow Sheet · Expense Form · Monthly Finance Summary · Simple Financial Policy · Supplier Payment Tracker |
 | 2.2 | Daily House Operations | `daily-house-operations` | `operating-model` | 6 — Cleaning Checklist · Daily Closing Checklist · Daily Opening Checklist · Incident Form · Maintenance Log · Weekly House Checklist |
-| 2.3 | Food **& Beverages** ⚠️ | `food-beverages` | `food-and-beverage-operations` | 6 — Daily F and B Sales Sheet · Food and Beverage Stock Sheet · Food Safety Checklist · Kitchen Opening and Closing Checklist · Menu Costing Sheet · Simple Menu Template |
+| 2.3 | Food **& Beverages** ⚠️ | `food-beverages` | `food-and-beverage-operations` | 6 — Daily F and B Sales Sheet · Food Safety Checklist · Food and Beverage Stock Sheet · Kitchen Opening and Closing Checklist · Menu Costing Sheet · Simple Menu Template |
 | 2.4 | Members and Visitors | `members-and-visitors` | `membership-model-and-benefits` | 5 — Membership Form · Membership Renewal Message · New Member Welcome Template · Simple Member List · Visitor Feedback Form |
-| 2.5 | Team | `team` | `hiring-onboarding-and-training` | 4 — Leave Request Form · Monthly Team Check-In Form · Simple Role and Responsibility Sheet · Weekly Staff Schedule |
+| 2.5 | Team | `team` | `hiring-onboarding-and-training` | 4 — Leave Request Form · Monthly Team Check-In Form · Simple Role and Responsiblity Sheet · Weekly Staff Schedule |
 | 2.6 | Monthly Check**-Up** ⚠️ | `monthly-check-up` | `reporting-kpis-and-audits` | 3 — Monthly Action List · One-Page Monthly House Report · Simple KPI Sheet |
 
 ### Program — 6 focus areas · 23 templates
@@ -165,9 +187,9 @@ Both found by reading the real files against the real code, 2026-08-14:
 
 | Item | Where it lands |
 |---|---|
-| The three prose "templates" — *Setup Checklist*, *Brand Guide*, *Opening Cost Checklist* — have no tables, no tick-boxes and no blanks. They read like guides, not forms. | Ship as delivered in the pilot; owner decides at PP6b step 6b-g. **Do not silently re-file the owner's content.** |
-| Folder 1.1 *Get Legally Ready* contains two templates that are neither legal nor specific to it. | Same — owner's call at the pilot. |
-| Where a partner-visible **template title** comes from — the filename (minus `_V.1`) or something inside the document. §4's names are cleaned; the filenames are not (§5). | **PP6b step 6b-c** settles it as one rule for all 88. 1.1's two filenames are already clean, so the pilot is unblocked. |
+| ~~The three prose "templates" — *Setup Checklist*, *Brand Guide*, *Opening Cost Checklist* — read like guides, not forms.~~ | ✅ **CLOSED at PP6b step 6b-g (D-PP-q): ship them in the grid exactly as delivered.** Owner's call. |
+| ~~Folder 1.1 *Get Legally Ready* contains two templates that are neither legal nor specific to it.~~ | ✅ **CLOSED at 6b-g, same answer** — shipped as delivered. |
+| ~~Where a partner-visible **template title** comes from.~~ | ✅ **SETTLED at PP6b step 6b-c and implemented in the extractor: the delivered filename, minus its extension and minus `_V.1`, verbatim — one rule for all 88.** So the cards read `Simple Role and Responsiblity Sheet` and `Palestine House 12-Month Budget Template`, because that is what the owner wrote. §4's cleaned names were the discrepancy, and §4 is now corrected (see the note there). |
 | The public proof band still says "11 focus areas · 33 topics · 200+ checklist items · 297 templates · 120-day launch". After cutover those numbers describe nothing that exists. | **D-PP-a**, already parked. Public pages stay untouched until PP7, then reconciled in one go. |
 | ~~Which database Vercel Preview points at is recorded nowhere.~~ | ✅ **RESOLVED 2026-08-15 — it was recorded all along.** `PROJECT-STATUS.md` §6: non-production ref `sdszcralogcrujtyghig` (`palestine-house-test-database`), *"Preview + Development env vars point here."* **The pilot is built and reviewed on TEST, and PP6b touches production not at all.** |
 | Supabase plan + Storage quota. | **UNVERIFIED**, and not blocking: 23.3 MB clears even the free tier by ~35×. TEST currently holds 297 + 2 objects. |
