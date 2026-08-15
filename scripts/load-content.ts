@@ -90,6 +90,17 @@ const ALLOW_LIVE = process.argv.includes("--allow-live");
    because matching by code cannot tell an edited document from an unchanged
    one — see replaceBytes(). */
 const REPLACE_FILES = process.argv.includes("--replace-files");
+/* Copy the mapped topic photographs into the working tree and stop, without
+   connecting to anything. Added at PP6c step 6c-c so the 21 new binaries land
+   in their own reviewable commit instead of inside the content-load commit,
+   and so a later photo remap in content-migration-map.md §4 can be applied on
+   its own. It reuses ensurePhoto() rather than reimplementing the copy — one
+   mechanism, which is the same reason D-PP-r put the production path behind a
+   flag on this script instead of in a second script. Safe without the preflight
+   guards because it writes no database row and touches no partner-visible
+   surface: every target filename is new (verified at 6c-c — 22 distinct sources
+   to 22 distinct targets, none of which is a live photo). */
+const PHOTOS_ONLY = process.argv.includes("--photos-only");
 const FOCUS = (() => {
   const i = process.argv.indexOf("--focus");
   return i === -1 ? null : process.argv[i + 1];
@@ -576,6 +587,24 @@ async function main(): Promise<void> {
   console.log(
     `PP6b content load — ${targets.length} focus area(s) — ${DRY_RUN ? "DRY RUN" : "LIVE"}`,
   );
+
+  /* --photos-only: working-tree copies, then stop. Deliberately BEFORE
+     connect(), so it needs no credentials, opens no session and cannot write a
+     row even by accident. */
+  if (PHOTOS_ONLY) {
+    console.log("--photos-only: copying mapped photographs, no database connection\n");
+    for (const fa of targets) {
+      console.log(`${fa.number} ${fa.title}`);
+      await ensurePhoto(fa);
+    }
+    console.log(
+      DRY_RUN
+        ? "\nDry run complete — nothing written."
+        : "\nPhotographs copied. Nothing else was touched; `git add public/assets/workspace/topics`.",
+    );
+    return;
+  }
+
   const db = await connect();
 
   /* PREFLIGHT, BEFORE ANY MUTATION ANYWHERE.
