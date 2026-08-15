@@ -95,9 +95,15 @@ function checkFile(file: File | null): Checked {
   }
   const ext = extensionOf(file.name);
   if (!ALLOWED.has(ext)) {
+    /* Name what arrived, not only what is allowed. The old wording gave the
+       owner nothing to act on when he met it on his first real upload — and a
+       .doc is indistinguishable from a .docx in a picker with extensions
+       hidden. Mirrored in files-admin.tsx so both layers say the same thing. */
     return {
       ok: false,
-      message: "That file type isn’t supported — please use a Word file or a PDF.",
+      message: ext
+        ? `That’s a .${ext} file. Please save it as .docx or a PDF and upload it again.`
+        : "That file doesn’t have a file type in its name. Please save it as .docx or a PDF and upload it again.",
     };
   }
   if (file.size > MAX_BYTES) {

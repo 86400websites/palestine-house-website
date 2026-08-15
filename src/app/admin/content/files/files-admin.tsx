@@ -50,6 +50,21 @@ function extOf(name: string) {
   return dot < 0 ? "" : name.slice(dot + 1).toLowerCase();
 }
 
+/* SAY WHAT WAS WRONG WITH IT (PP6b, 2026-08-15).
+   The old wording — "That file type isn't supported — please use a Word file or
+   a PDF" — is true and useless: it names what is allowed and not what arrived,
+   so the owner hit it on his first real upload and had nothing to act on. A
+   `.doc` and a `.docx` look identical in a file picker with extensions hidden,
+   which is the likeliest way to meet this. PP6c uploads well over a hundred
+   files, so a dead-end message there would be expensive.
+   Mirrored in src/lib/admin/file-actions.ts, which is the check that counts. */
+export function unsupportedMessage(fileName: string): string {
+  const ext = extOf(fileName);
+  return ext
+    ? `That’s a .${ext} file. Please save it as .docx or a PDF and upload it again.`
+    : "That file doesn’t have a file type in its name. Please save it as .docx or a PDF and upload it again.";
+}
+
 /* Refuses the file before it is sent anywhere, and says why in one sentence. */
 function FilePicker({ onProblem }: { onProblem: (m: string | null) => void }) {
   return (
@@ -64,9 +79,7 @@ function FilePicker({ onProblem }: { onProblem: (m: string | null) => void }) {
         if (!f) return onProblem(null);
         if (!ALLOWED_EXT.includes(extOf(f.name))) {
           e.target.value = "";
-          return onProblem(
-            "That file type isn’t supported — please use a Word file or a PDF.",
-          );
+          return onProblem(unsupportedMessage(f.name));
         }
         if (f.size > MAX_MB * 1024 * 1024) {
           e.target.value = "";

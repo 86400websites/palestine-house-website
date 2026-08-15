@@ -424,7 +424,13 @@ function FocusAreaForm({
               touch();
             }}
           />
-          <Counter value={description} max={90} />
+          {/* 120, not 90 (owner, 2026-08-15). The delivered summaries are the
+              Overview's own opening sentence and run 37-115 characters; at 90,
+              8 of the 22 tripped a warning about content the owner had written
+              deliberately and then looked at on a real card. A guidance number
+              that flags the majority of legitimate content is measuring the
+              wrong thing. It has always been advisory and never blocks a save. */}
+          <Counter value={description} max={120} />
           <span className="adm-field-hint">
             The first line on the card. One sentence.
           </span>

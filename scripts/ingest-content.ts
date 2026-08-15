@@ -403,6 +403,44 @@ function parseCover(
   fail(where, "cover block never terminated within 6 lines");
 }
 
+/* "Step 3. Choose a Bank" is a heading that the export styled as body text,
+   while the sub-headings under it ("We should:", "Simple question") came
+   through as real `###` headings. The reader therefore drew the hierarchy
+   upside down: the small parts looked bigger than the step containing them.
+   Owner's call, 2026-08-15: promote them.
+
+   ⚠️ THIS IS THE ONLY PLACE THE INGEST ALTERS A LINE OF THE OWNER'S TEXT, so it
+   is deliberately narrow. It matches only a line that is ENTIRELY "Step <n>."
+   followed by a title, adds no words, changes no wording, and emits `##` —
+   above the existing `###` sub-headings and below the reader's own `#` title.
+   A line that merely mentions a step mid-sentence is untouched, and a step line
+   that already carries heading marks is left exactly as it is.
+
+   Most of the 22 emit the step line in BOLD rather than as plain text — the
+   export's other way of saying "heading" — so bold wrappers are unwrapped
+   before promoting. A heading is already emphasised; keeping the marks inside
+   one would render literal underscores. Checking only plain lines promoted 6
+   step headings across 1 focus area instead of 118 across all 22, which is how
+   this was caught. */
+const STEP_HEADING = /^(Step\s+\d+\.\s+\S.*?)$/;
+/* A whole line wrapped in one emphasis pair, and nothing else. */
+const WHOLLY_BOLD = /^(?:__|\*\*)(.+)(?:__|\*\*)$/;
+
+function promoteStepHeadings(markdown: string): string {
+  return markdown
+    .split("\n")
+    .map((line) => {
+      const bare = line.trim();
+      /* An existing heading, a quote or a list item is the owner's own
+         structure — never re-level it. */
+      if (/^[#>-]/.test(bare) || /^\*\s/.test(bare)) return line;
+      const unwrapped = bare.match(WHOLLY_BOLD)?.[1]?.trim() ?? bare;
+      const m = unwrapped.match(STEP_HEADING);
+      return m ? `## ${m[1]}` : line;
+    })
+    .join("\n");
+}
+
 async function toMarkdown(file: string): Promise<string> {
   const raw = (await mammoth.convertToMarkdown({ path: file })).value;
   const md = cleanMd(raw);
@@ -485,7 +523,9 @@ async function parseFocusArea(
   }
 
   const overviewRest = [firstLineRest, afterFirstLine.trim()].filter(Boolean).join("\n\n");
-  const guideBody = guideLines.slice(gd.bodyStart).join("\n").replace(/^\s+/, "").trimEnd();
+  const guideBody = promoteStepHeadings(
+    guideLines.slice(gd.bodyStart).join("\n").replace(/^\s+/, "").trimEnd(),
+  );
   if (!guideBody.trim()) fail(where, "Simple Guide has no body after its cover");
   const guideMd = [overviewRest, guideBody].filter(Boolean).join("\n\n");
 
