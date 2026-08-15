@@ -1,0 +1,15 @@
+# Line endings for GENERATED files (PP6b, 2026-08-15).
+#
+# This repo is developed on Windows with core.autocrlf=true, so git rewrites
+# checked-out files to CRLF. That is fine for hand-edited source — but a file
+# produced by a script is compared against what the script produces, and the
+# script writes LF. Without this, `docs/content-v2-spec.json` shows up as
+# modified the instant it is regenerated after any checkout, and a re-run looks
+# unstable when it is byte-identical. PP6c re-runs the extractor over all 22
+# focus areas and diffs the result, so a phantom diff there would be genuinely
+# misleading rather than merely untidy.
+#
+# Pinned narrowly, to generated artefacts only. Ordinary source keeps the
+# repo's existing behaviour.
+docs/content-v2-spec.json     text eol=lf
+docs/content-v2-manifest.json text eol=lf

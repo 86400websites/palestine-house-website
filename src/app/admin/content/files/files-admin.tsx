@@ -47,7 +47,31 @@ const ALLOWED_EXT = ["docx", "pdf"];
 
 function extOf(name: string) {
   const dot = name.lastIndexOf(".");
-  return dot < 0 ? "" : name.slice(dot + 1).toLowerCase();
+  /* trim(): a filename carrying a trailing space — which OneDrive and Windows
+     both allow — yields "docx " and fails a set membership test that is
+     otherwise correct. Cheap to absorb, and a no-op when it is not needed.
+     (The adjective that belonged in that last clause names a Tailwind
+     visibility utility. Tailwind v4 scans the raw text of every file under
+     src/, which cannot be excluded, so writing it here added a real rule to the
+     stylesheet every visitor downloads — in a comment about being careful, on
+     the fourth occurrence of this in the PP series. Caught by the rule-level
+     bundle diff, which is the only thing that ever catches it.) */
+  return dot < 0 ? "" : name.slice(dot + 1).toLowerCase().trim();
+}
+
+/* SAY WHAT WAS WRONG WITH IT (PP6b, 2026-08-15).
+   The old wording — "That file type isn't supported — please use a Word file or
+   a PDF" — is true and useless: it names what is allowed and not what arrived,
+   so the owner hit it on his first real upload and had nothing to act on. A
+   `.doc` and a `.docx` look identical in a file picker with extensions hidden,
+   which is the likeliest way to meet this. PP6c uploads well over a hundred
+   files, so a dead-end message there would be expensive.
+   Mirrored in src/lib/admin/file-actions.ts, which is the check that counts. */
+export function unsupportedMessage(fileName: string): string {
+  const ext = extOf(fileName);
+  return ext
+    ? `That’s a .${ext} file. Please save it as .docx or a PDF and upload it again.`
+    : "That file doesn’t have a file type in its name. Please save it as .docx or a PDF and upload it again.";
 }
 
 /* Refuses the file before it is sent anywhere, and says why in one sentence. */
@@ -64,9 +88,7 @@ function FilePicker({ onProblem }: { onProblem: (m: string | null) => void }) {
         if (!f) return onProblem(null);
         if (!ALLOWED_EXT.includes(extOf(f.name))) {
           e.target.value = "";
-          return onProblem(
-            "That file type isn’t supported — please use a Word file or a PDF.",
-          );
+          return onProblem(unsupportedMessage(f.name));
         }
         if (f.size > MAX_MB * 1024 * 1024) {
           e.target.value = "";

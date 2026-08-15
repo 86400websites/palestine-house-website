@@ -42,10 +42,28 @@ export type AdminContentState = { ok: boolean; message: string | null };
 const GENERIC = "Something went wrong. Please try again.";
 const EXPIRED = "Your session expired — sign in again.";
 
+/* HTML requires a <textarea> to submit its value with CRLF line breaks,
+   whatever was put into it (the "API value" vs the "raw value" in the spec).
+   Every body in this platform is stored with LF, so without normalising here
+   ANY save rewrites the owner's text — adding a carriage return per line to
+   content nobody edited. Measured on the pilot at PP6b: a photo-only change
+   grew the guide from 3,933 to 4,087 characters.
+
+   Applied to every field rather than the textareas alone: a single-line input
+   cannot contain a newline, so this is a no-op there, and a rule that has to be
+   remembered per-field is a rule that gets forgotten when the next textarea is
+   added. `intro` and `lead` were exactly that oversight, caught while writing
+   the review brief for this sprint. */
+function normaliseNewlines(value: string): string {
+  return value.replace(/\r\n?/g, "\n");
+}
+
 /* Empty / whitespace form fields -> undefined, so zod optionals don't see "". */
 function field(formData: FormData, name: string): string | undefined {
   const v = formData.get(name);
-  return typeof v === "string" && v.trim() !== "" ? v : undefined;
+  return typeof v === "string" && v.trim() !== ""
+    ? normaliseNewlines(v)
+    : undefined;
 }
 
 type Guard =
@@ -242,9 +260,25 @@ export async function saveFocusAreaAction(
     /* Read RAW, not through field(): "" must survive as "" so the owner can
        clear the guide. field() maps "" to undefined, which the RPC reads as
        "not supplied" and leaves the old text in place — meaning an emptied
-       textarea would silently come back. Found on TEST, 2026-08-14. */
+       textarea would silently come back. Found on TEST, 2026-08-14.
+
+       NORMALISE LINE ENDINGS (PP6b, 2026-08-15). HTML requires a textarea to
+       submit its value with CRLF line breaks, whatever was put into it. The
+       ingested guide bodies use LF, so without this EVERY save rewrote the
+       owner's prose — adding a carriage return to all 154 lines of the pilot's
+       guide and growing it from 3,933 to 4,087 characters — even when the edit
+       was only to the photograph. It never showed in the reader, and it is
+       precisely the kind of silent edit to approved content this project
+       forbids. Found by changing a photo in the CMS and reading the row back.
+
+       (The word that belonged in that second sentence names a Tailwind
+       visibility utility, and Tailwind v4 scans the raw text of every file
+       under src/, which cannot be excluded. Written plainly it added a real
+       rule to the stylesheet every visitor downloads — the third time this
+       sprint series has hit that mechanism, and the reason globals.css now
+       excludes docs/, supabase/ and scripts/.) */
     simpleGuideMd: formData.has("simpleGuideMd")
-      ? String(formData.get("simpleGuideMd") ?? "")
+      ? normaliseNewlines(String(formData.get("simpleGuideMd") ?? ""))
       : undefined,
   });
   if (!parsed.success) {

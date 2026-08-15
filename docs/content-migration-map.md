@@ -1,6 +1,6 @@
 # Content Migration Map — the 22 real focus areas
 
-> **Status: agreed with the owner 2026-08-14, pending pilot sign-off.** This file is the single source of truth for *what the private platform becomes*. It is the input to the PP6c ingest and seed migration `0030`. Sprint plan: [`ROADMAP.md`](./ROADMAP.md) Stage 4. Decisions: [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §5 (D-PP-k … D-PP-o).
+> **Status: agreed with the owner 2026-08-14, pending pilot sign-off. ⚠️ Amended 2026-08-15 at the PP6b kickoff**, after every claim in it was re-checked by extracting all 132 delivered documents and querying both databases read-only. **Twelve findings, three of them blocking** — the corrections are marked ⚠️/🔴 inline with their evidence. The decisions (§2) are unchanged; the *facts* about the files were wrong in six places. This file is the single source of truth for *what the private platform becomes*. It is the input to the PP6c ingest and seed migration `0030`. Sprint plan: [`ROADMAP.md`](./ROADMAP.md) Stage 4. Decisions: [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §5 (D-PP-k … D-PP-p).
 >
 > **Source of the content:** `docs/source-assets/Resource/Palestine House Website Content - Complet and Formatted/` (gitignored — OneDrive is canon). 132 `.docx`, 23.3 MB: 22 Overviews + 22 Simple Guides + 88 templates.
 
@@ -59,7 +59,11 @@ The `about` section (`num` 0, the `/dashboard` landing) is unchanged and carries
 | `support` — Support | `support-focus-areas` | 5 | 16 |
 | **Total** | **4** | **22** | **88** |
 
-> **Slug + title rule:** the focus-area **title is read from inside the document**, never from the folder name. Four folders disagree with their documents (`3.5 Learn the Event` → *Learn from the Event*; `4.5 Learn from other Palestine House` → *Learn from Other Palestine Houses*; and two more), and the folder names carry typos (`Responsiblity`, `House-toHouse`, `Complet`). Slugs below are **provisional** — PP6b re-derives them from the extracted document titles and this table is corrected in the same PR if any differ.
+> **Slug + title rule:** the focus-area **title is read from inside the document**, never from the folder name — and the title **block may span two source lines** (3.6 does: *"Connect to the Wider Palestine"* / *"House Network"*), so a one-line read is wrong.
+>
+> ⚠️ **Corrected at the PP6b kickoff, 2026-08-15, by extracting all 22 documents.** The example this rule was written around was **backwards**: it claimed `3.5 Learn the Event` → *Learn from the Event*, but the document's own title line says **"Learn the Event"** and only the *filenames* say "Learn from the Event". **Owner's call, 2026-08-15: the document wins — the title is "Learn the Event"** (and it stays editable in the CMS afterwards; note the URL freezes at creation and does not follow a later rename, by design).
+>
+> **Five further titles differ from what this file first recorded**, all read from inside the documents: 1.4 *Build **a** Small Team* · 1.5 *Get Ready **To** Open* · 2.3 *Food **& Beverages*** · 2.6 *Monthly Check**-Up*** · 4.2 *Sponsorship **&** Fundraising*. The table below is corrected accordingly. The folder names also carry typos (`Responsiblity`, `House-toHouse`, `Complet`), which is why they are never the source. Slugs are derived by the CMS's own `slugify`, so `&` collapses like any other punctuation; PP6b step 6b-c re-derives all 22 programmatically and this table is corrected again in the same PR if any still differ.
 
 ---
 
@@ -74,8 +78,8 @@ The `about` section (`num` 0, the `/dashboard` landing) is unchanged and carries
 | 1.1 | Get Legally Ready | `get-legally-ready` | `legal-compliance-and-risk` | 2 — Palestine House Brand Guide · Palestine House Setup Checklist |
 | 1.2 | Plan the Money | `plan-the-money` | `business-model-and-revenue` | 5 — 12-Month Budget Template · Cash Flow Template · Opening Cost Checklist · Revenue Ideas · Startup Budget |
 | 1.3 | Find and Prepare the Space | `find-and-prepare-the-space` | `facility-operations` | 4 — Basic Furniture & Equipment List · Pre-Opening Venue Checklist · Venue Comparison Sheet · Venue Selection Checklist |
-| 1.4 | Build the Small Team | `build-the-small-team` | `org-structure-and-roles` | 5 — New Team Member Checklist · Role Description House Lead · Role Description Operations & Admin · Role Description Programming/Community · Simple Team Structure |
-| 1.5 | Get Ready to Open | `get-ready-to-open` | `launching-a-new-house` | 4 — 30-Day Opening Checklist · 90-Day Opening Checklist · Opening Day Run Sheet · Opening Week Checklist |
+| 1.4 | Build **a** Small Team ⚠️ | `build-a-small-team` | `org-structure-and-roles` | 5 — New Team Member Checklist · Role Description House Lead · Role Description Operations & Admin · Role Description Programming_Community · Simple Team Structure |
+| 1.5 | Get Ready **To** Open ⚠️ | `get-ready-to-open` | `launching-a-new-house` | 4 — 30-Day Opening Checklist · 90-Day Opening Checklist · Opening Day Run Sheet · Opening Week Checklist |
 
 ### Operate — 6 focus areas · 29 templates
 
@@ -83,10 +87,10 @@ The `about` section (`num` 0, the `/dashboard` landing) is unchanged and carries
 |---|---|---|---|---|
 | 2.1 | Money | `money` | `financial-operations-and-controls` | 5 — Cash Flow Sheet · Expense Form · Monthly Finance Summary · Simple Financial Policy · Supplier Payment Tracker |
 | 2.2 | Daily House Operations | `daily-house-operations` | `operating-model` | 6 — Cleaning Checklist · Daily Closing Checklist · Daily Opening Checklist · Incident Form · Maintenance Log · Weekly House Checklist |
-| 2.3 | Food and Beverage | `food-and-beverage` | `food-and-beverage-operations` | 6 — Daily F&B Sales Sheet · F&B Stock Sheet · Food Safety Checklist · Kitchen Opening and Closing Checklist · Menu Costing Sheet · Simple Menu Template |
+| 2.3 | Food **& Beverages** ⚠️ | `food-beverages` | `food-and-beverage-operations` | 6 — Daily F and B Sales Sheet · Food and Beverage Stock Sheet · Food Safety Checklist · Kitchen Opening and Closing Checklist · Menu Costing Sheet · Simple Menu Template |
 | 2.4 | Members and Visitors | `members-and-visitors` | `membership-model-and-benefits` | 5 — Membership Form · Membership Renewal Message · New Member Welcome Template · Simple Member List · Visitor Feedback Form |
 | 2.5 | Team | `team` | `hiring-onboarding-and-training` | 4 — Leave Request Form · Monthly Team Check-In Form · Simple Role and Responsibility Sheet · Weekly Staff Schedule |
-| 2.6 | Monthly Check Up | `monthly-check-up` | `reporting-kpis-and-audits` | 3 — Monthly Action List · One-Page Monthly House Report · Simple KPI Sheet |
+| 2.6 | Monthly Check**-Up** ⚠️ | `monthly-check-up` | `reporting-kpis-and-audits` | 3 — Monthly Action List · One-Page Monthly House Report · Simple KPI Sheet |
 
 ### Program — 6 focus areas · 23 templates
 
@@ -96,15 +100,15 @@ The `about` section (`num` 0, the `/dashboard` landing) is unchanged and carries
 | 3.2 | Plan an Event | `plan-an-event` | `event-production-sops` | 5 — Event Checklist · Event Feedback Form · Event Run Sheet · Guest List · Simple Event Budget |
 | 3.3 | Work with Artists and Speakers | `work-with-artists-and-speakers` | `aswatna-studio-collaboration` | 5 — Artist Hospitality Checklist · Artist Information Form · Artist Payment Form · Simple Artist Agreement · Simple Speaker Agreement |
 | 3.4 | Promote the Event | `promote-the-event` | `local-marketing-playbook` | 4 — Email Invitation Template · Event Invitation Template · Event Marketing Checklist · Social Media Post Template |
-| 3.5 | Learn from the Event | `learn-from-the-event` | `customer-service-and-recovery` | 2 — Audience Feedback Form · One-Page Event Review |
-| 3.6 | Connect to the Wider Palestine House Network | `connect-to-the-wider-palestine-house-network` | `global-campaigns` | 4 — Artist Request Form · Community Program Participation Form · House-to-House Collaboration Request · Programming Support Request |
+| 3.5 | Learn the Event ⚠️ | `learn-the-event` | `customer-service-and-recovery` | 2 — Audience Feedback Form · One-Page Event Review |
+| 3.6 | Connect to the Wider Palestine House Network *(title wraps two source lines)* | `connect-to-the-wider-palestine-house-network` | `global-campaigns` | 4 — Artist Request Form · Community Program Participation Form · House-toHouse Collaboration Request · Programming Support Request |
 
 ### Support — 5 focus areas · 16 templates
 
 | # | Focus area | Provisional slug | Photo reused from | Templates |
 |---|---|---|---|---|
 | 4.1 | Marketing | `marketing` | `brand-experience-standards` | 5 — Monthly Content Calendar · Newsletter Template · Photography Brief · Press Release Template · Simple Marketing Plan |
-| 4.2 | Sponsorship and Fundraising | `sponsorship-and-fundraising` | `sustainability-and-impact` | 5 — Grant Opportunity List · Simple Grant Application Template · Simple Partnership Agreement · Simple Sponsorship Proposal · Sponsor List Template |
+| 4.2 | Sponsorship **&** Fundraising ⚠️ | `sponsorship-fundraising` | `sustainability-and-impact` | 5 — Grant Opportunity List · Simple Grant Application Template · Simple Partnership Agreement · Simple Sponsorship Proposal · Sponsor List Template |
 | 4.3 | Partnerships | `partnerships` | `community-partnerships` | 3 — Partner List · Simple MOU · Simple Partnership Proposal |
 | 4.4 | Ask Community Support for Help | `ask-community-support-for-help` | `crisis-management` | 1 — Simple Support Request Form |
 | 4.5 | Learn from Other Palestine Houses | `learn-from-other-palestine-houses` | `continuous-improvement-and-knowledge-sharing` | 2 — Good Idea Sharing Template · Success Story Template |
@@ -126,9 +130,13 @@ Real messiness in the delivered folder, all verified — none of it is a problem
 
 | Trap | Detail |
 |---|---|
-| Templates folder has three names | `Template-Samples` ×5 · `Template` ×13 · `Templates` ×4 |
+| Templates folder has three names | `Template-Samples` ×5 · `Template` ×13 · `Templates` ×4 — **re-counted 2026-08-15, exact** |
 | `_V.1` suffix is inconsistent | present on 128 of 132 files, absent on all 4 files in folder 1.1 |
-| Folder name ≠ document title | 4 folders, e.g. `3.5 Learn the Event` → *Learn from the Event* |
+| Folder name ≠ document title | **6 folders, not 4** — 1.4, 1.5, 2.3, 2.6, 3.5, 4.2 (see §3; 3.5's correction was recorded backwards and is now fixed) |
+| **A title can span two source lines** ⚠️ | 3.6 renders as *"Connect to the Wider Palestine"* + *"House Network"*. Read the whole block between the section line and the `Overview` heading, never one line |
+| **Every document carries `<a id="…"></a>` anchors** 🔴 | **19–21 per document, all 132 — and ZERO of the 33 live guide bodies have any** (`select count(*) from elements where simple_guide_md like '%<a id=%'` = 0 on PROD, 2026-08-15). The ids are copy-paste residue: `get-legally-ready` heads *every* Overview, and `step-1.-register-our-local-entity` appears inside Monthly Check-Up. One sits **mid-line inside bold** (`__Palestine House__<a id="…"></a>: __Support __`), so a line-leading strip is not enough. They must be removed at ingest, and they are the reason §6 defect 1 is not a one-line fix |
+| **"Opening sentence" is not a split on `.!?`** ⚠️ | 2.6's first sentence contains `"How are we doing?"` — a naive splitter truncates it mid-quote |
+| **§4's template names are cleaned, the filenames are not** ⚠️ | delivered names carry `_V.1`, a `Palestine House ` prefix (1.2, ×5), `Daily F and B Sales Sheet` / `Food and Beverage Stock Sheet` (2.3), `Programming_Community` (1.4), `Responsiblity` (2.5), `House-toHouse` (3.6). Where a partner-visible template title comes from needs **one deliberate rule**, settled at PP6b step 6b-c. Folder 1.1's two filenames are already clean, so the pilot is unblocked |
 | Typos in paths | `Responsiblity` · `House-toHouse` · root folder `Complet` |
 | `&` in three paths | `Food & Beverage`, `Basic Furniture & Equipment List`, `Role Description Operations & Admin` |
 | Guide/Overview naming | ` - Simple Guide` vs ` Simple Guide` · `Overview` vs `_Overview_` |
@@ -136,13 +144,19 @@ Real messiness in the delivered folder, all verified — none of it is a problem
 
 **Rules:** read the title from inside the document · never from the folder name · never rewrite the owner's wording (`CLAUDE.md` — copy is verbatim).
 
+**Re-verified 2026-08-15 by extracting all 132 documents:** 22 focus areas · 88 templates · exactly one Overview and one Simple Guide each. Both totals hold.
+
 ---
 
 ## 6. Two content-shape defects to fix before ingest
 
 Both found by reading the real files against the real code, 2026-08-14:
 
-1. **The guide title prints twice.** `stripGuideCover` in `src/lib/workspace-v2/guide-cover.ts` was written against the current 33 files' cover banner. Run against *Get Legally Ready Simple Guide.docx*, **it does not fire** — "Palestine House: Set up" and "Get Legally Ready Simple Guide" would render above the reader's own heading. One-line fix, plus a regression test on a real new file.
+1. **The guide title prints twice.** `stripGuideCover` in `src/lib/workspace-v2/guide-cover.ts` was written against the current 33 files' cover banner. ⚠️ **Measured 2026-08-15 by running it over all 22 delivered guides: it fires on ZERO of them** — not just on 1.1, as first recorded — so "Palestine House: Set up" and "<Title> Simple Guide" would render above the reader's own heading on every focus area. ⚠️ **And it is not a one-line fix**, because there are two independent causes:
+   - the **`<a id="…"></a>` anchors** (§5): the function classifies a line by compacting it to letters and digits and subtracting known cover vocabulary, and an anchor's id survives that compaction as content, so the first line never looks like cover matter;
+   - the **section label**: the cover's first line is `Palestine House: <Section>`, and "Set up" / "Operate" / "Program" / "Support" are not in the cover vocabulary, so even with the anchors gone a residue remains.
+
+   Fix conservatively — this is the only code in the product that alters an owner-authored body — and regression-test on the **real** new openings, all four section variants plus 4.5's mid-line-anchor shape, keeping every existing PP4 case green (`scripts/verify-guide-cover.mts`).
 2. **Template `type` mapping.** The new templates must map onto the seven values the database allows (`form / script / log / report / approval / guide / booklet`). This field is **rendered nowhere**, so it is bookkeeping only — pick sensibly and move on.
 
 ---
@@ -151,8 +165,9 @@ Both found by reading the real files against the real code, 2026-08-14:
 
 | Item | Where it lands |
 |---|---|
-| The three prose "templates" — *Setup Checklist*, *Brand Guide*, *Opening Cost Checklist* — have no tables, no tick-boxes and no blanks. They read like guides, not forms. | Ship as delivered in the pilot; owner decides at PP6b step 7. **Do not silently re-file the owner's content.** |
+| The three prose "templates" — *Setup Checklist*, *Brand Guide*, *Opening Cost Checklist* — have no tables, no tick-boxes and no blanks. They read like guides, not forms. | Ship as delivered in the pilot; owner decides at PP6b step 6b-g. **Do not silently re-file the owner's content.** |
 | Folder 1.1 *Get Legally Ready* contains two templates that are neither legal nor specific to it. | Same — owner's call at the pilot. |
+| Where a partner-visible **template title** comes from — the filename (minus `_V.1`) or something inside the document. §4's names are cleaned; the filenames are not (§5). | **PP6b step 6b-c** settles it as one rule for all 88. 1.1's two filenames are already clean, so the pilot is unblocked. |
 | The public proof band still says "11 focus areas · 33 topics · 200+ checklist items · 297 templates · 120-day launch". After cutover those numbers describe nothing that exists. | **D-PP-a**, already parked. Public pages stay untouched until PP7, then reconciled in one go. |
-| Which database Vercel Preview points at is recorded nowhere. | **UNVERIFIED.** Resolve at PP6b step 0 — it decides whether the pilot is reviewed on TEST or landed in PROD as Draft. |
-| Supabase plan + Storage quota. | **UNVERIFIED**, and not blocking: 23.3 MB clears even the free tier by ~35×. |
+| ~~Which database Vercel Preview points at is recorded nowhere.~~ | ✅ **RESOLVED 2026-08-15 — it was recorded all along.** `PROJECT-STATUS.md` §6: non-production ref `sdszcralogcrujtyghig` (`palestine-house-test-database`), *"Preview + Development env vars point here."* **The pilot is built and reviewed on TEST, and PP6b touches production not at all.** |
+| Supabase plan + Storage quota. | **UNVERIFIED**, and not blocking: 23.3 MB clears even the free tier by ~35×. TEST currently holds 297 + 2 objects. |

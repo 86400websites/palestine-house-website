@@ -13,6 +13,17 @@
    of English comments. Tailwind scanned them and grew the stylesheet every
    visitor downloads. SQL is not markup either. */
 @source not "../../supabase";
+/* Third directory, same mechanism, third sprint running (PP6b). `scripts/` is
+   build tooling — extractors, loaders, verification harnesses — and emits no
+   markup at all, yet Tailwind scanned it and shipped real rules to every
+   visitor. This time it was not even prose: `path.relative(...)` produced
+   `.relative{position:relative}`, and the word "invisible" in a comment
+   produced `.invisible{visibility:hidden}`. Excluding the directory is right on
+   its own terms, not just as a workaround: nothing under scripts/ can ever
+   legitimately need a utility class.
+   Caught, as before, only by a rule-level diff of the built bundle against a
+   build of the sprint's base commit. */
+@source not "../../scripts";
 @import "./pages.css";
 @import "./v3.css";
 /* Workspace v2 (PP2) — fully scoped to `.pw-root`; imported last so it wins
