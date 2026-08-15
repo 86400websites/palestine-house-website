@@ -2,17 +2,17 @@
 
 | | |
 |---|---|
-| **Date built** | 2026-08-15 |
-| **Branch / PR** | `claude/sprint-pp6b-pilot-focus-area` (off `main` = `8fbff9d`) / PR pending |
+| **Date built** | 2026-08-15 · **owner signed off the same day** |
+| **Branch / PR** | `claude/sprint-pp6b-pilot-focus-area` (off `main` = `8fbff9d`), head `fbc6c31`, 15 commits |
 | **Goal** | Load one focus area end to end with the machinery that will do the other 21, and prove it as a real signed-in partner. **The owner's sign-off is the gate.** |
-| **Shape** | 8 steps (6b-a … 6b-h) + a guide-file addition + **an independent review round** · **TEST only · zero SQL · production untouched** |
-| **Totals** | 18 files · CSS **180,530 → 180,418** (−112 bytes, −2 rules, **0 added**) |
+| **Shape** | 8 steps (6b-a … 6b-h) + a guide-file addition + **two independent review rounds** · **TEST only · zero SQL · production untouched** |
+| **Totals** | 20 files · 15 commits · CSS **180,530 → 180,418** (−112 bytes, −2 rules, **0 added**) |
 
 ## Why this sprint exists
 
 PP6a made the platform able to hold the owner's real content and gave him a CMS to manage it, but moved nothing. PP6b is the cheapest possible place to find out that the pipeline, the content shapes or the CMS are wrong — before 22 focus areas, 88 templates and a destructive `0030` depend on them.
 
-It found six things wrong. Two were in the plan, three were in code that had already shipped, one was in this sprint's own work.
+It found sixteen things wrong — in the plan, in code that had already shipped, and in its own work. Two independent review rounds account for ten of them, and both returned BLOCKING.
 
 ## What shipped
 
@@ -34,7 +34,7 @@ It found six things wrong. Two were in the plan, three were in code that had alr
 
 **6b-f — the photo picker**, replacing a text box whose placeholder was a file path. If a row's current photograph is not in the list it is added to the list, so opening a focus area can never silently change its picture.
 
-**6b-g — the owner's walkthrough.** His, not mine. Outstanding.
+**6b-g — the owner's walkthrough. PASSED 2026-08-15.** He drove the CMS unaided, published the pilot himself, downloaded the guide file, and answered the five questions (**D-PP-q**).
 
 **6b-h — the exit gate**, which found the CSS regression below.
 
@@ -116,9 +116,35 @@ The same finding surfaced two more defects in that file. **It was not idempotent
 
 **The honest summary: three of my seven claims were wrong or overstated, and the one that mattered most was the one I was most confident about.** C1 was asserted on the strength of a suite I had written myself.
 
+## The second review round — BLOCKING again, right again
+
+Pinned to `e49d243..2d9c2f3`. **1 Critical, 1 High, 4 Medium.** Every one reproduced here before being fixed.
+
+🔴 **Two more ways the cover strip ate structure the owner wrote.** The decoration patterns (`Section n`, `n Steps`) still *licensed* removal on their own, so a bare `## Section 3` heading sitting under a banner was deleted. They now apply only on a line that already matched a banner phrase — which is the only way they ever appear in the real covers. Separately, two consecutive Markdown headings whose text concatenates to the topic title were consumed by the wrapped-title path; headings are structure, the real wrapped covers use bold, so that path now refuses heading lines.
+
+🔴 **A template code is not a stable identity — the sharpest finding of the sprint.** Codes are `T01…Tnn` assigned by *alphabetical filename order*, so renaming `Palestine House Setup Checklist.docx` to `A Palestine House Setup Checklist.docx` promotes it to T01 and demotes the Brand Guide to T02. Matching on code alone would then attach **each file's name to the other's bytes** — both downloads silently wrong, no error anywhere. The first round had moved matching *to* code precisely to escape the title-rename hazard; the second round showed that code was no better. There is no stable identity available in the data, so the fix is not a cleverer match: a **swap is detected exactly and refuses the run**, in a preflight before anything is written, and `--replace-files` becomes the deliberate way to push edited bytes through the CMS's own replace lifecycle.
+
+🟠 **Still not idempotent** for a prefix longer than the removal cap — it committed a partial strip that a second pass finished. It now returns the document untouched, which is also the conservative answer. 🟠 **`--allow-live` was checked after `ensurePhoto` and `ensureGroup` had already written**; a command that advertises refusal must decide before it touches anything, so both guards moved to a preflight. 🟠 **Per-area counts are not a manifest** — swapping a template between two areas that both expect five passed the document counts, the number set, the per-area counts *and* the total of 88 — so `docs/content-v2-manifest.json` now pins filenames per focus area. 🟠 **`etc.` routinely ends a sentence**, and treating every abbreviation as non-terminal swallowed the following sentence into the card summary while satisfying every assert.
+
+Also fixed in passing, from the review's "verification" notes: title keys now sort longest-first, so the result no longer depends on the order the caller passed them in.
+
+**⚠️ `e49d243..fbc6c31` is unreviewed.** The owner declined a third round on 2026-08-15 and accepted the risk. Recorded here because the range includes both Critical fixes and the guide-file feature.
+
+## The owner's sign-off — 6b-g
+
+He drove `/admin/content/focus-areas` unaided, published Focus Area 1.1 from the CMS, downloaded the guide file, and answered the five questions. Recorded as **D-PP-q**; all three build decisions are implemented in this branch.
+
+1. **Summary length → raise the counter to 120.** The card reads fine at 104; the guidance was wrong, not the content. No summary edited.
+2. **Guide hierarchy → promote the step lines.** Now `##`, adding no words. All 22 land at h2 in the rendered output — 20 directly, 3.3 and 3.4 via their `#` which the sanitiser demotes.
+3. **Guide files → all 22, `.docx`.** *"It's you who will upload anyway"* — so no export work falls on him.
+4. **Photo → keep the D-PP-o mapping.**
+5. **The three prose "templates" → ship in the grid as delivered.**
+
+And the answer that gates PP6c: **the CMS is simple enough to run it against.**
+
 ## Checks & results
 
-typecheck ✅ · lint ✅ · build ✅ · guide-cover regression **32/32** ✅ (all 15 PP4 cases still green, plus 3 from the review)
+typecheck ✅ · lint ✅ · build ✅ · guide-cover regression **38/38** ✅ (all 15 PP4 cases still green, plus 3 from the first review round and 5 from the second)
 
 **The A/B proof for the cover strip**, now a committed harness — `scripts/verify-guide-cover-live.mts --baseline <ref>`, which runs the pre-change two-argument caller beside the current three-argument one. Against `8fbff9d`: **byte-identical on all 34 live bodies**, so nothing partners already read changed. Over the **22 delivered guides**: 0 → 22 firing, none still showing cover matter, and every one idempotent. (It fires on 33 of the 34 live bodies: the pilot's stored body has no cover, because the extractor removed it at ingest.)
 
@@ -145,7 +171,9 @@ typecheck ✅ · lint ✅ · build ✅ · guide-cover regression **32/32** ✅ (
 
 ## Deviations & learnings
 
-**Ten defects. Not one was found by reading code.** Six by running it, four by an independent reviewer running it differently.
+**Sixteen defects. Not one was found by reading code.** Six by running it, ten across two independent review rounds.
+
+**The most useful thing this sprint learned is what the two rounds did to one function.** Round 1 found that matching template files by *title* was unsafe, so matching moved to the *code*. Round 2 found that the code was no safer, for a different reason. The lesson is not "use a better key" — it is that **the data contains no stable identity at all**, and the honest response to that is to detect the ambiguity and stop, not to pick the least-bad key and hope. The same shape appeared in the cover strip: round 1 fixed the section label, round 2 found two more ways the same block deleted owner structure. A function that edits an author's words attracts this class of defect indefinitely, and each round found what the previous one's fix had not considered.
 
 **The one worth carrying forward: a test that exercises the safe variant of a risk reads as coverage and is not.** The suite had a case named "a heading naming ANOTHER section survives — the label is scoped", and it passed. The dangerous case — a heading naming the topic's *own* section — was never written, because I wrote the test from the same mental model that produced the bug. That is the argument for an independent reviewer in one sentence: it is not that they look harder, it is that they do not share the model.
 
@@ -178,6 +206,6 @@ typecheck ✅ · lint ✅ · build ✅ · guide-cover regression **32/32** ✅ (
 | 2 | `content-migration-map.md` §4's template names are a cleaned summary; the spec is the source. Re-sync §4 from the spec. | PP6c |
 | 3 | `a1` on TEST carries 329 carriage returns from the old CMS. `0030` deletes the row. | PP6c, automatically |
 | 4 | The pilot has guide **text** but no guide **file**, so the card's "Download Now" shows the coming-soon toast (`pw-guide-download.tsx` handles this correctly — nothing is broken). Decide whether the new guides get a downloadable file at all, or whether Read Now is the whole offer. | PP6b sign-off |
-| 5 | ~~An independent review is not booked.~~ **DONE 2026-08-15 — verdict BLOCKING, 1 Critical + 1 High + 2 Medium, all four fixed on-branch and reproduced before and after.** A re-review of the fix commit (`4ce4b5e`) is optional but cheap. | Done |
+| 5 | ~~An independent review is not booked.~~ **TWO ROUNDS DONE 2026-08-15 — both BLOCKING, both right on every count; 10 findings, all fixed in `4ce4b5e` and `fbc6c31`.** ⚠️ `e49d243..fbc6c31` is unreviewed — **the owner declined a third round and accepted the risk.** | Owner's call, closed |
 | 6 | The review was pinned to `e49d243` and does not cover the guide-file commit (`1bb6a46`). Its loader findings were fixed across that code too, but the guide-file path itself is unreviewed. | Re-review, or PP6c kickoff |
 | 7 | The pilot is currently **Live** on TEST (the owner published it during his walkthrough). PP6c's loader now refuses to touch a Live row without `--allow-live` — expect that on the first rollout run. | PP6c kickoff |
