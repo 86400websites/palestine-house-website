@@ -30,6 +30,32 @@
  * exactly the kind of thing that must go through the audited path, and a raw
  * UPDATE would bypass whatever that RPC does now or grows later.
  *
+ * THE BREAK-GLASS ROLLBACK, EXECUTED RATHER THAN DOCUMENTED
+ * ---------------------------------------------------------
+ * If the app, the CMS or this script is unavailable, one SQL statement takes
+ * all 22 back to Draft:
+ *
+ *     update public.platform_topics t
+ *     set published = false
+ *     from public.platform_groups g
+ *     where g.id = t.group_id
+ *       and g.slug like '%-focus-areas';
+ *
+ * Verified on TEST at PP6c step 6c-f — actually run, not merely written down,
+ * because a rollback nobody has executed is a hypothesis and this sprint
+ * deletes production content on the strength of one. Result: 55 live -> 33 live
+ * / 22 draft, the legacy 33 untouched, and **all 409 resource rows and 407
+ * Storage objects still present** — the cutover hides content, it never
+ * destroys it.
+ *
+ * ⚠️ The `like '%-focus-areas'` predicate was checked before being trusted: it
+ * matches exactly the four new groups and **no legacy group** (the legacy ones
+ * are `setup-toolkit`, `support-toolkit`, `run-the-house-day-to-day`, and so
+ * on). Once `0030` has removed the legacy groups the predicate matches
+ * everything, which is then still the correct meaning — roll the whole new
+ * platform back — but it is worth knowing that its selectivity comes from a
+ * naming convention rather than from a flag.
+ *
  * TEST only — the host is asserted against the known TEST project ref before a
  * single request. Production is cut over by the owner, deliberately, by hand.
  */
