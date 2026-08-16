@@ -685,19 +685,42 @@ async function uploadFiles(
 /* D-PP-o: the photograph is COPIED to the new slug, never renamed, so the live
    33 keep rendering until 0030 removes them. Committed to the repo — it is a
    static asset, not data. */
+/* THE TARGET IS CHECKED FIRST, AND THAT ORDER IS LOAD-BEARING SINCE PP7.
+   This used to read the SOURCE before looking at the target — which was fine
+   while both existed, and became a hard failure the moment `0033`'s companion
+   cleanup deleted the 33 legacy photographs (7-k). All 22 targets are committed,
+   so nothing needed copying; the loader crashed on focus area 1.1 anyway,
+   reading a source it did not need. Caught while writing the production runbook,
+   which is a better place to find it than during the production run. */
 async function ensurePhoto(fa: FocusAreaEntry): Promise<void> {
   const from = path.join(TOPIC_PHOTO_DIR, fa.photo.source);
   const to = path.join(TOPIC_PHOTO_DIR, fa.photo.target);
-  const source = await fs.readFile(from);
-  try {
-    const current = await fs.readFile(to);
+
+  const current = await fs.readFile(to).catch(() => null);
+  const source = await fs.readFile(from).catch(() => null);
+
+  if (current) {
+    /* D-PP-o's copy is a one-time migration aid. Once the target is committed
+       the source has no further job, and at PP7 it was deleted along with the
+       other 32 retired photographs. */
+    if (!source) {
+      step(`photo ${fa.photo.target} present (source retired at PP7)`);
+      return;
+    }
     if (current.equals(source)) {
       step(`photo ${fa.photo.target} already in place`);
       return;
     }
-  } catch {
-    /* not there yet */
   }
+
+  if (!source) {
+    throw new Error(
+      `photo "${fa.photo.target}" is missing from ${path.relative(ROOT, TOPIC_PHOTO_DIR)} and its ` +
+        `source "${fa.photo.source}" no longer exists — the 33 legacy photographs were deleted at ` +
+        `PP7 step 7-k. Restore the target from git rather than re-deriving it.`,
+    );
+  }
+
   if (DRY_RUN) {
     step(`WOULD copy photo ${fa.photo.source} -> ${fa.photo.target}`);
     return;
