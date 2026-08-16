@@ -167,3 +167,59 @@ paraphrasing one sentence.
 the 13 steps. Nine verifier scripts green. Path guard clean: **no change to
 middleware, `next.config.ts`, any API route, env handling or CI.** `.env.local`
 never staged; no secret in the diff.
+
+---
+
+## Round 4 (same day) — BLOCKING again, fixed again, and the rehearsal ran
+
+The independent review of the PP7 branch returned **BLOCKING: 5 blocking + 3
+medium**. The worst was fully deserved: **the production runbook pointed at
+TEST-only tools** — `cutover.ts`, `delete-297-objects.ts` and
+`restore-297-objects.ts` all hard-refused production while the runbook told the
+owner to run them at steps 5 and 8. The sprint that existed to make the
+destructive tooling honest had documented a procedure that could not run.
+
+| # | fix |
+|---|---|
+| H1 | The whole target mechanism (PROD_* by name, exact host, typed ref confirmation, non-TTY refusal) lives **once** in `scripts/lib/connect.ts`; all four mutating scripts share it; the loader's private copy is deleted. |
+| H2 | `0032` gains `admin_referenced_paths_among(text[])`; the deleter refuses if ANY candidate is referenced by a surviving row. **Proven live**: a row repointed at `a1/…` was named in the refusal. |
+| H3 | The `0030` manifest pins per-area **guide-body md5** and **template-set md5** (generated from the spec, verified against the corpus first), and asserts every surviving object exists in `storage.objects`. The guard refused a three-way decoy naming all three defects. |
+| H4 | `0030` takes EXCLUSIVE locks on all four tables as its first statements, held to COMMIT. |
+| H5 | Replace-compensation deletes the fresh upload only on a definitive PG errcode; ambiguous transport failures keep both objects with recovery instructions. |
+| M1 | The deleter accepts any verified subset of the archived corpus; zero remaining = success; more than archived still refuses. |
+| M2 | `0033.down` recreates the seven retired RPCs verbatim (one had been silently dropped by a two-space `grant  execute` defeating the extraction — caught by grepping for all seven names, not trusting the count). |
+| M3 | `0033` asserts the three tables are empty before dropping them. |
+
+Also found while editing: **RAISE format strings cannot express adjacent
+placeholders** (`%%` is always a literal), so the guard's own refusal message
+would have errored with "too many parameters" instead of the diagnosis — on
+every version since 7-d, and never reached by any test because the tests
+exercised the logic standalone, not the DO block.
+
+### The dress rehearsal — run by the engine, on TEST, in the production order
+
+1. `0033`'s **down**-migration — first ever execution. Columns, tables, policies
+   and all seven RPCs back.
+2. **The full 1.68 MB `0030` rollback as ONE server-side transaction** — staged
+   into a scratch table through the admin session (1,759,410 chars), assembled
+   and `EXECUTE`d. Legacy prose restored **byte-perfect**: 1,577,160 code
+   points, exactly the documented 3-emoji UTF-16 delta.
+3. `restore-297-objects.ts` — 297 objects at exact keys, 110 → 407,
+   **`broken_downloads = 0`**, both platforms live. The perfect rollback state.
+4. The hardened `0030` **refused a three-way decoy** (tampered body, retitled
+   template, repointed path — all three named), then **passed and executed**
+   against the authentic legacy fixture.
+5. The deleter **refused** with a surviving row pointing at a legacy key (H2
+   live), then ran clean: 407 → 110.
+6. `0033` re-applied with its new guards. **TEST finished byte-identical to its
+   pre-rehearsal state** — guide-corpus digest `8c7d4f37…` unchanged.
+
+The one caveat, recorded in `ROLLBACK-RUNBOOK.md`: through the MCP channel the
+1.68 MB file ran without its outer `begin;`/`commit;` (the DO block supplied the
+transaction). In the SQL Editor it runs as written. The wrapper line is the only
+thing not exercised.
+
+**What this changes about the owner's run:** every step of
+`PRODUCTION-CUTOVER-RUNBOOK.md`, including the rollback path, has now been
+executed at least once. The TEST rehearsal that was previously owed by the owner
+is done.

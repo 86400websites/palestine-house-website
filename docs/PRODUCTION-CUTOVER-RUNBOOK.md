@@ -1,11 +1,23 @@
 # Production cutover runbook — PP7
 
 > **Every step here is run by the owner.** This engine writes to production
-> through no channel: the loader refuses `--target prod` without a typed
-> confirmation at a real terminal, migrations are applied by hand in the SQL
-> Editor, and the Supabase MCP that Claude can reach is read-only on production.
+> through no channel: every mutating script refuses `--target prod` without a
+> typed confirmation at a real terminal, migrations are applied by hand in the
+> SQL Editor, and the Supabase MCP that Claude can reach is read-only on
+> production.
 >
 > Undoing any of it: [`ROLLBACK-RUNBOOK.md`](./ROLLBACK-RUNBOOK.md).
+>
+> ✅ **THIS ENTIRE SEQUENCE WAS REHEARSED END TO END ON TEST (2026-08-16, review
+> round 4).** TEST was rolled all the way back to the legacy platform — `0033`'s
+> down-migration, then the full 1.68 MB `0030` rollback executed as ONE
+> transaction, then all 297 objects restored at their exact keys, ending at
+> `broken_downloads = 0` with both platforms live — and then brought forward
+> again through the hardened `0030` (whose guard first refused a three-way decoy:
+> a tampered guide body, a retitled template, a repointed storage path), the
+> object deletion (whose new preflight refused while a surviving row pointed at a
+> legacy key), and `0033`. TEST finished byte-identical to where it started.
+> Every step below has been executed at least once, in this order.
 
 ---
 
@@ -113,15 +125,15 @@ is still 33 — partners see exactly what they saw yesterday.
 ## 5. The cutover
 
 ```bash
-pnpm exec tsx scripts/cutover.ts --to live --dry-run
-pnpm exec tsx scripts/cutover.ts --to live
+pnpm exec tsx scripts/cutover.ts --to live --target prod --dry-run
+pnpm exec tsx scripts/cutover.ts --to live --target prod
 ```
 
 One RPC call. All 22 flip together or none do — a failure cannot leave half the
 platform live. It resolves each focus area on **code + slug + section together**
 and refuses unless all 22 resolve.
 
-Reverse at any time, same shape: `pnpm exec tsx scripts/cutover.ts --to draft`.
+Reverse at any time, same shape: `pnpm exec tsx scripts/cutover.ts --to draft --target prod`.
 
 Break-glass, if the script or the app is unavailable:
 
@@ -154,8 +166,8 @@ booklets kept · 0 orphans`.
 ## 8. Delete the legacy bytes
 
 ```bash
-pnpm exec tsx scripts/delete-297-objects.ts --dry-run
-pnpm exec tsx scripts/delete-297-objects.ts
+pnpm exec tsx scripts/delete-297-objects.ts --target prod --dry-run
+pnpm exec tsx scripts/delete-297-objects.ts --target prod
 ```
 
 ⚠️ **This is the one action no `.down.sql` can undo.** It re-verifies the cold
@@ -207,7 +219,7 @@ in either column.
 | when | what to do |
 |---|---|
 | before step 5 | Nothing is visible. Fix and re-run — the loader is idempotent. |
-| after step 5, before step 7 | `pnpm exec tsx scripts/cutover.ts --to draft`. The legacy platform is untouched and partners are back where they were. |
+| after step 5, before step 7 | `pnpm exec tsx scripts/cutover.ts --to draft --target prod`. The legacy platform is untouched and partners are back where they were. |
 | after step 7 | [`ROLLBACK-RUNBOOK.md`](./ROLLBACK-RUNBOOK.md) — bytes first, then the 1.68 MB `.down.sql`. |
 | after step 8 | Same, and the 297 files come from the cold archive at their exact keys. |
 | after step 10 | `0030`'s rollback no longer runs. This is the documented point of no return. |

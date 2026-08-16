@@ -200,26 +200,23 @@ trust.
 | The deletion refuses without the migration | Its new database preflight confirms `0030` has committed before it removes a single object. |
 | The down-migration is structurally sound | 17/17 checks, and the validator was itself tested against five deliberately corrupted copies — missing `on conflict`, an unterminated dollar-quote, an arity mismatch, broken FK order, a removed `commit` — and caught all five for the right reason. |
 
-### ❌ NOT yet executed
+### ✅ EXECUTED END TO END — review round 4, 2026-08-16, on TEST
 
-**The 1.68 MB `0030_content_v2_cutover.down.sql` has still never been run end to
-end.** It cannot be, from here. Its 373 inserts are validated offline and 10 of
-them (the group inserts) were executed live against the TEST schema at PP6c,
-round-tripping non-ASCII values and proving the on-conflict guard idempotent —
-but the file as a whole remains a hypothesis until somebody pastes it into the
-SQL Editor.
+The gap this section used to record is closed. The full cycle was run, in the
+production order, with these results:
 
-**Owner action, and the last blocking item on the rollback story.** The rehearsal
-is safe and cheap on TEST, and TEST is currently in the post-`0030` state, which
-is exactly the right starting point:
+| step | result |
+|---|---|
+| `0033`'s down-migration | executed (first ever run) — columns, tables, policies and all seven retired RPCs restored |
+| **the full 1.68 MB `0030` rollback** | **executed as ONE server-side transaction** (staged into a scratch table, assembled and `EXECUTE`d — 1,759,410 chars). 33 elements · 10 groups · 33 topics · 297 resources restored; legacy prose measured at **1,577,160 code points, exactly the documented 3-emoji delta** from the generator's UTF-16 count, i.e. byte-perfect |
+| `restore-297-objects.ts` | 297 objects at their exact keys (110 → 407), every one read back byte-identical; **`broken_downloads = 0`**, both platforms live |
+| the hardened `0030` guard, refused | a three-way decoy — tampered guide body (`2.1`), retitled template (`3.2`), repointed storage path (`1.2`) — refused with **all three named**, rolled back |
+| the hardened `0030`, applied | passed against the authentic legacy fixture: locks → guard (identity + md5s + storage existence) → deletes → post-conditions → pre-commit re-check |
+| `delete-297-objects.ts`, refused | with a surviving row repointed at `a1/…` — the new `admin_referenced_paths_among` preflight named the key and refused |
+| `delete-297-objects.ts`, run | 407 → 110, 0 legacy remaining, archive still valid |
+| `0033` re-applied | with its new emptiness guard; TEST finished **byte-identical** to its pre-rehearsal state (guide-corpus digest `8c7d4f37…`) |
 
-1. `pnpm exec tsx scripts/restore-297-objects.ts` — bytes back (110 → 407).
-2. Paste the `.down.sql` into the **TEST** SQL Editor and run it.
-3. Run the Step 4 query. Expect 33 legacy elements, 10 legacy groups, 0
-   `broken_downloads`.
-4. Then put TEST back: re-apply `0030_content_v2_cutover.up.sql` (its hardened
-   guard should pass), then `pnpm exec tsx scripts/delete-297-objects.ts`.
-
-Step 4 doubles as the end-to-end proof of the **hardened `0030` guard** against a
-database that genuinely still holds the legacy platform — the one fixture that
-cannot be constructed any other way.
+One caveat, stated precisely: through the MCP channel the 1.68 MB file ran as a
+single `EXECUTE` of its statements *without* its outer `begin;`/`commit;` (the
+DO block provided the transaction). In the SQL Editor the file runs as written.
+Both are one transaction; the wrapper itself is the only line not exercised.

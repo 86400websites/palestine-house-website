@@ -413,6 +413,40 @@ grant execute on function public.admin_delete_academy_module(uuid) to authentica
 
 
 
+/* This one was silently MISSING from the first version of this block: its
+   source grant line in 0025 reads `grant  execute` (two spaces), the extraction
+   searched for one, and an unmatched index sliced an empty string. Caught by
+   grepping the output for all seven names rather than trusting the count. */
+create or replace function public.member_programming_sessions()
+returns table (
+  id            uuid,
+  title         text,
+  summary       text,
+  mode          text,
+  status        text,
+  venue         text,
+  stream_url    text,
+  recording_url text,
+  starts_at     timestamptz,
+  cover_path    text,
+  is_mine       boolean
+)
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select s.id, s.title, s.summary, s.mode, s.status, s.venue,
+         s.stream_url, s.recording_url, s.starts_at, s.cover_path,
+         (s.created_by = (select auth.uid())) as is_mine
+  from public.programming_sessions s
+  where public.is_approved()          -- pending/revoked callers: zero rows
+  order by s.starts_at desc nulls last;
+$$;
+
+revoke execute on function public.member_programming_sessions() from public, anon;
+grant  execute on function public.member_programming_sessions() to authenticated;
+
 create or replace function public.publish_programming_session(
   p_title       text,
   p_status      text,
