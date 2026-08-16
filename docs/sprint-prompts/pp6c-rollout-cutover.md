@@ -87,11 +87,13 @@ resources · 110 objects · 0 orphans**, 8/8 verification checks, partner path
    .group_id` is **ON DELETE RESTRICT**. Hence resources → topics → groups →
    elements.
 
-5. **The down-migration cannot be committed.** D-PP-k requires the 33 guide bodies
-   as literal inserts, making it **1.75 MB of approval-gated prose** — and this
-   repository is public. Committing it would publish the private corpus in one
-   commit and break the S7 Step 7 invariant. Gitignored, regenerable in one
-   command, documented in `0030_content_v2_cutover.down.README.md`.
+5. ~~**The down-migration cannot be committed.**~~ **SUPERSEDED the same day.**
+   It was withheld because it is 1.75 MB of what this project treated as
+   approval-gated prose in a public repo. The review then found the same corpus
+   had been public since PP6b via `docs/content-v2-spec.json`, the owner
+   **declassified** it, and the file is now **committed** — which also closes the
+   review's separate blocking finding that a rollback existing only as a mutable
+   gitignored local file is not operationally recoverable.
 
 ## Checks & results
 
@@ -135,7 +137,7 @@ asked for.
 
 | # | Item |
 |---|---|
-| 1 | **Apply to PRODUCTION, in this exact order:** preflight (`0030_verify_PROD_safe_readonly.sql`) → rollout → `backup-297-objects` → `delete-297-objects` → `0030_..._up.sql` → postflight. The order is not negotiable: backup before delete, objects before rows. |
+| 1 | ⛔ **DO NOT APPLY TO PRODUCTION YET.** The review returned BLOCKING on the destructive tooling and **PP7 must land first**. In particular it refuted the objects-before-rows order recorded here: running the object deletion before the guarded migration can leave 297 live rows pointing at files that no longer exist, whereas orphaned bytes are inert and retryable. PP7 flips the order to rows-first and adds a database preflight to the deletion script. |
 | 2 | **Rehearse the 1.75 MB down-migration once in the SQL Editor.** It has never been executed end to end — no channel in the build environment can push that much SQL. Its 373 inserts are validated and 10 were run live, but a rollback that has never been run is a hypothesis, and this sprint deleted content on the strength of it. |
 | 3 | **`--target prod` (D-PP-r) is designed but NOT built.** PP6c loaded content to TEST only. Production still needs its 22 focus areas and 110 files. |
 | 4 | **PP7 must rewrite the public focus-area map, not just the proof numbers.** See below. |
