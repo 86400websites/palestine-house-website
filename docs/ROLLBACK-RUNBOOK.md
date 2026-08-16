@@ -26,6 +26,31 @@ healthy and hands every partner a broken download. **Both halves, always.**
 
 ---
 
+## 0. Migration `0033` ends this rollback. Read before applying it.
+
+`0030_content_v2_cutover.down.sql` restores the 33 legacy elements, and each of
+its inserts names **`overview_md`** and **`watch_out_for_md`** by column.
+Migration **`0033` drops both columns** — so the moment `0033` is applied, the
+file on this page will no longer run.
+
+That is deliberate and it is the point of no return:
+
+```
+0030  ->  delete-297-objects  ->  verify  ->  live for a while  ->  0033
+                                                                    ^
+                                          after this, no rollback of 0030
+```
+
+`0033` will refuse to run while the legacy platform is still present, and refuse
+again if any element still holds content in either column — so it cannot destroy
+the owner's prose by being run early or out of order (production currently holds
+**947,140 characters** across those two columns; TEST, post-`0030`, holds none).
+But nothing can protect you from applying it deliberately and changing your mind
+next week. **Leave `0033` until the new platform has been live long enough that
+rolling `0030` back is not a plan you would consider.**
+
+---
+
 ## 1. The archive is the single point of failure
 
 `docs/source-assets/_archive-297-templates/` is the **only copy** of 297 files.
