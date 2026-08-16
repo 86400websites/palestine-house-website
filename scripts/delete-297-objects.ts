@@ -5,8 +5,8 @@
  *   pnpm exec tsx scripts/delete-297-objects.ts
  *
  * Removes the 297 legacy template objects from the private `resources` bucket,
- * through the Storage API, immediately BEFORE migration 0030 deletes the rows
- * that name them.
+ * through the Storage API, immediately AFTER migration 0030 has deleted the rows
+ * that named them.
  *
  * WHY NOT IN THE MIGRATION
  * ------------------------
@@ -17,24 +17,61 @@
  * strand 5.3 MB of bytes in the bucket, and report success — the worst kind of
  * failure, because the migration would look like it had worked.
  *
- * WHY BEFORE THE MIGRATION AND NOT AFTER
- * --------------------------------------
- * The storage paths live in `public.resources`, and 0030 deletes those rows. Run
- * afterwards, this script would have nothing to work from and the 297 files
- * would be unreachable AND undeleted. Objects first, rows second.
+ * WHY AFTER THE MIGRATION AND NOT BEFORE — REVERSED AT PP7
+ * --------------------------------------------------------
+ * PP6c ran this FIRST, reasoning that "the storage paths live in
+ * `public.resources`, and 0030 deletes those rows, so afterwards this script
+ * would have nothing to work from."
  *
- * THE INTERLOCK
- * -------------
- * This is the one action in PP6c that no `.down.sql` can undo, so it refuses to
- * start until the cold backup is re-verified from disk, here, now — not trusted
- * because a previous run said so:
+ * That reason was false, and one grep at PP7's kickoff showed it: **this script
+ * has never read `public.resources`.** It derives the delete set from the
+ * Storage listing and the 22 new focus-area slugs in the spec — every object
+ * whose top-level folder is not one of the 22. Emptying the table takes nothing
+ * away from it.
  *
- *   297 files · 5,320,962 bytes · md5(name|md5|size, sorted) =
- *   6fde792718130d12071b69459f9d70ab
+ * With the stated reason gone, the independent review's argument decides, and it
+ * is about which half-finished state you would rather be left in:
  *
- * and it additionally requires that every single object it is about to delete is
- * present in that archive BY NAME AND BY CONTENT HASH. An object with no verified
- * copy on disk stops the run.
+ *   objects first, then the migration fails  ->  297 LIVE rows pointing at files
+ *                                                that no longer exist. Partners
+ *                                                get broken downloads and no
+ *                                                retry repairs it.
+ *
+ *   rows first, then this script fails       ->  297 unreachable files costing
+ *                                                5.3 MB. Inert, invisible, and
+ *                                                the fix is to run it again.
+ *
+ * One is user-visible and unrecoverable; the other is untidy. Hence rows first.
+ *
+ * THE TWO INTERLOCKS
+ * ------------------
+ * This is the one action in the whole series that no `.down.sql` can undo, so it
+ * refuses to start until BOTH hold:
+ *
+ * 1. THE COLD BACKUP IS INTACT, re-verified from the bytes on disk here and now —
+ *    not trusted because a previous run said so:
+ *      297 files · 5,320,962 bytes · md5(name|md5|size, sorted) = 6fde7927…
+ *    and every single object it is about to delete must be present in that
+ *    archive BY NAME AND BY CONTENT HASH.
+ *
+ * 2. **0030 HAS ACTUALLY COMMITTED** (new at PP7 — the script previously made no
+ *    database call whatsoever, so it would happily delete 297 files out from
+ *    under 297 live rows). Checked through the CMS's own admin RPCs:
+ *      - not one legacy focus area remains (no `element_code` outside 1.1…4.5);
+ *      - exactly the 22 spec focus areas are present;
+ *      - they carry exactly 110 resource rows (88 templates + 22 guides), so the
+ *        table holds the new content and nothing else.
+ *    Any of those failing means the migration has not run, or has not run fully,
+ *    and there is no safe object to delete.
+ *
+ * ⚠️ WHY THE PREFLIGHT COUNTS ROWS RATHER THAN COMPARING STORAGE PATHS. The
+ * exact check — "no surviving row references any object I am about to delete" —
+ * needs every surviving row's `storage_path`, and no admin RPC exposes one:
+ * D-PP-i keeps paths off admin surfaces deliberately. The only RPC that returns
+ * a path, `get_resource_download`, resolves nothing for an UNPUBLISHED topic, so
+ * building the check on it would silently miss every Draft row and fail OPEN on
+ * the one step that cannot be retried. Counting through the admin RPCs sees
+ * Draft and Live alike, so that is what this does.
  *
  * TEST only. Production is done by the owner, by hand, deliberately.
  */
@@ -45,6 +82,11 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
 import { ARCHIVE_REL, EXPECTED_COUNT, checkArchive, printChecks, readArchive } from "./lib/archive";
+import {
+  type PreflightArea as SpecArea,
+  type PreflightTopic as TopicRow,
+  checkMigrationHasRun,
+} from "./lib/preflight";
 
 const ROOT = process.cwd();
 const ARCHIVE = path.join(ROOT, ARCHIVE_REL);
@@ -55,6 +97,7 @@ const BUCKET = "resources";
 /* The Storage API removes at most 1000 keys per call; 297 fits, but the batch
    is explicit rather than implicit so a future larger corpus fails visibly. */
 const REMOVE_LIMIT = 1000;
+
 
 /* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
 const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"] });
@@ -133,16 +176,56 @@ async function listAll(db: SupabaseClient, prefix = ""): Promise<{ name: string;
   return out;
 }
 
+/**
+ * INTERLOCK 2 — has `0030` actually committed?
+ *
+ * Before PP7 this script made no database call at all, which is what made the
+ * old ordering unsafe in both directions: nothing stopped it deleting 297 files
+ * out from under 297 live rows.
+ *
+ * Read through `admin_list_platform_topics` and `admin_list_resource_files`
+ * because they are the CMS's own reads and they see Draft as well as Live. A
+ * check that cannot see a Draft row would fail open exactly where this one must
+ * not.
+ */
+async function assertMigrationHasRun(db: SupabaseClient, expected: SpecArea[]): Promise<void> {
+  const { data, error } = await db.rpc("admin_list_platform_topics");
+  if (error) throw new Error(`admin_list_platform_topics: ${error.message}`);
+  const topics = (data as TopicRow[] | null) ?? [];
+
+  /* Counted before the shape is judged, so the error can say which is wrong. */
+  let rows = 0;
+  for (const t of topics) {
+    const { data: files, error: fErr } = await db.rpc("admin_list_resource_files", {
+      p_element_id: t.element_id,
+    });
+    if (fErr) throw new Error(`admin_list_resource_files(${t.slug}): ${fErr.message}`);
+    rows += ((files as unknown[] | null) ?? []).length;
+  }
+
+  checkMigrationHasRun(topics, rows, expected);
+
+  console.log(
+    `0030 confirmed applied: 0 legacy focus areas · ${topics.length} new focus areas · ` +
+      `${rows} resource rows\n`,
+  );
+}
+
 async function main(): Promise<void> {
-  console.log(`PP6c 6c-g — delete the legacy template objects — ${DRY_RUN ? "DRY RUN" : "LIVE"}\n`);
+  console.log(`delete the legacy template objects — ${DRY_RUN ? "DRY RUN" : "LIVE"}\n`);
 
   const archive = await verifyArchive();
 
-  const spec = JSON.parse(await fs.readFile(SPEC, "utf8")) as { focusAreas: { slug: string }[] };
-  const newSlugs = new Set(spec.focusAreas.map((f) => f.slug));
+  const spec = JSON.parse(await fs.readFile(SPEC, "utf8")) as { focusAreas: SpecArea[] };
+  const expected = spec.focusAreas;
+  if (expected.length !== 22) throw new Error(`spec should carry 22 focus areas, found ${expected.length}`);
+  const newSlugs = new Set(expected.map((f) => f.slug));
 
   const db = await connect();
-  await withSession(db, () => run(db, archive, newSlugs));
+  await withSession(db, async () => {
+    await assertMigrationHasRun(db, expected);
+    await run(db, archive, newSlugs);
+  });
 }
 
 async function run(

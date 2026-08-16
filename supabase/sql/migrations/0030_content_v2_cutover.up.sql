@@ -17,16 +17,40 @@
 -- orphaned." A `delete from storage.objects` here would drop the metadata, leave
 -- 5.3 MB of bytes stranded in the bucket, and report success.
 --
--- So the 297 files are removed by a separate, explicitly-ordered step, BEFORE
--- this migration runs:
+-- So the 297 files are removed by a separate step, AFTER this migration:
 --
---     pnpm exec tsx scripts/backup-297-objects.ts    # verify the cold backup
---     pnpm exec tsx scripts/delete-297-objects.ts    # Storage API removal
---     -- then apply this file
+--     pnpm exec tsx scripts/verify-archive.ts        # the cold backup is intact
+--     -- apply THIS FILE                             # rows go first
+--     pnpm exec tsx scripts/delete-297-objects.ts    # then the bytes
 --
--- Objects first, rows second: this file deletes the rows that carry the storage
--- paths, so running it first would leave the deletion script with nothing to
--- work from.
+-- ⚠️ ROWS FIRST, OBJECTS SECOND — REVERSED AT PP7 (2026-08-16), AND THE OLD
+--    ORDER'S STATED REASON WAS FALSE ON ITS OWN TERMS.
+--
+-- This file used to run LAST, on the argument that "this file deletes the rows
+-- that carry the storage paths, so running it first would leave the deletion
+-- script with nothing to work from." Grepped at PP7's kickoff, that is simply
+-- not how the script works: `delete-297-objects.ts` never reads
+-- `public.resources` at all. It derives the delete set from the Storage listing
+-- and the 22 new focus-area slugs in `docs/content-v2-spec.json` — every object
+-- whose top-level folder is not one of the 22. Emptying the table takes nothing
+-- away from it.
+--
+-- With that reason gone, the independent review's argument decides the order,
+-- and it is about which half-finished state you would rather be in:
+--
+--   objects first, then a failed migration  ->  297 LIVE rows pointing at files
+--                                               that no longer exist. Every
+--                                               affected partner gets a broken
+--                                               download, and no retry fixes it.
+--
+--   rows first, then a failed deletion      ->  297 orphaned files nobody can
+--                                               reach, costing 5.3 MB. Inert,
+--                                               invisible, and the deletion is
+--                                               simply re-run.
+--
+-- One is a user-visible failure that cannot be undone; the other is untidy.
+-- Hence rows first. The deletion script now also refuses to start until it has
+-- confirmed through the database that this migration has actually committed.
 --
 -- ---------------------------------------------------------------------------
 -- 2. THE BACKUP IS THE ONLY WAY BACK FOR THE FILES
@@ -50,9 +74,12 @@
 --
 -- ⚠️ THE DOWN-MIGRATION DOES NOT RESTORE THESE 866 ROWS. Accepted deliberately:
 -- `0029` already dropped `get_checklist` and `get_academy_modules`, so nothing in
--- the product can read any of them; PP7's `0031` drops all three tables outright;
--- and the ROADMAP has recorded them as retired since PP5. A rollback therefore
--- restores a fully working platform minus data that no surface reaches.
+-- the product can read any of them; PP7's `0033` drops all three tables outright
+-- (this note said `0031`, which shipped instead as the `programming_sessions`
+-- approval fix — corrected at PP7's kickoff, because a wrong migration number is
+-- the map somebody reads during an incident); and the ROADMAP has recorded them
+-- as retired since PP5. A rollback therefore restores a fully working platform
+-- minus data that no surface reaches.
 --
 -- ---------------------------------------------------------------------------
 -- 4. DELETION ORDER IS FORCED BY THE FOREIGN KEYS, NOT BY TASTE
@@ -179,7 +206,19 @@ $check$;
 
 commit;
 
--- After committing, confirm the bucket really is down to the 110 new objects:
+-- AFTER COMMITTING, THE BYTES ARE STILL THERE. That is the design (note 1), and
+-- it is the safe half of the split: 297 files nobody can reach, because the rows
+-- that named them are gone. Finish the job:
+--
+--   pnpm exec tsx scripts/delete-297-objects.ts --dry-run
+--   pnpm exec tsx scripts/delete-297-objects.ts
+--
+-- It re-verifies the cold archive from disk, then confirms through the database
+-- that THIS MIGRATION has committed, and refuses to delete a single object
+-- otherwise. Then check the bucket is down to the 110 new objects:
+--
 --   select count(*) from storage.objects where bucket_id = 'resources';   -- 110
--- If it still reports 407, the Storage API deletion in note 1 was not run and
--- 297 orphaned files are consuming space with no row pointing at them.
+--
+-- If it still reports 407, the deletion has not been run and 297 orphaned files
+-- are consuming space with no row pointing at them. Untidy, not urgent, and
+-- retryable — which is exactly why the rows go first.

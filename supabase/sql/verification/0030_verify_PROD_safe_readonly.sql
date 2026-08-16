@@ -4,16 +4,34 @@
 -- destructive, to confirm production is in the state 0030 expects, and again
 -- afterwards to confirm the result.
 --
--- ⚠️ THE ORDER ON PRODUCTION IS NOT NEGOTIABLE:
+-- ⚠️ THE ORDER ON PRODUCTION IS NOT NEGOTIABLE — AND STEPS 4 AND 5 WERE SWAPPED
+--    AT PP7 (2026-08-16):
 --   1. this file            (preflight — every ok must be true)
 --   2. the rollout          (the 22 focus areas + 110 files must EXIST and be LIVE)
---   3. backup-297-objects   (the cold backup, verified)
---   4. delete-297-objects   (Storage API — the rows still carry the paths)
---   5. 0030_..._up.sql      (drops the rows; refuses if step 2 has not happened)
+--   3. verify-archive       (the cold backup, re-verified READ-ONLY from disk)
+--   4. 0030_..._up.sql      (drops the ROWS; refuses if step 2 has not happened)
+--   5. delete-297-objects   (Storage API — then the BYTES; refuses unless step 4
+--                            has committed, which it now checks for itself)
 --   6. this file again      (postflight)
 --
--- Step 3 before 4 is the interlock; step 4 before 5 is because 5 deletes the
--- rows that name the files.
+-- Step 3 before everything is the interlock: nothing destructive runs until the
+-- 297 files are provably archived.
+--
+-- Steps 4 and 5 used to be the other way round, on the reasoning that `0030`
+-- deletes the rows carrying the storage paths, so the deletion script had to run
+-- first or it would have nothing to work from. That reasoning was simply wrong:
+-- `delete-297-objects.ts` has never read `public.resources`. It derives the
+-- delete set from the Storage listing and the 22 new slugs in the spec.
+--
+-- With the false constraint gone, the order follows from which half-finished
+-- state is survivable. Objects-first leaves 297 LIVE rows pointing at files that
+-- no longer exist — every affected partner gets a broken download and no retry
+-- repairs it. Rows-first leaves 297 unreachable files costing 5.3 MB, which is
+-- inert, invisible and fixed by running step 5 again.
+--
+-- ⚠️ Step 3 uses `scripts/verify-archive.ts`, NOT `backup-297-objects.ts`. The
+-- exporter downloads; before PP7 it wrote straight into the archive, so the
+-- documented way to check the only copy of these files could destroy it.
 
 -- PREFLIGHT 1 — is the legacy platform still what 0030 was written against?
 -- Written from production on 2026-08-16: 10 groups · 33 topics · 33 elements ·
