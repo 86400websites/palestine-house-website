@@ -103,6 +103,22 @@
 begin;
 
 -- ---------------------------------------------------------------------------
+-- LOCKS FIRST (review round 4, H4). The guard below and the publication
+-- re-check before COMMIT were both ordinary READ COMMITTED reads: a concurrent
+-- CMS write could un-publish a topic after the guard saw it Live, commit while
+-- this migration worked, and the re-check would still have passed against the
+-- snapshot it took — leaving the legacy platform deleted with only 21 visible
+-- replacements. EXCLUSIVE mode blocks every concurrent row modification on
+-- these tables (including the SECURITY DEFINER admin RPCs) while still allowing
+-- partners' SELECTs, and it is held until COMMIT, so what the guard proves
+-- stays true for the lifetime of the transaction.
+-- ---------------------------------------------------------------------------
+lock table public.platform_topics  in exclusive mode;
+lock table public.platform_groups  in exclusive mode;
+lock table public.elements         in exclusive mode;
+lock table public.resources        in exclusive mode;
+
+-- ---------------------------------------------------------------------------
 -- GUARD. Refuse to run unless the replacement is actually in place and visible.
 -- Without this, applying 0030 to a database where the rollout has not run — or
 -- has run but is still Draft — empties the platform for every approved partner.
@@ -132,32 +148,43 @@ create temporary table _pp7_expected (
   code       text    primary key,
   slug       text    not null unique,
   group_slug text    not null,
-  templates  integer not null
+  templates  integer not null,
+  /* review round 4, H3: identity of the CONTENT, not only of the rows. A decoy
+     with the right codes/slugs/counts and simple_guide_md = 'x' passed the
+     previous manifest. guide_md5 pins each area's body to the owner's exact
+     prose; tset_md5 pins the template inventory —
+     md5(string_agg(upper(code)||'|'||title, E'
+' order by upper(code))) over
+     that area's private template rows. Both generated from
+     docs/content-v2-spec.json and verified against the live corpus before being
+     written here. */
+  guide_md5  text    not null,
+  tset_md5   text    not null
 ) on commit drop;
 
-insert into _pp7_expected (code, slug, group_slug, templates) values
-  ('1.1', 'get-legally-ready',                            'setup-focus-areas',    2),
-  ('1.2', 'plan-the-money',                               'setup-focus-areas',    5),
-  ('1.3', 'find-and-prepare-the-space',                   'setup-focus-areas',    4),
-  ('1.4', 'build-a-small-team',                           'setup-focus-areas',    5),
-  ('1.5', 'get-ready-to-open',                            'setup-focus-areas',    4),
-  ('2.1', 'money',                                        'operate-focus-areas',  5),
-  ('2.2', 'daily-house-operations',                       'operate-focus-areas',  6),
-  ('2.3', 'food-beverages',                               'operate-focus-areas',  6),
-  ('2.4', 'members-and-visitors',                         'operate-focus-areas',  5),
-  ('2.5', 'team',                                         'operate-focus-areas',  4),
-  ('2.6', 'monthly-check-up',                             'operate-focus-areas',  3),
-  ('3.1', 'plan-the-calendar',                            'program-focus-areas',  3),
-  ('3.2', 'plan-an-event',                                'program-focus-areas',  5),
-  ('3.3', 'work-with-artists-and-speakers',               'program-focus-areas',  5),
-  ('3.4', 'promote-the-event',                            'program-focus-areas',  4),
-  ('3.5', 'learn-the-event',                              'program-focus-areas',  2),
-  ('3.6', 'connect-to-the-wider-palestine-house-network', 'program-focus-areas',  4),
-  ('4.1', 'marketing',                                    'support-focus-areas',  5),
-  ('4.2', 'sponsorship-fundraising',                      'support-focus-areas',  5),
-  ('4.3', 'partnerships',                                 'support-focus-areas',  3),
-  ('4.4', 'ask-community-support-for-help',               'support-focus-areas',  1),
-  ('4.5', 'learn-from-other-palestine-houses',            'support-focus-areas',  2);
+insert into _pp7_expected (code, slug, group_slug, templates, guide_md5, tset_md5) values
+  ('1.1', 'get-legally-ready',                            'setup-focus-areas',    2, '2bb24d071beec6f379220a18da5f8a92', 'd3c3951027934d6fdb5f53bf4851c130'),
+  ('1.2', 'plan-the-money',                               'setup-focus-areas',    5, '963b66217088fd5c191285a10234eed9', '780eff4ab6dadf731f9cf99cbefe21be'),
+  ('1.3', 'find-and-prepare-the-space',                   'setup-focus-areas',    4, '5c21b18c71df52af169e2dee45325cbb', 'b2fda3b887d92db0fe23aea68b4bc3d3'),
+  ('1.4', 'build-a-small-team',                           'setup-focus-areas',    5, '601efc6cfe7527652801ddce855e4524', '13c951be484167097440d8c201f0dccb'),
+  ('1.5', 'get-ready-to-open',                            'setup-focus-areas',    4, '552e1c1429791b719ba0d8f89f57fee5', '5b4878b03574ca4195548b7aaaf8a98f'),
+  ('2.1', 'money',                                        'operate-focus-areas',  5, '096112b44c24fba73b10010cb6c465b3', 'ebc621b2a836fb30435362d69251bc29'),
+  ('2.2', 'daily-house-operations',                       'operate-focus-areas',  6, '995efd9dc7e47133b5cadbf635aebb21', '71ac749745d44fa9db20a3b088e6572e'),
+  ('2.3', 'food-beverages',                               'operate-focus-areas',  6, '1dc7667d0166b3c45b8f843c7570d950', '9e62222a89ad465c800abc4e58ace1d7'),
+  ('2.4', 'members-and-visitors',                         'operate-focus-areas',  5, '023a93709ef0c034605466c6379117bc', '1bc43162ce38b8260cbe6220b6d91c62'),
+  ('2.5', 'team',                                         'operate-focus-areas',  4, '7f3a75e6cefbcfa3f68db20ac15fac30', '8a15b66aa143d6d2e49160e4e9113d8a'),
+  ('2.6', 'monthly-check-up',                             'operate-focus-areas',  3, '6f3cc2998c8acbf8885a53c02ca886b3', '0e04fb1f8010292d9a591bbdf8ff4ee6'),
+  ('3.1', 'plan-the-calendar',                            'program-focus-areas',  3, '51e70b30bdb843b94e8323f5a88f9bf9', '7179f8bc374313f7882771c10ec7717a'),
+  ('3.2', 'plan-an-event',                                'program-focus-areas',  5, '21d904caf036df3d78b6f8ecc06e6fcb', 'f89f45e3656e92285f5a4678b7281ca6'),
+  ('3.3', 'work-with-artists-and-speakers',               'program-focus-areas',  5, '3c9013d248aac68b86de317eeaf65645', '4d12efd787309a6b646f0b088cd02d44'),
+  ('3.4', 'promote-the-event',                            'program-focus-areas',  4, '2e2b0959956373d687008530b0c3cd6b', '5afc364aeb292899365d6ac38f5cecf9'),
+  ('3.5', 'learn-the-event',                              'program-focus-areas',  2, '31aba217ca1d811b0279bb5c9756a0e3', 'c6e7dcf155d5324cfe1d4d34b8497c84'),
+  ('3.6', 'connect-to-the-wider-palestine-house-network', 'program-focus-areas',  4, 'b921d20443322bf3d3e694a86e2af0c6', '9b58f555daf55fe075f2827bd0115ac6'),
+  ('4.1', 'marketing',                                    'support-focus-areas',  5, '8315ff1fb7497dc889852f65636bf5b9', 'bd076387e8555fe0619abe9b11435f65'),
+  ('4.2', 'sponsorship-fundraising',                      'support-focus-areas',  5, '78cf84560cb78f258a1d53df726a8b5d', 'f8f6d04f64ac2a1244bca3b666d4daa8'),
+  ('4.3', 'partnerships',                                 'support-focus-areas',  3, '01894167af4711801df9b81a73ae629a', '60a31c299617daf16632bf56c34bd587'),
+  ('4.4', 'ask-community-support-for-help',               'support-focus-areas',  1, 'f633c7cbd62b2205eb92918fb034317d', '2283378f36e38a0b5430d39dfd22e93e'),
+  ('4.5', 'learn-from-other-palestine-houses',            'support-focus-areas',  2, '6a69507177e5293038f5972e208fe808', '54f5fe93c781f70e7cf8c23addd4d77d');
 
 do $guard$
 declare
@@ -165,6 +192,8 @@ declare
   problems   text;
   n_problems integer;
   n_extra    integer;
+  n_unbacked integer;
+  detail     text;
 begin
   select count(*) into n_expected from _pp7_expected;
   if n_expected <> 22 then
@@ -185,8 +214,12 @@ begin
         when not t.published then 'is a DRAFT'
         when not g.published then 'its section (' || x.group_slug || ') is unpublished'
         when coalesce(length(btrim(e.simple_guide_md)), 0) = 0 then 'has an empty guide body'
+        /* H3: the body must be the owner's exact prose, not merely non-empty. */
+        when md5(e.simple_guide_md) <> x.guide_md5 then 'guide body does not match the owner''s content (md5 mismatch)'
         when guides.n <> 1 then 'has ' || guides.n || ' guide file(s), expected exactly 1'
         when tpl.n <> x.templates then 'has ' || tpl.n || ' template(s), expected ' || x.templates
+        /* H3: and the templates must be the owner's exact inventory. */
+        when tpl.set_md5 is distinct from x.tset_md5 then 'template code/title set does not match the delivered inventory (md5 mismatch)'
       end as reason
     from _pp7_expected x
     left join public.elements e        on e.code = x.code
@@ -197,7 +230,9 @@ begin
       where r.element_id = e.id and r.doc_key = 'guide'
     ) guides on true
     left join lateral (
-      select count(*) as n from public.resources r
+      select count(*) as n,
+             md5(string_agg(upper(r.code) || '|' || r.title, E'\n' order by upper(r.code))) as set_md5
+      from public.resources r
       where r.element_id = e.id
         and r.is_public = false and r.doc_key is null and r.code is not null
     ) tpl on true
@@ -212,14 +247,37 @@ begin
   where e.code ~ '^[0-9]'
     and not exists (select 1 from _pp7_expected x where x.code = e.code);
 
-  if n_problems > 0 or n_extra > 0 then
-    raise exception E'REFUSING TO RUN — the replacement platform is not fully in place.\n\n0030 deletes the legacy platform, so all 22 new focus areas must be present, published and complete FIRST, or every approved partner is left with an empty platform.\n\n%%%',
-      case when n_problems > 0 then '  - ' || problems || E'\n' else '' end,
-      case when n_extra > 0 then '  - ' || n_extra || ' numeric-coded element(s) exist that the manifest does not name' || E'\n' else '' end,
-      E'\nRun the rollout and the cutover, then re-apply this migration.';
+  /* H3 (review round 4): every SURVIVING private resource row must point at an
+     object that actually exists in Storage. Registered rows whose keys were
+     never uploaded — the reviewer's fake-corpus counterexample — pass every
+     count above, and the platform they leave behind serves broken downloads the
+     moment the legacy rows are gone. This migration runs in the SQL Editor as
+     postgres, so storage.objects is readable directly. */
+  select count(*) into n_unbacked
+  from public.resources r
+  join public.elements e on e.id = r.element_id
+  where e.code ~ '^[0-9]'
+    and r.is_public = false
+    and not exists (
+      select 1 from storage.objects o
+      where o.bucket_id = r.storage_bucket and o.name = r.storage_path
+    );
+
+  if n_problems > 0 or n_extra > 0 or n_unbacked > 0 then
+    /* One placeholder, one assembled detail string. Adjacent %-placeholders do
+       not exist in RAISE format strings — %% is always a LITERAL percent — so
+       the previous multi-argument form would itself have errored at the moment
+       of refusal (still aborting, but with "too many parameters" instead of the
+       diagnosis). Found at review round 4 while extending this message. */
+    detail :=
+      case when n_problems > 0 then '  - ' || problems || E'\n' else '' end ||
+      case when n_extra > 0 then '  - ' || n_extra || ' numeric-coded element(s) exist that the manifest does not name' || E'\n' else '' end ||
+      case when n_unbacked > 0 then '  - ' || n_unbacked || ' surviving resource row(s) point at Storage objects that DO NOT EXIST' || E'\n' else '' end;
+    raise exception E'REFUSING TO RUN — the replacement platform is not fully in place.\n\n0030 deletes the legacy platform, so all 22 new focus areas must be present, published and complete FIRST, or every approved partner is left with an empty platform.\n\n%\nRun the rollout and the cutover, then re-apply this migration.',
+      detail;
   end if;
 
-  raise notice '0030 guard: all 22 focus areas verified — slug, code, section, published, guide body, 1 guide file, and template counts.';
+  raise notice '0030 guard: all 22 focus areas verified — identity, publication, guide-body md5, template-set md5, counts, and every surviving object present in Storage.';
 end
 $guard$;
 

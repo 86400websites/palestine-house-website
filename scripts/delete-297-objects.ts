@@ -78,9 +78,10 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
+import { confirmProduction, connectTarget, resolveTarget } from "./lib/connect";
 import { ARCHIVE_REL, EXPECTED_COUNT, checkArchive, printChecks, readArchive } from "./lib/archive";
 import {
   type PreflightArea as SpecArea,
@@ -91,7 +92,6 @@ import {
 const ROOT = process.cwd();
 const ARCHIVE = path.join(ROOT, ARCHIVE_REL);
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
-const TEST_REF = "sdszcralogcrujtyghig";
 const BUCKET = "resources";
 
 /* The Storage API removes at most 1000 keys per call; 297 fits, but the batch
@@ -100,30 +100,10 @@ const REMOVE_LIMIT = 1000;
 
 
 /* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
-const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"] });
+const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"], options: ["--target"] });
 const DRY_RUN = ARGS.has("--dry-run");
+const TARGET = resolveTarget(ARGS.get("--target"));
 
-async function connect(): Promise<SupabaseClient> {
-  process.loadEnvFile(path.join(ROOT, ".env.local"));
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const email = process.env.TEST_PARTNER_EMAIL;
-  const password = process.env.TEST_PARTNER_PASSWORD;
-  if (!url || !key || !email || !password) throw new Error("Missing Supabase / TEST_PARTNER_* values in .env.local");
-  const parsed = new URL(url);
-  if (parsed.protocol !== "https:" || parsed.hostname !== `${TEST_REF}.supabase.co`) {
-    throw new Error(
-      `Refusing to run against "${parsed.host}". This deletes files irreversibly and targets the TEST project only.`,
-    );
-  }
-  console.log(`target: ${parsed.host} (TEST)`);
-  const db = createClient(url, key, { auth: { persistSession: false } });
-  const { error } = await db.auth.signInWithPassword({ email, password });
-  if (error) throw new Error(`sign-in failed: ${error.message}`);
-  const { data: isAdmin } = await db.rpc("is_admin");
-  if (isAdmin !== true) throw new Error("Not an admin on this project — the delete policy requires is_admin().");
-  return db;
-}
 
 /** Re-verify the archive from the files on disk. Not from the manifest, and not
  *  from a previous run's say-so.
@@ -221,7 +201,7 @@ async function main(): Promise<void> {
   if (expected.length !== 22) throw new Error(`spec should carry 22 focus areas, found ${expected.length}`);
   const newSlugs = new Set(expected.map((f) => f.slug));
 
-  const db = await connect();
+  const db = await connectTarget(TARGET);
   await withSession(db, async () => {
     await assertMigrationHasRun(db, expected);
     await run(db, archive, newSlugs);
@@ -238,8 +218,25 @@ async function run(
   const keep = all.length - legacy.length;
   console.log(`bucket: ${all.length} object(s) — ${legacy.length} legacy to delete, ${keep} new to keep`);
 
-  if (legacy.length !== EXPECTED_COUNT) {
-    throw new Error(`found ${legacy.length} legacy objects, expected ${EXPECTED_COUNT}. REFUSING.`);
+  /* SUBSET-RETRYABLE (review round 4, M1). This used to demand exactly 297
+     candidates, which made a partial or response-lost delete unrecoverable: the
+     next run found fewer than 297 and refused before cleanup. Any VERIFIED
+     subset of the archived corpus is now a resumable state — every candidate
+     must still be archived by name AND hash below, which is the check that
+     actually protects the bytes — and zero remaining is success. MORE than the
+     archive holds is still an error: that means the bucket contains legacy-
+     shaped objects the backup never saw. */
+  if (legacy.length === 0) {
+    console.log("\nNothing to do — no legacy objects remain in the bucket.");
+    return;
+  }
+  if (legacy.length > EXPECTED_COUNT) {
+    throw new Error(`found ${legacy.length} legacy objects, more than the ${EXPECTED_COUNT} archived. REFUSING.`);
+  }
+  if (legacy.length < EXPECTED_COUNT) {
+    console.log(
+      `NOTE: ${legacy.length} of ${EXPECTED_COUNT} legacy objects remain — resuming a partial deletion.`,
+    );
   }
 
   /* EVERY object about to be deleted must have a byte-identical copy on disk.
@@ -252,13 +249,44 @@ async function run(
         `REFUSING to delete anything. Re-run scripts/backup-297-objects.ts.`,
     );
   }
-  console.log(`all ${legacy.length} objects verified present in the archive by name AND content hash\n`);
+  console.log(`all ${legacy.length} objects verified present in the archive by name AND content hash`);
+
+  /* NO SURVIVING ROW MAY REFERENCE A CANDIDATE (review round 4, H2). The
+     counts-only preflight cannot see a surviving row that was repointed at a
+     legacy key — admin_replace_resource_file accepts any valid relative path,
+     and the row count stays 110 while the download it serves is about to be
+     deleted. So the candidate list is put to the database itself:
+     admin_referenced_paths_among (0032) returns whichever of these keys any
+     resources row still references, and ONE hit refuses the whole run.
+     Checked after the archive verification and immediately before the delete,
+     to keep the window against a concurrent repoint as small as this side of a
+     table lock can make it. */
+  const { data: referenced, error: refErr } = await db.rpc("admin_referenced_paths_among", {
+    p_paths: legacy.map((o) => o.name),
+  });
+  if (refErr) throw new Error(`admin_referenced_paths_among: ${refErr.message}`);
+  const stillReferenced = ((referenced as { storage_path: string }[] | null) ?? []).map((r) => r.storage_path);
+  if (stillReferenced.length) {
+    throw new Error(
+      `${stillReferenced.length} candidate object(s) are STILL REFERENCED by a surviving resources row, ` +
+        `e.g. "${stillReferenced[0]}". Deleting them would leave live rows serving broken downloads. ` +
+        `A row has been repointed at a legacy key — fix the row first. REFUSING to delete anything.`,
+    );
+  }
+  console.log(`0 of ${legacy.length} candidates are referenced by any surviving resources row\n`);
 
   if (DRY_RUN) {
     console.log(`would delete ${legacy.length} object(s); ${keep} would remain.`);
     console.log("Dry run complete — nothing deleted.");
     return;
   }
+
+  await confirmProduction(TARGET, [
+    `  action     delete ${legacy.length} legacy object(s) from the private resources bucket`,
+    `  keeps      ${keep} new object(s), untouched`,
+    `  archive    verified byte-for-byte on disk moments ago`,
+    `  ⚠️         THIS IS THE ONE STEP NO .down.sql CAN UNDO`,
+  ].join("\n"));
 
   if (legacy.length > REMOVE_LIMIT) throw new Error(`${legacy.length} exceeds the ${REMOVE_LIMIT}-key remove() limit`);
   const { data: removed, error } = await db.storage.from(BUCKET).remove(legacy.map((o) => o.name));

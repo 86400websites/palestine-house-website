@@ -13,6 +13,7 @@
 begin;
 
 drop function if exists public.admin_cutover_focus_areas(jsonb, boolean);
+drop function if exists public.admin_referenced_paths_among(text[]);
 
 commit;
 

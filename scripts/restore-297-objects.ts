@@ -42,9 +42,10 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
+import { confirmProduction, connectTarget, resolveTarget } from "./lib/connect";
 import {
   ARCHIVE_REL,
   type ArchiveFile,
@@ -55,7 +56,6 @@ import {
 
 const ROOT = process.cwd();
 const ARCHIVE = path.join(ROOT, ARCHIVE_REL);
-const TEST_REF = "sdszcralogcrujtyghig";
 const BUCKET = "resources";
 
 /* Mirrors src/lib/admin/file-actions.ts. Word documents and PDFs only. */
@@ -64,33 +64,10 @@ const CONTENT_TYPE: Record<string, string> = {
   ".pdf": "application/pdf",
 };
 
-const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"] });
+const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"], options: ["--target"] });
 const DRY_RUN = ARGS.has("--dry-run");
+const TARGET = resolveTarget(ARGS.get("--target"));
 
-async function connect(): Promise<SupabaseClient> {
-  process.loadEnvFile(path.join(ROOT, ".env.local"));
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const email = process.env.TEST_PARTNER_EMAIL;
-  const password = process.env.TEST_PARTNER_PASSWORD;
-  if (!url || !key || !email || !password) throw new Error("Missing Supabase / TEST_PARTNER_* values in .env.local");
-
-  const parsed = new URL(url);
-  if (parsed.protocol !== "https:" || parsed.hostname !== `${TEST_REF}.supabase.co`) {
-    throw new Error(
-      `Refusing to run against "${parsed.host}". This script targets the TEST project only ` +
-        `(https://${TEST_REF}.supabase.co); a production restore is the owner's, by hand.`,
-    );
-  }
-  console.log(`target: ${parsed.host} (TEST)`);
-
-  const db = createClient(url, key, { auth: { persistSession: false } });
-  const { error } = await db.auth.signInWithPassword({ email, password });
-  if (error) throw new Error(`sign-in failed: ${error.message}`);
-  const { data: isAdmin } = await db.rpc("is_admin");
-  if (isAdmin !== true) throw new Error("Not an admin on this project — the storage insert policy requires is_admin().");
-  return db;
-}
 
 async function listAll(db: SupabaseClient, prefix = ""): Promise<Map<string, string>> {
   const out = new Map<string, string>();
@@ -132,7 +109,7 @@ async function main(): Promise<void> {
   }
   console.log("Archive is valid.\n");
 
-  const db = await connect();
+  const db = await connectTarget(TARGET);
   await withSession(db, () => run(db, files));
 }
 
@@ -177,6 +154,12 @@ async function run(db: SupabaseClient, files: ArchiveFile[]): Promise<void> {
     console.log("Dry run complete — nothing uploaded.");
     return;
   }
+
+  await confirmProduction(TARGET, [
+    `  action    upload ${missing.length} archived object(s) at their exact original keys`,
+    `  never     overwrites — a pre-existing key with different bytes refuses the whole run`,
+    `  bucket    resources (private)`,
+  ].join("\n"));
 
   let uploaded = 0;
   for (const f of missing) {

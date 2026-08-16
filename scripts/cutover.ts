@@ -72,23 +72,31 @@
  * platform back — but it is worth knowing that its selectivity comes from a
  * naming convention rather than from a flag.
  *
- * TEST only — the host is asserted against the known TEST project ref before a
- * single request. Production is cut over by the owner, deliberately, by hand.
+ * TEST BY DEFAULT; production via `--target prod` (review round 4, H1 — the
+ * runbook used to point at this script for production while it hard-refused
+ * production). The shared mechanism in scripts/lib/connect.ts applies: PROD_*
+ * variables by name with no fallback, exact host assertion, and a typed
+ * confirmation that refuses when stdin is not a terminal. The owner runs it;
+ * this engine writes to production through no channel.
  */
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
+import { confirmProduction, connectTarget, resolveTarget } from "./lib/connect";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
-const TEST_REF = "sdszcralogcrujtyghig";
 
-/* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
-const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"], options: ["--to"] });
+/* Strict: an unknown argument is an error, never a no-op (review 2026-08-16).
+   `--target prod` added at review round 4 (H1): the production runbook told the
+   owner to run this at step 5 while it hard-refused production — the flip would
+   have gone to TEST with the operator believing otherwise. */
+const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"], options: ["--to", "--target"] });
 const DRY_RUN = ARGS.has("--dry-run");
+const TARGET = resolveTarget(ARGS.get("--target"));
 const TO = (() => {
   const v = ARGS.get("--to");
   if (v !== "live" && v !== "draft") {
@@ -112,32 +120,6 @@ interface TopicRow {
   section_slug: string;
 }
 
-async function connect(): Promise<SupabaseClient> {
-  process.loadEnvFile(path.join(ROOT, ".env.local"));
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const email = process.env.TEST_PARTNER_EMAIL;
-  const password = process.env.TEST_PARTNER_PASSWORD;
-  if (!url || !key) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL / _PUBLISHABLE_KEY in .env.local");
-  if (!email || !password) throw new Error("Missing TEST_PARTNER_EMAIL / TEST_PARTNER_PASSWORD in .env.local");
-
-  const parsed = new URL(url);
-  if (parsed.protocol !== "https:" || parsed.hostname !== `${TEST_REF}.supabase.co`) {
-    throw new Error(
-      `Refusing to run against "${parsed.host}". This script targets the TEST project only ` +
-        `(https://${TEST_REF}.supabase.co); production is cut over by the owner, by hand.`,
-    );
-  }
-  console.log(`target: ${parsed.host} (TEST)`);
-
-  const db = createClient(url, key, { auth: { persistSession: false } });
-  const { error } = await db.auth.signInWithPassword({ email, password });
-  if (error) throw new Error(`sign-in failed: ${error.message}`);
-  const { data: isAdmin, error: adminErr } = await db.rpc("is_admin");
-  if (adminErr) throw adminErr;
-  if (isAdmin !== true) throw new Error("The signed-in account is not an admin on this project.");
-  return db;
-}
 
 /** The manifest the RPC resolves against: code + slug + section, for all 22.
  *  Built from the spec, never typed, and every section must resolve — a spec
@@ -177,7 +159,7 @@ async function main(): Promise<void> {
   const manifest = buildManifest(spec);
 
   console.log(`cutover — ${manifest.length} focus area(s) -> ${TO.toUpperCase()} — ${DRY_RUN ? "DRY RUN" : "LIVE"}`);
-  const db = await connect();
+  const db = await connectTarget(TARGET);
   await withSession(db, () => run(db, manifest));
 }
 
@@ -235,6 +217,15 @@ async function run(db: SupabaseClient, manifest: ManifestEntry[]): Promise<void>
     console.log("\nDry run complete — nothing written.");
     return;
   }
+
+  /* Production only: the typed confirmation, after every refusal above has had
+     its chance and before the one mutation. */
+  await confirmProduction(TARGET, [
+    `  action       flip ${toChange.length} focus area(s) to ${TO.toUpperCase()} (${alreadyThere.length} already there)`,
+    `  mechanism    admin_cutover_focus_areas — ONE transaction, all or none`,
+    `  legacy set   ${untouched} focus area(s), NOT touched`,
+    `  reverse      pnpm exec tsx scripts/cutover.ts --to ${TO === "live" ? "draft" : "live"} --target prod`,
+  ].join("\n"));
 
   /* ONE CALL. Not 22.
      The loop this replaces issued a separate RPC per focus area, so a failure at

@@ -63,6 +63,7 @@ declare
   n_legacy   integer;
   n_content  integer;
   n_chars    bigint;
+  n_rows     integer;
 begin
   select count(*) into n_legacy from public.elements where code !~ '^[0-9]';
   if n_legacy > 0 then
@@ -84,7 +85,22 @@ begin
       n_content, n_chars;
   end if;
 
-  raise notice '0033 guard: 0 legacy elements, 0 characters in the columns about to be dropped.';
+  /* review round 4, M3: the three tables were ASSUMED empty because 0030
+     emptied them — but 0033 is deliberately applied days later, and in that
+     window `admin_upsert_academy_module` still exists and still writes. A row
+     added in the gap would be dropped silently, and the down-migration restores
+     structure, never rows. So emptiness is asserted, not assumed. */
+  select (select count(*) from public.checklist_items)
+       + (select count(*) from public.checklist_progress)
+       + (select count(*) from public.academy_modules)
+  into n_rows;
+  if n_rows > 0 then
+    raise exception
+      'REFUSING: the retired tables hold % row(s). 0030 emptied them, so something has written in the window since — an admin RPC for these tables still exists until this migration removes it. Inspect and clear the rows deliberately, then re-apply.',
+      n_rows;
+  end if;
+
+  raise notice '0033 guard: 0 legacy elements, 0 characters in the doomed columns, 0 rows in the doomed tables.';
 end
 $guard$;
 

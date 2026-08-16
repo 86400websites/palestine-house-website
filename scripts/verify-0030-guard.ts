@@ -22,6 +22,7 @@
  * directions. It reads files. It touches no database.
  */
 
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -29,11 +30,15 @@ const ROOT = process.cwd();
 const MIGRATION = path.join(ROOT, "supabase/sql/migrations/0030_content_v2_cutover.up.sql");
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
 
+const md5 = (x: string): string => createHash("md5").update(x, "utf8").digest("hex");
+
 interface Row {
   code: string;
   slug: string;
   group: string;
   templates: number;
+  guideMd5: string;
+  tsetMd5: string;
 }
 
 let failures = 0;
@@ -51,10 +56,13 @@ function parseManifest(sql: string): Row[] {
   const body = sql.slice(start, end);
 
   const rows: Row[] = [];
-  const re = /\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*(\d+)\s*\)/g;
+  /* Six columns since review round 4 (H3): the two md5 hashes pin the CONTENT,
+     not only the identity. */
+  const re =
+    /\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*(\d+)\s*,\s*'([0-9a-f]{32})'\s*,\s*'([0-9a-f]{32})'\s*\)/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(body)) !== null) {
-    rows.push({ code: m[1], slug: m[2], group: m[3], templates: Number(m[4]) });
+    rows.push({ code: m[1], slug: m[2], group: m[3], templates: Number(m[4]), guideMd5: m[5], tsetMd5: m[6] });
   }
   return rows;
 }
@@ -63,7 +71,13 @@ function main(): void {
   const sql = readFileSync(MIGRATION, "utf8");
   const spec = JSON.parse(readFileSync(SPEC, "utf8")) as {
     sections: { slug: string; groupSlug: string }[];
-    focusAreas: { number: string; slug: string; sectionSlug: string; templates: unknown[] }[];
+    focusAreas: {
+      number: string;
+      slug: string;
+      sectionSlug: string;
+      guideMd: string;
+      templates: { code: string; title: string }[];
+    }[];
   };
 
   const groupOf = new Map(spec.sections.map((s) => [s.slug, s.groupSlug]));
@@ -72,6 +86,16 @@ function main(): void {
     slug: f.slug,
     group: groupOf.get(f.sectionSlug) ?? `!! no section "${f.sectionSlug}"`,
     templates: f.templates.length,
+    /* The exact formulas the guard evaluates in SQL:
+       md5(simple_guide_md) and
+       md5(string_agg(upper(code)||'|'||title, E'\n' order by upper(code))). */
+    guideMd5: md5(f.guideMd),
+    tsetMd5: md5(
+      f.templates
+        .map((t) => `${t.code.toUpperCase()}|${t.title}`)
+        .sort()
+        .join("\n"),
+    ),
   }));
 
   const manifest = parseManifest(sql);
@@ -96,6 +120,12 @@ function main(): void {
     if (got.templates !== want.templates) {
       fail(`${want.code}: manifest expects ${got.templates} template(s), the spec ships ${want.templates}`);
     }
+    if (got.guideMd5 !== want.guideMd5) {
+      fail(`${want.code}: manifest guide_md5 does not match md5 of the spec's guideMd`);
+    }
+    if (got.tsetMd5 !== want.tsetMd5) {
+      fail(`${want.code}: manifest tset_md5 does not match the spec's template code/title set`);
+    }
   }
 
   /* Manifest -> spec. The direction that catches a row nobody removed. */
@@ -119,6 +149,10 @@ function main(): void {
   const required: [string, string][] = [
     ["refuses a draft focus area", "is a DRAFT"],
     ["requires a non-empty guide body", "simple_guide_md"],
+    ["pins the guide body by md5 (H3)", "guide body does not match the owner"],
+    ["pins the template set by md5 (H3)", "template code/title set does not match"],
+    ["asserts surviving objects exist in Storage (H3)", "Storage objects that DO NOT EXIST"],
+    ["locks the four tables before the guard (H4)", "in exclusive mode"],
     ["requires exactly one guide file", "guide file(s), expected exactly 1"],
     ["checks per-area template counts", "template(s), expected"],
     ["rejects unnamed numeric-coded elements", "the manifest does not name"],

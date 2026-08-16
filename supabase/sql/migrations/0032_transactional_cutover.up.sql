@@ -148,6 +148,45 @@ $$;
 revoke execute on function public.admin_cutover_focus_areas(jsonb, boolean) from public, anon;
 grant  execute on function public.admin_cutover_focus_areas(jsonb, boolean) to authenticated;
 
+-- ---------------------------------------------------------------------------
+-- admin_referenced_paths_among — added at review round 4 (blocking H2).
+--
+-- The object-deletion script derives its candidate set from the Storage listing
+-- and checks counts through the admin RPCs, but nothing ever compared SURVIVING
+-- rows' storage_path values against the candidates. The reviewer's
+-- counterexample: after 0030, `admin_replace_resource_file` can legally repoint
+-- one of the 110 surviving rows at an archived legacy key (it accepts any valid
+-- relative path); the row count stays 110, every preflight passes, and the
+-- deleter removes an object a live row depends on — a broken download from a
+-- table that looks healthy.
+--
+-- No admin RPC exposes storage_path (D-PP-i, deliberate). This function keeps
+-- that property: the CALLER supplies the paths, and the function answers only
+-- "which of these are referenced by any resources row". Nothing is disclosed
+-- that the caller did not already hold.
+-- ---------------------------------------------------------------------------
+create or replace function public.admin_referenced_paths_among(p_paths text[])
+returns table (storage_path text)
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select r.storage_path
+  from public.resources r
+  where public.is_admin()
+    and r.storage_bucket = 'resources'
+    and r.storage_path = any (p_paths);
+$$;
+
+revoke execute on function public.admin_referenced_paths_among(text[]) from public, anon;
+grant  execute on function public.admin_referenced_paths_among(text[]) to authenticated;
+
+comment on function public.admin_referenced_paths_among(text[]) is
+  'PP7 0032 (review round 4, H2). Given candidate object keys, returns those still referenced by any '
+  'resources row. Admin-only; discloses nothing the caller did not supply. The deletion script refuses '
+  'to remove any object this reports.';
+
 comment on function public.admin_cutover_focus_areas(jsonb, boolean) is
   'PP7 0032. Atomically publishes or unpublishes exactly the focus areas named in the manifest, '
   'each resolved on code + slug + section together. Refuses unless every entry resolves. '

@@ -69,10 +69,10 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import * as readline from "node:readline/promises";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
+import { confirmProduction, connectTarget, resolveTarget } from "./lib/connect";
 import { findByCode } from "./lib/identity";
 import { assertCodesHaveNotShifted as checkShift } from "./lib/shift";
 
@@ -84,13 +84,10 @@ const SRC = path.join(
 );
 const TOPIC_PHOTO_DIR = path.join(ROOT, "public/assets/workspace/topics");
 
-/* The non-production project (PROJECT-STATUS.md §6). Vercel Preview and
-   Development point here, which is why the pilot is reviewed here and why this
-   script has no production mode at all. */
-const TEST_REF = "sdszcralogcrujtyghig";
-/* PROJECT-STATUS.md §6. Reachable only via `--target prod` and only with the
-   PROD_* credentials; see TARGETS below. */
-const PROD_REF = "jwogtqizqujwhbvpoziu";
+/* Project refs, credential names, host assertions and the typed production
+   confirmation all live in scripts/lib/connect.ts — ONE implementation, shared
+   with cutover.ts, delete-297-objects.ts and restore-297-objects.ts since
+   review round 4 (H1). */
 const BUCKET = "resources";
 
 /* Mirrors src/lib/admin/file-actions.ts. Word documents and PDFs only. */
@@ -102,22 +99,15 @@ const CONTENT_TYPE: Record<string, string> = {
 /* STRICT. An unknown argument is an error, never a no-op — the review of
    2026-08-16 rated this Certain, because D-PP-r documented `--target prod`,
    the owner was told to use it, and this script silently ignored it and ran
-   against TEST. `--target` is accepted here ONLY so that it fails loudly with
-   an explanation until PP7 implements it; it is not a working flag. */
+   against TEST. */
 const ARGS = parseArgs(process.argv.slice(2), {
   flags: ["--dry-run", "--all", "--allow-live", "--replace-files", "--photos-only", "--allow-retitle"],
   options: ["--focus", "--target"],
 });
 
-/* D-PP-r, built at PP7 step 7-h. TEST unless production is asked for by name.
-   Anything else is an error rather than a default — "--target production" or
-   "--target PROD" silently becoming TEST is the same class of failure as the
-   ignored argument that made this flag necessary in the first place. */
-const TARGET_ARG = ARGS.get("--target");
-if (TARGET_ARG !== null && TARGET_ARG !== "test" && TARGET_ARG !== "prod") {
-  throw new Error(`--target must be "test" or "prod", not ${JSON.stringify(TARGET_ARG)}.`);
-}
-const TARGET: "test" | "prod" = TARGET_ARG === "prod" ? "prod" : "test";
+/* D-PP-r. TEST unless production is asked for by name; an unknown value is an
+   error, never a default. Resolution lives in the shared lib. */
+const TARGET = resolveTarget(ARGS.get("--target"));
 
 const DRY_RUN = ARGS.has("--dry-run");
 const ALL = ARGS.has("--all");
@@ -237,117 +227,6 @@ function step(message: string): void {
  *     succeeds through RLS proves the storage policies admit it, whereas one
  *     that succeeds through a service key proves nothing.
  */
-const TARGETS = {
-  test: {
-    label: "TEST",
-    ref: TEST_REF,
-    urlVar: "NEXT_PUBLIC_SUPABASE_URL",
-    keyVar: "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-    emailVar: "TEST_PARTNER_EMAIL",
-    passwordVar: "TEST_PARTNER_PASSWORD",
-  },
-  prod: {
-    label: "PRODUCTION",
-    ref: PROD_REF,
-    urlVar: "PROD_SUPABASE_URL",
-    keyVar: "PROD_SUPABASE_PUBLISHABLE_KEY",
-    emailVar: "PROD_ADMIN_EMAIL",
-    passwordVar: "PROD_ADMIN_PASSWORD",
-  },
-} as const;
-
-async function connect(): Promise<SupabaseClient> {
-  const t = TARGETS[TARGET];
-  process.loadEnvFile(path.join(ROOT, ".env.local"));
-
-  const url = process.env[t.urlVar];
-  const key = process.env[t.keyVar];
-  const email = process.env[t.emailVar];
-  const password = process.env[t.passwordVar];
-
-  /* NO FALLBACK. Named variables or nothing. */
-  const missing = [
-    [t.urlVar, url],
-    [t.keyVar, key],
-    [t.emailVar, email],
-    [t.passwordVar, password],
-  ]
-    .filter(([, v]) => !v)
-    .map(([n]) => n);
-  if (missing.length) {
-    throw new Error(
-      `--target ${TARGET} needs ${missing.join(", ")} in .env.local.\n` +
-        `This script reads ONLY those names for this target and never falls back to another ` +
-        `client, so a .env.local pointed somewhere else cannot silently redirect the run.`,
-    );
-  }
-
-  /* Exact host match over https, NOT a substring test, so a look-alike host can
-     never receive a session or a write. */
-  const parsed = new URL(url!);
-  if (parsed.protocol !== "https:" || parsed.hostname !== `${t.ref}.supabase.co`) {
-    throw new Error(
-      `${t.urlVar} is "${parsed.host}", not the ${t.label} project (https://${t.ref}.supabase.co). ` +
-        `Refusing: the target and the credentials must agree before anything is written.`,
-    );
-  }
-  console.log(`target: ${parsed.host} (${t.label})`);
-
-  const db = createClient(url!, key!, { auth: { persistSession: false } });
-  const { error } = await db.auth.signInWithPassword({ email: email!, password: password! });
-  if (error) throw new Error(`sign-in failed: ${error.message}`);
-
-  const { data: isAdmin, error: adminErr } = await db.rpc("is_admin");
-  if (adminErr) throw adminErr;
-  if (isAdmin !== true) {
-    throw new Error(
-      `The signed-in account is not an admin on ${t.label}, so no write RPC will accept it. ` +
-        "If it was removed from `admins` for a partner-path test, put it back first.",
-    );
-  }
-  return db;
-}
-
-/**
- * THE TYPED CONFIRMATION (D-PP-r). Production only, mutations only.
- *
- * It sits AFTER the Live guard and the code-shift detector — a run that is going
- * to be refused should be refused before a human is asked to type anything — and
- * BEFORE the first write.
- *
- * The phrase is the production project ref rather than "yes", because "yes" is
- * something the hands type without the eyes reading. And if stdin is not a
- * terminal it REFUSES rather than assuming consent: a production load must have
- * a person at the keyboard, so it cannot be reached from a script, a pipe, a CI
- * job or an agent.
- */
-async function confirmProduction(plan: string): Promise<void> {
-  const phrase = PROD_REF;
-  console.log(`\n${"=".repeat(72)}`);
-  console.log("YOU ARE ABOUT TO WRITE TO PRODUCTION.");
-  console.log(`${"=".repeat(72)}`);
-  console.log(plan);
-  console.log(`${"=".repeat(72)}`);
-
-  if (!process.stdin.isTTY) {
-    throw new Error(
-      "Refusing: --target prod requires a typed confirmation and stdin is not a terminal. " +
-        "A production load is done by a person at a keyboard, not by a pipe, a CI job or an agent.",
-    );
-  }
-
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  try {
-    const typed = (await rl.question(`\nType the production project ref (${phrase}) to proceed: `)).trim();
-    if (typed !== phrase) {
-      throw new Error("Confirmation did not match. Nothing has been written.");
-    }
-  } finally {
-    rl.close();
-  }
-  console.log("Confirmed.\n");
-}
-
 async function ensureGroup(
   db: SupabaseClient,
   sectionSlug: string,
@@ -579,8 +458,31 @@ async function replaceBytes(
     p_storage_path: key,
   });
   if (error) {
-    await db.storage.from(BUCKET).remove([key]);
-    throw new Error(`replace "${row.title}" on ${fa.number}: ${error.message}`);
+    /* COMPENSATE ONLY ON A DEFINITIVE REFUSAL (review round 4, H5). A network
+       failure cannot distinguish "the RPC never committed" from "it committed
+       and the response was lost". The old code deleted the freshly uploaded
+       object on ANY error — in the lost-response case the row already points at
+       the new key, so the compensation destroyed the bytes the live row now
+       depends on, while the counts stayed plausible.
+
+       A Postgres error carries an errcode (the RPC ran and REFUSED — nothing
+       committed, the new object is truly orphaned and safe to remove). An error
+       without one is transport-level and AMBIGUOUS: keep BOTH objects — an
+       orphan is 100 KB of dead weight, a deleted live object is a broken
+       download — and have the operator settle it against the database. */
+    const code = (error as { code?: string }).code;
+    const definitiveRefusal = typeof code === "string" && /^[0-9A-Z]{5}$/.test(code);
+    if (definitiveRefusal) {
+      await db.storage.from(BUCKET).remove([key]);
+      throw new Error(`replace "${row.title}" on ${fa.number}: ${error.message}`);
+    }
+    throw new Error(
+      `replace "${row.title}" on ${fa.number} FAILED AMBIGUOUSLY (${error.message}). The database ` +
+        `may or may not have committed the new path. NEITHER object was deleted:\n` +
+        `  candidate new key: ${key}\n` +
+        `Re-run this focus area with --replace-files; the run will settle which key the row owns ` +
+        `and the loser can then be removed via the CMS.`,
+    );
   }
   const oldPath = typeof data === "string" ? data : null;
   if (oldPath && oldPath !== key) {
@@ -759,7 +661,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const db = await connect();
+  const db = await connectTarget(TARGET);
   await withSession(db, () => run(db, spec, targets));
 }
 
@@ -816,9 +718,7 @@ async function run(
   if (TARGET === "prod" && !DRY_RUN) {
     const existing = targets.filter((fa) => findByCode(known, fa));
     const files = targets.reduce((n, fa) => n + fa.templates.length + 1, 0);
-    await confirmProduction(
-      [
-        `  project      ${PROD_REF}.supabase.co`,
+    await confirmProduction(TARGET, [
         `  focus areas  ${targets.length} (${existing.length} already exist and will be UPDATED, ` +
           `${targets.length - existing.length} will be created as Draft)`,
         `  files        up to ${files} uploads (${targets.length} guides + ` +
