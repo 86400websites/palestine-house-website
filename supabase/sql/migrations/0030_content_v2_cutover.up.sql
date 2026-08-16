@@ -106,22 +106,120 @@ begin;
 -- GUARD. Refuse to run unless the replacement is actually in place and visible.
 -- Without this, applying 0030 to a database where the rollout has not run — or
 -- has run but is still Draft — empties the platform for every approved partner.
+--
+-- ⚠️ REWRITTEN AT PP7 (2026-08-16). The original counted rows:
+--
+--     select count(*) ... where e.code ~ '^[0-9]' and t.published and g.published
+--     if new_live <> 22 then raise exception ...
+--
+-- which asks "are there 22 live, published, numeric-coded focus areas?" and
+-- accepts ANY 22. The independent review put a decoy to it and the decoy passed:
+-- twenty-two rows with numeric codes and nothing else in common with the owner's
+-- content would satisfy it exactly, and the migration would then delete the real
+-- platform. **A count is not an identity.**
+--
+-- So the guard is now an exact, immutable manifest of the 22 focus areas, and
+-- every one of them must be present, published, in the right section, carrying a
+-- non-empty guide body, one guide file, and its own template count. All six
+-- properties, per focus area, before a single row is deleted.
+--
+-- The manifest is GENERATED from `docs/content-v2-spec.json`, never typed —
+-- and `scripts/verify-0030-guard.ts` re-parses it out of this file and asserts
+-- it still matches the spec, so the two cannot drift.
 -- ---------------------------------------------------------------------------
+
+create temporary table _pp7_expected (
+  code       text    primary key,
+  slug       text    not null unique,
+  group_slug text    not null,
+  templates  integer not null
+) on commit drop;
+
+insert into _pp7_expected (code, slug, group_slug, templates) values
+  ('1.1', 'get-legally-ready',                            'setup-focus-areas',    2),
+  ('1.2', 'plan-the-money',                               'setup-focus-areas',    5),
+  ('1.3', 'find-and-prepare-the-space',                   'setup-focus-areas',    4),
+  ('1.4', 'build-a-small-team',                           'setup-focus-areas',    5),
+  ('1.5', 'get-ready-to-open',                            'setup-focus-areas',    4),
+  ('2.1', 'money',                                        'operate-focus-areas',  5),
+  ('2.2', 'daily-house-operations',                       'operate-focus-areas',  6),
+  ('2.3', 'food-beverages',                               'operate-focus-areas',  6),
+  ('2.4', 'members-and-visitors',                         'operate-focus-areas',  5),
+  ('2.5', 'team',                                         'operate-focus-areas',  4),
+  ('2.6', 'monthly-check-up',                             'operate-focus-areas',  3),
+  ('3.1', 'plan-the-calendar',                            'program-focus-areas',  3),
+  ('3.2', 'plan-an-event',                                'program-focus-areas',  5),
+  ('3.3', 'work-with-artists-and-speakers',               'program-focus-areas',  5),
+  ('3.4', 'promote-the-event',                            'program-focus-areas',  4),
+  ('3.5', 'learn-the-event',                              'program-focus-areas',  2),
+  ('3.6', 'connect-to-the-wider-palestine-house-network', 'program-focus-areas',  4),
+  ('4.1', 'marketing',                                    'support-focus-areas',  5),
+  ('4.2', 'sponsorship-fundraising',                      'support-focus-areas',  5),
+  ('4.3', 'partnerships',                                 'support-focus-areas',  3),
+  ('4.4', 'ask-community-support-for-help',               'support-focus-areas',  1),
+  ('4.5', 'learn-from-other-palestine-houses',            'support-focus-areas',  2);
+
 do $guard$
 declare
-  new_live integer;
+  n_expected integer;
+  problems   text;
+  n_problems integer;
+  n_extra    integer;
 begin
-  select count(*) into new_live
-  from public.platform_topics t
-  join public.platform_groups g on g.id = t.group_id
-  join public.elements e on e.id = t.element_id
-  where e.code ~ '^[0-9]' and t.published and g.published;
-
-  if new_live <> 22 then
-    raise exception
-      'REFUSING TO RUN: % of the 22 new focus areas are live and visible. 0030 removes the legacy platform, so the replacement must be in place and published FIRST or every approved partner is left with an empty platform. Run the rollout and the cutover, then re-apply this migration.',
-      new_live;
+  select count(*) into n_expected from _pp7_expected;
+  if n_expected <> 22 then
+    raise exception '0030 guard: the manifest holds % focus areas, expected 22. The migration file has been edited.', n_expected;
   end if;
+
+  /* Every expected focus area, checked on all six properties at once. A LEFT
+     JOIN so a MISSING one is reported as missing rather than silently dropped
+     from the result — the failure mode a plain INNER JOIN count would hide. */
+  select string_agg(reason, E'\n  - ' order by code), count(*)
+    into problems, n_problems
+  from (
+    select
+      x.code,
+      x.code || ' /' || x.slug || ' — ' ||
+      case
+        when t.id is null then 'absent, or its slug/code/section do not match the manifest'
+        when not t.published then 'is a DRAFT'
+        when not g.published then 'its section (' || x.group_slug || ') is unpublished'
+        when coalesce(length(btrim(e.simple_guide_md)), 0) = 0 then 'has an empty guide body'
+        when guides.n <> 1 then 'has ' || guides.n || ' guide file(s), expected exactly 1'
+        when tpl.n <> x.templates then 'has ' || tpl.n || ' template(s), expected ' || x.templates
+      end as reason
+    from _pp7_expected x
+    left join public.elements e        on e.code = x.code
+    left join public.platform_topics t on t.element_id = e.id and t.slug = x.slug
+    left join public.platform_groups g on g.id = t.group_id and g.slug = x.group_slug
+    left join lateral (
+      select count(*) as n from public.resources r
+      where r.element_id = e.id and r.doc_key = 'guide'
+    ) guides on true
+    left join lateral (
+      select count(*) as n from public.resources r
+      where r.element_id = e.id
+        and r.is_public = false and r.doc_key is null and r.code is not null
+    ) tpl on true
+  ) checked
+  where reason is not null;
+
+  /* And nothing numeric-coded that the manifest does not name. Without this a
+     23rd new-looking focus area would pass unnoticed, and the 22-row count that
+     the old guard relied on would have been satisfied by 22 of 23. */
+  select count(*) into n_extra
+  from public.elements e
+  where e.code ~ '^[0-9]'
+    and not exists (select 1 from _pp7_expected x where x.code = e.code);
+
+  if n_problems > 0 or n_extra > 0 then
+    raise exception E'REFUSING TO RUN — the replacement platform is not fully in place.\n\n0030 deletes the legacy platform, so all 22 new focus areas must be present, published and complete FIRST, or every approved partner is left with an empty platform.\n\n%%%',
+      case when n_problems > 0 then '  - ' || problems || E'\n' else '' end,
+      case when n_extra > 0 then '  - ' || n_extra || ' numeric-coded element(s) exist that the manifest does not name' || E'\n' else '' end,
+      E'\nRun the rollout and the cutover, then re-apply this migration.';
+  end if;
+
+  raise notice '0030 guard: all 22 focus areas verified — slug, code, section, published, guide body, 1 guide file, and template counts.';
 end
 $guard$;
 
@@ -203,6 +301,44 @@ begin
   raise notice '0030 OK — 22 elements · 22 topics · 4 groups · 88 templates · 2 public booklets kept · 0 orphans';
 end
 $check$;
+
+-- ---------------------------------------------------------------------------
+-- PUBLICATION RE-CHECK, IMMEDIATELY BEFORE COMMIT (PP7).
+--
+-- The guard at the top ran before the deletions. Everything between then and
+-- here is a window: an admin using the CMS, a `cutover.ts --to draft`, or a
+-- half-finished script in another session can un-publish a focus area while this
+-- transaction is working, and under READ COMMITTED this statement will see it.
+--
+-- The window is small and the consequence is not. Committing after the legacy
+-- platform is gone AND the replacement has gone dark leaves every approved
+-- partner with an empty platform and no automatic way back — the down-migration
+-- restores rows, but the operator has to know to run it.
+--
+-- So the last thing this transaction does before committing is ask again.
+-- Failing here rolls the whole migration back, which is the cheap outcome.
+-- ---------------------------------------------------------------------------
+do $recheck$
+declare
+  n_live integer;
+  n_dark integer;
+begin
+  select
+    count(*) filter (where t.published and g.published),
+    count(*) filter (where not (t.published and g.published))
+  into n_live, n_dark
+  from public.platform_topics t
+  join public.platform_groups g on g.id = t.group_id;
+
+  if n_live <> 22 or n_dark <> 0 then
+    raise exception
+      'REFUSING TO COMMIT: % of 22 focus areas are live and % are dark at the end of this migration. Something un-published content while 0030 was running. Nothing has been deleted — the transaction is rolled back. Re-publish, then re-apply.',
+      n_live, n_dark;
+  end if;
+
+  raise notice '0030 re-check: all 22 focus areas still live at commit time.';
+end
+$recheck$;
 
 commit;
 

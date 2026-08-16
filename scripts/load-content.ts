@@ -63,6 +63,7 @@ import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
+import { findByCode } from "./lib/identity";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
@@ -268,6 +269,7 @@ type TopicRow = {
   id: string;
   element_id: string;
   element_slug: string;
+  element_code: string;
   slug: string;
   published: boolean;
 };
@@ -280,7 +282,7 @@ async function upsertFocusArea(
   const { data, error } = await db.rpc("admin_list_platform_topics");
   if (error) throw error;
   const rows = (data as TopicRow[] | null) ?? [];
-  const existing = rows.find((t) => t.slug === fa.slug) ?? null;
+  const existing = findByCode(rows, fa);
 
   /* REFUSE TO REWRITE LIVE CONTENT WITHOUT BEING TOLD TO.
      This script never changes the Draft/Live flag — but that is not the same as
@@ -329,8 +331,8 @@ async function upsertFocusArea(
 
   const { data: after, error: afterErr } = await db.rpc("admin_list_platform_topics");
   if (afterErr) throw afterErr;
-  const row = ((after as TopicRow[] | null) ?? []).find((t) => t.slug === fa.slug);
-  if (!row) throw new Error(`focus area "${fa.slug}" is missing immediately after upsert`);
+  const row = ((after as TopicRow[] | null) ?? []).find((t) => t.element_code === fa.code);
+  if (!row) throw new Error(`focus area ${fa.code} "/${fa.slug}" is missing immediately after upsert`);
   return row;
 }
 
@@ -645,8 +647,11 @@ async function run(
   const known = (preRows as TopicRow[] | null) ?? [];
 
   if (!ALLOW_LIVE) {
+    /* By CODE, not slug (see findExisting): a renamed focus area is invisible to
+       a slug lookup, so this guard used to wave through exactly the published
+       row it exists to protect. */
     const live = targets
-      .map((fa) => known.find((t) => t.slug === fa.slug))
+      .map((fa) => findByCode(known, fa))
       .filter((t): t is TopicRow => Boolean(t?.published));
     if (live.length) {
       throw new Error(
@@ -662,7 +667,7 @@ async function run(
   /* The code-shift check belongs here too, for the same reason: it decides that
      the run is unsafe, so it must decide it before the run has written anything. */
   for (const fa of targets) {
-    const topic = known.find((t) => t.slug === fa.slug);
+    const topic = findByCode(known, fa);
     if (!topic) continue;
     const { data, error } = await db.rpc("admin_list_resource_files", {
       p_element_id: topic.element_id,
