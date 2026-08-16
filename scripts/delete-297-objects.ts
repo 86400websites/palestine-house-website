@@ -273,7 +273,11 @@ async function run(
 
   console.log(`\nDeleted ${legacy.length}. The ${keep} new objects are untouched.`);
   console.log(`The only copy of those files is now ${path.relative(ROOT, ARCHIVE)} — do not delete it.`);
-  console.log(`Next: apply supabase/sql/migrations/0030_content_v2_cutover.up.sql`);
+  /* 0030 ran BEFORE this script (PP7 reversed the order), and the preflight
+     above refused to start until it had confirmed so. Nothing follows. */
+  console.log(`0030 was already applied — this was the last destructive step. Verify with`);
+  console.log(`  supabase/sql/verification/0030_verify_PROD_safe_readonly.sql`);
+  console.log(`To put these files back: pnpm exec tsx scripts/restore-297-objects.ts`);
 }
 
 main().catch((e) => {
