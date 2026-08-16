@@ -154,3 +154,53 @@ database read — but the public site now advertises 33 focus areas by name that
 exist nowhere. PP7's scope has been widened accordingly, with the note that the
 new public wording is **copy, a locked input**: the owner supplies or approves it
 before PP7 writes a line.
+
+
+---
+
+## The independent review — BLOCKING, and right for the third time in this series
+
+Booked at the exit gate over the whole PP1→PP6c body of work. **11 blocking + 4
+medium findings.** Six are fixed here; the rest became **PP7 (new)**, and the old
+PP7 was renumbered **PP8**.
+
+### Fixed in this sprint
+
+| # | Finding | Evidence |
+|---|---|---|
+| 🔴 | **The gated corpus was already public.** `docs/content-v2-spec.json` carries all 22 guide bodies — 68,492 chars — tracked since `664b7ec` (PP6b). | Verified three ways: tracked, 22/22 bodies, introducing commit an ancestor of public `main`. **Owner declassified it, 2026-08-16.** |
+| 🔴 | **A fifth way the cover strip ate owner structure.** A heading could still be consumed as the continuation of a wrapped title. | Reproduced, fixed, 4 new cases. |
+| 🔴 | **Still non-idempotent at the removal cap.** | Reproduced with `Alpha Beta`, fixed. |
+| 🔴 | **Blanket-gate failure open since `0013`** — `programming_sessions_select_own` had ownership but no approval check. | Fixed in `0031`, applied + verified on TEST. |
+| 🔴 | **`--target prod` was silently ignored**, so a run intended for production went to TEST. | `scripts/lib/argv.ts`; verified it now refuses. |
+| 🟠 | **"Read-only" script mutated Auth state** via global-scope `signOut()`. | Local scope, in `finally`. |
+
+### The disclosure, and why it was missed here
+
+This sprint was careful about the 297 object paths at 6c-b and about the
+down-migration at 6c-g — and *inherited* the spec file without ever asking whether
+it was already tracked. **Caution applied to new artefacts does not extend itself
+to old ones.** The withholding was also, in hindsight, incoherent: the same content
+was already public by another route.
+
+### What the review refuted
+
+**Four of the eight claims put to it.** C1 — the `0030` guard counts *any* 22 live
+numeric-coded rows, so a decoy passes. C3 — the backup verifier can overwrite the
+archive before the aggregate check fails. C5 — SQL and API deletion are uncoupled
+in both directions. C7 — the disclosure above. C2, C4, C6 and C8 held.
+
+**The pattern across all three rounds is the same one PP6b named and this sprint
+still did not escape:** a test that exercises the safe variant of a risk reads as
+coverage and is not. The suite already had a case for two consecutive *headings*
+concatenating to the title, and it passed. The dangerous shape — a plain line
+followed by a heading — had never been written, in a round that had explicitly gone
+looking for exactly this class of bug.
+
+### And the tally worth carrying forward
+
+**Five probe bugs this sprint. Zero product defects found by probes.** Every real
+defect came either from running the product or from the reviewer. The probes found
+nothing but their own mistakes — a hardcoded bucket, a title match, a
+one-statement-per-line assumption, bash `$` mangling, and `NOT (a OR NULL)` being
+NULL in SQL. That is worth knowing before trusting the next verification script.
