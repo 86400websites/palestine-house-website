@@ -1,0 +1,12 @@
+{
+  "generatedBy": "scripts/backup-297-objects.ts (PP6c step 6c-b)",
+  "purpose": "Cold backup of the 297 legacy template objects deleted by migration 0030 (D-PP-k). A .down.sql restores rows, never Storage objects — these files are the only copy.",
+  "exportedFrom": "TEST (sdszcralogcrujtyghig), whose 297 legacy objects are byte-identical to production's",
+  "archiveDir": "docs/source-assets/_archive-297-templates/ (gitignored)",
+  "objectCount": 297,
+  "totalBytes": 5320962,
+  "fingerprint": "6fde792718130d12071b69459f9d70ab",
+  "fingerprintFormula": "md5(join('\\n', sorted `name|md5|size`)), computed from the bytes on disk. Server equivalent: md5(string_agg(name||'|'||replace(metadata->>'eTag','\"','')||'|'||(metadata->>'size'), E'\\n' order by name)) — the replace() is required because Storage stores eTags quoted.",
+  "objectListing": "withheld from the public repo by design — see docs/source-assets/_archive-297-templates/_manifest-full.json (gitignored), or re-run this script to regenerate it",
+  "howToVerify": "pnpm exec tsx scripts/backup-297-objects.ts — re-hashes every archived file and re-asserts count, total bytes and fingerprint against production's measured values."
+}

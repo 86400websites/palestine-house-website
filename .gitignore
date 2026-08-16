@@ -42,3 +42,9 @@ docs/source-assets/
 
 # The owner's mockup copy at docs/ root — kept on disk until the PP series closes (PP7); never commit it
 docs/PH - Palestine House Final.html
+
+# PP6c: 0030's down-migration carries 1.6 MB of guide prose as literal inserts
+# (D-PP-k requires the bodies to be restorable). It was withheld from git while
+# that prose was treated as approval-gated; the owner DECLASSIFIED it on
+# 2026-08-16, so it is now committed — which is also what makes the rollback
+# operationally recoverable rather than a mutable local file.

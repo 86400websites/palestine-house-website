@@ -61,6 +61,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { parseArgs } from "./lib/argv";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
@@ -82,18 +83,47 @@ const CONTENT_TYPE: Record<string, string> = {
   pdf: "application/pdf",
 };
 
-const DRY_RUN = process.argv.includes("--dry-run");
-const ALL = process.argv.includes("--all");
+/* STRICT. An unknown argument is an error, never a no-op — the review of
+   2026-08-16 rated this Certain, because D-PP-r documented `--target prod`,
+   the owner was told to use it, and this script silently ignored it and ran
+   against TEST. `--target` is accepted here ONLY so that it fails loudly with
+   an explanation until PP7 implements it; it is not a working flag. */
+const ARGS = parseArgs(process.argv.slice(2), {
+  flags: ["--dry-run", "--all", "--allow-live", "--replace-files", "--photos-only"],
+  options: ["--focus", "--target"],
+});
+
+const TARGET = ARGS.get("--target");
+if (TARGET !== null) {
+  throw new Error(
+    `--target is NOT IMPLEMENTED. This script targets the TEST project only, and ` +
+      `asserts the TEST host before its first request. ` +
+      `D-PP-r designs a production path and PP7 builds it; until then, passing ` +
+      `--target ${TARGET} would have been silently ignored and this run would have ` +
+      `written to TEST while you believed otherwise. Refusing instead.`,
+  );
+}
+
+const DRY_RUN = ARGS.has("--dry-run");
+const ALL = ARGS.has("--all");
 /* Permission to rewrite a focus area partners can already see. Off by default. */
-const ALLOW_LIVE = process.argv.includes("--allow-live");
+const ALLOW_LIVE = ARGS.has("--allow-live");
 /* Re-upload the bytes of files that are already registered. Off by default,
    because matching by code cannot tell an edited document from an unchanged
    one — see replaceBytes(). */
-const REPLACE_FILES = process.argv.includes("--replace-files");
-const FOCUS = (() => {
-  const i = process.argv.indexOf("--focus");
-  return i === -1 ? null : process.argv[i + 1];
-})();
+const REPLACE_FILES = ARGS.has("--replace-files");
+/* Copy the mapped topic photographs into the working tree and stop, without
+   connecting to anything. Added at PP6c step 6c-c so the 21 new binaries land
+   in their own reviewable commit instead of inside the content-load commit,
+   and so a later photo remap in content-migration-map.md §4 can be applied on
+   its own. It reuses ensurePhoto() rather than reimplementing the copy — one
+   mechanism, which is the same reason D-PP-r put the production path behind a
+   flag on this script instead of in a second script. Safe without the preflight
+   guards because it writes no database row and touches no partner-visible
+   surface: every target filename is new (verified at 6c-c — 22 distinct sources
+   to 22 distinct targets, none of which is a live photo). */
+const PHOTOS_ONLY = ARGS.has("--photos-only");
+const FOCUS = ARGS.get("--focus");
 
 if (!ALL && !FOCUS) {
   throw new Error("Pass --focus <N.M> (e.g. --focus 1.1) or --all");
@@ -576,6 +606,24 @@ async function main(): Promise<void> {
   console.log(
     `PP6b content load — ${targets.length} focus area(s) — ${DRY_RUN ? "DRY RUN" : "LIVE"}`,
   );
+
+  /* --photos-only: working-tree copies, then stop. Deliberately BEFORE
+     connect(), so it needs no credentials, opens no session and cannot write a
+     row even by accident. */
+  if (PHOTOS_ONLY) {
+    console.log("--photos-only: copying mapped photographs, no database connection\n");
+    for (const fa of targets) {
+      console.log(`${fa.number} ${fa.title}`);
+      await ensurePhoto(fa);
+    }
+    console.log(
+      DRY_RUN
+        ? "\nDry run complete — nothing written."
+        : "\nPhotographs copied. Nothing else was touched; `git add public/assets/workspace/topics`.",
+    );
+    return;
+  }
+
   const db = await connect();
 
   /* PREFLIGHT, BEFORE ANY MUTATION ANYWHERE.

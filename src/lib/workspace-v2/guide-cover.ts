@@ -262,6 +262,22 @@ export function stripGuideCover(
     if (inspected >= MAX_COVER_LINES + MAX_TITLE_LINES) break;
     inspected += 1;
 
+    /* A MARKDOWN HEADING NEVER CONTINUES A WRAPPED TITLE — the fifth way this
+       function was found deleting structure the owner wrote (independent review,
+       2026-08-16). The heading guard below already refused to START a provisional
+       run on a heading, but a run already in flight was resolved by classifyLine
+       BEFORE any heading check could see the continuation, so:
+
+           SIMPLE GUIDE
+           Connect to the Wider Palestine
+           ## House Network          <- deleted
+           A real paragraph.
+
+       lost the owner's heading. Checked here, before classification, so the
+       provisional lines survive intact. The real wrapped covers use bold, never
+       headings, so nothing legitimate is lost by refusing. */
+    if (pending && /^\s*#/.test(lines[i])) break;
+
     const verdict = classifyLine(lines[i], titleKeys, sectionKey, pending);
     /* null = a title was mid-flight and this line did not continue it. Break
        WITHOUT advancing `cut`, so the held-back lines survive. */
@@ -275,7 +291,26 @@ export function stripGuideCover(
        Refusing is also the conservative answer — showing a banner is better
        than half-removing one. Found by the independent review, 2026-08-15. */
     if (removed >= MAX_COVER_LINES) {
-      if (verdict.cover) return markdown;
+      /* ⚠️ `verdict.cover` alone was NOT enough, and the gap was still
+         reachable (independent review, 2026-08-16). A line that is not cover on
+         its own can still OPEN another provisional cover run — a banner
+         carrying the first half of a wrapped title, say — and breaking here
+         committed a prefix that a second pass then finished:
+
+             8 × "SIMPLE GUIDE", "SIMPLE GUIDE Alpha", "Beta", "Body"
+             title "Alpha Beta"
+             pass 1 -> "SIMPLE GUIDE Alpha\nBeta\nBody"
+             pass 2 -> "Body"                       f(f(x)) !== f(x)
+
+         So the cap refuses on anything that could still be cover in ANY sense:
+         confirmed cover, a bare marker, or the opening of a wrapped title.
+         Returning the document untouched is both idempotent and the
+         conservative answer — a visible banner beats a half-removed one. */
+      const couldStillBeCover =
+        verdict.cover ||
+        verdict.marker ||
+        Boolean(unfinishedTitleTail(verdict.residue, titleKeys));
+      if (couldStillBeCover) return markdown;
       break;
     }
 
