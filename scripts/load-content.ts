@@ -8,7 +8,8 @@
  *
  *   pnpm exec tsx scripts/load-content.ts --focus 1.1 --dry-run
  *   pnpm exec tsx scripts/load-content.ts --focus 1.1
- *   pnpm exec tsx scripts/load-content.ts --all            # PP6c
+ *   pnpm exec tsx scripts/load-content.ts --all                   # PP6c, TEST
+ *   pnpm exec tsx scripts/load-content.ts --all --target prod     # PP7, the owner
  *
  * IT DRIVES THE CMS's OWN RPCs, AND THAT IS THE POINT
  * ---------------------------------------------------
@@ -34,9 +35,17 @@
  *
  * SAFETY
  * ------
- * TEST only. The target host is asserted against the known TEST project ref
- * before a single request, and the credentials are read out of `.env.local` by
- * this script — they are never passed on a command line or printed.
+ * TEST BY DEFAULT. Production requires `--target prod`, typed out, and PP7 built
+ * it so that reaching production by accident is impossible rather than unlikely:
+ * the `PROD_*` variables are read BY NAME with **no fallback** to the default
+ * client, the host is asserted exactly before the first request, and a typed
+ * confirmation naming the production project ref is demanded after every guard
+ * has passed and before the first write. If stdin is not a terminal it refuses
+ * outright — a production load has a person at the keyboard, so it cannot be
+ * reached from a pipe, a CI job or an agent. Full reasoning at `connect()`.
+ *
+ * Credentials are read out of `.env.local` by this script — never passed on a
+ * command line, never printed.
  *
  * IDEMPOTENT. Re-running finds what it created last time — group by slug, focus
  * area by slug, and a file by its CODE (or doc_key for the guide, never by its
@@ -60,6 +69,7 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import * as readline from "node:readline/promises";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
@@ -78,6 +88,9 @@ const TOPIC_PHOTO_DIR = path.join(ROOT, "public/assets/workspace/topics");
    Development point here, which is why the pilot is reviewed here and why this
    script has no production mode at all. */
 const TEST_REF = "sdszcralogcrujtyghig";
+/* PROJECT-STATUS.md §6. Reachable only via `--target prod` and only with the
+   PROD_* credentials; see TARGETS below. */
+const PROD_REF = "jwogtqizqujwhbvpoziu";
 const BUCKET = "resources";
 
 /* Mirrors src/lib/admin/file-actions.ts. Word documents and PDFs only. */
@@ -96,16 +109,15 @@ const ARGS = parseArgs(process.argv.slice(2), {
   options: ["--focus", "--target"],
 });
 
-const TARGET = ARGS.get("--target");
-if (TARGET !== null) {
-  throw new Error(
-    `--target is NOT IMPLEMENTED. This script targets the TEST project only, and ` +
-      `asserts the TEST host before its first request. ` +
-      `D-PP-r designs a production path and PP7 builds it; until then, passing ` +
-      `--target ${TARGET} would have been silently ignored and this run would have ` +
-      `written to TEST while you believed otherwise. Refusing instead.`,
-  );
+/* D-PP-r, built at PP7 step 7-h. TEST unless production is asked for by name.
+   Anything else is an error rather than a default — "--target production" or
+   "--target PROD" silently becoming TEST is the same class of failure as the
+   ignored argument that made this flag necessary in the first place. */
+const TARGET_ARG = ARGS.get("--target");
+if (TARGET_ARG !== null && TARGET_ARG !== "test" && TARGET_ARG !== "prod") {
+  throw new Error(`--target must be "test" or "prod", not ${JSON.stringify(TARGET_ARG)}.`);
 }
+const TARGET: "test" | "prod" = TARGET_ARG === "prod" ? "prod" : "test";
 
 const DRY_RUN = ARGS.has("--dry-run");
 const ALL = ARGS.has("--all");
@@ -198,41 +210,140 @@ function step(message: string): void {
   console.log(`  ${message}`);
 }
 
+/**
+ * THE TWO TARGETS (D-PP-r, built at PP7 step 7-h).
+ *
+ * One pipeline, two destinations — rejected alternatives on the record: a
+ * separate production script would have been a second implementation of a
+ * pipeline that took two blocking review rounds to get right, and the bugs would
+ * have been in the copy rather than in the original.
+ *
+ * Everything here is designed so that an accidental production write is
+ * IMPOSSIBLE rather than merely unlikely:
+ *
+ *   - TEST is the default. Production requires `--target prod`, typed out.
+ *   - production reads the `PROD_*` variables BY NAME and **never falls back**
+ *     to the default client if they are absent. That is the specific defect the
+ *     `.env.local` incident of 2026-08-16 would have become under a laxer
+ *     design: `.env.local` had been pointed at production, and a script that
+ *     "just uses whatever is configured" would have written there believing it
+ *     was on TEST.
+ *   - each target asserts its own host EXACTLY, over https, before the first
+ *     request — so even correct-looking credentials pointed at the wrong project
+ *     stop the run.
+ *   - and no service key, ever. The admin's own session, because an upload that
+ *     succeeds through RLS proves the storage policies admit it, whereas one
+ *     that succeeds through a service key proves nothing.
+ */
+const TARGETS = {
+  test: {
+    label: "TEST",
+    ref: TEST_REF,
+    urlVar: "NEXT_PUBLIC_SUPABASE_URL",
+    keyVar: "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    emailVar: "TEST_PARTNER_EMAIL",
+    passwordVar: "TEST_PARTNER_PASSWORD",
+  },
+  prod: {
+    label: "PRODUCTION",
+    ref: PROD_REF,
+    urlVar: "PROD_SUPABASE_URL",
+    keyVar: "PROD_SUPABASE_PUBLISHABLE_KEY",
+    emailVar: "PROD_ADMIN_EMAIL",
+    passwordVar: "PROD_ADMIN_PASSWORD",
+  },
+} as const;
+
 async function connect(): Promise<SupabaseClient> {
+  const t = TARGETS[TARGET];
   process.loadEnvFile(path.join(ROOT, ".env.local"));
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const email = process.env.TEST_PARTNER_EMAIL;
-  const password = process.env.TEST_PARTNER_PASSWORD;
-  if (!url || !key) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL / _PUBLISHABLE_KEY in .env.local");
-  if (!email || !password) {
-    throw new Error("Missing TEST_PARTNER_EMAIL / TEST_PARTNER_PASSWORD in .env.local");
+
+  const url = process.env[t.urlVar];
+  const key = process.env[t.keyVar];
+  const email = process.env[t.emailVar];
+  const password = process.env[t.passwordVar];
+
+  /* NO FALLBACK. Named variables or nothing. */
+  const missing = [
+    [t.urlVar, url],
+    [t.keyVar, key],
+    [t.emailVar, email],
+    [t.passwordVar, password],
+  ]
+    .filter(([, v]) => !v)
+    .map(([n]) => n);
+  if (missing.length) {
+    throw new Error(
+      `--target ${TARGET} needs ${missing.join(", ")} in .env.local.\n` +
+        `This script reads ONLY those names for this target and never falls back to another ` +
+        `client, so a .env.local pointed somewhere else cannot silently redirect the run.`,
+    );
   }
 
   /* Exact host match over https, NOT a substring test, so a look-alike host can
-     never receive a session or a write. The same guard the old ingest carried. */
-  const parsed = new URL(url);
-  if (parsed.protocol !== "https:" || parsed.hostname !== `${TEST_REF}.supabase.co`) {
+     never receive a session or a write. */
+  const parsed = new URL(url!);
+  if (parsed.protocol !== "https:" || parsed.hostname !== `${t.ref}.supabase.co`) {
     throw new Error(
-      `Refusing to run against "${parsed.host}". This script targets the TEST project only ` +
-        `(https://${TEST_REF}.supabase.co); production content is loaded by PP6c, deliberately, by hand.`,
+      `${t.urlVar} is "${parsed.host}", not the ${t.label} project (https://${t.ref}.supabase.co). ` +
+        `Refusing: the target and the credentials must agree before anything is written.`,
     );
   }
-  console.log(`target: ${parsed.host} (TEST)`);
+  console.log(`target: ${parsed.host} (${t.label})`);
 
-  const db = createClient(url, key, { auth: { persistSession: false } });
-  const { error } = await db.auth.signInWithPassword({ email, password });
+  const db = createClient(url!, key!, { auth: { persistSession: false } });
+  const { error } = await db.auth.signInWithPassword({ email: email!, password: password! });
   if (error) throw new Error(`sign-in failed: ${error.message}`);
 
   const { data: isAdmin, error: adminErr } = await db.rpc("is_admin");
   if (adminErr) throw adminErr;
   if (isAdmin !== true) {
     throw new Error(
-      "The signed-in account is not an admin on this project, so no write RPC will accept it. " +
+      `The signed-in account is not an admin on ${t.label}, so no write RPC will accept it. ` +
         "If it was removed from `admins` for a partner-path test, put it back first.",
     );
   }
   return db;
+}
+
+/**
+ * THE TYPED CONFIRMATION (D-PP-r). Production only, mutations only.
+ *
+ * It sits AFTER the Live guard and the code-shift detector — a run that is going
+ * to be refused should be refused before a human is asked to type anything — and
+ * BEFORE the first write.
+ *
+ * The phrase is the production project ref rather than "yes", because "yes" is
+ * something the hands type without the eyes reading. And if stdin is not a
+ * terminal it REFUSES rather than assuming consent: a production load must have
+ * a person at the keyboard, so it cannot be reached from a script, a pipe, a CI
+ * job or an agent.
+ */
+async function confirmProduction(plan: string): Promise<void> {
+  const phrase = PROD_REF;
+  console.log(`\n${"=".repeat(72)}`);
+  console.log("YOU ARE ABOUT TO WRITE TO PRODUCTION.");
+  console.log(`${"=".repeat(72)}`);
+  console.log(plan);
+  console.log(`${"=".repeat(72)}`);
+
+  if (!process.stdin.isTTY) {
+    throw new Error(
+      "Refusing: --target prod requires a typed confirmation and stdin is not a terminal. " +
+        "A production load is done by a person at a keyboard, not by a pipe, a CI job or an agent.",
+    );
+  }
+
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const typed = (await rl.question(`\nType the production project ref (${phrase}) to proceed: `)).trim();
+    if (typed !== phrase) {
+      throw new Error("Confirmation did not match. Nothing has been written.");
+    }
+  } finally {
+    rl.close();
+  }
+  console.log("Confirmed.\n");
 }
 
 async function ensureGroup(
@@ -664,6 +775,27 @@ async function run(
     });
     if (error) throw error;
     assertCodesHaveNotShifted(fa, (data as ExistingFile[] | null) ?? []);
+  }
+
+  /* THE LAST THING BEFORE THE FIRST WRITE (D-PP-r). Every refusal above has
+     already had its chance, so anything that gets here is a run the script is
+     willing to perform — which is exactly the point at which a person should be
+     asked whether they meant production. Skipped for a dry run, which writes
+     nothing. */
+  if (TARGET === "prod" && !DRY_RUN) {
+    const existing = targets.filter((fa) => findByCode(known, fa));
+    const files = targets.reduce((n, fa) => n + fa.templates.length + 1, 0);
+    await confirmProduction(
+      [
+        `  project      ${PROD_REF}.supabase.co`,
+        `  focus areas  ${targets.length} (${existing.length} already exist and will be UPDATED, ` +
+          `${targets.length - existing.length} will be created as Draft)`,
+        `  files        up to ${files} uploads (${targets.length} guides + ` +
+          `${files - targets.length} templates)`,
+        `  publication  unchanged — this script never publishes and never un-publishes`,
+        `  photographs  copied into the working tree, not the database`,
+      ].join("\n"),
+    );
   }
 
   for (const fa of targets) {

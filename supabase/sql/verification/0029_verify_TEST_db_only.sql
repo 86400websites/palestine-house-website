@@ -7,6 +7,33 @@
 --
 -- NOTE on the convention: no 0028_verify_* file was ever written. 0029 restores
 -- the one-verification-file-per-migration rule rather than assuming it held.
+--
+-- ---------------------------------------------------------------------------
+-- REPAIRED AT PP7 STEP 7-h (2026-08-16)
+-- ---------------------------------------------------------------------------
+-- This file called five RPCs with signatures that no longer exist, so Postgres
+-- raised "function does not exist" and the run ABORTED EARLY — meaning the
+-- sections after it had never actually verified anything. `admin_delete_platform_topic`
+-- and `admin_delete_resource_file` both grew a `p_confirm_title` argument after
+-- this file was written (you must type the title back before a delete), and
+-- `admin_replace_resource_file` grew `p_element_id`. Fixed:
+--
+--   L424  admin_delete_platform_topic(v_topic)             -> (…, 'Get Legally Ready')
+--   L446  admin_delete_platform_topic(v_topic_with_files)  -> (…, v_files_title)
+--   L459  admin_delete_platform_topic(v_topic)             -> (…, 'Get Legally Ready')
+--   L699  admin_replace_resource_file(v_file, path)        -> (…, v_element, path)
+--   L737  admin_delete_resource_file(v_file)               -> (…, 'Venue Selection Checklist')
+--
+-- `v_topic_with_files` is chosen dynamically, so its title is now selected
+-- alongside its id rather than guessed.
+--
+-- Verified by extracting EVERY `public.*(…)` call site in this file and checking
+-- each against `pg_proc` on TEST, allowing for DEFAULT parameters
+-- (`pronargs - pronargdefaults <= argc <= pronargs`). **21 of 21 resolve.**
+-- Four apparent mismatches were investigated and are not defects: three are
+-- legitimate calls relying on defaults (`admin_register_resource_file` takes 3–8,
+-- `admin_update_platform_section` 3–13) and one was a function name inside a
+-- comment.
 
 -- ===========================================================================
 -- 0) The ceiling is gone at the table layer, and the A–K vocabulary is optional.
@@ -329,14 +356,17 @@ as $fn$
 declare
   v_admin uuid; v_approved uuid;
   v_group uuid; v_topic uuid; v_element uuid;
-  v_existing_group uuid; v_topic_with_files uuid;
+  v_existing_group uuid; v_topic_with_files uuid; v_files_title text;
   n int; r text; ids uuid[]; cnt int; s_first int; s_last int;
   el_before int; el_after int;
 begin
   select user_id into v_admin from public.admins limit 1;
   select id into v_approved from public.profiles where is_approved order by id limit 1;
   select id into v_existing_group from public.platform_groups where section_slug = 'setup' limit 1;
-  select t.id into v_topic_with_files
+  /* PP7: the title comes with the id. `admin_delete_platform_topic` requires the
+     caller to type the title back (added after this file was written), so a
+     dynamically chosen topic needs its title carried alongside. */
+  select t.id, t.title into v_topic_with_files, v_files_title
     from public.platform_topics t
    where exists (select 1 from public.resources r where r.element_id = t.element_id)
    limit 1;
@@ -418,7 +448,7 @@ begin
   perform set_config('request.jwt.claims',
     json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
   perform set_config('role', 'authenticated', true);
-  begin perform public.admin_delete_platform_topic(v_topic); r := 'ACCEPTED';
+  begin perform public.admin_delete_platform_topic(v_topic, 'Get Legally Ready'); r := 'ACCEPTED';
   exception when others then r := sqlerrm; end;
   perform set_config('role', 'postgres', true);
   insert into _0029_write_results values
@@ -440,7 +470,7 @@ begin
     json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
   perform set_config('role', 'authenticated', true);
   perform public.admin_set_platform_topic_published(v_topic_with_files, false);
-  begin perform public.admin_delete_platform_topic(v_topic_with_files); r := 'ACCEPTED';
+  begin perform public.admin_delete_platform_topic(v_topic_with_files, v_files_title); r := 'ACCEPTED';
   exception when others then r := sqlerrm; end;
   perform public.admin_set_platform_topic_published(v_topic_with_files, true);
   perform set_config('role', 'postgres', true);
@@ -453,7 +483,7 @@ begin
     json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
   perform set_config('role', 'authenticated', true);
   perform public.admin_set_platform_topic_published(v_topic, false);
-  perform public.admin_delete_platform_topic(v_topic);
+  perform public.admin_delete_platform_topic(v_topic, 'Get Legally Ready');
   perform set_config('role', 'postgres', true);
   select count(*) into el_after from public.elements;
   insert into _0029_write_results values
@@ -693,7 +723,8 @@ begin
   begin perform public.admin_register_resource_file(v_element,'https://evil.example/x.docx','Bad',null,'T04'); r := 'ACCEPTED';
   exception when others then r := sqlerrm; end;
   -- replace hands back the OLD key so the action can delete the object it replaced
-  old_path := public.admin_replace_resource_file(v_file, 'get-legally-ready/t01-venue-checklist-v2.docx');
+  old_path := public.admin_replace_resource_file(
+    v_file, v_element, 'get-legally-ready/t01-venue-checklist-v2.docx');
   perform public.admin_update_resource_meta(v_file, 'Venue Selection Checklist', 'T07', null, 'v2', 20);
   perform set_config('role', 'postgres', true);
   select count(*) into n from public.resources
@@ -727,8 +758,10 @@ begin
   perform set_config('request.jwt.claims',
     json_build_object('sub', v_admin, 'role', 'authenticated')::text, true);
   perform set_config('role', 'authenticated', true);
+  /* The title is what `admin_update_resource_meta` renamed it to a few lines
+     above, not the title it was registered under. */
   select f.storage_bucket, f.storage_path into del_bucket, del_path
-    from public.admin_delete_resource_file(v_file) f;
+    from public.admin_delete_resource_file(v_file, 'Venue Selection Checklist') f;
   cnt := public.admin_reorder_resource_files(array[v_guide]);
   perform set_config('role', 'postgres', true);
   select count(*) into n from public.resources where id = v_file;
