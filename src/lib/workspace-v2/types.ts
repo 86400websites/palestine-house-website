@@ -31,7 +31,16 @@ export type PwTopic = {
   /* The D-PP-f summary is the topic's own description + intro. There is no
      Overview card, and elements.overview_md is rendered nowhere. */
   description: string | null;
-  intro: string | null;
+  /* PP7 — the See More body, ALREADY RENDERED to sanitized HTML on the server.
+     `platform_topics.intro` is markdown: the Overview's remainder, which carries
+     bullet lists and `__bold__` goal lines. It was null on all 22 until PP7, so
+     the card rendered `{topic.intro}` as text and nothing showed the difference
+     — the moment it held content that would have printed literal dashes and
+     underscores on the card. Rendering happens through the same
+     marked + sanitize-html path as the guide reader; the raw markdown is
+     deliberately NOT carried to the client, so it cannot be rendered as text by
+     mistake a second time. */
+  introHtml: string | null;
   /* platform_topics.icon is deliberately NOT carried: the card renders the
      topic's photo, and its no-image fallback uses one generic mark rather than
      33 lucide imports for a state nobody should see. PP6 may need it again. */

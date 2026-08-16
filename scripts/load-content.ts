@@ -165,6 +165,8 @@ interface FocusAreaEntry {
   title: string;
   code: string;
   summary: string;
+  /** The Overview's remainder — `platform_topics.intro`, the See More body. */
+  intro: string;
   guideMd: string;
   guideFile: { fileName: string; relPath: string; title: string };
   photo: { source: string; target: string; imagePath: string };
@@ -431,7 +433,13 @@ async function upsertFocusArea(
     p_description: fa.summary,
     /* D-PP-m routes the whole of the Overview's remainder into the guide, so
        there is no second card line. Left empty rather than invented. */
-    p_intro: null,
+    /* PP7 — See More. D-PP-f's summary is `description` + `intro`, and `intro`
+       was null on all 22 because D-PP-m routed the Overview's remainder into the
+       guide instead. The owner asked for the card to expand to that remainder,
+       so it is now written here TOO — the same text in both places, which he
+       confirmed. Empty string normalised to null so a focus area with no
+       remainder gets no disclosure rather than an empty one. */
+    p_intro: fa.intro?.trim() ? fa.intro : null,
     p_icon: null,
     p_image_path: fa.photo.imagePath,
     p_image_position: "50% 50%",

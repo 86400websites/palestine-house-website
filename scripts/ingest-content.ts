@@ -350,6 +350,7 @@ export interface FocusAreaEntry {
   title: string;
   code: string; // elements.code — the delivered number
   summary: string; // platform_topics.description — the Overview's first sentence
+  intro: string;   // platform_topics.intro       — the Overview's remainder (See More)
   guideMd: string; // elements.simple_guide_md — Overview remainder + the guide
   /* The Simple Guide document itself, offered as the card's "Download Now".
      The same words the reader shows, as a file the partner can keep — which is
@@ -363,7 +364,7 @@ export interface FocusAreaEntry {
   photo: { source: string; target: string; imagePath: string };
   templates: TemplateEntry[];
   sourceDir: string;
-  stats: { overviewChars: number; guideChars: number; summaryChars: number };
+  stats: { overviewChars: number; guideChars: number; summaryChars: number; introChars: number };
 }
 
 export interface ContentSpec {
@@ -612,6 +613,18 @@ async function parseFocusArea(
     title,
     code: number,
     summary,
+    /* PP7 — the See More affordance (owner request, 2026-08-16).
+       `platform_topics.intro` is the second half of the D-PP-f summary model
+       (`description` + `intro`) and has been empty on all 22 since PP6c. It now
+       carries the Overview's REMAINDER: the card shows the opening sentence and
+       expands to the rest.
+
+       This is deliberately the SAME text that already opens the Simple guide.
+       D-PP-m routed the whole remainder into the guide body so a partner reading
+       Read Now starts at the owner's own words, and the owner confirmed the
+       duplication when asking for See More. Nothing is written or re-worded
+       here — the split point is unchanged, only its destination is new. */
+    intro: overviewRest,
     guideMd,
     /* Same naming rule as the templates: the delivered filename, minus its
        extension and version suffix, never re-worded. */
@@ -636,6 +649,7 @@ async function parseFocusArea(
       overviewChars: overviewMd.length,
       guideChars: guideMd.length,
       summaryChars: summary.length,
+      introChars: overviewRest.length,
     },
   };
 }
