@@ -5,147 +5,166 @@ import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 
 /* Focus Areas (/focus-areas) — the public, anon-safe map of the playbook:
-   titles + overviews only; full depth opens to approved partners. Copy
-   verbatim from docs/page-copy/01-public-pages/focus-areas.md; layout from
-   docs/page-designs/public/FocusAreas.app.jsx (approved mockup). */
+   titles + one-line summaries only; full depth opens to approved partners.
+   Layout from docs/page-designs/public/FocusAreas.app.jsx (approved mockup) —
+   unchanged by PP7; only the content model beneath it moved.
+
+   ---------------------------------------------------------------------------
+   REWRITTEN AT PP7 (D-PP-a), AND WHY IT COULD NOT WAIT
+   ---------------------------------------------------------------------------
+   D-PP-a was recorded as "public proof numbers". Grepped at PP6c's exit gate it
+   was much more: this page was a FULL PUBLIC MAP OF THE RETIRED IA BY NAME — 11
+   focus areas and 33 topics, every one of which migration 0030 deletes. Nothing
+   was broken for a visitor (these are static strings, no database read), but the
+   site advertised 33 topics by name that exist nowhere.
+
+   The real model is four sections → 22 focus areas → 88 templates (D-PP-k).
+
+   COPY PROVENANCE (D-PP-s, resolved 2026-08-16). CLAUDE.md holds copy verbatim
+   from docs/page-copy/ and never invents it. The owner granted a deliberate,
+   scoped exception here — "You can write your own copy please based on the
+   overview etc you already have for the new focus areas" — with a rule that
+   keeps it honest: **each focus area's public one-liner is its own Overview's
+   opening sentence**, the owner's wording, and already the private card summary.
+   Public and private therefore cannot drift. The only text written for this page
+   is the four section lines below, and each of those is a plain list of the
+   focus areas it contains — connective tissue, per
+   docs/page-copy/00-global/brand-voice.md.
+
+   The owner reviews this page on Preview before PP7 closes. */
 
 export const metadata: Metadata = {
   title: "Focus Areas",
   description:
-    "The full map of the playbook — eleven focus areas, thirty-three topics, 297 templates. Every title and overview is public; the full depth opens to approved partners.",
+    "The full map of the playbook — four sections, twenty-two focus areas, 88 templates. Every title and summary is public; the full depth opens to approved partners.",
 };
 
+/* 200+ checklist items is GONE, not updated: checklists were dropped at D-PP-b
+   and 0030 deletes the last 818 rows, so the number now describes nothing. */
 const FA_STATS = [
-  { n: "11", label: "focus areas" },
-  { n: "33", label: "topics" },
-  { n: "200+", label: "checklist items" },
-  { n: "297", label: "real templates" },
+  { n: "4", label: "sections" },
+  { n: "22", label: "focus areas" },
+  { n: "88", label: "real templates" },
   { n: "120", label: "day launch" },
 ] as const;
 
-const FA_AREAS = [
+/* The 22, in the owner's order, with his own opening sentences.
+   Source: docs/content-v2-spec.json — `summary` per focus area, which is also
+   what platform_topics.description holds for approved partners. */
+const FA_SECTIONS = [
   {
-    k: "A",
-    title: "The House Promise",
+    n: "1",
+    title: "Setup",
     blurb:
-      "Mission and values, the guest and member experience, and brand standards.",
-    topics: [
-      ["Mission, Values & Guest Promise", "Mission and values"],
-      ["Guest Journey & Member Journey", "The guest and member experience"],
-      ["Brand Experience Standards", "Brand standards"],
+      "Getting legally ready, planning the money, finding the space, building a team, and opening the doors.",
+    areas: [
+      [
+        "Get Legally Ready",
+        "Before we open our Palestine House, we need to make sure the basic legal and business setup is in place.",
+      ],
+      ["Plan the Money", "Before we open our Palestine House, we need a simple plan for the money."],
+      [
+        "Find and Prepare the Space",
+        "Once we are legally ready, we need to find a venue that will work well for our Palestine House.",
+      ],
+      [
+        "Build a Small Team",
+        "As we get ready to open, we need to think about who will run our Palestine House day to day.",
+      ],
+      [
+        "Get Ready To Open",
+        "Once the space, team and money are in place, we need a simple countdown to opening day.",
+      ],
     ],
   },
   {
-    k: "B",
-    title: "Operating Model & Governance",
+    n: "2",
+    title: "Operate",
     blurb:
-      "How a House runs, stays accountable, and meets its legal and ethical duties.",
-    topics: [
-      ["Operating Model", "How a House runs"],
-      ["Governance & Ethics", "Staying accountable"],
-      ["Legal, Compliance & Risk", "Legal and ethical duties"],
+      "Money, daily routines, food and drink, members and visitors, your team, and a monthly check-up.",
+    areas: [
+      ["Money", "Once we are open, we need a simple way to stay on top of our money."],
+      [
+        "Daily House Operations",
+        "Running our Palestine House day to day comes down to a few simple routines.",
+      ],
+      ["Food & Beverages", "If our Palestine House has a café or simple F&B offer, we keep it lean."],
+      [
+        "Members and Visitors",
+        "Our members and visitors are at the heart of our Palestine House, so we look after them well.",
+      ],
+      ["Team", "Once we are open, we need a simple way to look after our small team."],
+      [
+        "Monthly Check-Up",
+        "Instead of complex performance management, we have one monthly “How are we doing?” review.",
+      ],
     ],
   },
   {
-    k: "C",
-    title: "People System",
+    n: "3",
+    title: "Program",
     blurb:
-      "Structure and roles, hiring and training, and a values-driven team culture.",
-    topics: [
-      ["Org Structure & Roles", "Structure and roles"],
-      ["Hiring, Onboarding & Training", "Hiring and training"],
-      ["Performance Management & Culture", "A values-driven team culture"],
+      "Planning the calendar, running each event, working with artists, promoting it, and learning from it.",
+    areas: [
+      [
+        "Plan the Calendar",
+        "Before we plan any single event, we start with the calendar as a whole — a simple picture of what is coming up.",
+      ],
+      [
+        "Plan an Event",
+        "Once we know what’s on the calendar, we plan each event the same simple way, every time.",
+      ],
+      [
+        "Work with Artists and Speakers",
+        "When we bring in artists or speakers, we treat them professionally while keeping things simple.",
+      ],
+      [
+        "Promote the Event",
+        "Once an event is planned, we let people know about it the same simple way every time.",
+      ],
+      ["Learn the Event", "After every event, we take a few minutes to look back and learn."],
+      ["Connect to the Wider Palestine House Network", "We don’t have to do everything alone."],
     ],
   },
   {
-    k: "D",
-    title: "Programming & Cultural Quality",
+    n: "4",
+    title: "Support",
     blurb:
-      "The programming model, the Aswātna collaboration, and event production.",
-    topics: [
-      ["Programming Model & Pillars", "The programming model"],
-      ["Aswātna Studio Collaboration", "The Aswātna collaboration"],
-      ["Event Production SOPs", "Event production"],
-    ],
-  },
-  {
-    k: "E",
-    title: "Membership, Community & Service",
-    blurb:
-      "Membership, customer service and recovery, and community partnerships.",
-    topics: [
-      ["Membership Model & Benefits", "Membership"],
-      ["Customer Service & Recovery", "Customer service and recovery"],
-      ["Community Partnerships", "Community partnerships"],
-    ],
-  },
-  {
-    k: "F",
-    title: "Operations Engine",
-    blurb: "Facility, food and beverage, and inventory and procurement.",
-    topics: [
-      ["Facility Operations", "Facility"],
-      ["Food & Beverage Operations", "Food and beverage"],
-      ["Inventory & Procurement", "Inventory and procurement"],
-    ],
-  },
-  {
-    k: "G",
-    title: "Marketing, Communications & Growth",
-    blurb: "Local marketing, global campaigns, and the retail shop.",
-    topics: [
-      ["Local Marketing Playbook", "Local marketing"],
-      ["Global Campaigns", "Global campaigns"],
-      ["Retail / Shop Operations", "The retail shop"],
-    ],
-  },
-  {
-    k: "H",
-    title: "Finance, Reporting & Sustainability",
-    blurb:
-      "The business and revenue model, financial controls, and reporting and KPIs.",
-    topics: [
-      ["Business Model & Revenue", "The business and revenue model"],
-      ["Financial Operations & Controls", "Financial controls"],
-      ["Reporting, KPIs & Audits", "Reporting and KPIs"],
-    ],
-  },
-  {
-    k: "I",
-    title: "Quality Control & Continuous Improvement",
-    blurb:
-      "Technology and data, launching a new House, and crisis management.",
-    topics: [
-      ["Technology Stack & Data", "Technology and data"],
-      ["Launching a New House", "Launching a new House"],
-      ["Crisis Management", "Crisis management"],
-    ],
-  },
-  {
-    k: "J",
-    title: "Appendices & Tools Library",
-    blurb:
-      "Continuous improvement, the master template index, and sustainability and impact.",
-    topics: [
-      ["Continuous Improvement & Knowledge Sharing", "Continuous improvement"],
-      ["Templates & Master Index", "The master template index"],
-      ["Sustainability & Impact", "Sustainability and impact"],
-    ],
-  },
-  {
-    k: "K",
-    title: "Café & Culinary Experience",
-    blurb:
-      "Menu and Palestinian culinary identity, the coffee and tea program, and catering and culinary events.",
-    topics: [
-      ["Menu & Palestinian Culinary Identity", "Menu and culinary identity"],
-      ["Coffee, Tea & Beverage Program", "The coffee and tea program"],
-      ["Catering, Private Events & Culinary Programming", "Catering and culinary events"],
+      "Marketing, sponsorship and fundraising, partnerships, and the help of the wider network.",
+    areas: [
+      ["Marketing", "We need basic help to make people aware of our house and its programs."],
+      [
+        "Sponsorship & Fundraising",
+        "Sponsorship and fundraising help us grow, and we keep the process simple enough for a small team to run.",
+      ],
+      [
+        "Partnerships",
+        "Partnerships help us do more than we could alone, so we build simple, useful relationships with others in our city.",
+      ],
+      /* ⚠️ FOR THE OWNER'S PREVIEW REVIEW. This one reads as an internal note
+         about the website rather than a description of the focus area, and in
+         public it lands oddly — "our site" is the partner's House site, but a
+         visitor will read it as this one. It is reproduced verbatim anyway,
+         because D-PP-s's rule is the owner's own opening sentence and silently
+         rewriting his words is exactly what that rule exists to prevent. If he
+         wants it changed, the fix belongs in the Overview document, so public
+         and private move together. */
+      [
+        "Ask Community Support for Help",
+        "This should be one of the easiest and most visible things to do on our site.",
+      ],
+      [
+        "Learn from Other Palestine Houses",
+        "We’re part of a network of houses, and we can learn a lot from each other.",
+      ],
     ],
   },
 ] as const;
 
-const FA_CAPS = ["Overview", "Guide", "Checklist", "Video", "Templates"] as const;
+/* What opens behind the gate, per focus area (D-PP-f). "Checklist" is gone with
+   the checklists themselves; "Overview" is gone because there is no Overview
+   card — the summary above IS the overview. */
+const FA_CAPS = ["Summary", "Simple guide", "Video", "Templates"] as const;
 
 export default function FocusAreasPage() {
   return (
@@ -189,9 +208,10 @@ export default function FocusAreasPage() {
           <div className="fa-read-copy">
             <p className="ph-eyebrow">How to read this map</p>
             <p className="fa-read-text">
-              Each focus area (A–K) opens to its topics. On the public site you
-              can see every title and a short overview. The full guides,
-              checklists, videos, and templates open once you’re an approved
+              The playbook is organised into four sections — Setup, Operate,
+              Program and Support — and each section opens to its focus areas. On
+              the public site you can see every focus area and a short summary.
+              The full guides, videos, and templates open once you’re an approved
               partner.
             </p>
           </div>
@@ -199,15 +219,15 @@ export default function FocusAreasPage() {
             <p className="fa-key-line">
               <LockOpen size={17} aria-hidden="true" />
               <span>
-                <strong>Open to everyone</strong> — every topic title and a
-                short overview.
+                <strong>Open to everyone</strong> — every focus area and a short
+                summary.
               </span>
             </p>
             <p className="fa-key-line">
               <Lock size={17} aria-hidden="true" />
               <span>
-                <strong>Open to partners</strong> — guides, checklists, videos,
-                and templates.
+                <strong>Open to partners</strong> — guides, videos, and
+                templates.
               </span>
             </p>
           </div>
@@ -218,27 +238,27 @@ export default function FocusAreasPage() {
       <section className="ph-section-lg ph-section-dark">
         <div className="ph-container">
           <Reveal className="sec-head fa-head-wide">
-            <p className="ph-eyebrow">Eleven focus areas · Thirty-three topics</p>
+            <p className="ph-eyebrow">Four sections · Twenty-two focus areas</p>
             <h2>The full map of the playbook.</h2>
           </Reveal>
           <div className="fa-index">
-            {FA_AREAS.map((a, i) => (
-              <Reveal key={a.k} delay={(i % 2) * 0.07}>
+            {FA_SECTIONS.map((s, i) => (
+              <Reveal key={s.n} delay={(i % 2) * 0.07}>
                 <article className="fa-entry">
                   <div className="fa-entry-head">
-                    <span className="fa-letter">{a.k}</span>
+                    <span className="fa-letter">{s.n}</span>
                     <div>
-                      <h3>{a.title}</h3>
-                      <p className="fa-entry-blurb">{a.blurb}</p>
+                      <h3>{s.title}</h3>
+                      <p className="fa-entry-blurb">{s.blurb}</p>
                     </div>
                   </div>
                   <ul className="fa-topics">
-                    {a.topics.map((t) => (
-                      <li key={t[0]} className="fa-topic">
+                    {s.areas.map((a) => (
+                      <li key={a[0]} className="fa-topic">
                         <Lock size={14} aria-hidden="true" />
                         <span>
-                          <span className="fa-topic-title">{t[0]}</span>
-                          <span className="fa-topic-sub">{t[1]}</span>
+                          <span className="fa-topic-title">{a[0]}</span>
+                          <span className="fa-topic-sub">{a[1]}</span>
                         </span>
                       </li>
                     ))}
@@ -269,8 +289,7 @@ export default function FocusAreasPage() {
           </h2>
           <p className="statement-sub">
             You have seen the map. Approved partners gain access to the practical
-            guides, step-by-step checklists, videos, and ready-to-use templates
-            behind every topic.
+            guides, videos, and ready-to-use templates behind every focus area.
           </p>
           <ApplyCta />
         </Reveal>

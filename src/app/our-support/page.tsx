@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  AlertTriangle,
   ArrowRight,
   BarChart3,
   BookOpen,
   Bookmark,
   CalendarDays,
-  CheckCircle2,
   Download,
   FileText,
   Info,
@@ -27,16 +25,20 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Our Support",
   description:
-    "What HQ gives every partner — the full playbook (11 focus areas, 33 topics, 297 templates), the standards, Aswātna, and support from first decision to open doors.",
+    "What HQ gives every partner — the full playbook (4 sections, 22 focus areas, 88 templates), the standards, Aswātna, and support from first decision to open doors.",
 };
 
 /* Hero proof row — the canonical numbers, shown under the lead (mockup).
-   Labels per the owner copy overhaul (2026-07-17); counts updated to 11 · 33 ·
-   297 with Focus Area 11 (FA11, 2026-07-18, decision D-FA11-a). */
+   Labels per the owner copy overhaul (2026-07-17).
+
+   PP7 / D-PP-a: 11 · 33 · 297 -> 4 · 22 · 88. The old figures described the
+   retired A–K curriculum that migration 0030 deletes; the delivered content is
+   four sections, 22 focus areas and 88 templates (D-PP-k). "Core topics" becomes
+   "focus areas" because the new model has no level between the two. */
 const SUP_PROOF = [
-  { icon: BookOpen, n: "11", label: "focus areas" },
-  { icon: LayoutGrid, n: "33", label: "core topics" },
-  { icon: FileText, n: "297", label: "ready-to-use templates" },
+  { icon: LayoutGrid, n: "4", label: "sections" },
+  { icon: BookOpen, n: "22", label: "focus areas" },
+  { icon: FileText, n: "88", label: "ready-to-use templates" },
   { icon: CalendarDays, n: "120", label: "day guided launch plan" },
 ] as const;
 
@@ -110,27 +112,23 @@ const SUP_STAGES = [
   },
 ] as const;
 
-/* Every topic ships the same six artefacts — shown as documents, not icons. */
+/* Every focus area ships the same four artefacts — shown as documents, not icons.
+   PP7 / D-PP-a: this was six. "A step-by-step checklist" and "What to watch for"
+   are removed because neither exists any more — checklists were dropped at
+   D-PP-b (and its text promised "progress saved as you work", which went with
+   them), and the watch-out body is rendered on no surface. What a partner
+   actually opens per focus area is the D-PP-f model: a summary, one Simple
+   guide, a video, and the templates. */
 const SUP_ARTEFACTS = [
   {
     icon: Info,
     name: "A clear overview",
-    text: "Understand what the topic covers and why it matters.",
+    text: "Understand what the focus area covers and why it matters.",
   },
   {
     icon: Bookmark,
     name: "A practical guide",
     text: "Plain-language advice designed to be useful in real working conditions.",
-  },
-  {
-    icon: CheckCircle2,
-    name: "A step-by-step checklist",
-    text: "Every action placed in a clear order, with progress saved as you work.",
-  },
-  {
-    icon: AlertTriangle,
-    name: "What to watch for",
-    text: "Common mistakes, risks, and decisions that need extra attention.",
   },
   {
     icon: Play,
@@ -191,11 +189,11 @@ export default function OurSupportPage() {
             <h2>A complete operating system, ready when you need it.</h2>
             <p className="ph-lead">
               Everything required to plan, open, and run a House is organised in
-              one place. The system is divided into eleven focus areas and
-              thirty-three practical topics, so you can concentrate on the
-              decisions that matter now without losing sight of what comes next.
+              one place. The system is divided into four sections and twenty-two
+              practical focus areas, so you can concentrate on the decisions that
+              matter now without losing sight of what comes next.
             </p>
-            <p className="sup-artefacts-intro">Every topic includes:</p>
+            <p className="sup-artefacts-intro">Every focus area includes:</p>
           </Reveal>
           <Reveal className="sup-artefacts">
             {SUP_ARTEFACTS.map((a) => (
@@ -217,7 +215,7 @@ export default function OurSupportPage() {
           <Reveal className="sup-templates">
             <p className="sup-templates-line">
               Start with proven tools, not a blank page. With{" "}
-              <strong>297 templates</strong> across the platform, your team can
+              <strong>88 templates</strong> across the platform, your team can
               spend less time creating documents from scratch and more time
               building the House itself.
             </p>

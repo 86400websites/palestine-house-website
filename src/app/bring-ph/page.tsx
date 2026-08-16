@@ -62,15 +62,17 @@ const BRING_STAGES: readonly StageCopy[] = [
   },
 ];
 
-/* Proof-band labels owner-approved (copy overhaul, 2026-07-17). Counts updated
-   to 11 · 33 · 297 when Focus Area 11 "Café & Culinary Experience" shipped
-   (FA11, 2026-07-18, decision D-FA11-a); 200+ and 120 unchanged. The band moved
-   here from Home §4 (owner, 2026-07-21) to sit below the three stages. */
+/* Proof-band labels owner-approved (copy overhaul, 2026-07-17). The band moved
+   here from Home §4 (owner, 2026-07-21) to sit below the three stages.
+
+   PP7 / D-PP-a: 11 · 33 · 297 -> 4 · 22 · 88, and "200+ Checklist actions" is
+   REMOVED rather than restated. Checklists were dropped at D-PP-b and migration
+   0030 deletes the last 818 rows, so the number describes nothing a partner can
+   reach. Five figures become four. */
 const BRING_PROOF = [
-  { n: "11", label: "Focus areas" },
-  { n: "33", label: "Core topics" },
-  { n: "200+", label: "Checklist actions" },
-  { n: "297", label: "Ready-to-use templates" },
+  { n: "4", label: "Sections" },
+  { n: "22", label: "Focus areas" },
+  { n: "88", label: "Ready-to-use templates" },
   { n: "120", label: "Day guided launch plan" },
 ] as const;
 
