@@ -541,6 +541,75 @@ check(
   body("Real content.", "__SIMPLE GUIDE__", "More content."),
 );
 
+/* ---------------------------------------------------------------------------
+   ROUND 3 — the independent review of 2026-08-16, on the whole PP series.
+   Both cases below were EXECUTED counterexamples, not hypotheses, and both
+   deleted or altered content the owner wrote.
+
+   Note what the pre-existing coverage looked like: there was already a case for
+   "two consecutive HEADINGS whose text concatenates to the title", and it
+   passed. The dangerous shape was a PLAIN line followed by a HEADING — a mixed
+   run — and it had never been written. That is the same trap PP6b's record
+   named ("a test that exercises the safe variant of a risk reads as coverage
+   and is not"), surviving a round that had explicitly looked for it.
+   --------------------------------------------------------------------------- */
+
+check(
+  "a HEADING never continues a wrapped title, even mid-run (round 3, Critical)",
+  stripGuideCover(
+    body(
+      "SIMPLE GUIDE",
+      "Connect to the Wider Palestine",
+      "## House Network",
+      "A real paragraph.",
+    ),
+    ["Connect to the Wider Palestine House Network"],
+    "Program",
+  ),
+  body("Connect to the Wider Palestine", "## House Network", "A real paragraph."),
+);
+
+/* The same shape with bold, which IS how the real wrapped covers are written,
+   must still be removed — otherwise the fix above would have been a
+   regression dressed up as a safety improvement. */
+check(
+  "a BOLD continuation of a wrapped title is still removed",
+  stripGuideCover(
+    body(
+      "SIMPLE GUIDE",
+      "__Connect to the Wider Palestine__",
+      "__House Network__",
+      "A real paragraph.",
+    ),
+    ["Connect to the Wider Palestine House Network"],
+    "Program",
+  ),
+  body("A real paragraph."),
+);
+
+{
+  /* At the removal cap, a line that is not cover ON ITS OWN can still open
+     another wrapped-title run. Committing the prefix made a second pass finish
+     the job the first abandoned. */
+  const atCap = body(
+    ...Array.from({ length: 8 }, () => "SIMPLE GUIDE"),
+    "SIMPLE GUIDE Alpha",
+    "Beta",
+    "Body",
+  );
+  const once = stripGuideCover(atCap, ["Alpha Beta"], "Program");
+  check(
+    "the removal cap refuses rather than committing a partial strip (round 3)",
+    once,
+    atCap,
+  );
+  check(
+    "…and is therefore idempotent at the cap: f(f(x)) === f(x)",
+    stripGuideCover(once, ["Alpha Beta"], "Program"),
+    once,
+  );
+}
+
 console.log(
   `\n${failures === 0 ? "ALL CHECKS PASSED" : `${failures} FAILURE(S)`}`,
 );
