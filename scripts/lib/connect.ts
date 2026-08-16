@@ -57,10 +57,22 @@ const TARGETS = {
 
 /** Parse the already-extracted `--target` value. Unknown values are an error,
  *  never a default — `--target production` silently becoming TEST is the same
- *  failure the flag exists to prevent. */
-export function resolveTarget(raw: string | null): TargetName {
+ *  failure the flag exists to prevent.
+ *
+ *  `requireExplicit` (round 5, H1): destructive and rollback scripts take NO
+ *  default at all. The rollback runbook once printed bare commands that would
+ *  have silently "restored" TEST while the operator believed production —
+ *  documentation drift cannot select a database if the script refuses to pick
+ *  one for you. */
+export function resolveTarget(raw: string | null, requireExplicit = false): TargetName {
   if (raw !== null && raw !== "test" && raw !== "prod") {
     throw new Error(`--target must be "test" or "prod", not ${JSON.stringify(raw)}.`);
+  }
+  if (raw === null && requireExplicit) {
+    throw new Error(
+      "This script requires an EXPLICIT --target test or --target prod. It is destructive or " +
+        "restorative, so it refuses to guess which database you mean.",
+    );
   }
   return raw === "prod" ? "prod" : "test";
 }

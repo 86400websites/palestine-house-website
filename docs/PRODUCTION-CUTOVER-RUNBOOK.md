@@ -43,16 +43,14 @@ statement, and only then removes the old.
 
 ```
  1  verify the archive            read-only, 5 seconds
- 2  apply 0032                    additive: one RPC, no table touched
+ 2  apply 0032                    additive: two RPCs, no table touched
  3  load  --target prod           creates 22 DRAFT focus areas + 110 files
  4  verify the load               nothing is visible to partners yet
  5  cutover --to live             ONE statement, all 22 at once
  6  eyeball the platform          this is the moment to stop if it looks wrong
- 7  apply 0030                    deletes the legacy ROWS
+ 7  apply PP7_finalize_prod.sql   0030 (legacy ROWS) + 0033 (contraction), one paste
  8  delete-297-objects            deletes the legacy BYTES
  9  verify the end state
---  ...live for a while...
-10  apply 0033                    ⚠️ after this, step 7 cannot be rolled back
 ```
 
 Steps 3–5 are additive and reversible: until step 5 nothing is visible, and step
@@ -60,6 +58,12 @@ Steps 3–5 are additive and reversible: until step 5 nothing is visible, and st
 is the only one no `.down.sql` can undo — which is why step 1 comes first and why
 steps 7 and 8 are in that order (rows before bytes: orphaned bytes are inert and
 retryable, live rows pointing at deleted files are not).
+
+`0033` used to be deferred by days as "the point of no return". Review round 5
+established that was wrong — `0033.down` restores everything `0030.down` needs,
+and the rehearsal executed that exact three-step rollback — so the contraction
+now runs the same day, in the same paste as `0030`. Rolling back after step 7 is
+`0033.down` → restore objects → `0030.down`, all rehearsed.
 
 ---
 

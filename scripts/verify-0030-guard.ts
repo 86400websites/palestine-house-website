@@ -37,8 +37,12 @@ interface Row {
   slug: string;
   group: string;
   templates: number;
+  title: string;
+  descMd5: string;
+  introMd5: string;
   guideMd5: string;
   tsetMd5: string;
+  filesMd5: string;
 }
 
 let failures = 0;
@@ -56,13 +60,25 @@ function parseManifest(sql: string): Row[] {
   const body = sql.slice(start, end);
 
   const rows: Row[] = [];
-  /* Six columns since review round 4 (H3): the two md5 hashes pin the CONTENT,
-     not only the identity. */
+  /* TEN columns since round 5 (H3): identity, every partner-visible text field,
+     and the file BYTES. The title cell may carry escaped quotes ('') — matched
+     non-greedily. */
   const re =
-    /\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*(\d+)\s*,\s*'([0-9a-f]{32})'\s*,\s*'([0-9a-f]{32})'\s*\)/g;
+    /\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*(\d+)\s*,\s*'((?:[^']|'')+)'\s*,\s*'([0-9a-f]{32})'\s*,\s*'([0-9a-f]{32})'\s*,\s*'([0-9a-f]{32})'\s*,\s*'([0-9a-f]{32})'\s*,\s*'([0-9a-f]{32})'\s*\)/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(body)) !== null) {
-    rows.push({ code: m[1], slug: m[2], group: m[3], templates: Number(m[4]), guideMd5: m[5], tsetMd5: m[6] });
+    rows.push({
+      code: m[1],
+      slug: m[2],
+      group: m[3],
+      templates: Number(m[4]),
+      title: m[5].replace(/''/g, "'"),
+      descMd5: m[6],
+      introMd5: m[7],
+      guideMd5: m[8],
+      tsetMd5: m[9],
+      filesMd5: m[10],
+    });
   }
   return rows;
 }
@@ -74,9 +90,13 @@ function main(): void {
     focusAreas: {
       number: string;
       slug: string;
+      title: string;
       sectionSlug: string;
+      summary: string;
+      intro: string;
       guideMd: string;
-      templates: { code: string; title: string }[];
+      guideFile: { md5: string };
+      templates: { code: string; title: string; md5: string }[];
     }[];
   };
 
@@ -86,9 +106,13 @@ function main(): void {
     slug: f.slug,
     group: groupOf.get(f.sectionSlug) ?? `!! no section "${f.sectionSlug}"`,
     templates: f.templates.length,
-    /* The exact formulas the guard evaluates in SQL:
-       md5(simple_guide_md) and
-       md5(string_agg(upper(code)||'|'||title, E'\n' order by upper(code))). */
+    /* The exact formulas the guard evaluates in SQL. files_md5 aggregates the
+       per-file byte-md5s (guide + templates, sorted) — the spec carries those
+       since round 5, computed from the delivered documents, and Storage
+       single-part eTags equal them. */
+    title: f.title,
+    descMd5: md5(f.summary),
+    introMd5: md5(f.intro),
     guideMd5: md5(f.guideMd),
     tsetMd5: md5(
       f.templates
@@ -96,6 +120,7 @@ function main(): void {
         .sort()
         .join("\n"),
     ),
+    filesMd5: md5([f.guideFile.md5, ...f.templates.map((t) => t.md5)].sort().join("\n")),
   }));
 
   const manifest = parseManifest(sql);
@@ -120,11 +145,17 @@ function main(): void {
     if (got.templates !== want.templates) {
       fail(`${want.code}: manifest expects ${got.templates} template(s), the spec ships ${want.templates}`);
     }
+    if (got.title !== want.title) fail(`${want.code}: manifest title "${got.title}" != spec "${want.title}"`);
+    if (got.descMd5 !== want.descMd5) fail(`${want.code}: manifest desc_md5 does not match the spec's summary`);
+    if (got.introMd5 !== want.introMd5) fail(`${want.code}: manifest intro_md5 does not match the spec's intro`);
     if (got.guideMd5 !== want.guideMd5) {
       fail(`${want.code}: manifest guide_md5 does not match md5 of the spec's guideMd`);
     }
     if (got.tsetMd5 !== want.tsetMd5) {
       fail(`${want.code}: manifest tset_md5 does not match the spec's template code/title set`);
+    }
+    if (got.filesMd5 !== want.filesMd5) {
+      fail(`${want.code}: manifest files_md5 does not match the spec's per-file byte hashes`);
     }
   }
 
@@ -151,8 +182,14 @@ function main(): void {
     ["requires a non-empty guide body", "simple_guide_md"],
     ["pins the guide body by md5 (H3)", "guide body does not match the owner"],
     ["pins the template set by md5 (H3)", "template code/title set does not match"],
+    ["pins the topic title (round 5)", "topic title does not match"],
+    ["pins the card description by md5 (round 5)", "card description does not match"],
+    ["pins the See More body by md5 (round 5)", "See More body does not match"],
+    ["pins the file BYTES by eTag-set md5 (round 5)", "stored file BYTES do not match"],
     ["asserts surviving objects exist in Storage (H3)", "Storage objects that DO NOT EXIST"],
     ["locks the four tables before the guard (H4)", "in exclusive mode"],
+    ["locks storage.objects too (round 5, H4)", "lock table storage.objects"],
+    ["re-verifies objects immediately before commit (round 5, H4)", "no longer exist. The transaction is rolled back"],
     ["requires exactly one guide file", "guide file(s), expected exactly 1"],
     ["checks per-area template counts", "template(s), expected"],
     ["rejects unnamed numeric-coded elements", "the manifest does not name"],

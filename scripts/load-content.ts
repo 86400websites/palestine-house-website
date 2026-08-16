@@ -72,6 +72,7 @@ import path from "node:path";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
+import { isDefinitiveRefusal } from "./lib/pg-errors";
 import { confirmProduction, connectTarget, resolveTarget } from "./lib/connect";
 import { findByCode } from "./lib/identity";
 import { assertCodesHaveNotShifted as checkShift } from "./lib/shift";
@@ -146,6 +147,8 @@ interface TemplateEntry {
   relPath: string;
   type: string;
   sortOrder: number;
+  /** md5 of the delivered bytes (round 5, H3) — what 0030's guard pins. */
+  md5: string;
 }
 interface FocusAreaEntry {
   number: string;
@@ -158,7 +161,7 @@ interface FocusAreaEntry {
   /** The Overview's remainder — `platform_topics.intro`, the See More body. */
   intro: string;
   guideMd: string;
-  guideFile: { fileName: string; relPath: string; title: string };
+  guideFile: { fileName: string; relPath: string; title: string; md5: string };
   photo: { source: string; target: string; imagePath: string };
   templates: TemplateEntry[];
 }
@@ -370,7 +373,16 @@ async function putFile(
   const { error: upErr } = await db.storage
     .from(BUCKET)
     .upload(args.key, bytes, { contentType, upsert: false });
-  if (upErr) throw new Error(`upload ${args.key}: ${upErr.message}`);
+  if (upErr) {
+    /* Round 5, H5 follow-through: an earlier AMBIGUOUS registration failure now
+       deliberately KEEPS the uploaded object, so a healing re-run can find its
+       own key already present. The key is deterministic for this exact file, so
+       "already exists" here means OUR bytes from the interrupted run — proceed
+       to register the row against them. Any other upload error still throws. */
+    const alreadyExists = /already exists|duplicate/i.test(upErr.message);
+    if (!alreadyExists) throw new Error(`upload ${args.key}: ${upErr.message}`);
+    step(`object ${args.key} already present from an interrupted run — registering against it`);
+  }
 
   const { error: regErr } = await db.rpc("admin_register_resource_file", {
     p_element_id: args.elementId,
@@ -383,10 +395,24 @@ async function putFile(
     p_sort_order: args.sortOrder,
   });
   if (regErr) {
-    /* Safe to remove: the upload above succeeded with upsert:false, so this key
-       did not exist a moment ago and belongs to nobody else. */
-    await db.storage.from(BUCKET).remove([args.key]);
-    throw new Error(`register "${args.title}": ${regErr.message}`);
+    /* Round 5, H5: compensate ONLY on a definitive database refusal. The key is
+       ours (upsert:false proved it did not exist a moment ago), but "ours" is
+       not the question — WHETHER THE ROW COMMITTED is. A five-char SQLSTATE
+       means the RPC ran and refused: nothing committed, the object is a true
+       orphan, remove it. An empty/absent code is a transport failure: the
+       registration may have committed with its response lost, in which case a
+       live row now points at this key and deleting it makes a broken download a
+       rerun cannot repair (the rerun sees the row as already registered). */
+    if (isDefinitiveRefusal(regErr)) {
+      await db.storage.from(BUCKET).remove([args.key]);
+      throw new Error(`register "${args.title}": ${regErr.message}`);
+    }
+    throw new Error(
+      `register "${args.title}" FAILED AMBIGUOUSLY (${regErr.message}). The row may or may not have ` +
+        `committed, so the uploaded object was KEPT:\n  ${args.key}\n` +
+        `Re-run this focus area: if the row committed, the run reports the file as already ` +
+        `registered; if it did not, the run re-registers this key. Either way nothing is lost.`,
+    );
   }
   return bytes.length;
 }
@@ -470,9 +496,7 @@ async function replaceBytes(
        without one is transport-level and AMBIGUOUS: keep BOTH objects — an
        orphan is 100 KB of dead weight, a deleted live object is a broken
        download — and have the operator settle it against the database. */
-    const code = (error as { code?: string }).code;
-    const definitiveRefusal = typeof code === "string" && /^[0-9A-Z]{5}$/.test(code);
-    if (definitiveRefusal) {
+    if (isDefinitiveRefusal(error)) {
       await db.storage.from(BUCKET).remove([key]);
       throw new Error(`replace "${row.title}" on ${fa.number}: ${error.message}`);
     }

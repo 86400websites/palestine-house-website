@@ -66,7 +66,11 @@ const CONTENT_TYPE: Record<string, string> = {
 
 const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"], options: ["--target"] });
 const DRY_RUN = ARGS.has("--dry-run");
-const TARGET = resolveTarget(ARGS.get("--target"));
+/* Round 5, H1: this is THE ROLLBACK TOOL — the one script most likely to be run
+   during an incident from a runbook. NO default target: --target test or
+   --target prod, typed, always. A bare command "restoring production" that
+   silently restored TEST is exactly the failure the reviewer constructed. */
+const TARGET = resolveTarget(ARGS.get("--target"), true);
 
 
 async function listAll(db: SupabaseClient, prefix = ""): Promise<Map<string, string>> {

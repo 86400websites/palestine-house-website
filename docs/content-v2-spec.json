@@ -47,6 +47,7 @@
       "guideFile": {
         "fileName": "Get Legally Ready Simple Guide.docx",
         "relPath": "1. SETUP/1.1 Get Legally ready/Get Legally Ready Simple Guide.docx",
+        "md5": "71cfe4cb2f1f9371ef58a992e5ff63dd",
         "title": "Get Legally Ready Simple Guide"
       },
       "photo": {
@@ -61,7 +62,8 @@
           "fileName": "Palestine House Brand Guide.docx",
           "relPath": "1. SETUP/1.1 Get Legally ready/Template-Samples/Palestine House Brand Guide.docx",
           "type": "guide",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "986079f3c6d861b069e438015a5086af"
         },
         {
           "code": "T02",
@@ -69,7 +71,8 @@
           "fileName": "Palestine House Setup Checklist.docx",
           "relPath": "1. SETUP/1.1 Get Legally ready/Template-Samples/Palestine House Setup Checklist.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "9fe19025828e473e7c529ce7e49af5de"
         }
       ],
       "sourceDir": "1. SETUP/1.1 Get Legally ready",
@@ -94,6 +97,7 @@
       "guideFile": {
         "fileName": "Plan the Money - Simple Guide_V.1.docx",
         "relPath": "1. SETUP/1.2 Plan the money/Plan the Money - Simple Guide_V.1.docx",
+        "md5": "91b33404994d21f7ce9e53f1dad8e2e0",
         "title": "Plan the Money - Simple Guide"
       },
       "photo": {
@@ -108,7 +112,8 @@
           "fileName": "Palestine House 12-Month Budget Template_V.1.docx",
           "relPath": "1. SETUP/1.2 Plan the money/Template-Samples/Palestine House 12-Month Budget Template_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "cf7d4bfc29faa06117d9f2fe77cb4866"
         },
         {
           "code": "T02",
@@ -116,7 +121,8 @@
           "fileName": "Palestine House Cash Flow Template_V.1.docx",
           "relPath": "1. SETUP/1.2 Plan the money/Template-Samples/Palestine House Cash Flow Template_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "c37a8753afca84b59104c48126664480"
         },
         {
           "code": "T03",
@@ -124,7 +130,8 @@
           "fileName": "Palestine House Opening Cost Checklist_V.1.docx",
           "relPath": "1. SETUP/1.2 Plan the money/Template-Samples/Palestine House Opening Cost Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "12369115d60a6da20da76e5210dd7e96"
         },
         {
           "code": "T04",
@@ -132,7 +139,8 @@
           "fileName": "Palestine House Revenue Ideas_V.1.docx",
           "relPath": "1. SETUP/1.2 Plan the money/Template-Samples/Palestine House Revenue Ideas_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "2a4e48e637c21e4e926ceee2b343c589"
         },
         {
           "code": "T05",
@@ -140,7 +148,8 @@
           "fileName": "Palestine House Startup Budget_V.1.docx",
           "relPath": "1. SETUP/1.2 Plan the money/Template-Samples/Palestine House Startup Budget_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "7f07fb96353a64126f37e24b15248ee3"
         }
       ],
       "sourceDir": "1. SETUP/1.2 Plan the money",
@@ -165,6 +174,7 @@
       "guideFile": {
         "fileName": "Find and Prepare the Space - Simple Guide_V.1.docx",
         "relPath": "1. SETUP/1.3 Find and prepare the space/Find and Prepare the Space - Simple Guide_V.1.docx",
+        "md5": "df7ab5e86807309dcd337c1347cb71e9",
         "title": "Find and Prepare the Space - Simple Guide"
       },
       "photo": {
@@ -179,7 +189,8 @@
           "fileName": "Basic Furniture & Equipment List_V.1.docx",
           "relPath": "1. SETUP/1.3 Find and prepare the space/Template-Samples/Basic Furniture & Equipment List_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "63bf5f34db0193206e1c3ad852b62088"
         },
         {
           "code": "T02",
@@ -187,7 +198,8 @@
           "fileName": "Pre-Opening Venue Checklist_V.1.docx",
           "relPath": "1. SETUP/1.3 Find and prepare the space/Template-Samples/Pre-Opening Venue Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "98341d497e307eec174b5d6d2a8802d6"
         },
         {
           "code": "T03",
@@ -195,7 +207,8 @@
           "fileName": "Venue Comparison Sheet_V.1.docx",
           "relPath": "1. SETUP/1.3 Find and prepare the space/Template-Samples/Venue Comparison Sheet_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "3ee483e8ae20faa90401bcf7d1ccc9b5"
         },
         {
           "code": "T04",
@@ -203,7 +216,8 @@
           "fileName": "Venue Selection Checklist_V.1.docx",
           "relPath": "1. SETUP/1.3 Find and prepare the space/Template-Samples/Venue Selection Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "4fd65bc02bc76c12013b75ea21f0ae97"
         }
       ],
       "sourceDir": "1. SETUP/1.3 Find and prepare the space",
@@ -228,6 +242,7 @@
       "guideFile": {
         "fileName": "Build the small team Simple Guide_V.1.docx",
         "relPath": "1. SETUP/1.4 Build the small team/Build the small team Simple Guide_V.1.docx",
+        "md5": "c1f2effd82d82c80175a1e7f2917676e",
         "title": "Build the small team Simple Guide"
       },
       "photo": {
@@ -242,7 +257,8 @@
           "fileName": "New Team Member Checklist_V.1.docx",
           "relPath": "1. SETUP/1.4 Build the small team/Template-Samples/New Team Member Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "ecccab9885c087a1e061c8c71cf8b221"
         },
         {
           "code": "T02",
@@ -250,7 +266,8 @@
           "fileName": "Role Description House Lead_V.1.docx",
           "relPath": "1. SETUP/1.4 Build the small team/Template-Samples/Role Description House Lead_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "6ccabd8847a053708463eeab4f6467a7"
         },
         {
           "code": "T03",
@@ -258,7 +275,8 @@
           "fileName": "Role Description Operations & Admin_V.1.docx",
           "relPath": "1. SETUP/1.4 Build the small team/Template-Samples/Role Description Operations & Admin_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "79e6373a06479495c2a6e6f7767d53aa"
         },
         {
           "code": "T04",
@@ -266,7 +284,8 @@
           "fileName": "Role Description Programming_Community_V.1.docx",
           "relPath": "1. SETUP/1.4 Build the small team/Template-Samples/Role Description Programming_Community_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "e3c514aa4c8d86389505eff4660f54c2"
         },
         {
           "code": "T05",
@@ -274,7 +293,8 @@
           "fileName": "Simple Team Structure_V.1.docx",
           "relPath": "1. SETUP/1.4 Build the small team/Template-Samples/Simple Team Structure_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "44faf1c487c8d28e0c0060f783bc49a6"
         }
       ],
       "sourceDir": "1. SETUP/1.4 Build the small team",
@@ -299,6 +319,7 @@
       "guideFile": {
         "fileName": "Get Ready to Open - Simple Guide_V.1.docx",
         "relPath": "1. SETUP/1.5 Get ready to open/Get Ready to Open - Simple Guide_V.1.docx",
+        "md5": "bc7124817a1ba3e16eaef060f01c9d01",
         "title": "Get Ready to Open - Simple Guide"
       },
       "photo": {
@@ -313,7 +334,8 @@
           "fileName": "30-Day Opening Checklist_V.1.docx",
           "relPath": "1. SETUP/1.5 Get ready to open/Template-Samples/30-Day Opening Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "aa7e219d55fe84ce0c41dd9cc3273d87"
         },
         {
           "code": "T02",
@@ -321,7 +343,8 @@
           "fileName": "90-Day Opening Checklist_V.1.docx",
           "relPath": "1. SETUP/1.5 Get ready to open/Template-Samples/90-Day Opening Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "1ea2d6e12186073fe9ee539c5ef04952"
         },
         {
           "code": "T03",
@@ -329,7 +352,8 @@
           "fileName": "Opening Day Run Sheet_V.1.docx",
           "relPath": "1. SETUP/1.5 Get ready to open/Template-Samples/Opening Day Run Sheet_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "07fb87eba4b650effeeef042ad044508"
         },
         {
           "code": "T04",
@@ -337,7 +361,8 @@
           "fileName": "Opening Week Checklist_V.1.docx",
           "relPath": "1. SETUP/1.5 Get ready to open/Template-Samples/Opening Week Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "4bb6758f4c6f7e09e04ceeb8702b4a61"
         }
       ],
       "sourceDir": "1. SETUP/1.5 Get ready to open",
@@ -362,6 +387,7 @@
       "guideFile": {
         "fileName": "Money - Simple Guide_V.1.docx",
         "relPath": "2. Operate/2.1 Money/Money - Simple Guide_V.1.docx",
+        "md5": "e177c751e6f2274991b562b6d6a64c19",
         "title": "Money - Simple Guide"
       },
       "photo": {
@@ -376,7 +402,8 @@
           "fileName": "Cash Flow Sheet_V.1.docx",
           "relPath": "2. Operate/2.1 Money/Template/Cash Flow Sheet_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "03c86a5e66c9f76a61a6e67fe44adca1"
         },
         {
           "code": "T02",
@@ -384,7 +411,8 @@
           "fileName": "Expense Form_V.1.docx",
           "relPath": "2. Operate/2.1 Money/Template/Expense Form_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "dc6831d7a4069c66bf4e2c4d25516bea"
         },
         {
           "code": "T03",
@@ -392,7 +420,8 @@
           "fileName": "Monthly Finance Summary_V.1.docx",
           "relPath": "2. Operate/2.1 Money/Template/Monthly Finance Summary_V.1.docx",
           "type": "report",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "1ec2c64b1198c62024789b73cd02b500"
         },
         {
           "code": "T04",
@@ -400,7 +429,8 @@
           "fileName": "Simple Financial Policy_V.1.docx",
           "relPath": "2. Operate/2.1 Money/Template/Simple Financial Policy_V.1.docx",
           "type": "guide",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "12893db5173ad36843103ec97f8d1cb9"
         },
         {
           "code": "T05",
@@ -408,7 +438,8 @@
           "fileName": "Supplier Payment Tracker_V.1.docx",
           "relPath": "2. Operate/2.1 Money/Template/Supplier Payment Tracker_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "08230b4ccab2f69c21521837b41ffa54"
         }
       ],
       "sourceDir": "2. Operate/2.1 Money",
@@ -433,6 +464,7 @@
       "guideFile": {
         "fileName": "Daily House Operations - Simple Guide_V.1.docx",
         "relPath": "2. Operate/2.2 Daily house operations/Daily House Operations - Simple Guide_V.1.docx",
+        "md5": "2693f89a54b25c2524d03474a20eda07",
         "title": "Daily House Operations - Simple Guide"
       },
       "photo": {
@@ -447,7 +479,8 @@
           "fileName": "Cleaning Checklist_V.1.docx",
           "relPath": "2. Operate/2.2 Daily house operations/Templates/Cleaning Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "8cfd3cb4aaca5801dbc04ac9d2777e53"
         },
         {
           "code": "T02",
@@ -455,7 +488,8 @@
           "fileName": "Daily Closing Checklist_V.1.docx",
           "relPath": "2. Operate/2.2 Daily house operations/Templates/Daily Closing Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "615170cc18d8c467e707b2b51b0ac67e"
         },
         {
           "code": "T03",
@@ -463,7 +497,8 @@
           "fileName": "Daily Opening Checklist_V.1.docx",
           "relPath": "2. Operate/2.2 Daily house operations/Templates/Daily Opening Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "fc604ba242885c1750e097c01f4e7dd9"
         },
         {
           "code": "T04",
@@ -471,7 +506,8 @@
           "fileName": "Incident Form_V.1.docx",
           "relPath": "2. Operate/2.2 Daily house operations/Templates/Incident Form_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "24811d1740a51112f3a717de6559fb7a"
         },
         {
           "code": "T05",
@@ -479,7 +515,8 @@
           "fileName": "Maintenance Log_V.1.docx",
           "relPath": "2. Operate/2.2 Daily house operations/Templates/Maintenance Log_V.1.docx",
           "type": "log",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "99d4103094a89ee2ce371d982b7ac402"
         },
         {
           "code": "T06",
@@ -487,7 +524,8 @@
           "fileName": "Weekly House Checklist_V.1.docx",
           "relPath": "2. Operate/2.2 Daily house operations/Templates/Weekly House Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 6
+          "sortOrder": 6,
+          "md5": "d9f2600fbaebe6567041e854bacac475"
         }
       ],
       "sourceDir": "2. Operate/2.2 Daily house operations",
@@ -512,6 +550,7 @@
       "guideFile": {
         "fileName": "Food and Beverage - Simple Guide_V.1.docx",
         "relPath": "2. Operate/2.3 Food & Beverage/Food and Beverage - Simple Guide_V.1.docx",
+        "md5": "d44cd041ea854893559915025dc6de83",
         "title": "Food and Beverage - Simple Guide"
       },
       "photo": {
@@ -526,7 +565,8 @@
           "fileName": "Daily F and B Sales Sheet_V.1.docx",
           "relPath": "2. Operate/2.3 Food & Beverage/Templates/Daily F and B Sales Sheet_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "e8f0aef4295ac2d69ef68348ab40928b"
         },
         {
           "code": "T02",
@@ -534,7 +574,8 @@
           "fileName": "Food Safety Checklist_V.1.docx",
           "relPath": "2. Operate/2.3 Food & Beverage/Templates/Food Safety Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "65e0f3117a3b7751283138b42e113ee8"
         },
         {
           "code": "T03",
@@ -542,7 +583,8 @@
           "fileName": "Food and Beverage Stock Sheet_V.1.docx",
           "relPath": "2. Operate/2.3 Food & Beverage/Templates/Food and Beverage Stock Sheet_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "a548e29f83b0bd67188e9fe005e74dc3"
         },
         {
           "code": "T04",
@@ -550,7 +592,8 @@
           "fileName": "Kitchen Opening and Closing Checklist_V.1.docx",
           "relPath": "2. Operate/2.3 Food & Beverage/Templates/Kitchen Opening and Closing Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "ea7773f42d8884ed77388674b5307ec2"
         },
         {
           "code": "T05",
@@ -558,7 +601,8 @@
           "fileName": "Menu Costing Sheet_V.1.docx",
           "relPath": "2. Operate/2.3 Food & Beverage/Templates/Menu Costing Sheet_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "98a428202e833994370672593555f389"
         },
         {
           "code": "T06",
@@ -566,7 +610,8 @@
           "fileName": "Simple Menu Template_V.1.docx",
           "relPath": "2. Operate/2.3 Food & Beverage/Templates/Simple Menu Template_V.1.docx",
           "type": "form",
-          "sortOrder": 6
+          "sortOrder": 6,
+          "md5": "8b26d0ec8f5aa2309e6b2457f8b03612"
         }
       ],
       "sourceDir": "2. Operate/2.3 Food & Beverage",
@@ -591,6 +636,7 @@
       "guideFile": {
         "fileName": "Members and Visitors - Simple Guide_V.1.docx",
         "relPath": "2. Operate/2.4 Members and Visitors/Members and Visitors - Simple Guide_V.1.docx",
+        "md5": "c767d5743698a3ae171f2b5d30cf3bea",
         "title": "Members and Visitors - Simple Guide"
       },
       "photo": {
@@ -605,7 +651,8 @@
           "fileName": "Membership Form_V.1.docx",
           "relPath": "2. Operate/2.4 Members and Visitors/Template/Membership Form_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "01bfbf2654b9f6dc8193bff5ab911c4f"
         },
         {
           "code": "T02",
@@ -613,7 +660,8 @@
           "fileName": "Membership Renewal Message_V.1.docx",
           "relPath": "2. Operate/2.4 Members and Visitors/Template/Membership Renewal Message_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "4c388681b06fe2adeeac842390d82773"
         },
         {
           "code": "T03",
@@ -621,7 +669,8 @@
           "fileName": "New Member Welcome Template_V.1.docx",
           "relPath": "2. Operate/2.4 Members and Visitors/Template/New Member Welcome Template_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "02f3516491da5183d7318556f237203c"
         },
         {
           "code": "T04",
@@ -629,7 +678,8 @@
           "fileName": "Simple Member List_V.1.docx",
           "relPath": "2. Operate/2.4 Members and Visitors/Template/Simple Member List_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "a89452670833c3fc4368b86db30db258"
         },
         {
           "code": "T05",
@@ -637,7 +687,8 @@
           "fileName": "Visitor Feedback Form_V.1.docx",
           "relPath": "2. Operate/2.4 Members and Visitors/Template/Visitor Feedback Form_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "7a0a7b13f936d9adeb777647fae7719c"
         }
       ],
       "sourceDir": "2. Operate/2.4 Members and Visitors",
@@ -662,6 +713,7 @@
       "guideFile": {
         "fileName": "Team - Simple Guide_V.1.docx",
         "relPath": "2. Operate/2.5 Team/Team - Simple Guide_V.1.docx",
+        "md5": "fe00481beb15c3f8dfb4f4618ea094f1",
         "title": "Team - Simple Guide"
       },
       "photo": {
@@ -676,7 +728,8 @@
           "fileName": "Leave Request Form_V.1.docx",
           "relPath": "2. Operate/2.5 Team/Template/Leave Request Form_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "b2917ed8759426d6f7895bdf06d6d15d"
         },
         {
           "code": "T02",
@@ -684,7 +737,8 @@
           "fileName": "Monthly Team Check-In Form_V.1.docx",
           "relPath": "2. Operate/2.5 Team/Template/Monthly Team Check-In Form_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "c28905fda92c042bc15640b6ac72add0"
         },
         {
           "code": "T03",
@@ -692,7 +746,8 @@
           "fileName": "Simple Role and Responsiblity Sheet_V.1.docx",
           "relPath": "2. Operate/2.5 Team/Template/Simple Role and Responsiblity Sheet_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "c0687913a82d1caf2ea680d71c7d6811"
         },
         {
           "code": "T04",
@@ -700,7 +755,8 @@
           "fileName": "Weekly Staff Schedule_V.1.docx",
           "relPath": "2. Operate/2.5 Team/Template/Weekly Staff Schedule_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "dc25d90357f3b0d09cc19dceda906fdc"
         }
       ],
       "sourceDir": "2. Operate/2.5 Team",
@@ -725,6 +781,7 @@
       "guideFile": {
         "fileName": "Monthly Check Up - Simple Guide_V.1.docx",
         "relPath": "2. Operate/2.6 Monthly Check Up/Monthly Check Up - Simple Guide_V.1.docx",
+        "md5": "0a3d221fa55f087412c90fcc7697460c",
         "title": "Monthly Check Up - Simple Guide"
       },
       "photo": {
@@ -739,7 +796,8 @@
           "fileName": "Monthly Action List_V.1.docx",
           "relPath": "2. Operate/2.6 Monthly Check Up/Template/Monthly Action List_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "67026e5a8edbfc86316f08a68e3ef5a8"
         },
         {
           "code": "T02",
@@ -747,7 +805,8 @@
           "fileName": "One-Page Monthly House Report_V.1.docx",
           "relPath": "2. Operate/2.6 Monthly Check Up/Template/One-Page Monthly House Report_V.1.docx",
           "type": "report",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "726bfc8ee85ebcad4359a2103d12c2e8"
         },
         {
           "code": "T03",
@@ -755,7 +814,8 @@
           "fileName": "Simple KPI Sheet_V.1.docx",
           "relPath": "2. Operate/2.6 Monthly Check Up/Template/Simple KPI Sheet_V.1.docx",
           "type": "report",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "9cc1846db4d80a9b6048903a00bfe163"
         }
       ],
       "sourceDir": "2. Operate/2.6 Monthly Check Up",
@@ -780,6 +840,7 @@
       "guideFile": {
         "fileName": "Plan the Calendar - Simple Guide_V.1.docx",
         "relPath": "3. Program/3.1 Plan the Calendar/Plan the Calendar - Simple Guide_V.1.docx",
+        "md5": "4ffae8ef3c320df9db678e6db4bace2d",
         "title": "Plan the Calendar - Simple Guide"
       },
       "photo": {
@@ -794,7 +855,8 @@
           "fileName": "Event Budget Template_V.1.docx",
           "relPath": "3. Program/3.1 Plan the Calendar/Template/Event Budget Template_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "e01ba7eeb599132ad155284106a2d52f"
         },
         {
           "code": "T02",
@@ -802,7 +864,8 @@
           "fileName": "Monthly Programming Calendar_V.1.docx",
           "relPath": "3. Program/3.1 Plan the Calendar/Template/Monthly Programming Calendar_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "497c17c62eb21eddfd071895f1eb06b2"
         },
         {
           "code": "T03",
@@ -810,7 +873,8 @@
           "fileName": "Simple Event Idea Form_V.1.docx",
           "relPath": "3. Program/3.1 Plan the Calendar/Template/Simple Event Idea Form_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "c8188b27eae286cb3b5c4cad47cf3928"
         }
       ],
       "sourceDir": "3. Program/3.1 Plan the Calendar",
@@ -835,6 +899,7 @@
       "guideFile": {
         "fileName": "Plan an Event - Simple Guide_V.1.docx",
         "relPath": "3. Program/3.2 Plan an Event/Plan an Event - Simple Guide_V.1.docx",
+        "md5": "27176545a27adeba50925f0677c1700f",
         "title": "Plan an Event - Simple Guide"
       },
       "photo": {
@@ -849,7 +914,8 @@
           "fileName": "Event Checklist_V.1.docx",
           "relPath": "3. Program/3.2 Plan an Event/Template/Event Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "020b5884626c63ce47b996e57c68b14d"
         },
         {
           "code": "T02",
@@ -857,7 +923,8 @@
           "fileName": "Event Feedback Form_V.1.docx",
           "relPath": "3. Program/3.2 Plan an Event/Template/Event Feedback Form_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "a79e7b6e2e6ccc1bb94dce922bab0356"
         },
         {
           "code": "T03",
@@ -865,7 +932,8 @@
           "fileName": "Event Run Sheet_V.1.docx",
           "relPath": "3. Program/3.2 Plan an Event/Template/Event Run Sheet_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "431a9148c6e4ffa454f38a4c2fa4e187"
         },
         {
           "code": "T04",
@@ -873,7 +941,8 @@
           "fileName": "Guest List_V.1.docx",
           "relPath": "3. Program/3.2 Plan an Event/Template/Guest List_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "3daa24689801b4bc4b5fcd5ed415db00"
         },
         {
           "code": "T05",
@@ -881,7 +950,8 @@
           "fileName": "Simple Event Budget_V.1.docx",
           "relPath": "3. Program/3.2 Plan an Event/Template/Simple Event Budget_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "dccffc685c92e4b3ddc0ea22afa04e6f"
         }
       ],
       "sourceDir": "3. Program/3.2 Plan an Event",
@@ -906,6 +976,7 @@
       "guideFile": {
         "fileName": "Work with Artists and Speakers - Simple Guide_V.1.docx",
         "relPath": "3. Program/3.3 Work with Artist and Speakers/Work with Artists and Speakers - Simple Guide_V.1.docx",
+        "md5": "858c9382fcbec834382e9fa7084b8e08",
         "title": "Work with Artists and Speakers - Simple Guide"
       },
       "photo": {
@@ -920,7 +991,8 @@
           "fileName": "Artist Hospitality Checklist_V.1.docx",
           "relPath": "3. Program/3.3 Work with Artist and Speakers/Template/Artist Hospitality Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "0f00a0fe87d20566d470baf939bf6dff"
         },
         {
           "code": "T02",
@@ -928,7 +1000,8 @@
           "fileName": "Artist Information Form_V.1.docx",
           "relPath": "3. Program/3.3 Work with Artist and Speakers/Template/Artist Information Form_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "8da0c6e19b7165c18e81d8bf430fecb9"
         },
         {
           "code": "T03",
@@ -936,7 +1009,8 @@
           "fileName": "Artist Payment Form_V.1.docx",
           "relPath": "3. Program/3.3 Work with Artist and Speakers/Template/Artist Payment Form_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "c6744e27877456515f76a8d2a1e0dcd7"
         },
         {
           "code": "T04",
@@ -944,7 +1018,8 @@
           "fileName": "Simple Artist Agreement_V.1.docx",
           "relPath": "3. Program/3.3 Work with Artist and Speakers/Template/Simple Artist Agreement_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "556da2ab547053219947a53d338a5ecd"
         },
         {
           "code": "T05",
@@ -952,7 +1027,8 @@
           "fileName": "Simple Speaker Agreement_V.1.docx",
           "relPath": "3. Program/3.3 Work with Artist and Speakers/Template/Simple Speaker Agreement_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "3d73c5abfea99e2c32a4f6c805a870e5"
         }
       ],
       "sourceDir": "3. Program/3.3 Work with Artist and Speakers",
@@ -977,6 +1053,7 @@
       "guideFile": {
         "fileName": "Promote the Event - Simple Guide_V.1.docx",
         "relPath": "3. Program/3.4 Promote the Event/Promote the Event - Simple Guide_V.1.docx",
+        "md5": "8095d2ce154906a25c397f090959e2e7",
         "title": "Promote the Event - Simple Guide"
       },
       "photo": {
@@ -991,7 +1068,8 @@
           "fileName": "Email Invitation Template_V.1.docx",
           "relPath": "3. Program/3.4 Promote the Event/Template/Email Invitation Template_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "170097f291e1fb38ba3e9bed209dee89"
         },
         {
           "code": "T02",
@@ -999,7 +1077,8 @@
           "fileName": "Event Invitation Template_V.1.docx",
           "relPath": "3. Program/3.4 Promote the Event/Template/Event Invitation Template_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "4615f956a68aaf644ffa89c88a35ea0a"
         },
         {
           "code": "T03",
@@ -1007,7 +1086,8 @@
           "fileName": "Event Marketing Checklist_V.1.docx",
           "relPath": "3. Program/3.4 Promote the Event/Template/Event Marketing Checklist_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "f021c17e43deeeb068ddefc494249fed"
         },
         {
           "code": "T04",
@@ -1015,7 +1095,8 @@
           "fileName": "Social Media Post Template_V.1.docx",
           "relPath": "3. Program/3.4 Promote the Event/Template/Social Media Post Template_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "d2a46467ff45a8eb002ae1e60de1dc90"
         }
       ],
       "sourceDir": "3. Program/3.4 Promote the Event",
@@ -1040,6 +1121,7 @@
       "guideFile": {
         "fileName": "Learn from the Event - Simple Guide_V.1.docx",
         "relPath": "3. Program/3.5 Learn the Event/Learn from the Event - Simple Guide_V.1.docx",
+        "md5": "ee2c38ad39c78f798e6ae51ce82ae673",
         "title": "Learn from the Event - Simple Guide"
       },
       "photo": {
@@ -1054,7 +1136,8 @@
           "fileName": "Audience Feedback Form_V.1.docx",
           "relPath": "3. Program/3.5 Learn the Event/Template/Audience Feedback Form_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "d988dd2fb8bb760ff40be0bd2d3d5997"
         },
         {
           "code": "T02",
@@ -1062,7 +1145,8 @@
           "fileName": "One-Page Event Review_V.1.docx",
           "relPath": "3. Program/3.5 Learn the Event/Template/One-Page Event Review_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "8495b0b08118865d81e6012451dce300"
         }
       ],
       "sourceDir": "3. Program/3.5 Learn the Event",
@@ -1087,6 +1171,7 @@
       "guideFile": {
         "fileName": "Connect to the Wider Palestine House Network - Simple Guide_V.1.docx",
         "relPath": "3. Program/3.6 Connect to the Wider Palestine House Network/Connect to the Wider Palestine House Network - Simple Guide_V.1.docx",
+        "md5": "51fece61074e9c9b4481106f9573011c",
         "title": "Connect to the Wider Palestine House Network - Simple Guide"
       },
       "photo": {
@@ -1101,7 +1186,8 @@
           "fileName": "Artist Request Form_V.1.docx",
           "relPath": "3. Program/3.6 Connect to the Wider Palestine House Network/Template/Artist Request Form_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "4a57804eb7e6c6c0168de8db6187e450"
         },
         {
           "code": "T02",
@@ -1109,7 +1195,8 @@
           "fileName": "Community Program Participation Form_V.1.docx",
           "relPath": "3. Program/3.6 Connect to the Wider Palestine House Network/Template/Community Program Participation Form_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "c0a77e77b3ec9ff363d840b3a2bfe7be"
         },
         {
           "code": "T03",
@@ -1117,7 +1204,8 @@
           "fileName": "House-toHouse Collaboration Request_V.1.docx",
           "relPath": "3. Program/3.6 Connect to the Wider Palestine House Network/Template/House-toHouse Collaboration Request_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "bc8874e4ea16a556a51aa197be6494bc"
         },
         {
           "code": "T04",
@@ -1125,7 +1213,8 @@
           "fileName": "Programming Support Request_V.1.docx",
           "relPath": "3. Program/3.6 Connect to the Wider Palestine House Network/Template/Programming Support Request_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "371b71c5866b20e6ea459a1e302afe23"
         }
       ],
       "sourceDir": "3. Program/3.6 Connect to the Wider Palestine House Network",
@@ -1150,6 +1239,7 @@
       "guideFile": {
         "fileName": "Marketing - Simple Guide_V.1.docx",
         "relPath": "4. Support/4.1 Marketing/Marketing - Simple Guide_V.1.docx",
+        "md5": "67820e51b8c62ae9f63672ac3c767678",
         "title": "Marketing - Simple Guide"
       },
       "photo": {
@@ -1164,7 +1254,8 @@
           "fileName": "Monthly Content Calendar_V.1.docx",
           "relPath": "4. Support/4.1 Marketing/Template/Monthly Content Calendar_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "f395c4d5d5339afd7d8d7759ecc3253e"
         },
         {
           "code": "T02",
@@ -1172,7 +1263,8 @@
           "fileName": "Newsletter Template_V.1.docx",
           "relPath": "4. Support/4.1 Marketing/Template/Newsletter Template_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "890c8e141b7fa6b63cde65e7f1278af0"
         },
         {
           "code": "T03",
@@ -1180,7 +1272,8 @@
           "fileName": "Photography Brief_V.1.docx",
           "relPath": "4. Support/4.1 Marketing/Template/Photography Brief_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "aa98e9dd4689985383a1710038a37e6e"
         },
         {
           "code": "T04",
@@ -1188,7 +1281,8 @@
           "fileName": "Press Release Template_V.1.docx",
           "relPath": "4. Support/4.1 Marketing/Template/Press Release Template_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "75f912a657bdedab593fe4ec207c71d5"
         },
         {
           "code": "T05",
@@ -1196,7 +1290,8 @@
           "fileName": "Simple Marketing Plan_V.1.docx",
           "relPath": "4. Support/4.1 Marketing/Template/Simple Marketing Plan_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "ca821e5fb4a9c1c28d9a4e4527998a92"
         }
       ],
       "sourceDir": "4. Support/4.1 Marketing",
@@ -1221,6 +1316,7 @@
       "guideFile": {
         "fileName": "Sponsorship and Fundraising - Simple Guide_V.1.docx",
         "relPath": "4. Support/4.2 Sponsorship and fundraising/Sponsorship and Fundraising - Simple Guide_V.1.docx",
+        "md5": "4d2a67ddc909f616ee1ada80a87ad559",
         "title": "Sponsorship and Fundraising - Simple Guide"
       },
       "photo": {
@@ -1235,7 +1331,8 @@
           "fileName": "Grant Opportunity List_V.1.docx",
           "relPath": "4. Support/4.2 Sponsorship and fundraising/Templates/Grant Opportunity List_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "634b68773104d157dbb24a2fc634d4cb"
         },
         {
           "code": "T02",
@@ -1243,7 +1340,8 @@
           "fileName": "Simple Grant Application Template_V.1.docx",
           "relPath": "4. Support/4.2 Sponsorship and fundraising/Templates/Simple Grant Application Template_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "6ee792a67d33d1db4b4baba5d7608adf"
         },
         {
           "code": "T03",
@@ -1251,7 +1349,8 @@
           "fileName": "Simple Partnership Agreement_V.1.docx",
           "relPath": "4. Support/4.2 Sponsorship and fundraising/Templates/Simple Partnership Agreement_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "fa80822aa3be7141e1fea24d4e4bd98c"
         },
         {
           "code": "T04",
@@ -1259,7 +1358,8 @@
           "fileName": "Simple Sponsorship Proposal_V.1.docx",
           "relPath": "4. Support/4.2 Sponsorship and fundraising/Templates/Simple Sponsorship Proposal_V.1.docx",
           "type": "form",
-          "sortOrder": 4
+          "sortOrder": 4,
+          "md5": "b62aa762d06595c3bb420371ac8e3110"
         },
         {
           "code": "T05",
@@ -1267,7 +1367,8 @@
           "fileName": "Sponsor List Template_V.1.docx",
           "relPath": "4. Support/4.2 Sponsorship and fundraising/Templates/Sponsor List Template_V.1.docx",
           "type": "form",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "md5": "829b2009a4c29352eb05943c8282eb54"
         }
       ],
       "sourceDir": "4. Support/4.2 Sponsorship and fundraising",
@@ -1292,6 +1393,7 @@
       "guideFile": {
         "fileName": "Partnerships - Simple Guide_V.1.docx",
         "relPath": "4. Support/4.3 Partnerships/Partnerships - Simple Guide_V.1.docx",
+        "md5": "e7dd3d07e0b7b971e6d1fe9020e3e17e",
         "title": "Partnerships - Simple Guide"
       },
       "photo": {
@@ -1306,7 +1408,8 @@
           "fileName": "Partner List_V.1.docx",
           "relPath": "4. Support/4.3 Partnerships/Templates/Partner List_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "14ca151168b207764e4028d2ab36ba7e"
         },
         {
           "code": "T02",
@@ -1314,7 +1417,8 @@
           "fileName": "Simple MOU_V.1.docx",
           "relPath": "4. Support/4.3 Partnerships/Templates/Simple MOU_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "2ad75e9d1eea3ec89134c8db8e127d91"
         },
         {
           "code": "T03",
@@ -1322,7 +1426,8 @@
           "fileName": "Simple Partnership Proposal_V.1.docx",
           "relPath": "4. Support/4.3 Partnerships/Templates/Simple Partnership Proposal_V.1.docx",
           "type": "form",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "md5": "fd4f82fe11016effb6b546fa063a8bb3"
         }
       ],
       "sourceDir": "4. Support/4.3 Partnerships",
@@ -1347,6 +1452,7 @@
       "guideFile": {
         "fileName": "Ask Community Support for Help - Simple Guide_V.1.docx",
         "relPath": "4. Support/4.4 Ask Community Support for help/Ask Community Support for Help - Simple Guide_V.1.docx",
+        "md5": "0fe01a1e22474c3334bc9b3592caf5e0",
         "title": "Ask Community Support for Help - Simple Guide"
       },
       "photo": {
@@ -1361,7 +1467,8 @@
           "fileName": "Simple Support Request Form_V.1.docx",
           "relPath": "4. Support/4.4 Ask Community Support for help/Template/Simple Support Request Form_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "aa77f7f02add03a02cb4e6e5cab4e35a"
         }
       ],
       "sourceDir": "4. Support/4.4 Ask Community Support for help",
@@ -1386,6 +1493,7 @@
       "guideFile": {
         "fileName": "Learn from Other Palestine Houses - Simple Guide_V.1.docx",
         "relPath": "4. Support/4.5 Learn from other Palestine House/Learn from Other Palestine Houses - Simple Guide_V.1.docx",
+        "md5": "b52d220b407e750bf1e4aa45f01c1d69",
         "title": "Learn from Other Palestine Houses - Simple Guide"
       },
       "photo": {
@@ -1400,7 +1508,8 @@
           "fileName": "Good Idea Sharing Template_V.1.docx",
           "relPath": "4. Support/4.5 Learn from other Palestine House/Template/Good Idea Sharing Template_V.1.docx",
           "type": "form",
-          "sortOrder": 1
+          "sortOrder": 1,
+          "md5": "338c66913026c29836b422933f9f2011"
         },
         {
           "code": "T02",
@@ -1408,7 +1517,8 @@
           "fileName": "Success Story Template_V.1.docx",
           "relPath": "4. Support/4.5 Learn from other Palestine House/Template/Success Story Template_V.1.docx",
           "type": "form",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "md5": "4460b16fe6e0c4bec520e536f6ab4f54"
         }
       ],
       "sourceDir": "4. Support/4.5 Learn from other Palestine House",

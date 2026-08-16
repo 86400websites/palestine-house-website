@@ -11,11 +11,18 @@
 -- PP5. Nothing a partner can perceive changes.
 --
 -- ===========================================================================
--- ⚠️⚠️  READ THIS FIRST: 0033 IS THE POINT OF NO RETURN FOR 0030's ROLLBACK
+-- ⚠️  READ THIS FIRST: 0033 ADDS A STEP TO 0030's ROLLBACK — IT DOES NOT END IT
 -- ===========================================================================
--- `0030_content_v2_cutover.down.sql` restores the legacy platform, and each of
--- its 33 element inserts names `overview_md` and `watch_out_for_md` by column.
--- Once this migration drops those columns, **that file will no longer run**.
+-- `0030_content_v2_cutover.down.sql` names `overview_md` and `watch_out_for_md`
+-- in every element insert, so it cannot run while those columns are dropped.
+-- **But `0033_contraction.down.sql` restores them** (columns, tables, policies
+-- and all seven retired RPCs), after which 0030's rollback runs normally. This
+-- exact order — 0033.down, then restore the objects, then 0030.down — was
+-- EXECUTED END TO END in the PP7 rehearsal (2026-08-16) and the legacy prose
+-- came back byte-perfect. An earlier version of this header called 0033 "the
+-- point of no return"; review round 5 correctly called that wrong, and it
+-- mattered: an emergency operator could have abandoned a viable rollback.
+-- The rollback after 0033 is three steps instead of two, all rehearsed.
 --
 -- Measured 2026-08-16:
 --   PRODUCTION  33 elements, all 33 carrying BOTH columns —
@@ -56,7 +63,19 @@
 begin;
 
 -- ---------------------------------------------------------------------------
--- GUARD. Two independent refusals, either of which stops the whole migration.
+-- LOCKS FIRST (review round 5, M3). The emptiness and empty-column checks below
+-- were ordinary reads: an admin could insert an academy row, or an in-flight
+-- old-signature admin_upsert_element could write overview_md, between the check
+-- and the drop — and the drop destroys what the check never saw. EXCLUSIVE on
+-- all four blocks every concurrent write until COMMIT while reads continue.
+-- ---------------------------------------------------------------------------
+lock table public.elements           in exclusive mode;
+lock table public.checklist_items    in exclusive mode;
+lock table public.checklist_progress in exclusive mode;
+lock table public.academy_modules    in exclusive mode;
+
+-- ---------------------------------------------------------------------------
+-- GUARD. Three independent refusals, any of which stops the whole migration.
 -- ---------------------------------------------------------------------------
 do $guard$
 declare

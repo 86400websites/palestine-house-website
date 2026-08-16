@@ -102,7 +102,9 @@ const REMOVE_LIMIT = 1000;
 /* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
 const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"], options: ["--target"] });
 const DRY_RUN = ARGS.has("--dry-run");
-const TARGET = resolveTarget(ARGS.get("--target"));
+/* Round 5, H1: destructive — NO default target. --target test or --target prod,
+   typed, always. */
+const TARGET = resolveTarget(ARGS.get("--target"), true);
 
 
 /** Re-verify the archive from the files on disk. Not from the manifest, and not
@@ -288,6 +290,25 @@ async function run(
     `  ⚠️         THIS IS THE ONE STEP NO .down.sql CAN UNDO`,
   ].join("\n"));
 
+  /* Round 5, H2: the reference check above ran BEFORE the typed confirmation,
+     which can sit open indefinitely — a row repointed at a candidate while the
+     operator reads the prompt would slip through. So the same check runs AGAIN
+     here, after consent and immediately before the remove(). The residual
+     window is one round-trip; closing it entirely needs a database trigger,
+     which for a single-admin, one-time migration buys risk (new schema surface)
+     rather than safety. Recorded as the accepted residual. */
+  const { data: recheck, error: recheckErr } = await db.rpc("admin_referenced_paths_among", {
+    p_paths: legacy.map((o) => o.name),
+  });
+  if (recheckErr) throw new Error(`post-confirmation re-check failed: ${recheckErr.message} — nothing deleted.`);
+  const nowReferenced = ((recheck as { storage_path: string }[] | null) ?? []).map((r) => r.storage_path);
+  if (nowReferenced.length) {
+    throw new Error(
+      `${nowReferenced.length} candidate object(s) became referenced WHILE the confirmation was open, ` +
+        `e.g. "${nowReferenced[0]}". REFUSING — a row was repointed mid-run. Nothing deleted.`,
+    );
+  }
+
   if (legacy.length > REMOVE_LIMIT) throw new Error(`${legacy.length} exceeds the ${REMOVE_LIMIT}-key remove() limit`);
   const { data: removed, error } = await db.storage.from(BUCKET).remove(legacy.map((o) => o.name));
   if (error) throw new Error(`remove: ${error.message}`);
@@ -305,7 +326,9 @@ async function run(
      above refused to start until it had confirmed so. Nothing follows. */
   console.log(`0030 was already applied — this was the last destructive step. Verify with`);
   console.log(`  supabase/sql/verification/0030_verify_PROD_safe_readonly.sql`);
-  console.log(`To put these files back: pnpm exec tsx scripts/restore-297-objects.ts`);
+  /* Round 5, H1: the printed recovery command carries the SAME target this run
+     used — a bare command here once pointed a production operator at TEST. */
+  console.log(`To put these files back: pnpm exec tsx scripts/restore-297-objects.ts --target ${TARGET}`);
 }
 
 main().catch((e) => {

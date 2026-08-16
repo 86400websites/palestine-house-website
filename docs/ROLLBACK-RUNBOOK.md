@@ -26,28 +26,28 @@ healthy and hands every partner a broken download. **Both halves, always.**
 
 ---
 
-## 0. Migration `0033` ends this rollback. Read before applying it.
+## 0. After `0033`, the rollback has three steps, not two
 
-`0030_content_v2_cutover.down.sql` restores the 33 legacy elements, and each of
-its inserts names **`overview_md`** and **`watch_out_for_md`** by column.
-Migration **`0033` drops both columns** — so the moment `0033` is applied, the
-file on this page will no longer run.
+`0030_content_v2_cutover.down.sql` names **`overview_md`** and
+**`watch_out_for_md`** in every element insert, so it cannot run while `0033`
+has those columns dropped. **`0033`'s own down-migration restores them** —
+columns, tables, policies and all seven retired RPCs — after which `0030`'s
+rollback runs normally.
 
-That is deliberate and it is the point of no return:
+> An earlier version of this section called `0033` "the point of no return".
+> Review round 5 correctly called that wrong — and it mattered, because an
+> emergency operator reading it could have abandoned a viable rollback. The
+> three-step order below was **executed end to end in the PP7 rehearsal**
+> (2026-08-16) and the legacy prose came back byte-perfect.
 
-```
-0030  ->  delete-297-objects  ->  verify  ->  live for a while  ->  0033
-                                                                    ^
-                                          after this, no rollback of 0030
-```
+**Rolling back BEFORE `0033` is applied:** steps 1–4 below.
+**Rolling back AFTER `0033` is applied:** paste
+`supabase/sql/migrations/0033_contraction.down.sql` in the SQL Editor first,
+then steps 1–4 below, unchanged.
 
-`0033` will refuse to run while the legacy platform is still present, and refuse
-again if any element still holds content in either column — so it cannot destroy
-the owner's prose by being run early or out of order (production currently holds
-**947,140 characters** across those two columns; TEST, post-`0030`, holds none).
-But nothing can protect you from applying it deliberately and changing your mind
-next week. **Leave `0033` until the new platform has been live long enough that
-rolling `0030` back is not a plan you would consider.**
+`0033` refuses to run while the legacy platform is present, and refuses again if
+any element holds content in either column or any retired table holds a row — so
+it cannot destroy data by being run early or out of order.
 
 ---
 
@@ -109,8 +109,16 @@ that point at files you cannot produce makes the situation worse, not better.
 ### Step 2 — put the bytes back, at their exact keys
 
 ```bash
-pnpm exec tsx scripts/restore-297-objects.ts --dry-run
-pnpm exec tsx scripts/restore-297-objects.ts
+pnpm exec tsx scripts/restore-297-objects.ts --target prod --dry-run
+pnpm exec tsx scripts/restore-297-objects.ts --target prod
+```
+
+(For a TEST rehearsal, `--target test`.) Since review round 5 the script
+**refuses to run without an explicit target** — a bare command in a runbook once
+pointed a production operator at TEST, and documentation drift cannot select a
+database when the script declines to guess.
+
+```
 ```
 
 The keys are the whole point: a restored `resources` row carries its

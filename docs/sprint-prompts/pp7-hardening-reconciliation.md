@@ -223,3 +223,47 @@ thing not exercised.
 `PRODUCTION-CUTOVER-RUNBOOK.md`, including the rollback path, has now been
 executed at least once. The TEST rehearsal that was previously owed by the owner
 is done.
+
+---
+
+## 7-q — review round 5, and the loop closed
+
+Round 5 returned BLOCKING again with five highs and two mediums. Every one is
+fixed; three of them changed real behaviour, and one **corrected the record in
+the owner's favour**:
+
+- **H1** — `delete-297-objects.ts` and `restore-297-objects.ts` now **refuse to
+  run without an explicit `--target`**; the rollback runbook's commands carry
+  `--target prod`, and the deleter's printed recovery command carries the target
+  it ran with. Documentation drift can no longer select a database, because the
+  scripts decline to guess.
+- **H2** — the referenced-path check now runs **again after the typed
+  confirmation**, immediately before `remove()`. The residual window is one
+  round-trip; a trigger-based invariant was considered and rejected as new
+  schema surface for a one-admin, one-time migration — recorded as accepted.
+- **H3** — the `0030` manifest grew from 6 to **10 columns**: title (direct),
+  description/intro/guide md5s, template-set md5, and **`files_md5` — the byte
+  hashes of every delivered file**, computed from the source documents at
+  extraction (the spec now carries per-file md5s) and compared against
+  `storage.objects` eTags. Proven on TEST: the guard **passes on the true
+  corpus**, and a probe with a cross-wired object (existence passes, bytes
+  wrong), a missing object, a tampered title and a rewritten description caught
+  **all four, each by the intended check**. The `resources_storage_key` UNIQUE
+  constraint also blocked a plain path swap outright.
+- **H4** — `0030` now locks **`storage.objects`** in EXCLUSIVE mode with the
+  other four tables, and re-verifies object existence immediately before COMMIT.
+- **H5** — `putFile` now uses the shared `isDefinitiveRefusal` classifier
+  (`scripts/lib/pg-errors.ts`): compensation-deletes only on a five-character
+  SQLSTATE; ambiguous transport failures KEEP the object with a healing re-run
+  path (an "already exists" upload collision from our own interrupted run
+  proceeds to registration).
+- **M3** — `0033` takes EXCLUSIVE locks on `elements` and all three doomed
+  tables before its guards.
+- **M-doc** — the "point of no return" was **wrong, and the reviewer was right**:
+  `0033.down` restores everything `0030.down` needs, and the rehearsal executed
+  that exact three-step rollback. `0033` therefore runs the **same day** as
+  `0030`, in one paste: `supabase/sql/bundles/PP7_finalize_prod.sql` (generated
+  from the two migration files, fingerprints in its header).
+
+The extractor also had the 7-k photo break (source-before-target); fixed the
+same way as the loader.
