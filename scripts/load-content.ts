@@ -64,6 +64,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
 import { withSession } from "./lib/session";
 import { findByCode } from "./lib/identity";
+import { assertCodesHaveNotShifted as checkShift } from "./lib/shift";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
@@ -91,7 +92,7 @@ const CONTENT_TYPE: Record<string, string> = {
    against TEST. `--target` is accepted here ONLY so that it fails loudly with
    an explanation until PP7 implements it; it is not a working flag. */
 const ARGS = parseArgs(process.argv.slice(2), {
-  flags: ["--dry-run", "--all", "--allow-live", "--replace-files", "--photos-only"],
+  flags: ["--dry-run", "--all", "--allow-live", "--replace-files", "--photos-only", "--allow-retitle"],
   options: ["--focus", "--target"],
 });
 
@@ -125,6 +126,11 @@ const REPLACE_FILES = ARGS.has("--replace-files");
    surface: every target filename is new (verified at 6c-c — 22 distinct sources
    to 22 distinct targets, none of which is a live photo). */
 const PHOTOS_ONLY = ARGS.has("--photos-only");
+/* Confirmation that a code whose registered title no longer matches the spec is
+   a genuine RENAME and not a deletion-induced code shift. Off by default: the
+   two are indistinguishable from title and code alone, and guessing wrong
+   attaches one document's name to another's bytes (M1, PP7). */
+const ALLOW_RETITLE = ARGS.has("--allow-retitle");
 const FOCUS = ARGS.get("--focus");
 
 if (!ALL && !FOCUS) {
@@ -410,26 +416,10 @@ type ExistingFile = { id: string; title: string; code: string | null; doc_key: s
 
    Called from the preflight, before anything is written, and again inside the
    file loop so it cannot be bypassed by a future caller. */
+/* Delegates to scripts/lib/shift.ts, where the rule has its own test suite. */
 function assertCodesHaveNotShifted(fa: FocusAreaEntry, existing: ExistingFile[]): void {
-  for (const t of fa.templates) {
-    const clash = existing.find((r) => r.doc_key === null && r.code === t.code);
-    if (!clash || clash.title === t.title) continue;
-    const movedTo = fa.templates.find(
-      (x) => x.title === clash.title && x.code !== t.code,
-    );
-    if (movedTo) {
-      throw new Error(
-        `Template codes have shifted on "${fa.title}". ${t.code} is registered as ` +
-          `"${clash.title}", which the spec now calls ${movedTo.code}. Codes come from ` +
-          `alphabetical filename order, so a renamed or inserted file re-labels the ones ` +
-          `after it — continuing would attach each file's name to the other's bytes. ` +
-          `Fix the codes in the CMS, or delete this focus area's files and re-load it. ` +
-          `Nothing has been written.`,
-      );
-    }
-  }
+  checkShift(fa.title, fa.templates, existing, ALLOW_RETITLE);
 }
-
 /* PUSH NEW BYTES for a file that is already registered.
    Matching by code means an EDITED source document under an unchanged filename
    is not noticed — the row is found, nothing is re-uploaded, and the partner
