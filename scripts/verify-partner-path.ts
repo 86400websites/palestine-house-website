@@ -58,11 +58,15 @@ const SRC = path.join(
   "docs/source-assets/Resource/Palestine House Website Content - Complet and Formatted",
 );
 
-/* The legacy platform that is still live until 0030 removes it. Both numbers
-   are asserted in BOTH states: the rollout must not disturb what partners are
-   using today, and that is easiest to get wrong exactly when attention is on
-   the new content. */
-const LEGACY_TOPICS = 33;
+/* How many legacy focus areas are expected alongside the 22.
+   33 before migration 0030 removes them, 0 after — so it is a flag rather than a
+   constant, because a hardcoded 33 would have started failing the moment 0030
+   ran and would have read as a regression in the product rather than as the
+   migration doing its job. Pass --legacy 0 after the cutover. */
+const LEGACY_TOPICS = (() => {
+  const i = process.argv.indexOf("--legacy");
+  return i === -1 ? 33 : Number(process.argv[i + 1]);
+})();
 
 const OBJECT_UNDER_ATTACK = (() => {
   const i = process.argv.indexOf("--object");
@@ -264,7 +268,12 @@ async function main(): Promise<void> {
   const legacyTemplate = resources.find(
     (r) => r.element_id && r.doc_key === null && !isNewRow(r),
   );
-  if (legacyTemplate) {
+  if (LEGACY_TOPICS === 0) {
+    /* After 0030 there is no legacy content left to protect, so this check has
+       nothing to assert. Reported rather than silently skipped — a check that
+       quietly disappears is how coverage rots. */
+    console.log("SKIP  legacy template still downloads — none exist (--legacy 0, post-0030)");
+  } else if (legacyTemplate) {
     const bytes = await download(db, legacyTemplate.id);
     record(
       `an existing live template still downloads ("${legacyTemplate.title}")`,
