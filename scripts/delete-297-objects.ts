@@ -40,20 +40,17 @@
  */
 
 import { promises as fs } from "node:fs";
-import { createHash } from "node:crypto";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
+import { withSession } from "./lib/session";
+import { ARCHIVE_REL, EXPECTED_COUNT, checkArchive, printChecks, readArchive } from "./lib/archive";
 
 const ROOT = process.cwd();
-const ARCHIVE = path.join(ROOT, "docs/source-assets/_archive-297-templates");
+const ARCHIVE = path.join(ROOT, ARCHIVE_REL);
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
 const TEST_REF = "sdszcralogcrujtyghig";
 const BUCKET = "resources";
-
-const EXPECTED_COUNT = 297;
-const EXPECTED_BYTES = 5_320_962;
-const EXPECTED_FINGERPRINT = "6fde792718130d12071b69459f9d70ab";
 
 /* The Storage API removes at most 1000 keys per call; 297 fits, but the batch
    is explicit rather than implicit so a future larger corpus fails visibly. */
@@ -62,10 +59,6 @@ const REMOVE_LIMIT = 1000;
 /* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
 const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"] });
 const DRY_RUN = ARGS.has("--dry-run");
-
-function md5(b: Buffer): string {
-  return createHash("md5").update(b).digest("hex");
-}
 
 async function connect(): Promise<SupabaseClient> {
   process.loadEnvFile(path.join(ROOT, ".env.local"));
@@ -90,47 +83,31 @@ async function connect(): Promise<SupabaseClient> {
 }
 
 /** Re-verify the archive from the files on disk. Not from the manifest, and not
- *  from a previous run's say-so. */
+ *  from a previous run's say-so.
+ *
+ *  PP7: the count/bytes/fingerprint constants and the fingerprint formula now
+ *  come from `scripts/lib/archive.ts`, in one definition. This function used to
+ *  carry its own — and had quietly grown a SECOND, wrong one beside the right
+ *  one: a digest over `name|md5|0` with the size hardcoded to zero, computed,
+ *  logged nowhere and discarded with `void`. Nothing unsafe followed from it,
+ *  because the real check sat two lines below and did stat every file. But two
+ *  fingerprints in one function, one of them wrong, is precisely what gets
+ *  copied into the next script by someone reading quickly. */
 async function verifyArchive(): Promise<Map<string, string>> {
-  const byName = new Map<string, string>();
-  let bytes = 0;
-  const walk = async (dir: string, prefix = ""): Promise<void> => {
-    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
-      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
-      const abs = path.join(dir, entry.name);
-      if (entry.isDirectory()) await walk(abs, rel);
-      else if (entry.name.endsWith(".docx") || entry.name.endsWith(".pdf")) {
-        const buf = await fs.readFile(abs);
-        byName.set(rel, md5(buf));
-        bytes += buf.length;
-      }
-    }
-  };
-  await walk(ARCHIVE);
+  const { files, skipped } = await readArchive(ARCHIVE);
+  if (skipped.length) console.log(`archive: skipped ${skipped.length} bookkeeping file(s)`);
 
-  const rows = [...byName.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-  const fingerprint = createHash("md5")
-    .update(rows.map(([n, h]) => `${n}|${h}|${0}`).join("\n"))
-    .digest("hex");
-
-  console.log(`archive: ${byName.size} file(s), ${bytes.toLocaleString("en-US")} bytes`);
-  if (byName.size !== EXPECTED_COUNT) {
-    throw new Error(`archive holds ${byName.size} files, expected ${EXPECTED_COUNT}. REFUSING to delete anything.`);
+  const { ok, checks } = checkArchive(files);
+  console.log("archive assertions");
+  printChecks(checks);
+  if (!ok) {
+    throw new Error(
+      "The cold backup does not match production's measured values. REFUSING to delete anything. " +
+        "Re-check it read-only with `pnpm exec tsx scripts/verify-archive.ts`.",
+    );
   }
-  if (bytes !== EXPECTED_BYTES) {
-    throw new Error(`archive is ${bytes} bytes, expected ${EXPECTED_BYTES}. REFUSING to delete anything.`);
-  }
-  /* Recompute the 6c-b fingerprint exactly: name|md5|size, sorted by name. */
-  const sized = await Promise.all(
-    rows.map(async ([n, h]) => `${n}|${h}|${(await fs.stat(path.join(ARCHIVE, n))).size}`),
-  );
-  const fp = createHash("md5").update(sized.join("\n")).digest("hex");
-  if (fp !== EXPECTED_FINGERPRINT) {
-    throw new Error(`archive fingerprint ${fp} != ${EXPECTED_FINGERPRINT}. REFUSING to delete anything.`);
-  }
-  console.log(`archive fingerprint ${fp} — matches production's. Backup is valid.\n`);
-  void fingerprint;
-  return byName;
+  console.log("Backup is valid.\n");
+  return new Map(files.map((f) => [f.name, f.md5]));
 }
 
 async function listAll(db: SupabaseClient, prefix = ""): Promise<{ name: string; etag: string }[]> {
@@ -165,6 +142,14 @@ async function main(): Promise<void> {
   const newSlugs = new Set(spec.focusAreas.map((f) => f.slug));
 
   const db = await connect();
+  await withSession(db, () => run(db, archive, newSlugs));
+}
+
+async function run(
+  db: SupabaseClient,
+  archive: Map<string, string>,
+  newSlugs: Set<string>,
+): Promise<void> {
   const all = await listAll(db);
   const legacy = all.filter((o) => !newSlugs.has(o.name.split("/")[0]));
   const keep = all.length - legacy.length;
@@ -189,7 +174,6 @@ async function main(): Promise<void> {
   if (DRY_RUN) {
     console.log(`would delete ${legacy.length} object(s); ${keep} would remain.`);
     console.log("Dry run complete — nothing deleted.");
-    await db.auth.signOut();
     return;
   }
 
@@ -204,7 +188,6 @@ async function main(): Promise<void> {
   if (stillThere.length !== 0) throw new Error(`${stillThere.length} legacy object(s) survived the delete.`);
   if (after.length !== keep) throw new Error(`expected ${keep} objects to remain, found ${after.length}`);
 
-  await db.auth.signOut();
   console.log(`\nDeleted ${legacy.length}. The ${keep} new objects are untouched.`);
   console.log(`The only copy of those files is now ${path.relative(ROOT, ARCHIVE)} — do not delete it.`);
   console.log(`Next: apply supabase/sql/migrations/0030_content_v2_cutover.up.sql`);

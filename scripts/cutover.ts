@@ -64,6 +64,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
+import { withSession } from "./lib/session";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
@@ -124,7 +125,13 @@ async function main(): Promise<void> {
 
   console.log(`PP6c cutover — ${wanted.length} focus area(s) -> ${TO.toUpperCase()} — ${DRY_RUN ? "DRY RUN" : "LIVE"}`);
   const db = await connect();
+  await withSession(db, () => run(db, wanted));
+}
 
+async function run(
+  db: SupabaseClient,
+  wanted: { number: string; slug: string; title: string }[],
+): Promise<void> {
   const { data, error } = await db.rpc("admin_list_platform_topics");
   if (error) throw error;
   const all = (data as TopicRow[] | null) ?? [];
@@ -160,7 +167,6 @@ async function main(): Promise<void> {
 
   if (DRY_RUN) {
     console.log("\nDry run complete — nothing written.");
-    await db.auth.signOut();
     return;
   }
 
@@ -185,7 +191,6 @@ async function main(): Promise<void> {
     throw new Error(`${wrong.length} focus area(s) did not take the change: ${wrong.map((t) => t.slug).join(", ")}`);
   }
 
-  await db.auth.signOut();
   console.log(`\nchanged ${toChange.length}; all ${newRows.length} new focus areas are now ${TO.toUpperCase()}.`);
   console.log(
     `legacy set unchanged: ${legacyRows.filter((t) => t.published).length} live / ` +

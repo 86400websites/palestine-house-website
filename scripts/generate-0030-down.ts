@@ -73,6 +73,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
+import { signOutLocal } from "./lib/session";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "supabase/sql/migrations/0030_content_v2_cutover.down.sql");
@@ -177,8 +178,11 @@ async function main(): Promise<void> {
     /* LOCAL scope, and in `finally`. The default scope is GLOBAL, which revokes
        every refresh token the account holds — logging the owner out of his own
        browser as a side effect of a script advertised as read-only. `finally`
-       so the session is also closed when the run throws. */
-    await db.auth.signOut({ scope: "local" });
+       so the session is also closed when the run throws.
+
+       PP7: this file was the ONLY one that got this right. The rule now lives in
+       `scripts/lib/session.ts` and all eight scripts share it. */
+    await signOutLocal(db);
   }
 }
 

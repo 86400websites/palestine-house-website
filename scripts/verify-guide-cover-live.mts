@@ -33,6 +33,7 @@ import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import { createClient } from "@supabase/supabase-js";
+import { signOutLocal } from "./lib/session.js";
 import { stripGuideCover as CURRENT } from "../src/lib/workspace-v2/guide-cover.ts";
 
 const ROOT = process.cwd();
@@ -142,7 +143,7 @@ async function main(): Promise<void> {
       else fail(`LIVE ${r.element_slug}: baseline ${before.length} chars vs current ${now.length}`);
     }
   }
-  await db.auth.signOut();
+  await signOutLocal(db);
   console.log(
     `live bodies: ${rows.length} · strip fires on ${fired}` +
       (baseline ? ` · byte-identical to baseline on ${identical}/${rows.length}` : ""),

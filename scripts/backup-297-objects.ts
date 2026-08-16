@@ -1,12 +1,17 @@
 /**
- * scripts/backup-297-objects.ts — PP6c step 6c-b. THE COLD BACKUP.
+ * scripts/backup-297-objects.ts — PP6c step 6c-b, hardened at PP7 step 7-b.
+ * THE COLD BACKUP.
  *
  * Exports the 297 legacy template objects out of the private `resources` bucket
  * onto disk, and PROVES the result is a byte-for-byte copy of what production
  * holds — before migration `0030` deletes them.
  *
  *   pnpm exec tsx scripts/backup-297-objects.ts --dry-run   # plan + assertions only
- *   pnpm exec tsx scripts/backup-297-objects.ts             # download + verify
+ *   pnpm exec tsx scripts/backup-297-objects.ts             # export, verify, promote
+ *
+ * ⚠️ TO CHECK AN EXISTING ARCHIVE, DO NOT RUN THIS. Run the read-only verifier:
+ *
+ *   pnpm exec tsx scripts/verify-archive.ts
  *
  * WHY THIS SCRIPT IS A HARD GATE AND NOT A CHORE (D-PP-k)
  * ------------------------------------------------------
@@ -14,7 +19,31 @@
  * migration ships a `.down.sql` and rows come back. Storage objects do not. When
  * `0030` removes these 297 files there is no statement, flag or backup inside
  * Supabase that returns them. This directory is the only copy. Nothing
- * destructive in PP6c runs until this script exits 0.
+ * destructive runs until this script exits 0.
+ *
+ * ---------------------------------------------------------------------------
+ * WHAT PP7 CHANGED, AND WHY IT WAS BLOCKING
+ * ---------------------------------------------------------------------------
+ * The original wrote each downloaded object STRAIGHT INTO THE ARCHIVE, and only
+ * afterwards checked the count, the byte total and the fingerprint. So the one
+ * command anybody would reach for to answer "is my only copy still good?" was
+ * also the command that opened all 297 of them for writing. If Storage had been
+ * mutated in the meantime — a replaced file, a partial upload, a wrong bucket —
+ * the good bytes were gone by the time the aggregate check noticed, and the
+ * script reported a corrupt archive that it had corrupted itself.
+ *
+ * The independent review of 2026-08-16 rated it blocking, and it was right. So
+ * the export is now **staged, verified, and only then promoted**:
+ *
+ *   1. everything lands in `_archive-297-templates.staging/`;
+ *   2. a file already in the LIVE archive with the right MD5 is COPIED into
+ *      staging rather than re-downloaded — the archive is read, never written;
+ *   3. all four assertions run against staging;
+ *   4. only on a clean pass is staging promoted, by rename, to the live archive —
+ *      and the archive it replaces is kept as `.superseded`, so a complete,
+ *      verified copy exists at every instant of the swap.
+ *
+ * A failed run therefore leaves the previous archive exactly as it found it.
  *
  * WHY IT READS FROM TEST TO BACK UP PRODUCTION
  * --------------------------------------------
@@ -35,22 +64,11 @@
  *       at 297 objects / 5,320,962 bytes.
  *
  * ⚠️ `replace(...,'"','')` IS LOAD-BEARING, and the first run of this script is
- * what found that out. Storage stores the eTag QUOTED — `"57962cf1…"` — so a
- * query that fingerprints `metadata->>'eTag'` directly yields a different digest
- * (27e3e6efccf33eebedf60ad0aa45c2cc) from one computed over real files, which
- * hash to bare hex. Both are correct fingerprints of the same 297 objects; only
- * the canonical form above is reproducible from bytes on disk, which is the
- * whole point of a backup you can verify. The assertions localised this
- * immediately: 1–3 passed, so the DATA was never in doubt, only the formula.
+ * what found that out — Storage stores the eTag QUOTED. The canonical form, and
+ * the single implementation of it, now live in `scripts/lib/archive.ts`.
  *
- * So the export happens against TEST, and the four assertions below are what
- * turn "we copied some files" into "this is provably production's bytes". The
- * fingerprint is computed from the MD5 of the bytes ACTUALLY WRITTEN TO DISK,
- * never from the metadata the server reported — otherwise a truncated download
- * would sail through while the manifest looked perfect.
- *
- * THE FOUR ASSERTIONS, all of which must pass:
- *   1. every downloaded file's MD5 equals the eTag Storage holds for it
+ * THE FOUR ASSERTIONS, all of which must pass before anything is promoted:
+ *   1. every exported file's MD5 equals the eTag Storage holds for it
  *      (eTags here are single-part, so the eTag IS the MD5 of the bytes —
  *      verified 0 multipart objects at the kickoff);
  *   2. exactly EXPECTED_COUNT objects were exported;
@@ -58,10 +76,9 @@
  *   4. the aggregate fingerprint recomputed from disk equals EXPECTED_FINGERPRINT,
  *      production's own value.
  *
- * Assertion 4 subsumes 1–3, but they are kept separate because a failure should
- * say WHICH property broke. A single mismatched fingerprint with no other
- * signal is the least actionable possible error on the one step that cannot be
- * retried after the fact.
+ * Assertion 4 subsumes 2–3, but they are kept separate because a failure should
+ * say WHICH property broke. A single mismatched fingerprint with no other signal
+ * is the least actionable possible error on the one step that cannot be retried.
  *
  * WHICH OBJECTS ARE "THE 297"
  * ---------------------------
@@ -77,36 +94,47 @@
  * never passed on a command line or printed. This script only ever READS from
  * Storage — it has no delete, no upload and no database write.
  *
- * IDEMPOTENT. A file already on disk with the right MD5 is left alone, so an
- * interrupted run is simply repeated. The manifest is rewritten every time.
+ * IDEMPOTENT. A file already archived with the right MD5 is copied forward, so an
+ * interrupted run is simply repeated. The manifests are rewritten every time.
  */
 
 import { promises as fs } from "node:fs";
-import { createHash } from "node:crypto";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
+import { withSession } from "./lib/session";
+import {
+  ARCHIVE_REL,
+  EXPECTED_BYTES,
+  EXPECTED_COUNT,
+  EXPECTED_FINGERPRINT,
+  FULL_MANIFEST_NAME,
+  STAGING_REL,
+  type ArchiveFile,
+  checkArchive,
+  fingerprintOf,
+  md5,
+  normaliseEtag,
+  printChecks,
+  promoteStaging,
+  sortByName,
+} from "./lib/archive";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
 /* Inside docs/source-assets/, which .gitignore already excludes wholesale — the
-   bytes stay out of git. The manifest beside it is committed. */
-const ARCHIVE = path.join(ROOT, "docs/source-assets/_archive-297-templates");
+   bytes stay out of git. The summary manifest beside it is committed. */
+const ARCHIVE = path.join(ROOT, ARCHIVE_REL);
+const STAGING = path.join(ROOT, STAGING_REL);
+/* The archive a successful promotion displaces. Kept, not deleted: it is a
+   second verified copy, and it costs 5.3 MB. */
+const SUPERSEDED = path.join(ROOT, `${ARCHIVE_REL}.superseded`);
 /* Summary only, committed. The per-object rows go beside the bytes instead —
    this repository is public; see the note above the write. */
 const MANIFEST = path.join(ROOT, "docs/archive-297-manifest.json");
-const FULL_MANIFEST_NAME = "_manifest-full.json";
 
 const TEST_REF = "sdszcralogcrujtyghig";
 const BUCKET = "resources";
-
-/* Production's measured values, read-only, 2026-08-16 (PP6c step 6c-a).
-   Re-checkable at any time with the query in the header comment. */
-const EXPECTED_COUNT = 297;
-const EXPECTED_BYTES = 5_320_962;
-/* Canonical form: bare-hex eTags, so a downloaded file can reproduce it. See
-   the ⚠️ note in the header — the quoted-eTag variant is a different digest. */
-const EXPECTED_FINGERPRINT = "6fde792718130d12071b69459f9d70ab";
 
 /* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
 const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"] });
@@ -118,34 +146,8 @@ interface StorageEntry {
   etag: string;
 }
 
-interface ManifestRow {
-  name: string;
-  md5: string;
-  size: number;
-}
-
 function fail(message: string): never {
   throw new Error(message);
-}
-
-/** The eTag Storage reports is a quoted MD5 hex string. Normalise, and refuse
- *  anything that is not a plain 32-hex digest — a multipart eTag (`<md5>-<n>`)
- *  is NOT the MD5 of the bytes, so silently comparing against one would make
- *  assertion 1 meaningless exactly when it matters most. */
-function normaliseEtag(raw: string | undefined, name: string): string {
-  const etag = (raw ?? "").replace(/^"|"$/g, "").trim().toLowerCase();
-  if (!/^[0-9a-f]{32}$/.test(etag)) {
-    fail(
-      `object "${name}" has eTag ${JSON.stringify(raw)}, which is not a plain MD5 digest. ` +
-        `A multipart eTag cannot be compared against the file's MD5; back this object up by hand ` +
-        `and re-check the assertions before trusting this run.`,
-    );
-  }
-  return etag;
-}
-
-function md5(bytes: Buffer): string {
-  return createHash("md5").update(bytes).digest("hex");
 }
 
 async function connect(): Promise<SupabaseClient> {
@@ -224,7 +226,7 @@ async function listAll(db: SupabaseClient, prefix = ""): Promise<StorageEntry[]>
 }
 
 async function main(): Promise<void> {
-  console.log(`PP6c 6c-b — cold backup of the legacy template objects — ${DRY_RUN ? "DRY RUN" : "LIVE"}\n`);
+  console.log(`cold backup of the legacy template objects — ${DRY_RUN ? "DRY RUN" : "LIVE"}\n`);
 
   const spec = JSON.parse(await fs.readFile(SPEC, "utf8")) as {
     focusAreas: { slug: string }[];
@@ -233,6 +235,10 @@ async function main(): Promise<void> {
   if (newSlugs.size !== 22) fail(`spec should carry 22 focus-area slugs, found ${newSlugs.size}`);
 
   const db = await connect();
+  await withSession(db, () => run(db, newSlugs));
+}
+
+async function run(db: SupabaseClient, newSlugs: Set<string>): Promise<void> {
   const all = await listAll(db);
   console.log(`bucket holds ${all.length} object(s)`);
 
@@ -245,38 +251,57 @@ async function main(): Promise<void> {
 
   if (DRY_RUN) {
     const bytes = legacy.reduce((n, o) => n + o.size, 0);
-    console.log(`would write ${legacy.length} file(s), ${bytes.toLocaleString("en-US")} bytes, to`);
-    console.log(`  ${path.relative(ROOT, ARCHIVE)}`);
+    console.log(`would stage ${legacy.length} file(s), ${bytes.toLocaleString("en-US")} bytes, in`);
+    console.log(`  ${path.relative(ROOT, STAGING)}`);
+    console.log(`and promote to ${path.relative(ROOT, ARCHIVE)} only if all four assertions pass.`);
     console.log(
       `\nexpected: ${EXPECTED_COUNT} objects / ${EXPECTED_BYTES.toLocaleString("en-US")} bytes ` +
         `/ fingerprint ${EXPECTED_FINGERPRINT}`,
     );
     console.log("Dry run complete — nothing written.");
-    await db.auth.signOut();
     return;
   }
 
-  await fs.mkdir(ARCHIVE, { recursive: true });
-  const rows: ManifestRow[] = [];
+  /* STAGE. Nothing below writes inside ARCHIVE; it is opened for reading only,
+     to carry already-correct bytes forward without hitting the network. */
+  await fs.mkdir(STAGING, { recursive: true });
+  const rows: ArchiveFile[] = [];
   let downloaded = 0;
-  let reused = 0;
+  let reusedFromStaging = 0;
+  let reusedFromArchive = 0;
 
   for (const obj of legacy) {
-    const dest = path.join(ARCHIVE, obj.name);
+    const dest = path.join(STAGING, obj.name);
     await fs.mkdir(path.dirname(dest), { recursive: true });
 
     let bytes: Buffer | null = null;
-    /* Idempotence: an existing file is trusted only if its MD5 still matches,
-       so a half-written file from an interrupted run is re-fetched rather than
-       silently kept. */
+
+    /* Idempotence, in two steps. A partial staging directory from an interrupted
+       run is trusted only where the MD5 still matches; then the live archive is
+       consulted the same way. Both are verified against the eTag Storage holds
+       RIGHT NOW, so a file that changed server-side is re-downloaded rather than
+       carried forward — the reuse can never mask a mutation. */
     try {
-      const existing = await fs.readFile(dest);
-      if (md5(existing) === obj.etag) {
-        bytes = existing;
-        reused++;
+      const staged = await fs.readFile(dest);
+      if (md5(staged) === obj.etag) {
+        bytes = staged;
+        reusedFromStaging++;
       }
     } catch {
-      /* not on disk yet */
+      /* not staged yet */
+    }
+
+    if (!bytes) {
+      try {
+        const archived = await fs.readFile(path.join(ARCHIVE, obj.name));
+        if (md5(archived) === obj.etag) {
+          await fs.writeFile(dest, archived);
+          bytes = archived;
+          reusedFromArchive++;
+        }
+      } catch {
+        /* not in the archive, or unreadable — fall through to the network */
+      }
     }
 
     if (!bytes) {
@@ -292,54 +317,56 @@ async function main(): Promise<void> {
        Computed from the file, never from the reported metadata. */
     const digest = md5(bytes);
     if (digest !== obj.etag) {
-      fail(`"${obj.name}": MD5 on disk ${digest} != Storage eTag ${obj.etag}. Backup is NOT valid.`);
+      fail(`"${obj.name}": MD5 in staging ${digest} != Storage eTag ${obj.etag}. Backup is NOT valid.`);
     }
     if (bytes.length !== obj.size) {
-      fail(`"${obj.name}": ${bytes.length} bytes on disk != ${obj.size} reported. Backup is NOT valid.`);
+      fail(`"${obj.name}": ${bytes.length} bytes staged != ${obj.size} reported. Backup is NOT valid.`);
     }
     rows.push({ name: obj.name, md5: digest, size: bytes.length });
   }
 
-  rows.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
-  const totalBytes = rows.reduce((n, r) => n + r.size, 0);
+  const staged = sortByName(rows);
+  const totalBytes = staged.reduce((n, r) => n + r.size, 0);
+  const fingerprint = fingerprintOf(staged);
 
-  /* ASSERTION 4: the same aggregate production reports, recomputed from disk.
-     Mirrors md5(string_agg(name||'|'||eTag||'|'||size, E'\n' order by name)). */
-  const fingerprint = createHash("md5")
-    .update(rows.map((r) => `${r.name}|${r.md5}|${r.size}`).join("\n"))
-    .digest("hex");
+  console.log(
+    `staged ${staged.length}: ${downloaded} downloaded, ${reusedFromArchive} carried from the current ` +
+      `archive, ${reusedFromStaging} already staged\n`,
+  );
 
-  console.log(`downloaded ${downloaded}, reused ${reused} already-correct file(s)\n`);
+  /* VERIFY, STILL IN STAGING. The live archive has not been touched. */
   console.log("ASSERTIONS");
-  const checks: [string, boolean, string][] = [
-    ["every file's MD5 matches its Storage eTag", true, `${rows.length}/${rows.length} verified`],
-    ["object count", rows.length === EXPECTED_COUNT, `${rows.length} (expected ${EXPECTED_COUNT})`],
-    [
-      "total bytes",
-      totalBytes === EXPECTED_BYTES,
-      `${totalBytes.toLocaleString("en-US")} (expected ${EXPECTED_BYTES.toLocaleString("en-US")})`,
-    ],
-    [
-      "aggregate fingerprint = PRODUCTION's",
-      fingerprint === EXPECTED_FINGERPRINT,
-      `${fingerprint} (expected ${EXPECTED_FINGERPRINT})`,
-    ],
-  ];
-  for (const [label, ok, detail] of checks) {
-    console.log(`  ${ok ? "PASS" : "FAIL"}  ${label} — ${detail}`);
+  console.log(`  PASS  every file's MD5 matches its Storage eTag — ${staged.length}/${staged.length} verified`);
+  const { ok, checks } = checkArchive(staged);
+  printChecks(checks);
+  if (!ok) {
+    fail(
+      `Backup assertions FAILED. Nothing was promoted and the existing archive at ` +
+        `${path.relative(ROOT, ARCHIVE)} is untouched. Staging is left at ` +
+        `${path.relative(ROOT, STAGING)} for inspection. Nothing destructive may run.`,
+    );
   }
-  if (checks.some(([, ok]) => !ok)) {
-    fail("Backup assertions FAILED. Nothing destructive may run. Do not proceed to 6c-g.");
-  }
+
+  /* PROMOTE. Only now — and via `scripts/lib/archive.ts`, where the two-rename
+     swap has its own test (`scripts/verify-archive-promote.ts`) including the
+     failure path. */
+  console.log("");
+  const promoted = await promoteStaging({ archive: ARCHIVE, staging: STAGING, superseded: SUPERSEDED });
+  console.log(
+    promoted.outcome === "fresh"
+      ? `promoted staging -> ${path.relative(ROOT, ARCHIVE)} (no previous archive)`
+      : `promoted staging -> ${path.relative(ROOT, ARCHIVE)}; previous archive kept at ` +
+          `${path.relative(ROOT, SUPERSEDED)} (a second verified copy)`,
+  );
 
   const common = {
-    generatedBy: "scripts/backup-297-objects.ts (PP6c step 6c-b)",
+    generatedBy: "scripts/backup-297-objects.ts (PP6c step 6c-b; staged-and-promoted since PP7 step 7-b)",
     purpose:
       "Cold backup of the 297 legacy template objects deleted by migration 0030 (D-PP-k). " +
       "A .down.sql restores rows, never Storage objects — these files are the only copy.",
     exportedFrom: `TEST (${TEST_REF}), whose 297 legacy objects are byte-identical to production's`,
-    archiveDir: "docs/source-assets/_archive-297-templates/ (gitignored)",
-    objectCount: rows.length,
+    archiveDir: `${ARCHIVE_REL}/ (gitignored)`,
+    objectCount: staged.length,
     totalBytes,
     fingerprint,
     fingerprintFormula:
@@ -350,16 +377,15 @@ async function main(): Promise<void> {
 
   /* THE MANIFEST IS SPLIT, AND THE REASON IS THAT THIS REPOSITORY IS PUBLIC.
      S7 Step 7 (2026-06-19) verified a standing invariant: the gated source trees
-     are gitignored AND were never committed on any branch, so there is no
-     exposure. A committed list of 297 private-bucket object paths would be the
-     first thing to break it. The paths are not access-granting — the bucket's
-     RLS gates on session and approval, and PP6b proved that signing a known
-     object key without approval is refused — but publishing the private
-     platform's whole template inventory is a decision for the owner, not a side
-     effect of a backup script.
+     are gitignored AND were never committed on any branch. A committed list of
+     297 private-bucket object paths would be the first thing to break it. The
+     paths are not access-granting — the bucket's RLS gates on session and
+     approval, and PP6b proved that signing a known object key without approval
+     is refused — but publishing the private platform's whole template inventory
+     is a decision for the owner, not a side effect of a backup script.
 
-     So: the committed file carries what the PP6c exit gate actually asks for
-     (count, total bytes, fingerprint, provenance, and how to re-check), and the
+     So: the committed file carries what the exit gate actually asks for (count,
+     total bytes, fingerprint, provenance, and how to re-check), and the
      per-object rows live beside the bytes in the gitignored archive. Nothing is
      lost — anyone can rebuild the full list by re-running this script, and the
      fingerprint proves the archive is intact without naming a single file. */
@@ -369,12 +395,15 @@ async function main(): Promise<void> {
       {
         ...common,
         objectListing: `withheld from the public repo by design — see ${path.posix.join(
-          "docs/source-assets/_archive-297-templates",
+          ARCHIVE_REL,
           FULL_MANIFEST_NAME,
         )} (gitignored), or re-run this script to regenerate it`,
+        /* PP7: this used to name THIS script, which downloads. Checking your only
+           backup must not be an operation that can damage it. */
         howToVerify:
-          "pnpm exec tsx scripts/backup-297-objects.ts — re-hashes every archived file and re-asserts " +
-          "count, total bytes and fingerprint against production's measured values.",
+          "pnpm exec tsx scripts/verify-archive.ts — re-hashes every archived file and re-asserts " +
+          "count, total bytes and fingerprint against production's measured values. Strictly " +
+          "read-only: no network call, no credential read, nothing opened for writing.",
       },
       null,
       2,
@@ -383,15 +412,15 @@ async function main(): Promise<void> {
   );
   await fs.writeFile(
     path.join(ARCHIVE, FULL_MANIFEST_NAME),
-    JSON.stringify({ ...common, objects: rows }, null, 2) + "\n",
+    JSON.stringify({ ...common, objects: staged }, null, 2) + "\n",
     "utf8",
   );
 
-  await db.auth.signOut();
   console.log(`\nSummary manifest: ${path.relative(ROOT, MANIFEST)} (committed — no object paths)`);
   console.log(`Full manifest:    ${path.relative(ROOT, path.join(ARCHIVE, FULL_MANIFEST_NAME))} (gitignored)`);
-  console.log(`Bytes written:    ${path.relative(ROOT, ARCHIVE)} (gitignored)`);
-  console.log("\nBackup verified. 0030 may now be built.");
+  console.log(`Bytes:            ${path.relative(ROOT, ARCHIVE)} (gitignored)`);
+  console.log("\nBackup verified and promoted. Re-check it any time, safely:");
+  console.log("  pnpm exec tsx scripts/verify-archive.ts");
 }
 
 main().catch((e) => {

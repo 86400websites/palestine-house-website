@@ -62,6 +62,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
+import { withSession } from "./lib/session";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
@@ -625,7 +626,14 @@ async function main(): Promise<void> {
   }
 
   const db = await connect();
+  await withSession(db, () => run(db, spec, targets));
+}
 
+async function run(
+  db: SupabaseClient,
+  spec: ContentSpec,
+  targets: FocusAreaEntry[],
+): Promise<void> {
   /* PREFLIGHT, BEFORE ANY MUTATION ANYWHERE.
      The Live guard used to sit inside upsertFocusArea, which runs third — so a
      refused run had already copied a photograph into the working tree and could
@@ -686,7 +694,6 @@ async function main(): Promise<void> {
     }
   }
 
-  await db.auth.signOut();
   /* Precise rather than reassuring: anything this run CREATED is a Draft, but a
      focus area that already existed keeps whatever state the owner put it in —
      this script never publishes and never un-publishes. Saying "everything is a
