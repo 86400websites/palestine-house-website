@@ -63,15 +63,17 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { parseArgs } from "./lib/argv";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
 const TEST_REF = "sdszcralogcrujtyghig";
 
-const DRY_RUN = process.argv.includes("--dry-run");
+/* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
+const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"], options: ["--to"] });
+const DRY_RUN = ARGS.has("--dry-run");
 const TO = (() => {
-  const i = process.argv.indexOf("--to");
-  const v = i === -1 ? null : process.argv[i + 1];
+  const v = ARGS.get("--to");
   if (v !== "live" && v !== "draft") {
     throw new Error('Pass --to live or --to draft (e.g. `--to live --dry-run`).');
   }

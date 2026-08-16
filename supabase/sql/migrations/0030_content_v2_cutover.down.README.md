@@ -1,25 +1,29 @@
-# `0030_content_v2_cutover.down.sql` — where it is, and why it is not here
+# `0030_content_v2_cutover.down.sql` — how it is produced and what it restores
 
-The rollback for migration `0030` **exists but is deliberately not committed**.
+The rollback for migration `0030` **is committed** alongside this file.
 
-## Why
+## It was nearly not
 
 D-PP-k requires the down-migration to carry the 33 legacy guide bodies as literal
 inserts, because a `.down.sql` is the only thing that can bring that prose back.
 That makes the file **1.75 MB of `simple_guide_md`, `overview_md` and
-`watch_out_for_md`** — the approval-gated *Read Now* content of the private
-platform.
+`watch_out_for_md`**, and this repository is public — so PP6c withheld it, on the
+grounds that S7 Step 7 had verified no gated content was ever committed here.
 
-**This repository is public.** S7 Step 7 (2026-06-19) verified a standing
-invariant: the gated source trees are gitignored *and were never committed on any
-branch*, so there is no exposure. Committing this file would publish the entire
-private guide corpus in one commit, and git history is forever.
+The independent review of 2026-08-16 then found that **`docs/content-v2-spec.json`
+had been carrying all 22 gated guide bodies in public history since PP6b anyway**,
+which made the withholding both futile and inconsistent. The owner's call on
+2026-08-16 was to **declassify this content**: it is not sensitive.
 
-So the file is gitignored (`.gitignore`, bottom) and lives only on disk.
+So the file is committed, and that is not merely tidier — it is what makes the
+rollback *operationally recoverable*. A rollback artefact that exists only as a
+mutable, gitignored local file is one lost checkout away from being unrecoverable,
+which the review raised as a blocking finding in its own right.
 
 ## How to get it
 
-It is generated **read-only from production**, and can be regenerated at any time:
+It is generated **read-only from production**. It is committed, so you do not need to
+regenerate it — but it can be regenerated, with one caveat below:
 
 ```bash
 pnpm exec tsx scripts/generate-0030-down.ts --dry-run   # counts and sizes
@@ -31,6 +35,13 @@ The generator is committed, reviewable, and calls exactly six read RPCs —
 `admin_get_element`, `admin_list_resource_files`, `get_resource_download`. No
 write method appears in it, and it asserts the production project ref before
 signing in.
+
+⚠️ **Regeneration only works BEFORE the rollout.** The generator asserts production
+still looks like 10 groups / 33 topics / 297 templates, so after the rollout (14 /
+55 / 409) and certainly after `0030` it will refuse or find nothing. This is the
+reason the committed file matters: *"regenerate it whenever you like"* is false,
+and PP7 fixes the generator to snapshot the exact predicate the up-migration
+deletes.
 
 ⚠️ **It must be generated from PRODUCTION, never from TEST.** Measured 2026-08-16,
 the two projects hold *different generations* of the legacy content — only element

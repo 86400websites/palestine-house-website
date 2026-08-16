@@ -85,6 +85,7 @@ import { promises as fs } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { parseArgs } from "./lib/argv";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
@@ -107,7 +108,9 @@ const EXPECTED_BYTES = 5_320_962;
    the ⚠️ note in the header — the quoted-eTag variant is a different digest. */
 const EXPECTED_FINGERPRINT = "6fde792718130d12071b69459f9d70ab";
 
-const DRY_RUN = process.argv.includes("--dry-run");
+/* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
+const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"] });
+const DRY_RUN = ARGS.has("--dry-run");
 
 interface StorageEntry {
   name: string;

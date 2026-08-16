@@ -40,6 +40,14 @@
  *     the divergence above, would be the defect it exists to prevent.
  *   - Its only side effect on this machine is writing one .sql file.
  *
+ * ⚠️ ONE CORRECTION TO THE ABOVE, from the review of 2026-08-16: signing in DOES
+ * create an Auth session on production, so "no write of any kind" was overstated.
+ * It writes no CONTENT. Worse, the original `auth.signOut()` defaults to GLOBAL
+ * scope, which would have revoked the admin's other refresh tokens — logging the
+ * owner out of his own browser as a side effect of a "read-only" script. Sign-out
+ * is now local-scoped and runs in a `finally`, so it also happens when the script
+ * throws.
+ *
  * Storage paths come from `get_resource_download`, the product's own download
  * path, rather than from a filename-matching heuristic: no admin RPC exposes a
  * storage path (deliberately — D-PP-i keeps paths off admin screens), and
@@ -64,6 +72,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { parseArgs } from "./lib/argv";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "supabase/sql/migrations/0030_content_v2_cutover.down.sql");
@@ -72,7 +81,9 @@ const OUT = path.join(ROOT, "supabase/sql/migrations/0030_content_v2_cutover.dow
 const PROD_REF = "jwogtqizqujwhbvpoziu";
 const TEST_REF = "sdszcralogcrujtyghig";
 
-const DRY_RUN = process.argv.includes("--dry-run");
+/* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
+const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"] });
+const DRY_RUN = ARGS.has("--dry-run");
 
 /* What production is expected to hold. If any of these is wrong the shape of
    the migration is wrong, so it fails rather than emits a plausible file. */
@@ -160,7 +171,18 @@ async function connect(): Promise<SupabaseClient> {
 async function main(): Promise<void> {
   console.log(`PP6c 6c-g — generating 0030.down.sql from production — ${DRY_RUN ? "DRY RUN" : "WRITE"}\n`);
   const db = await connect();
+  try {
+    await run(db);
+  } finally {
+    /* LOCAL scope, and in `finally`. The default scope is GLOBAL, which revokes
+       every refresh token the account holds — logging the owner out of his own
+       browser as a side effect of a script advertised as read-only. `finally`
+       so the session is also closed when the run throws. */
+    await db.auth.signOut({ scope: "local" });
+  }
+}
 
+async function run(db: SupabaseClient): Promise<void> {
   const { data: gData, error: gErr } = await db.rpc("admin_list_platform_groups");
   if (gErr) throw gErr;
   const groups = (gData as GroupRow[] | null) ?? [];
@@ -222,7 +244,6 @@ async function main(): Promise<void> {
 
   if (DRY_RUN) {
     console.log("Dry run complete — nothing written.");
-    await db.auth.signOut();
     return;
   }
 
@@ -308,7 +329,6 @@ async function main(): Promise<void> {
 
   await fs.writeFile(OUT, L.join("\n"), "utf8");
   const size = (await fs.stat(OUT)).size;
-  await db.auth.signOut();
   console.log(`Wrote ${path.relative(ROOT, OUT)} — ${(size / 1024 / 1024).toFixed(2)} MB, ${L.length.toLocaleString("en-US")} lines.`);
   console.log(`Production was READ ONLY: six read RPCs, no write of any kind.`);
 }

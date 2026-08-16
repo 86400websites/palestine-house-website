@@ -43,6 +43,7 @@ import { promises as fs } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { parseArgs } from "./lib/argv";
 
 const ROOT = process.cwd();
 const ARCHIVE = path.join(ROOT, "docs/source-assets/_archive-297-templates");
@@ -58,7 +59,9 @@ const EXPECTED_FINGERPRINT = "6fde792718130d12071b69459f9d70ab";
    is explicit rather than implicit so a future larger corpus fails visibly. */
 const REMOVE_LIMIT = 1000;
 
-const DRY_RUN = process.argv.includes("--dry-run");
+/* Strict: an unknown argument is an error, never a no-op (review 2026-08-16). */
+const ARGS = parseArgs(process.argv.slice(2), { flags: ["--dry-run"] });
+const DRY_RUN = ARGS.has("--dry-run");
 
 function md5(b: Buffer): string {
   return createHash("md5").update(b).digest("hex");
