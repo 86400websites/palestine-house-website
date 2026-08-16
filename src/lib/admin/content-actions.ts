@@ -162,7 +162,7 @@ export async function savePlatformSectionAction(
 
 // ---------------------------------------------------------------------------
 // Focus areas (PP6a) — the main CMS screen. Replaces the old Elements screen,
-// whose two editable bodies are dead: overview_md is dropped by PP7's 0031
+// whose two editable bodies are dead: overview_md is dropped by PP7's 0033
 // (D-PP-f removed the Overview card) and watch_out_for_md has had no consumer
 // since PP3. The guide body moves here.
 //
