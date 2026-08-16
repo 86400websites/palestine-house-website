@@ -1,5 +1,7 @@
 -- 0030_verify_TEST_db_only.sql — PP6c
--- Run AFTER `scripts/delete-297-objects.ts` and `0030_content_v2_cutover.up.sql`.
+-- Run AFTER `0030_content_v2_cutover.up.sql` and then `scripts/delete-297-objects.ts`
+-- (that order, reversed at PP7 2026-08-16 — rows first, bytes second; see the
+-- migration header for why the old rationale was false).
 -- Safe to run repeatedly; reads only.
 --
 -- Every row below should report ok = true. Anything false is a defect, not a

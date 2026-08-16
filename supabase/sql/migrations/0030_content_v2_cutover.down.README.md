@@ -57,26 +57,76 @@ emergency.
 | 33 `elements` + all three body columns (1,577,163 chars) | ✅ |
 | 10 `platform_groups` | ✅ |
 | 33 `platform_topics` | ✅ |
-| 297 `resources` rows (with their storage paths) | ✅ |
+| 297 `resources` rows (with their storage paths **and `focus_area_code`**) | ✅ *(the column was added at PP7 — see below)* |
 | **297 Storage objects (the actual files)** | ❌ **SQL cannot** |
+| `created_at` / `updated_at` on any restored row | ❌ stamped `now()` — see below |
 | `checklist_items` (818) · `academy_modules` (33) · `checklist_progress` (15) | ❌ deliberately — owner decision A, 2026-08-16 |
 
 **The 297 files** come from the cold backup at
 `docs/source-assets/_archive-297-templates/` (also gitignored, also the only
 copy). Re-upload them under the **same object keys**, which the archive preserves
 exactly, so the restored `resources.storage_path` values resolve. Verify the
-archive first:
+archive first — with the **read-only** verifier, not the exporter:
 
 ```bash
-pnpm exec tsx scripts/backup-297-objects.ts
+pnpm exec tsx scripts/verify-archive.ts
 # 297 objects · 5,320,962 bytes · fingerprint 6fde792718130d12071b69459f9d70ab
+```
+
+and put them back at their exact keys with:
+
+```bash
+pnpm exec tsx scripts/restore-297-objects.ts --dry-run
+```
+
+**`resources.focus_area_code` was missing until PP7 (finding M4).** No admin RPC
+returns the column, so the generator simply omitted it — and because the
+`resources_focus_area_shape` CHECK permits NULL, a rollback would have restored
+all 297 rows with it silently emptied and raised no error. It is now DERIVED from
+each row's owning element, which was verified exact rather than assumed:
+production reports `md5(id || ':' || focus_area_code)` over all 297 non-public
+rows as `c5472e4fc37b85f4666504be87017765`, and the generated file reproduces that
+digest per row, id by id. Worth knowing for scale: the column is **legacy-only** —
+all 112 rows of the new content carry NULL — and nothing in `src/` reads it.
+
+**Timestamps are not restored.** `elements.created_at` / `.updated_at` and
+`resources.created_at` are returned by no admin RPC, so restored rows are stamped
+`now()`. Recorded rather than hidden, with the measurement that sizes it: nothing
+in `src/` reads any of the three — the product's only `created_at` readers are
+`profiles`, `applications` and `admins`. Row *content* is restored exactly; the
+bookkeeping timestamps are not. To keep them, capture them from production
+**before** `0030` runs:
+
+```sql
+select id, created_at, updated_at from public.elements  where code !~ '^[0-9]';
+select id, created_at             from public.resources where is_public = false;
 ```
 
 **The 866 cascade rows** are not restored, and that was decided deliberately:
 `0029` already dropped `get_checklist` and `get_academy_modules`, so nothing in
-the product can read any of them, and PP7's `0031` drops all three tables
+the product can read any of them, and PP7's `0033` drops all three tables
 outright. A rollback restores a fully working platform minus data no surface
 reaches.
+
+## How the snapshot is selected (rewritten at PP7 — finding B4)
+
+The generator used to collect elements and resources by walking
+`platform_topics`: one `admin_get_element` per topic, one
+`admin_list_resource_files` per topic. `0030` deletes by a different rule —
+*every* element whose `code` does not start with a digit, and every non-public
+resource belonging to one.
+
+The two agree only while every legacy element has a topic. An **unlinked** legacy
+element, and any file hanging off it, was deleted by the up-migration and never
+appeared in the rollback — and the generator's own `elements.length === 33` check
+passed, because it had counted one element per topic and there were 33 topics.
+
+Measured on production 2026-08-16: **0 unlinked legacy elements, 0 unsnapshotted
+resources**, so the previous file was in fact complete. The defect was a trap for
+the next generation rather than a hole in the artefact. It is closed by
+construction anyway: elements now come from `admin_list_elements()` (the table,
+not the topics), topics are selected *by element*, groups by `slug not like
+'%-focus-areas'`, and resources are walked over every legacy element.
 
 ## Verification status
 
@@ -87,8 +137,12 @@ terminated, `on conflict (id) do nothing` present on every one), and a real slic
 including non-ASCII values (`Café`, `Aswātna`), and re-run to prove the
 on-conflict guard makes it idempotent.
 
-⚠️ **The full 1.75 MB file has not been executed end to end.** There is no channel
-from the build environment that can push that much SQL. It must be run in the
-Supabase SQL Editor by hand — which is the documented process for every migration
-in this project (`WORKFLOW.md` §14) — and should be rehearsed on TEST before it is
-ever needed on production.
+**PP7 regeneration (2026-08-16):** same shape — 10 groups · 33 topics · 33
+elements · 297 resources, 1,577,163 chars of prose — with `focus_area_code` added
+to every resource insert and verified per row against production by digest.
+
+⚠️ **STILL NOT EXECUTED END TO END as of step 7-e.** The file is 1.68 MB and must
+be run in the Supabase SQL Editor by hand — the documented process for every
+migration in this project (`WORKFLOW.md` §14). PP7 step **7-f** rehearses it on
+TEST; until that step reports a result here, this remains a rollback nobody has
+run, which is what the independent review called blocking.

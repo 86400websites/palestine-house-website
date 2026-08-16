@@ -47,8 +47,9 @@
  * exists to make impossible.
  */
 
-import { promises as fs } from "node:fs";
+import { promises as fs, readFileSync } from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 
 // ---- mammoth (script-only devDep, ships no TS types) loaded via require + a typed shim ----
@@ -340,6 +341,11 @@ export interface TemplateEntry {
   relPath: string; // relative to SRC, so the spec is readable and portable
   type: ResourceType;
   sortOrder: number;
+  /* md5 of the delivered file bytes (review round 5, H3). The loader uploads
+     these bytes unchanged and Storage single-part eTags ARE the md5 — so the
+     0030 guard can pin every object BYTE-FOR-BYTE per focus area, from a value
+     computed at extraction time and identical in every environment. */
+  md5: string;
 }
 
 export interface FocusAreaEntry {
@@ -350,20 +356,21 @@ export interface FocusAreaEntry {
   title: string;
   code: string; // elements.code — the delivered number
   summary: string; // platform_topics.description — the Overview's first sentence
+  intro: string;   // platform_topics.intro       — the Overview's remainder (See More)
   guideMd: string; // elements.simple_guide_md — Overview remainder + the guide
   /* The Simple Guide document itself, offered as the card's "Download Now".
      The same words the reader shows, as a file the partner can keep — which is
      why it is the delivered .docx and not something generated from the text.
      Registered with doc_key='guide', so the partial unique index allows exactly
      one per focus area and the templates-grid predicate excludes it. */
-  guideFile: { fileName: string; relPath: string; title: string };
+  guideFile: { fileName: string; relPath: string; title: string; md5: string };
   /* Carried so the manifest can assert WHICH document was read, not merely that
      one was. */
   overviewFile: string;
   photo: { source: string; target: string; imagePath: string };
   templates: TemplateEntry[];
   sourceDir: string;
-  stats: { overviewChars: number; guideChars: number; summaryChars: number };
+  stats: { overviewChars: number; guideChars: number; summaryChars: number; introChars: number };
 }
 
 export interface ContentSpec {
@@ -591,18 +598,28 @@ async function parseFocusArea(
       relPath: path.relative(SRC, path.join(tmplDir, fileName)).split(path.sep).join("/"),
       type: resourceType(templateTitle),
       sortOrder: i + 1,
+      md5: createHash("md5").update(readFileSync(path.join(tmplDir, fileName))).digest("hex"),
     };
   });
 
   const photoSlug = PHOTO_BY_NUMBER[number];
   if (!photoSlug) fail(where, `no photograph mapped for ${number} (content-migration-map.md §4)`);
   const photoSource = `${photoSlug}.jpg`;
-  if (!(await exists(path.join(TOPIC_PHOTO_DIR, photoSource)))) {
-    fail(where, `mapped photograph is missing: public/assets/workspace/topics/${photoSource}`);
-  }
 
   const slug = slugify(title);
   if (!slug) fail(where, `title does not make a usable web address: ${JSON.stringify(title)}`);
+
+  /* PP7 7-k deleted the 33 legacy source photographs once the 22 targets were
+     committed under their new names, so the SOURCE no longer proves anything.
+     What the platform renders is the TARGET (slug.jpg). Accept either — target
+     first, since that is the committed file the cards use. */
+  const photoTargetOk = await exists(path.join(TOPIC_PHOTO_DIR, `${slug}.jpg`));
+  if (!photoTargetOk && !(await exists(path.join(TOPIC_PHOTO_DIR, photoSource)))) {
+    fail(
+      where,
+      `neither the target photograph (${slug}.jpg) nor its source (${photoSource}) exists in public/assets/workspace/topics`,
+    );
+  }
 
   return {
     number,
@@ -612,6 +629,18 @@ async function parseFocusArea(
     title,
     code: number,
     summary,
+    /* PP7 — the See More affordance (owner request, 2026-08-16).
+       `platform_topics.intro` is the second half of the D-PP-f summary model
+       (`description` + `intro`) and has been empty on all 22 since PP6c. It now
+       carries the Overview's REMAINDER: the card shows the opening sentence and
+       expands to the rest.
+
+       This is deliberately the SAME text that already opens the Simple guide.
+       D-PP-m routed the whole remainder into the guide body so a partner reading
+       Read Now starts at the owner's own words, and the owner confirmed the
+       duplication when asking for See More. Nothing is written or re-worded
+       here — the split point is unchanged, only its destination is new. */
+    intro: overviewRest,
     guideMd,
     /* Same naming rule as the templates: the delivered filename, minus its
        extension and version suffix, never re-worded. */
@@ -619,6 +648,7 @@ async function parseFocusArea(
     guideFile: {
       fileName: guideFile,
       relPath: path.relative(SRC, path.join(faDir, guideFile)).split(path.sep).join("/"),
+      md5: createHash("md5").update(readFileSync(path.join(faDir, guideFile))).digest("hex"),
       title: path
         .basename(guideFile, path.extname(guideFile))
         .replace(/_V\.\d+(\.\d+)*$/i, "")
@@ -636,6 +666,7 @@ async function parseFocusArea(
       overviewChars: overviewMd.length,
       guideChars: guideMd.length,
       summaryChars: summary.length,
+      introChars: overviewRest.length,
     },
   };
 }

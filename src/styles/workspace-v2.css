@@ -1572,12 +1572,88 @@
   line-height: 1.5;
 }
 
+/* See More (PP7). A quiet text affordance, not a third button: the card already
+   carries Explore and Watch Video, and a filled control here would compete with
+   the one action that matters. */
+.pw-root .pw-topic-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--pw-olive-700);
+  font: inherit;
+  font-size: 12.75px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.pw-root .pw-topic-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* No per-rule reduced-motion override: the house motion rule at the end of this
+   file already sets `transition-duration: 0.01ms !important` on every `.pw-root`
+   descendant (DESIGN.md §8). A second `@media (prefers-reduced-motion: reduce)`
+   block was written here first, and it was both redundant AND fatal — it crashed
+   the Next build worker with an access violation (exit 3221225477), found by
+   bisecting the stylesheet after typecheck and lint had both passed clean. */
+.pw-root .pw-topic-more .pw-icon {
+  width: 15px;
+  height: 15px;
+  transition: transform 160ms ease;
+}
+
+.pw-root .pw-topic-more[aria-expanded="true"] .pw-icon {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pw-root .pw-topic-more .pw-icon {
+    transition: none;
+  }
+}
+
 .pw-root .pw-topic-summary {
   margin-top: 10px;
   max-width: 66ch;
   color: var(--pw-char-800);
   font-size: 13.5px;
   line-height: 1.62;
+}
+
+/* The See More body is rendered markdown (the Overview's remainder), so it
+   arrives as paragraphs, a bullet list and a bold closing goal line rather than
+   as one string. */
+.pw-root .pw-topic-summary > :first-child {
+  margin-top: 0;
+}
+
+.pw-root .pw-topic-summary p {
+  margin: 0 0 8px;
+}
+
+.pw-root .pw-topic-summary p:last-child {
+  margin-bottom: 0;
+}
+
+.pw-root .pw-topic-summary ul,
+.pw-root .pw-topic-summary ol {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+
+.pw-root .pw-topic-summary li {
+  margin-bottom: 3px;
+}
+
+.pw-root .pw-topic-summary strong {
+  color: var(--pw-char-900);
+  font-weight: 800;
 }
 
 .pw-root .pw-topic-actions {

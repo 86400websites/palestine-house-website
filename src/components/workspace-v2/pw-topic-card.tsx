@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, ArrowRight, ImageOff, PlayCircle } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, ArrowRight, ChevronDown, ImageOff, PlayCircle } from "lucide-react";
 import { usePwToast } from "@/components/workspace-v2/pw-toast";
 import { PwStartCard } from "@/components/workspace-v2/pw-start-card";
 import { PwTemplateGrid } from "@/components/workspace-v2/pw-template-grid";
@@ -74,9 +75,14 @@ export function PwTopicCard({
   onToggle: (slug: string) => void;
 }) {
   const { showToast } = usePwToast();
+  /* Local, and deliberately independent of the card's Explore state — See More
+     discloses a few sentences of summary; Explore opens the guide and templates
+     below it. */
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const titleId = `topic-${topic.slug}-title`;
   const bodyId = `topic-${topic.slug}-body`;
+  const introId = `topic-${topic.slug}-intro`;
 
   return (
     <article
@@ -96,8 +102,37 @@ export function PwTopicCard({
           {topic.description ? (
             <p className="pw-topic-desc">{topic.description}</p>
           ) : null}
-          {topic.intro ? (
-            <p className="pw-topic-summary">{topic.intro}</p>
+
+          {/* SEE MORE (PP7, owner request 2026-08-16). The card shows the
+              Overview's opening sentence; the rest expands in place.
+
+              `introHtml` is already sanitized server-side — it is markdown in
+              the database, carrying bullet lists and a bold goal line, so it
+              cannot be rendered as a string here. See PwTopic.introHtml.
+
+              Deliberately independent of `open`: this discloses a few sentences
+              of summary, while Explore opens the guide and templates below. A
+              partner can read the whole summary without committing to opening
+              the focus area. */}
+          {topic.introHtml ? (
+            <>
+              <button
+                type="button"
+                className="pw-topic-more"
+                aria-expanded={moreOpen}
+                aria-controls={introId}
+                onClick={() => setMoreOpen((v) => !v)}
+              >
+                {moreOpen ? "See less" : "See more"}
+                <ChevronDown className="pw-icon" aria-hidden="true" />
+              </button>
+              <div
+                className="pw-topic-summary"
+                id={introId}
+                hidden={!moreOpen}
+                dangerouslySetInnerHTML={{ __html: topic.introHtml }}
+              />
+            </>
           ) : null}
 
           <div className="pw-topic-actions">

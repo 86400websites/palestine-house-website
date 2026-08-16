@@ -55,6 +55,38 @@
  *
  * The 1.6 MB of prose is streamed to disk and never printed.
  *
+ * ⚠️ PP7: THE SNAPSHOT IS NOW DEFINED BY THE UP-MIGRATION'S OWN PREDICATES
+ * ------------------------------------------------------------------------
+ * This file used to collect elements and resources by WALKING `platform_topics`
+ * — one `admin_get_element` per topic, one `admin_list_resource_files` per
+ * topic. `0030` deletes by a different rule: every element whose `code` does not
+ * start with a digit, and every non-public resource belonging to one.
+ *
+ * The two agree only while every legacy element has a topic. An UNLINKED legacy
+ * element — and any file hanging off it — was deleted by the up-migration and
+ * never appeared in the rollback. The failure is silent in both directions: the
+ * generator's `elements.length === 33` assertion passes, because it counted one
+ * element per topic and there were 33 topics.
+ *
+ * Measured on production 2026-08-16: 0 unlinked legacy elements, 0
+ * unsnapshotted resources. So the file this replaced was complete — the defect
+ * was a trap for the next generation, not a hole in the artefact. It is fixed
+ * by construction anyway: elements come from `admin_list_elements()` (the table,
+ * not the topics), topics are selected BY ELEMENT, groups by `slug not like
+ * '%-focus-areas'`, and resources are walked over every legacy element.
+ *
+ * ⚠️ WHAT A ROLLBACK STILL DOES NOT RESTORE: `created_at` / `updated_at`.
+ * No admin RPC returns them and this script has no other read path, so restored
+ * rows are stamped `now()`. Recorded rather than hidden, with the measurement
+ * that sizes it: **nothing in `src/` reads `elements.created_at`,
+ * `elements.updated_at` or `resources.created_at`** — the only `created_at`
+ * readers in the product are `profiles`, `applications` and `admins`. The rows'
+ * content is restored exactly; their bookkeeping timestamps are not. If the
+ * owner wants them, they must be captured from production BEFORE `0030` runs:
+ *
+ *   select id, created_at, updated_at from public.elements  where code !~ '^[0-9]';
+ *   select id, created_at             from public.resources where is_public = false;
+ *
  * TWO THINGS THAT LOOK LIKE DISCREPANCIES AND ARE NOT
  * ---------------------------------------------------
  * 1. The character totals printed here are THREE HIGHER than `length()` reports
@@ -73,6 +105,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
+import { signOutLocal } from "./lib/session";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "supabase/sql/migrations/0030_content_v2_cutover.down.sql");
@@ -114,7 +147,8 @@ interface FileRow {
   type: string | null; version: string | null; sort_order: number; is_public: boolean;
 }
 interface FullResource extends FileRow {
-  element_id: string; storage_bucket: string | null; storage_path: string | null;
+  element_id: string; focus_area_code: string | null;
+  storage_bucket: string | null; storage_path: string | null;
 }
 
 /** Postgres literal. Nulls stay NULL; everything else is dollar-quoted with a
@@ -177,42 +211,94 @@ async function main(): Promise<void> {
     /* LOCAL scope, and in `finally`. The default scope is GLOBAL, which revokes
        every refresh token the account holds — logging the owner out of his own
        browser as a side effect of a script advertised as read-only. `finally`
-       so the session is also closed when the run throws. */
-    await db.auth.signOut({ scope: "local" });
+       so the session is also closed when the run throws.
+
+       PP7: this file was the ONLY one that got this right. The rule now lives in
+       `scripts/lib/session.ts` and all eight scripts share it. */
+    await signOutLocal(db);
   }
 }
 
+/** THE UP-MIGRATION'S OWN PREDICATES, in one place, so the snapshot is defined
+ *  by what `0030` deletes rather than by something that happens to coincide
+ *  with it today. See the ⚠️ note in the header. */
+const isLegacyElement = (code: string): boolean => !/^[0-9]/.test(code ?? "");
+const isLegacyGroup = (slug: string): boolean => !slug.endsWith("-focus-areas");
+
 async function run(db: SupabaseClient): Promise<void> {
+  /* ── groups: `delete from platform_groups where slug not like '%-focus-areas'` */
   const { data: gData, error: gErr } = await db.rpc("admin_list_platform_groups");
   if (gErr) throw gErr;
-  const groups = (gData as GroupRow[] | null) ?? [];
+  const allGroups = (gData as GroupRow[] | null) ?? [];
+  const groups = allGroups.filter((g) => isLegacyGroup(g.slug));
 
-  const { data: tData, error: tErr } = await db.rpc("admin_list_platform_topics");
-  if (tErr) throw tErr;
-  const topics = (tData as TopicRow[] | null) ?? [];
+  /* ── elements: `delete from elements where code !~ '^[0-9]'`
+     Enumerated from admin_list_elements(), which lists the TABLE — not walked
+     through platform_topics, which is what the old version did and is the whole
+     of finding B4. */
+  const { data: eList, error: eErr } = await db.rpc("admin_list_elements");
+  if (eErr) throw eErr;
+  const elementIndex = ((eList as { id: string; slug: string; code: string }[] | null) ?? []).filter((e) =>
+    isLegacyElement(e.code),
+  );
+  const legacyElementIds = new Set(elementIndex.map((e) => e.id));
 
   const elements: ElementRow[] = [];
-  for (const t of topics) {
-    const { data, error } = await db.rpc("admin_get_element", { p_slug: t.element_slug });
-    if (error) throw new Error(`admin_get_element(${t.element_slug}): ${error.message}`);
+  for (const idx of elementIndex) {
+    const { data, error } = await db.rpc("admin_get_element", { p_slug: idx.slug });
+    if (error) throw new Error(`admin_get_element(${idx.slug}): ${error.message}`);
     const row = ((data as ElementRow[] | null) ?? [])[0];
-    if (!row) throw new Error(`element "${t.element_slug}" returned no rows`);
+    if (!row) throw new Error(`element "${idx.slug}" returned no rows`);
     elements.push(row);
   }
+  const elementByIdText = new Map(elements.map((e) => [e.id, e]));
 
+  /* ── topics: `delete from platform_topics where element_id in (legacy elements)`
+     Selected BY ELEMENT, matching the migration. A topic on a non-legacy element
+     is not deleted and must not be snapshotted. */
+  const { data: tData, error: tErr } = await db.rpc("admin_list_platform_topics");
+  if (tErr) throw tErr;
+  const topics = ((tData as TopicRow[] | null) ?? []).filter((t) => legacyElementIds.has(t.element_id));
+
+  /* ── resources: `delete from resources where is_public = false and element_id
+     in (legacy elements)`. Walked over EVERY legacy element, including one with
+     no topic — the exact row the old per-topic walk deleted and never saved. */
   const resources: FullResource[] = [];
-  for (const t of topics) {
-    const { data, error } = await db.rpc("admin_list_resource_files", { p_element_id: t.element_id });
-    if (error) throw new Error(`admin_list_resource_files(${t.element_slug}): ${error.message}`);
+  for (const el of elements) {
+    const { data, error } = await db.rpc("admin_list_resource_files", { p_element_id: el.id });
+    if (error) throw new Error(`admin_list_resource_files(${el.slug}): ${error.message}`);
     for (const f of (data as FileRow[] | null) ?? []) {
+      /* is_public = false is the migration's predicate; the two public booklets
+         carry element_id IS NULL and never appear here anyway, but the filter is
+         written rather than assumed. */
+      if (f.is_public) continue;
       /* The product's own download path, not a filename guess. */
       const { data: dl, error: dErr } = await db.rpc("get_resource_download", { p_id: f.id });
       if (dErr) throw new Error(`get_resource_download(${f.title}): ${dErr.message}`);
       const row = ((dl as { storage_bucket: string; storage_path: string }[] | null) ?? [])[0];
       if (!row?.storage_path) throw new Error(`no storage path for "${f.title}"`);
-      resources.push({ ...f, element_id: t.element_id, storage_bucket: row.storage_bucket, storage_path: row.storage_path });
+      resources.push({
+        ...f,
+        element_id: el.id,
+        /* M4. `resources.focus_area_code` is not returned by any admin RPC, and
+           the old file simply omitted the column — so a rollback restored 297
+           rows with it silently NULL, which the CHECK permits and no error would
+           report. It is DERIVED from the owning element, which is exact:
+           measured read-only on production 2026-08-16, all 297 non-public rows
+           carry a focus_area_code identical to their element's, 0 differing. */
+        focus_area_code: el.focus_area_code,
+        storage_bucket: row.storage_bucket,
+        storage_path: row.storage_path,
+      });
     }
   }
+
+  /* The predicate-exactness check, stated rather than assumed: everything the
+     migration will delete has been collected. */
+  const orphanTopics = ((tData as TopicRow[] | null) ?? []).filter(
+    (t) => legacyElementIds.has(t.element_id) && !elementByIdText.has(t.element_id),
+  );
+  if (orphanTopics.length) throw new Error(`${orphanTopics.length} legacy topic(s) have no snapshotted element`);
 
   const templates = resources.filter((r) => !r.is_public && r.doc_key === null && r.code !== null);
   const guideChars = elements.reduce((n, e) => n + (e.simple_guide_md?.length ?? 0), 0);
@@ -309,10 +395,15 @@ async function run(db: SupabaseClient): Promise<void> {
   L.push(``);
 
   L.push(`-- 4. resources — rows only. The BYTES come from the cold backup (see header).`);
+  L.push(`--    focus_area_code is DERIVED from the owning element (PP7 / M4): no admin`);
+  L.push(`--    RPC returns the column, and omitting it — as this file used to — restored`);
+  L.push(`--    all ${resources.length} rows with it silently NULL, which the CHECK permits and`);
+  L.push(`--    no error reports. Measured read-only on production 2026-08-16: every`);
+  L.push(`--    non-public resource row carries its element's focus_area_code, 0 differing.`);
   for (const r of resources) {
     L.push(
-      `insert into public.resources (id, element_id, title, code, doc_key, type, version, is_public, sort_order, storage_bucket, storage_path) values (` +
-        [r.id, r.element_id, r.title, r.code, r.doc_key, r.type, r.version].map(lit).join(", ") +
+      `insert into public.resources (id, element_id, title, code, doc_key, type, version, focus_area_code, is_public, sort_order, storage_bucket, storage_path) values (` +
+        [r.id, r.element_id, r.title, r.code, r.doc_key, r.type, r.version, r.focus_area_code].map(lit).join(", ") +
         `, ${r.is_public}, ${r.sort_order}, ` +
         [r.storage_bucket, r.storage_path].map(lit).join(", ") +
         `) on conflict (id) do nothing;`,

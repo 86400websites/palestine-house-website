@@ -1,5 +1,5 @@
 {
-  "generatedBy": "scripts/backup-297-objects.ts (PP6c step 6c-b)",
+  "generatedBy": "scripts/backup-297-objects.ts (PP6c step 6c-b; staged-and-promoted since PP7 step 7-b)",
   "purpose": "Cold backup of the 297 legacy template objects deleted by migration 0030 (D-PP-k). A .down.sql restores rows, never Storage objects — these files are the only copy.",
   "exportedFrom": "TEST (sdszcralogcrujtyghig), whose 297 legacy objects are byte-identical to production's",
   "archiveDir": "docs/source-assets/_archive-297-templates/ (gitignored)",
@@ -8,5 +8,6 @@
   "fingerprint": "6fde792718130d12071b69459f9d70ab",
   "fingerprintFormula": "md5(join('\\n', sorted `name|md5|size`)), computed from the bytes on disk. Server equivalent: md5(string_agg(name||'|'||replace(metadata->>'eTag','\"','')||'|'||(metadata->>'size'), E'\\n' order by name)) — the replace() is required because Storage stores eTags quoted.",
   "objectListing": "withheld from the public repo by design — see docs/source-assets/_archive-297-templates/_manifest-full.json (gitignored), or re-run this script to regenerate it",
-  "howToVerify": "pnpm exec tsx scripts/backup-297-objects.ts — re-hashes every archived file and re-asserts count, total bytes and fingerprint against production's measured values."
+  "howToVerify": "pnpm exec tsx scripts/verify-archive.ts — re-hashes every archived file and re-asserts count, total bytes and fingerprint against production's measured values. Strictly read-only: no network call, no credential read, nothing opened for writing.",
+  "howToVerifyChangedAt": "PP7 step 7-b, 2026-08-16. This field used to name scripts/backup-297-objects.ts, which DOWNLOADS — so the documented way to check the only copy of these 297 files was a command that opened every one of them for writing, and it overwrote them before the aggregate check could fail. Raised as blocking by the independent review of 2026-08-16."
 }

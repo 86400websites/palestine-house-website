@@ -8,7 +8,8 @@
  *
  *   pnpm exec tsx scripts/load-content.ts --focus 1.1 --dry-run
  *   pnpm exec tsx scripts/load-content.ts --focus 1.1
- *   pnpm exec tsx scripts/load-content.ts --all            # PP6c
+ *   pnpm exec tsx scripts/load-content.ts --all                   # PP6c, TEST
+ *   pnpm exec tsx scripts/load-content.ts --all --target prod     # PP7, the owner
  *
  * IT DRIVES THE CMS's OWN RPCs, AND THAT IS THE POINT
  * ---------------------------------------------------
@@ -34,9 +35,17 @@
  *
  * SAFETY
  * ------
- * TEST only. The target host is asserted against the known TEST project ref
- * before a single request, and the credentials are read out of `.env.local` by
- * this script — they are never passed on a command line or printed.
+ * TEST BY DEFAULT. Production requires `--target prod`, typed out, and PP7 built
+ * it so that reaching production by accident is impossible rather than unlikely:
+ * the `PROD_*` variables are read BY NAME with **no fallback** to the default
+ * client, the host is asserted exactly before the first request, and a typed
+ * confirmation naming the production project ref is demanded after every guard
+ * has passed and before the first write. If stdin is not a terminal it refuses
+ * outright — a production load has a person at the keyboard, so it cannot be
+ * reached from a pipe, a CI job or an agent. Full reasoning at `connect()`.
+ *
+ * Credentials are read out of `.env.local` by this script — never passed on a
+ * command line, never printed.
  *
  * IDEMPOTENT. Re-running finds what it created last time — group by slug, focus
  * area by slug, and a file by its CODE (or doc_key for the guide, never by its
@@ -60,8 +69,13 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseArgs } from "./lib/argv";
+import { withSession } from "./lib/session";
+import { isDefinitiveRefusal } from "./lib/pg-errors";
+import { confirmProduction, connectTarget, resolveTarget } from "./lib/connect";
+import { findByCode } from "./lib/identity";
+import { assertCodesHaveNotShifted as checkShift } from "./lib/shift";
 
 const ROOT = process.cwd();
 const SPEC = path.join(ROOT, "docs/content-v2-spec.json");
@@ -71,10 +85,10 @@ const SRC = path.join(
 );
 const TOPIC_PHOTO_DIR = path.join(ROOT, "public/assets/workspace/topics");
 
-/* The non-production project (PROJECT-STATUS.md §6). Vercel Preview and
-   Development point here, which is why the pilot is reviewed here and why this
-   script has no production mode at all. */
-const TEST_REF = "sdszcralogcrujtyghig";
+/* Project refs, credential names, host assertions and the typed production
+   confirmation all live in scripts/lib/connect.ts — ONE implementation, shared
+   with cutover.ts, delete-297-objects.ts and restore-297-objects.ts since
+   review round 4 (H1). */
 const BUCKET = "resources";
 
 /* Mirrors src/lib/admin/file-actions.ts. Word documents and PDFs only. */
@@ -86,23 +100,15 @@ const CONTENT_TYPE: Record<string, string> = {
 /* STRICT. An unknown argument is an error, never a no-op — the review of
    2026-08-16 rated this Certain, because D-PP-r documented `--target prod`,
    the owner was told to use it, and this script silently ignored it and ran
-   against TEST. `--target` is accepted here ONLY so that it fails loudly with
-   an explanation until PP7 implements it; it is not a working flag. */
+   against TEST. */
 const ARGS = parseArgs(process.argv.slice(2), {
-  flags: ["--dry-run", "--all", "--allow-live", "--replace-files", "--photos-only"],
+  flags: ["--dry-run", "--all", "--allow-live", "--replace-files", "--photos-only", "--allow-retitle"],
   options: ["--focus", "--target"],
 });
 
-const TARGET = ARGS.get("--target");
-if (TARGET !== null) {
-  throw new Error(
-    `--target is NOT IMPLEMENTED. This script targets the TEST project only, and ` +
-      `asserts the TEST host before its first request. ` +
-      `D-PP-r designs a production path and PP7 builds it; until then, passing ` +
-      `--target ${TARGET} would have been silently ignored and this run would have ` +
-      `written to TEST while you believed otherwise. Refusing instead.`,
-  );
-}
+/* D-PP-r. TEST unless production is asked for by name; an unknown value is an
+   error, never a default. Resolution lives in the shared lib. */
+const TARGET = resolveTarget(ARGS.get("--target"));
 
 const DRY_RUN = ARGS.has("--dry-run");
 const ALL = ARGS.has("--all");
@@ -123,6 +129,11 @@ const REPLACE_FILES = ARGS.has("--replace-files");
    surface: every target filename is new (verified at 6c-c — 22 distinct sources
    to 22 distinct targets, none of which is a live photo). */
 const PHOTOS_ONLY = ARGS.has("--photos-only");
+/* Confirmation that a code whose registered title no longer matches the spec is
+   a genuine RENAME and not a deletion-induced code shift. Off by default: the
+   two are indistinguishable from title and code alone, and guessing wrong
+   attaches one document's name to another's bytes (M1, PP7). */
+const ALLOW_RETITLE = ARGS.has("--allow-retitle");
 const FOCUS = ARGS.get("--focus");
 
 if (!ALL && !FOCUS) {
@@ -136,6 +147,8 @@ interface TemplateEntry {
   relPath: string;
   type: string;
   sortOrder: number;
+  /** md5 of the delivered bytes (round 5, H3) — what 0030's guard pins. */
+  md5: string;
 }
 interface FocusAreaEntry {
   number: string;
@@ -145,8 +158,10 @@ interface FocusAreaEntry {
   title: string;
   code: string;
   summary: string;
+  /** The Overview's remainder — `platform_topics.intro`, the See More body. */
+  intro: string;
   guideMd: string;
-  guideFile: { fileName: string; relPath: string; title: string };
+  guideFile: { fileName: string; relPath: string; title: string; md5: string };
   photo: { source: string; target: string; imagePath: string };
   templates: TemplateEntry[];
 }
@@ -190,43 +205,31 @@ function step(message: string): void {
   console.log(`  ${message}`);
 }
 
-async function connect(): Promise<SupabaseClient> {
-  process.loadEnvFile(path.join(ROOT, ".env.local"));
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const email = process.env.TEST_PARTNER_EMAIL;
-  const password = process.env.TEST_PARTNER_PASSWORD;
-  if (!url || !key) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL / _PUBLISHABLE_KEY in .env.local");
-  if (!email || !password) {
-    throw new Error("Missing TEST_PARTNER_EMAIL / TEST_PARTNER_PASSWORD in .env.local");
-  }
-
-  /* Exact host match over https, NOT a substring test, so a look-alike host can
-     never receive a session or a write. The same guard the old ingest carried. */
-  const parsed = new URL(url);
-  if (parsed.protocol !== "https:" || parsed.hostname !== `${TEST_REF}.supabase.co`) {
-    throw new Error(
-      `Refusing to run against "${parsed.host}". This script targets the TEST project only ` +
-        `(https://${TEST_REF}.supabase.co); production content is loaded by PP6c, deliberately, by hand.`,
-    );
-  }
-  console.log(`target: ${parsed.host} (TEST)`);
-
-  const db = createClient(url, key, { auth: { persistSession: false } });
-  const { error } = await db.auth.signInWithPassword({ email, password });
-  if (error) throw new Error(`sign-in failed: ${error.message}`);
-
-  const { data: isAdmin, error: adminErr } = await db.rpc("is_admin");
-  if (adminErr) throw adminErr;
-  if (isAdmin !== true) {
-    throw new Error(
-      "The signed-in account is not an admin on this project, so no write RPC will accept it. " +
-        "If it was removed from `admins` for a partner-path test, put it back first.",
-    );
-  }
-  return db;
-}
-
+/**
+ * THE TWO TARGETS (D-PP-r, built at PP7 step 7-h).
+ *
+ * One pipeline, two destinations — rejected alternatives on the record: a
+ * separate production script would have been a second implementation of a
+ * pipeline that took two blocking review rounds to get right, and the bugs would
+ * have been in the copy rather than in the original.
+ *
+ * Everything here is designed so that an accidental production write is
+ * IMPOSSIBLE rather than merely unlikely:
+ *
+ *   - TEST is the default. Production requires `--target prod`, typed out.
+ *   - production reads the `PROD_*` variables BY NAME and **never falls back**
+ *     to the default client if they are absent. That is the specific defect the
+ *     `.env.local` incident of 2026-08-16 would have become under a laxer
+ *     design: `.env.local` had been pointed at production, and a script that
+ *     "just uses whatever is configured" would have written there believing it
+ *     was on TEST.
+ *   - each target asserts its own host EXACTLY, over https, before the first
+ *     request — so even correct-looking credentials pointed at the wrong project
+ *     stop the run.
+ *   - and no service key, ever. The admin's own session, because an upload that
+ *     succeeds through RLS proves the storage policies admit it, whereas one
+ *     that succeeds through a service key proves nothing.
+ */
 async function ensureGroup(
   db: SupabaseClient,
   sectionSlug: string,
@@ -267,6 +270,7 @@ type TopicRow = {
   id: string;
   element_id: string;
   element_slug: string;
+  element_code: string;
   slug: string;
   published: boolean;
 };
@@ -279,7 +283,7 @@ async function upsertFocusArea(
   const { data, error } = await db.rpc("admin_list_platform_topics");
   if (error) throw error;
   const rows = (data as TopicRow[] | null) ?? [];
-  const existing = rows.find((t) => t.slug === fa.slug) ?? null;
+  const existing = findByCode(rows, fa);
 
   /* REFUSE TO REWRITE LIVE CONTENT WITHOUT BEING TOLD TO.
      This script never changes the Draft/Live flag — but that is not the same as
@@ -311,7 +315,13 @@ async function upsertFocusArea(
     p_description: fa.summary,
     /* D-PP-m routes the whole of the Overview's remainder into the guide, so
        there is no second card line. Left empty rather than invented. */
-    p_intro: null,
+    /* PP7 — See More. D-PP-f's summary is `description` + `intro`, and `intro`
+       was null on all 22 because D-PP-m routed the Overview's remainder into the
+       guide instead. The owner asked for the card to expand to that remainder,
+       so it is now written here TOO — the same text in both places, which he
+       confirmed. Empty string normalised to null so a focus area with no
+       remainder gets no disclosure rather than an empty one. */
+    p_intro: fa.intro?.trim() ? fa.intro : null,
     p_icon: null,
     p_image_path: fa.photo.imagePath,
     p_image_position: "50% 50%",
@@ -328,8 +338,8 @@ async function upsertFocusArea(
 
   const { data: after, error: afterErr } = await db.rpc("admin_list_platform_topics");
   if (afterErr) throw afterErr;
-  const row = ((after as TopicRow[] | null) ?? []).find((t) => t.slug === fa.slug);
-  if (!row) throw new Error(`focus area "${fa.slug}" is missing immediately after upsert`);
+  const row = ((after as TopicRow[] | null) ?? []).find((t) => t.element_code === fa.code);
+  if (!row) throw new Error(`focus area ${fa.code} "/${fa.slug}" is missing immediately after upsert`);
   return row;
 }
 
@@ -363,7 +373,16 @@ async function putFile(
   const { error: upErr } = await db.storage
     .from(BUCKET)
     .upload(args.key, bytes, { contentType, upsert: false });
-  if (upErr) throw new Error(`upload ${args.key}: ${upErr.message}`);
+  if (upErr) {
+    /* Round 5, H5 follow-through: an earlier AMBIGUOUS registration failure now
+       deliberately KEEPS the uploaded object, so a healing re-run can find its
+       own key already present. The key is deterministic for this exact file, so
+       "already exists" here means OUR bytes from the interrupted run — proceed
+       to register the row against them. Any other upload error still throws. */
+    const alreadyExists = /already exists|duplicate/i.test(upErr.message);
+    if (!alreadyExists) throw new Error(`upload ${args.key}: ${upErr.message}`);
+    step(`object ${args.key} already present from an interrupted run — registering against it`);
+  }
 
   const { error: regErr } = await db.rpc("admin_register_resource_file", {
     p_element_id: args.elementId,
@@ -376,10 +395,24 @@ async function putFile(
     p_sort_order: args.sortOrder,
   });
   if (regErr) {
-    /* Safe to remove: the upload above succeeded with upsert:false, so this key
-       did not exist a moment ago and belongs to nobody else. */
-    await db.storage.from(BUCKET).remove([args.key]);
-    throw new Error(`register "${args.title}": ${regErr.message}`);
+    /* Round 5, H5: compensate ONLY on a definitive database refusal. The key is
+       ours (upsert:false proved it did not exist a moment ago), but "ours" is
+       not the question — WHETHER THE ROW COMMITTED is. A five-char SQLSTATE
+       means the RPC ran and refused: nothing committed, the object is a true
+       orphan, remove it. An empty/absent code is a transport failure: the
+       registration may have committed with its response lost, in which case a
+       live row now points at this key and deleting it makes a broken download a
+       rerun cannot repair (the rerun sees the row as already registered). */
+    if (isDefinitiveRefusal(regErr)) {
+      await db.storage.from(BUCKET).remove([args.key]);
+      throw new Error(`register "${args.title}": ${regErr.message}`);
+    }
+    throw new Error(
+      `register "${args.title}" FAILED AMBIGUOUSLY (${regErr.message}). The row may or may not have ` +
+        `committed, so the uploaded object was KEPT:\n  ${args.key}\n` +
+        `Re-run this focus area: if the row committed, the run reports the file as already ` +
+        `registered; if it did not, the run re-registers this key. Either way nothing is lost.`,
+    );
   }
   return bytes.length;
 }
@@ -407,26 +440,10 @@ type ExistingFile = { id: string; title: string; code: string | null; doc_key: s
 
    Called from the preflight, before anything is written, and again inside the
    file loop so it cannot be bypassed by a future caller. */
+/* Delegates to scripts/lib/shift.ts, where the rule has its own test suite. */
 function assertCodesHaveNotShifted(fa: FocusAreaEntry, existing: ExistingFile[]): void {
-  for (const t of fa.templates) {
-    const clash = existing.find((r) => r.doc_key === null && r.code === t.code);
-    if (!clash || clash.title === t.title) continue;
-    const movedTo = fa.templates.find(
-      (x) => x.title === clash.title && x.code !== t.code,
-    );
-    if (movedTo) {
-      throw new Error(
-        `Template codes have shifted on "${fa.title}". ${t.code} is registered as ` +
-          `"${clash.title}", which the spec now calls ${movedTo.code}. Codes come from ` +
-          `alphabetical filename order, so a renamed or inserted file re-labels the ones ` +
-          `after it — continuing would attach each file's name to the other's bytes. ` +
-          `Fix the codes in the CMS, or delete this focus area's files and re-load it. ` +
-          `Nothing has been written.`,
-      );
-    }
-  }
+  checkShift(fa.title, fa.templates, existing, ALLOW_RETITLE);
 }
-
 /* PUSH NEW BYTES for a file that is already registered.
    Matching by code means an EDITED source document under an unchanged filename
    is not noticed — the row is found, nothing is re-uploaded, and the partner
@@ -467,8 +484,29 @@ async function replaceBytes(
     p_storage_path: key,
   });
   if (error) {
-    await db.storage.from(BUCKET).remove([key]);
-    throw new Error(`replace "${row.title}" on ${fa.number}: ${error.message}`);
+    /* COMPENSATE ONLY ON A DEFINITIVE REFUSAL (review round 4, H5). A network
+       failure cannot distinguish "the RPC never committed" from "it committed
+       and the response was lost". The old code deleted the freshly uploaded
+       object on ANY error — in the lost-response case the row already points at
+       the new key, so the compensation destroyed the bytes the live row now
+       depends on, while the counts stayed plausible.
+
+       A Postgres error carries an errcode (the RPC ran and REFUSED — nothing
+       committed, the new object is truly orphaned and safe to remove). An error
+       without one is transport-level and AMBIGUOUS: keep BOTH objects — an
+       orphan is 100 KB of dead weight, a deleted live object is a broken
+       download — and have the operator settle it against the database. */
+    if (isDefinitiveRefusal(error)) {
+      await db.storage.from(BUCKET).remove([key]);
+      throw new Error(`replace "${row.title}" on ${fa.number}: ${error.message}`);
+    }
+    throw new Error(
+      `replace "${row.title}" on ${fa.number} FAILED AMBIGUOUSLY (${error.message}). The database ` +
+        `may or may not have committed the new path. NEITHER object was deleted:\n` +
+        `  candidate new key: ${key}\n` +
+        `Re-run this focus area with --replace-files; the run will settle which key the row owns ` +
+        `and the loser can then be removed via the CMS.`,
+    );
   }
   const oldPath = typeof data === "string" ? data : null;
   if (oldPath && oldPath !== key) {
@@ -573,19 +611,42 @@ async function uploadFiles(
 /* D-PP-o: the photograph is COPIED to the new slug, never renamed, so the live
    33 keep rendering until 0030 removes them. Committed to the repo — it is a
    static asset, not data. */
+/* THE TARGET IS CHECKED FIRST, AND THAT ORDER IS LOAD-BEARING SINCE PP7.
+   This used to read the SOURCE before looking at the target — which was fine
+   while both existed, and became a hard failure the moment `0033`'s companion
+   cleanup deleted the 33 legacy photographs (7-k). All 22 targets are committed,
+   so nothing needed copying; the loader crashed on focus area 1.1 anyway,
+   reading a source it did not need. Caught while writing the production runbook,
+   which is a better place to find it than during the production run. */
 async function ensurePhoto(fa: FocusAreaEntry): Promise<void> {
   const from = path.join(TOPIC_PHOTO_DIR, fa.photo.source);
   const to = path.join(TOPIC_PHOTO_DIR, fa.photo.target);
-  const source = await fs.readFile(from);
-  try {
-    const current = await fs.readFile(to);
+
+  const current = await fs.readFile(to).catch(() => null);
+  const source = await fs.readFile(from).catch(() => null);
+
+  if (current) {
+    /* D-PP-o's copy is a one-time migration aid. Once the target is committed
+       the source has no further job, and at PP7 it was deleted along with the
+       other 32 retired photographs. */
+    if (!source) {
+      step(`photo ${fa.photo.target} present (source retired at PP7)`);
+      return;
+    }
     if (current.equals(source)) {
       step(`photo ${fa.photo.target} already in place`);
       return;
     }
-  } catch {
-    /* not there yet */
   }
+
+  if (!source) {
+    throw new Error(
+      `photo "${fa.photo.target}" is missing from ${path.relative(ROOT, TOPIC_PHOTO_DIR)} and its ` +
+        `source "${fa.photo.source}" no longer exists — the 33 legacy photographs were deleted at ` +
+        `PP7 step 7-k. Restore the target from git rather than re-deriving it.`,
+    );
+  }
+
   if (DRY_RUN) {
     step(`WOULD copy photo ${fa.photo.source} -> ${fa.photo.target}`);
     return;
@@ -624,8 +685,15 @@ async function main(): Promise<void> {
     return;
   }
 
-  const db = await connect();
+  const db = await connectTarget(TARGET);
+  await withSession(db, () => run(db, spec, targets));
+}
 
+async function run(
+  db: SupabaseClient,
+  spec: ContentSpec,
+  targets: FocusAreaEntry[],
+): Promise<void> {
   /* PREFLIGHT, BEFORE ANY MUTATION ANYWHERE.
      The Live guard used to sit inside upsertFocusArea, which runs third — so a
      refused run had already copied a photograph into the working tree and could
@@ -637,8 +705,11 @@ async function main(): Promise<void> {
   const known = (preRows as TopicRow[] | null) ?? [];
 
   if (!ALLOW_LIVE) {
+    /* By CODE, not slug (see findExisting): a renamed focus area is invisible to
+       a slug lookup, so this guard used to wave through exactly the published
+       row it exists to protect. */
     const live = targets
-      .map((fa) => known.find((t) => t.slug === fa.slug))
+      .map((fa) => findByCode(known, fa))
       .filter((t): t is TopicRow => Boolean(t?.published));
     if (live.length) {
       throw new Error(
@@ -654,13 +725,32 @@ async function main(): Promise<void> {
   /* The code-shift check belongs here too, for the same reason: it decides that
      the run is unsafe, so it must decide it before the run has written anything. */
   for (const fa of targets) {
-    const topic = known.find((t) => t.slug === fa.slug);
+    const topic = findByCode(known, fa);
     if (!topic) continue;
     const { data, error } = await db.rpc("admin_list_resource_files", {
       p_element_id: topic.element_id,
     });
     if (error) throw error;
     assertCodesHaveNotShifted(fa, (data as ExistingFile[] | null) ?? []);
+  }
+
+  /* THE LAST THING BEFORE THE FIRST WRITE (D-PP-r). Every refusal above has
+     already had its chance, so anything that gets here is a run the script is
+     willing to perform — which is exactly the point at which a person should be
+     asked whether they meant production. Skipped for a dry run, which writes
+     nothing. */
+  if (TARGET === "prod" && !DRY_RUN) {
+    const existing = targets.filter((fa) => findByCode(known, fa));
+    const files = targets.reduce((n, fa) => n + fa.templates.length + 1, 0);
+    await confirmProduction(TARGET, [
+        `  focus areas  ${targets.length} (${existing.length} already exist and will be UPDATED, ` +
+          `${targets.length - existing.length} will be created as Draft)`,
+        `  files        up to ${files} uploads (${targets.length} guides + ` +
+          `${files - targets.length} templates)`,
+        `  publication  unchanged — this script never publishes and never un-publishes`,
+        `  photographs  copied into the working tree, not the database`,
+      ].join("\n"),
+    );
   }
 
   for (const fa of targets) {
@@ -686,7 +776,6 @@ async function main(): Promise<void> {
     }
   }
 
-  await db.auth.signOut();
   /* Precise rather than reassuring: anything this run CREATED is a Draft, but a
      focus area that already existed keeps whatever state the owner put it in —
      this script never publishes and never un-publishes. Saying "everything is a

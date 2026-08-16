@@ -49,6 +49,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { signOutLocal } from "./lib/session";
 
 const ROOT = process.cwd();
 const TEST_REF = "sdszcralogcrujtyghig";
@@ -308,7 +309,7 @@ async function main(): Promise<void> {
     );
   }
 
-  await db.auth.signOut();
+  await signOutLocal(db);
   console.log(
     `\n${checks} checks · ${failures === 0 ? "ALL PARTNER-PATH CHECKS PASSED" : `${failures} FAILURE(S)`}`,
   );

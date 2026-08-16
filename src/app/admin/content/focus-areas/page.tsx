@@ -11,7 +11,7 @@ import {
 
    Replaces /admin/content/elements, which edited two bodies that no longer
    reach a partner: overview_md (the Overview card was removed at D-PP-f, and
-   the column is dropped by PP7's 0031) and watch_out_for_md (no consumer since
+   the column is dropped by PP7's 0033) and watch_out_for_md (no consumer since
    PP3). The guide body moves here, alongside the summary and the card fields.
 
    is_admin()-gated twice: by the /admin layout, and again inside every

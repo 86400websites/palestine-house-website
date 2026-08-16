@@ -15,7 +15,7 @@ import Link from "next/link";
    areas · Files · Admins. The Videos card and its screen are gone — the Academy
    was retired at D-PP-b, PP5 deleted its partner-facing surface, and PP5 left
    this screen for PP6 to remove. Its four RPCs and the academy_modules table
-   follow in PP7's 0031. */
+   follow in PP7's 0033. */
 
 export const metadata: Metadata = { title: "Content admin" };
 

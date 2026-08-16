@@ -21,10 +21,12 @@ export type ElementListItem = {
   sort_order: number;
 };
 
+/* PP7 `0033` dropped `elements.overview_md` and `elements.watch_out_for_md`, so
+   `get_element()` no longer returns them and this type no longer claims it does.
+   The only consumer is the guide reader, which reads `simple_guide_md` and
+   `title` — the two columns were declared here and never read. */
 export type ElementFull = ElementListItem & {
-  overview_md: string | null;
   simple_guide_md: string | null;
-  watch_out_for_md: string | null;
 };
 
 /* get_resources() was widened in place by 0027 (columns appended, none removed

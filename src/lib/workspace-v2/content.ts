@@ -277,7 +277,14 @@ export const getSectionContent = cache(
         slug: row.slug,
         title: row.title,
         description: row.description,
-        intro: row.intro,
+        /* PP7 — See More. `intro` is MARKDOWN (bullet lists, `__bold__` goal
+           lines), so it is rendered here, server-side, through the same
+           marked + sanitize-html path as the guide reader. The raw markdown does
+           not travel to the client: the card is a Client Component and a string
+           in JSX would have printed the dashes and underscores verbatim — which
+           is exactly what would have shipped, silently, the first time a topic
+           had a non-empty intro. */
+        introHtml: renderMarkdown(row.intro) || null,
         imagePath: row.image_path,
         imagePosition: row.image_position,
         youtubeUrl: safeHttpUrl(row.youtube_url),
