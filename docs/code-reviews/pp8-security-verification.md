@@ -141,3 +141,169 @@ real account to run as; no seeding needed.
 
 `pnpm install --frozen-lockfile` · `pnpm run typecheck` · `pnpm run lint` ·
 `pnpm run build` — **all green** on `dda9c0f` before any change.
+
+---
+
+## 8-b — §15 invariants, re-verified end to end
+
+§15's first bullet is explicit that the approval rule must be stated **as a
+blanket, never as a list**, because an enumeration silently becomes an
+allowlist. So the surface was enumerated **from the database**, not from the
+doc, and then every claim was **executed** rather than pattern-matched.
+
+### The whole RPC surface, classified from `pg_proc`
+
+45 functions are `EXECUTE`-able by `authenticated` in `public`. Every one is
+`SECURITY DEFINER` with `search_path` pinned to `''` — except the one defect.
+
+| class | n | anon EXECUTE |
+|---|---|---|
+| admin-gated (body references `is_admin`) | 33 | none |
+| approval-gated (body references `is_approved`) | 7 | none |
+| helpers (`is_admin`, `is_approved`, `is_published_object`) | 3 | none |
+| documented `/account` exception (`set_my_account`) | 1 | none |
+| **DEFECT — `rls_auto_enable`** | 1 | **yes** (issue #2, closed in 8-c) |
+| **`*** UNACCOUNTED ***`** | **0** | — |
+
+Zero unaccounted is the assertion that matters: a new RPC shipped without a gate
+would land in that last row.
+
+### …and then actually called, because a regex is not enforcement
+
+`prosrc ~ 'is_approved'` proves a function *mentions* approval, not that it
+*enforces* it. Every probe below ran inside a transaction that ends in
+`RAISE EXCEPTION`, so **nothing was written** — the pattern PP7 used to measure
+guards without leaving state behind.
+
+| | approved partner | pending partner | anonymous |
+|---|---|---|---|
+| `get_platform_sections()` | 5 | **0** | DENIED (no EXECUTE) |
+| `get_platform_topics()` | 22 | **0** | DENIED (no EXECUTE) |
+| `get_element(slug)` | 1 | **0** | DENIED (no EXECUTE) |
+| `get_resources()` | 112 | **0** | DENIED (no EXECUTE) |
+| `get_resource_download(id)` | 1 row | **0 rows** | DENIED (no EXECUTE) |
+| `submit_support_request()` (Ask HQ) | — | **REFUSED** | DENIED |
+| `get_my_profile()` | 1 | **1 — own row only** | DENIED |
+| `public.resources` direct read | — | — | **0 rows** (RLS default-deny) |
+| `public.elements` direct read | — | — | **0 rows** (RLS default-deny) |
+| `storage.objects` (`resources`) | 110 | **0 — BYTE layer** | — |
+
+The pending row for `get_my_profile` is **correct and required**: a pending
+partner must be able to resolve their own approval status and use `/account`.
+It returns their own row and nothing else.
+
+### Draft is a boundary for bytes as well as rows
+
+Proven by drafting a real focus area (`get-legally-ready`) inside the aborting
+transaction and re-reading as an **approved** partner:
+
+| | result |
+|---|---|
+| topics visible | 22 → **21** |
+| `get_element()` on the drafted slug | **0 rows** |
+| its resource rows via `get_resources()` | **0** |
+| its `get_resource_download()` | **0 rows** |
+| **its `storage.objects` rows** | **0** |
+| all objects visible | 110 → **107** |
+
+110 − 107 = **3**, and that focus area holds exactly 3 files (1 guide + 2
+templates) — verified independently. The arithmetic closes, so the drop is its
+files and nothing else. `is_published_object()` is doing real work.
+
+### The four D-PP-i CHECK constraints, attacked directly
+
+Direct `INSERT`s that bypass every RPC. Each assertion names the constraint it
+*expects*, so a rejection by the wrong one cannot score as a pass:
+
+| attack | result |
+|---|---|
+| private file pointed at another bucket | REJECTED by `resources_private_bucket_shape` ✅ |
+| private file with no focus area | REJECTED by `resources_private_needs_element` ✅ |
+| guide file with no focus area | REJECTED by `resources_guide_needs_element` ✅ |
+| private file with neither `code` nor `doc_key` | REJECTED by `resources_private_needs_code` ✅ |
+| duplicate `storage_path` | REJECTED by `resources_storage_key` (UNIQUE) ✅ |
+| **CONTROL — a legitimate private template** | **ACCEPTED** ✅ |
+
+The control matters: without it, four rejections prove only that the table
+rejects everything.
+
+### The admin gate — approved is not admin
+
+As an **approved, non-admin** partner: `is_approved()` = true,
+`is_admin()` = **false**. Admin reads return **zero rows**; admin **writes**
+(`admin_set_platform_topic_published`, `admin_upsert_element`) raise
+**`42501 insufficient_privilege`**. Both directions fail closed.
+
+### Signed-URL issuance
+
+`src/lib/resources/actions.ts` — TTL **60 seconds**; the raw storage path never
+reaches the client; the URL is minted with the **caller's own** authenticated
+client, so storage RLS applies on top of the RPC gate; a zero-row result and an
+unknown id return the *same* generic message, so there is no enumeration oracle.
+
+### Client bundle + live production headers
+
+- `.next/static` — **no** occurrence of `service_role`, `sb_secret_`,
+  `SUPABASE_SECRET`, `RESEND_API_KEY`, `SENTRY_AUTH_TOKEN`,
+  `UPSTASH_REDIS_REST_TOKEN`, `TURNSTILE_SECRET`, `MAILCHIMP_API_KEY` or any
+  credential variable; no JWT-shaped token at all.
+- Live production response carries all six headers, CSP byte-matching
+  `next.config.ts` with **no `unsafe-eval`** (dev-only, correctly absent):
+  `Content-Security-Policy` · `X-Frame-Options: DENY` ·
+  `X-Content-Type-Options: nosniff` · `Referrer-Policy` ·
+  `Strict-Transport-Security: max-age=63072000; includeSubDomains` ·
+  `Permissions-Policy`.
+
+### Anonymous probes against LIVE production
+
+| route | result |
+|---|---|
+| `/dashboard` | **0** focus-area strings, storage paths or codes |
+| `/setup` | **0** focus-area titles |
+| `/admin/content` | 🔴 **four card labels + all four `/admin/content/*` paths**, in the HTML *and* the RSC flight payload |
+
+**Issue #3 is reproduced on production**, exactly as recorded — structure only,
+never data. Closed in 8-c.
+
+### The `0031` sweep — and a stale check it exposed
+
+Run from the committed
+`supabase/sql/verification/0031_verify_PROD_safe_readonly.sql`:
+
+| check | PROD |
+|---|---|
+| 1 all `programming_sessions` policies require approval | **`false` — see below** |
+| 2 ownership still required | true |
+| 3 RLS enabled on `programming_sessions` | true |
+| **4 ungated policies are only the 3 documented ones** | **true** ✅ |
+| 5 every public table has RLS enabled | true |
+
+**Check 4 is the one PP8 owed, and it passes**: exactly
+`applications_insert_own`, `applications_select_own`, `profiles_select_own`, and
+no fourth, on **both** databases.
+
+⚠️ **Check 1 is stale, not broken security.** It was written before `0033`, and
+asserts `count(*) > 0` — i.e. *policies exist and all are gated*. `0033` dropped
+all four `programming_sessions` policies, so the table is now **RLS-enabled with
+zero policies = default-deny**, which is strictly *stronger* than any set of
+gated policies. The check reports `ok = false` for the safest possible state.
+Left uncorrected, the next operator either panics or — worse — learns that a
+red line in this file is normal. Fixed in 8-c.
+
+### ⚠️ Two defects found in my own probes, not in the product
+
+Recorded because this project's record is that the probe is where the bug
+usually is — five of five in PP6c:
+
+1. **`perform` on a TABLE-returning function swallows the result.** The first
+   pending-partner probe reported `download = ISSUED`, which read as a live
+   approval-gate breach. `get_resource_download` is a SQL function returning
+   `TABLE(...)` with `and public.is_approved()` in the `WHERE`: a pending caller
+   gets **zero rows**, not an exception, so `perform` succeeded and the probe
+   called it success. Re-run counting rows: **0**. The gate was never open.
+2. **The constraint attack used an invalid `type`.** `type = 'template'` is not
+   in `resources_type_check`'s allowed set (`form, script, log, report,
+   approval, guide, booklet`), so all four D-PP-i attacks would have been
+   rejected by **the wrong constraint** and scored as passes. Caught only
+   because a later attack's handler printed the constraint *name*. Every
+   assertion now names the constraint it expects.
