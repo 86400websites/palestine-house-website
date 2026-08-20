@@ -9,11 +9,27 @@
 -- PostgREST. SECURITY-CHECKLIST §15 treats that as blocking.
 
 -- 1. THE FIX. Every policy on the table must require approval.
-select 'all programming_sessions policies require approval' as check,
+--
+-- ⚠️ AMENDED BY PP8 (2026-08-20). As originally written this check required
+-- `count(*) > 0` — policies must EXIST and all must be gated. `0033` then
+-- dropped all four `programming_sessions` policies, leaving the table
+-- RLS-enabled with NO policies at all, which is default-deny and strictly
+-- STRONGER than any set of gated policies. The check therefore returned
+-- `ok = false` for the safest state the table has ever been in.
+--
+-- That is not a harmless stale check. Run as-is after `0033` it puts a red line
+-- in front of an operator who is mid-migration, and the lesson they take from
+-- it is that a red line in this file is normal — which is exactly how a real
+-- one gets waved through later.
+--
+-- Both end states are now accepted, and only those two:
+--   (a) policies exist and EVERY one requires approval   — pre-`0033`
+--   (b) zero policies, with RLS enabled (check 3 proves the RLS half)
+-- A table with SOME ungated policy still fails, which is the point.
+select 'all programming_sessions policies require approval (or none, post-0033)' as check,
        count(*)                                                          as policies,
        count(*) filter (where predicate ilike '%is_approved%')           as gated,
-       (count(*) = count(*) filter (where predicate ilike '%is_approved%')
-        and count(*) > 0)                                                as ok
+       (count(*) = count(*) filter (where predicate ilike '%is_approved%')) as ok
 from (
   select coalesce(qual,'') || ' ' || coalesce(with_check,'') as predicate
   from pg_policies

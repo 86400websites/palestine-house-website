@@ -1,10 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { isAdmin } from "@/lib/auth/profile";
 
-/* /admin/content — the content-management hub (S11 11-2). The admin layout
-   already gated this request via is_admin() (anon -> /login, authenticated
-   non-admin -> 404 notFound), so no extra gate is needed here. The heading is
-   the approved canon string (docs/page-copy/04-admin/admin-content.md).
+/* /admin/content — the content-management hub (S11 11-2). The heading is the
+   approved canon string (docs/page-copy/04-admin/admin-content.md).
+
+   ⚠️ PP8 8-c — this page used to say "the admin layout already gated this
+   request, so no extra gate is needed here", and that reasoning was wrong in a
+   way worth keeping written down (PROJECT-STATUS.md §7 issue #3).
+
+   The layout's gate IS correct and does redirect. But Next renders a page
+   segment in PARALLEL with its layout, so a segment that awaits nothing can
+   have its flight data in the streamed response before the layout's redirect()
+   resolves. This page was a synchronous component over a hardcoded array, so an
+   ANONYMOUS request got a 200 carrying all four card labels and their
+   /admin/content/* paths — in the HTML and in the RSC payload. Reproduced
+   against live production during PP8's security pass; structure only, never
+   data, because every data-bearing admin screen awaits a gated read and so
+   fails closed.
+
+   The fix is the same rule CLAUDE.md states for routes: file location is never
+   access control, so the page checks for itself. Awaiting isAdmin() also makes
+   the render depend on a server round-trip, which is what actually stops the
+   segment streaming ahead of the gate. isAdmin() is request-cached, so this
+   costs no second query.
 
    Canon-vs-scope reconciliation (PROJECT-STATUS D-S11-f): the copy canon lists a
    "Live Programming sessions" section, but programming was self-managed in the
@@ -42,7 +62,9 @@ const SECTIONS = [
   },
 ];
 
-export default function ContentAdminPage() {
+export default async function ContentAdminPage() {
+  if (!(await isAdmin())) notFound();
+
   return (
     <div>
       <h1 className="adm-h1">Content admin.</h1>

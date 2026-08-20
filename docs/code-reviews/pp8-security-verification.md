@@ -307,3 +307,126 @@ usually is — five of five in PP6c:
    rejected by **the wrong constraint** and scored as passes. Caught only
    because a later attack's handler printed the constraint *name*. Every
    assertion now names the constraint it expects.
+
+---
+
+## 8-c — the two open findings closed, and a stale check corrected
+
+### 🔴 The one-line fix for issue #2 does not work
+
+Migration `0034` was planned as a single
+`revoke execute on function public.rls_auto_enable() from anon`. **Rehearsed on
+TEST inside an aborting transaction, that statement changed nothing** —
+afterwards `has_function_privilege('anon', …)` was still `true` and `anon` could
+still invoke the function.
+
+The ACL carried **two** grants:
+
+```
+=X/postgres              <- PUBLIC
+postgres=X/postgres
+anon=X/postgres          <- and an explicit one
+authenticated=X/postgres
+service_role=X/postgres
+```
+
+Revoking the explicit `anon` row leaves the PUBLIC grant, which `anon`
+inherits. For contrast, a correctly-locked RPC — `get_platform_topics` — is
+exactly `postgres`, `authenticated`, `service_role`: no PUBLIC, no anon.
+
+Had the one-liner shipped, it would have **applied cleanly, reported success,
+and closed nothing**, while the advisor kept flagging the same function. The
+migration is `from public, anon, authenticated`.
+
+### What the function actually is — and the real risk in touching it
+
+`rls_auto_enable()` returns `event_trigger` and is wired to the **`ensure_rls`**
+event trigger on `ddl_command_end`: on every `CREATE TABLE` in `public` it runs
+`ALTER TABLE … ENABLE ROW LEVEL SECURITY`. It is the safety net behind
+CLAUDE.md's *"RLS default-deny on every user-reachable table from day one."*
+
+So the risk in `0034` was never the grant — it was **breaking the net**. A
+migration that closes a cosmetic advisor finding and silently stops future
+tables getting RLS would be far worse than the finding.
+
+Exploitability of the finding itself is low: the function takes no arguments,
+returns a pseudo-type with no output function, reads no application table, and
+its only action is driven by `pg_event_trigger_ddl_commands()` — which raises
+**`39P03`** outside an event-trigger context (verified). An anon caller names no
+tables and alters nothing. It is privilege hygiene, not a data path.
+
+### `0034` applied to TEST — six checks
+
+| check | result |
+|---|---|
+| `anon` cannot execute | **true** |
+| `authenticated` cannot execute | **true** |
+| no PUBLIC grant remains | **true** — ACL now `postgres=X \| service_role=X` |
+| no anon-executable `SECURITY DEFINER` left in `public` | **true — 0 remaining** |
+| **`ensure_rls` still armed** | **true** (`ddl_command_end`, enabled) |
+| every public table has RLS enabled | **true** |
+
+And the regression test that mattered, run live after the revoke:
+**`CREATE TABLE public.pp8_postrevoke_probe` came out with
+`relrowsecurity = true`** — the net still catches. Table dropped; the probe ran
+inside an aborting block.
+
+**The down-migration was executed too** (also aborted, so TEST stays revoked):
+it restores all three entries — PUBLIC, `anon`, `authenticated`. Granting only
+to PUBLIC would make `has_function_privilege` read `true` while the explicit
+rows stayed missing — a state that *looks* restored and is not.
+
+`service_role` is kept deliberately: it is Supabase's own privileged role, it
+bypasses RLS regardless, and moving it is not this migration's business.
+
+**⛔ PRODUCTION IS NOT TOUCHED.** `0034` is applied to TEST only. The owner's
+paste and verification file are named in the sprint report.
+
+### Issue #3 — `/admin/content`
+
+`ContentAdminPage` was a *synchronous* component over a hardcoded array, so it
+awaited nothing and Next streamed its flight data in parallel with the layout's
+`redirect()`. It is now `async` and calls `isAdmin()` itself, which both adds
+the second gate CLAUDE.md requires of every route and makes the render depend
+on a server round-trip — the part that actually stops the segment racing the
+gate. `isAdmin()` is request-cached, so there is no extra query.
+
+**Verified against a locally-served production build, anonymous:**
+
+| route | before | after |
+|---|---|---|
+| `/admin/content` HTML | 4 labels + 4 paths | **clean** |
+| `/admin/content` RSC payload | 4 labels + 4 paths | **clean** |
+
+Every other admin and gated route was swept in the same pass — `/admin`,
+`/admin/approvals`, `/admin/content/{focus-areas,files,pages,admins}`,
+`/dashboard`, `/setup`, `/operate`, `/program`, `/support`, `/account`, in HTML
+**and** RSC — all clean.
+
+A source sweep for the same *shape* (a gated segment that awaits nothing) found
+exactly one other: `src/app/admin/page.tsx`. Its entire body is
+`redirect("/admin/approvals")`, so it emits no content and has nothing to leak.
+
+### The stale `0031` check, corrected
+
+`0031_verify_PROD_safe_readonly.sql` check 1 required `count(*) > 0` — policies
+must exist and all be gated. `0033` dropped all four `programming_sessions`
+policies, so the table is RLS-enabled with **zero** policies: default-deny, and
+strictly stronger. The file reported `ok = false` for the safest state the table
+has ever been in. It now accepts either end state — all-gated, or none-at-all —
+while still failing on *some ungated* policy, which is the case it exists for.
+
+Left alone, the harm is not the red line: it is that the next operator learns a
+red line in this file is normal.
+
+### ⚠️ Probe defect #3 and #4 (mine, again)
+
+3. **`@` in a leak pattern matches `@media` in inline CSS.** The first sweep
+   reported `leaked=2` on five clean admin routes. Pure false positive.
+4. **The leak sweep was case-sensitive and mis-cased.** It searched
+   `Get legally ready`; the site renders **`Get Legally Ready`**. Every route
+   came back "clean" — including the public page that *does* list all 22 by
+   name, which is what exposed it. Without that positive control the whole
+   sweep would have been meaningless and would have read as a pass. The final
+   sweep is case-insensitive **and** asserts the pattern matches on
+   `/focus-areas` first.
