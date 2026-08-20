@@ -5,7 +5,9 @@
 | **Date built** | 2026-08-20 |
 | **Branch / PR** | `claude/sprint-pp8-final-verification` / (open) |
 | **Goal** | Prove the cut-over platform end to end — by driving it, not reading it — close the open findings, and shut Stage 4. |
-| **Migration** | `0034` (one `REVOKE`) — applied to **TEST only**; production is the owner's to run |
+| **Migration** | `0034` (one `REVOKE`) — **✅ APPLIED TO PRODUCTION 2026-08-20** and re-verified through the read-only MCP |
+| **Reviews** | **2 independent rounds, both BLOCKING, both right** — and both on the same defect |
+| **Ledger** | **2 product defects** found and fixed · 3 findings logged unfixed · **10 defects in my own probes** |
 
 The full evidence, every query and every measurement, is
 `docs/code-reviews/pp8-security-verification.md`. This record is the summary.
@@ -91,6 +93,29 @@ typecheck ✅ · lint ✅ · build ✅ · 320px ✅ · live production pass ✅ 
   `[role="dialog"]` missing a *native* `<dialog>` so the palette looked like it had no
   aria at all. **Two of those would have shipped as severe defect reports against working
   features.** The PP6c lesson holds exactly: debug the probe as hard as the product.
+- **⚠️ THE SPRINT'S REAL LESSON, and it is the opposite of the one it first drew.**
+  Mid-sprint the ledger read *"ten probe defects, one product defect"* and the lesson
+  written down was *debug a failing check before you believe it.* True, but it is the
+  easy half. **Both reviews found the same thing: a check that reports SUCCESS deserves
+  identical scrutiny, and mine got none.** My `/admin/content` sweep searched for the four
+  hub card labels, so it could not — by construction — detect a *different* admin route
+  leaking its *own* heading. It returned "all clean" and read exactly like evidence. I
+  published it as evidence, and five leaking routes shipped behind it. A green check is a
+  claim about the instrument as much as the product.
+- **The mechanism you write down becomes the rule the next person applies.** The
+  `/admin/content` fix was correct; the *reason* recorded beside it was not ("awaiting
+  makes the render depend on a server round-trip"). That false rule then scoped the source
+  sweep — "a gated segment that awaits nothing" — which is why it found one route sharing
+  the shape when five did. `/admin/content/files` awaits `searchParams` **and two gated
+  RPCs** and still flushed. The true rule is now in the code: *gate and throw before you
+  construct any JSX; awaiting is not a gate.*
+- **A verifier can be narrower than the thing it verifies.** Both RLS sweeps used
+  `relkind = 'r'`, missing partitioned tables — while `rls_auto_enable()` itself already
+  handled both. And `evtenabled <> 'D'` accepted `'R'`, which fires only in replica mode,
+  so a trigger that would never fire on real DDL passed the check guarding it.
+- **An un-replayable proof is a claim.** The §15 probes were run ad hoc through the MCP
+  and never committed. They are now `supabase/sql/verification/PP8_probes_TEST_db_only.sql`
+  and were re-run from that file to prove the file itself works.
 - **Harness guards shaped the work and were not worked around.** Reading `.env.local`,
   deleting the `admins` row, and the RCE-equivalent browser tool were each refused. The
   signed-in walkthrough was unblocked by the owner's explicit permission plus a
@@ -153,7 +178,7 @@ file:line locations · suggested fix for each · merge recommendation
 
 | # | |
 |---|---|
-| 1 | **Owner: apply `0034` to production.** Paste `supabase/sql/migrations/0034_revoke_rls_auto_enable.up.sql`, verify with `supabase/sql/verification/0034_verify_PROD_safe_readonly.sql`. One `REVOKE`, instantly reversible, and the `ensure_rls` net was proven to survive it on TEST. |
+| 1 | ✅ **DONE — `0034` is applied to production** (owner ran `supabase/sql/bundles/PP8_apply_prod.sql`, 2026-08-20) and re-verified independently through the read-only MCP with hardened checks. §7 issue #2 is closed on prod. |
 | 2 | **Owner: the off-machine copy of the 297-file cold archive** (`ROLLBACK-RUNBOOK` §1, copy 3). Still outstanding from PP7. |
 | 3 | **Owner: sign off the public copy** (D-PP-s) — now a **live** sign-off; screenshot supplied. |
 | 4 | **`/admin/*` is not responsive** — every admin screen overflows at 320px (`scrollWidth` 480–736). Pre-existing since S11, HQ-only, no security or partner consequence. A design change, not a verification fix. |
