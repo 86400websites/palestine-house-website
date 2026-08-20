@@ -1,4 +1,6 @@
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/auth/profile";
 import {
   ApprovalsQueue,
   type ApplicationRow,
@@ -27,6 +29,13 @@ const APPLIED_FMT = new Intl.DateTimeFormat("en-US", {
 });
 
 export default async function ApprovalsPage() {
+  /* PP8 8-k: gate before producing any JSX. See the note in
+     src/app/admin/content/page.tsx — awaiting a server round-trip does NOT stop
+     this segment streaming ahead of the layout's redirect(); only throwing
+     before the JSX exists does. This page awaited an RPC and still leaked its
+     own heading and intro to anonymous callers. */
+  if (!(await isAdmin())) notFound();
+
   const supabase = await createClient();
   const { data } = await supabase.rpc("admin_list_applications");
   const raw = (data as RpcRow[] | null) ?? [];

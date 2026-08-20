@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/auth/profile";
 import { AdminsAdmin, type AdminRow } from "./admins-admin";
 
 /* /admin/content/admins (S11 11-9) — see / add / remove HQ admins (the old-S10
@@ -17,6 +19,12 @@ const ADDED_FMT = new Intl.DateTimeFormat("en-US", {
 });
 
 export default async function AdminsAdminPage() {
+  /* PP8 8-k: gate before producing any JSX. Awaiting a server round-trip does
+     NOT stop this segment streaming ahead of the layout's redirect() — this
+     page awaited one and still leaked its own heading and intro to anonymous
+     callers. Only throwing before the JSX exists closes it. */
+  if (!(await isAdmin())) notFound();
+
   const supabase = await createClient();
   const { data } = await supabase.rpc("admin_list_admins");
   const raw =

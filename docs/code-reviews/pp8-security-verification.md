@@ -384,12 +384,11 @@ paste and verification file are named in the sprint report.
 
 ### Issue #3 — `/admin/content`
 
-`ContentAdminPage` was a *synchronous* component over a hardcoded array, so it
-awaited nothing and Next streamed its flight data in parallel with the layout's
-`redirect()`. It is now `async` and calls `isAdmin()` itself, which both adds
-the second gate CLAUDE.md requires of every route and makes the render depend
-on a server round-trip — the part that actually stops the segment racing the
-gate. `isAdmin()` is request-cached, so there is no extra query.
+`ContentAdminPage` was a *synchronous* component over a hardcoded array, so
+Next streamed its flight data in parallel with the layout's `redirect()`. It is
+now `async` and calls `isAdmin()` itself, adding the second gate CLAUDE.md
+requires of every route. `isAdmin()` is request-cached, so there is no extra
+query.
 
 **Verified against a locally-served production build, anonymous:**
 
@@ -398,14 +397,35 @@ gate. `isAdmin()` is request-cached, so there is no extra query.
 | `/admin/content` HTML | 4 labels + 4 paths | **clean** |
 | `/admin/content` RSC payload | 4 labels + 4 paths | **clean** |
 
-Every other admin and gated route was swept in the same pass — `/admin`,
-`/admin/approvals`, `/admin/content/{focus-areas,files,pages,admins}`,
-`/dashboard`, `/setup`, `/operate`, `/program`, `/support`, `/account`, in HTML
-**and** RSC — all clean.
-
-A source sweep for the same *shape* (a gated segment that awaits nothing) found
-exactly one other: `src/app/admin/page.tsx`. Its entire body is
-`redirect("/admin/approvals")`, so it emits no content and has nothing to leak.
+> ### 🔴 THIS SECTION WAS WRONG, AND 8-k PROVED IT
+>
+> Two claims made here originally were **false**, and they are corrected in
+> place rather than quietly edited away — see **8-k** for the full account.
+>
+> **① The stated mechanism was wrong.** This section claimed the fix worked
+> because awaiting `isAdmin()` *"makes the render depend on a server round-trip
+> — the part that actually stops the segment racing the gate."* It does not.
+> `/admin/content/files` awaits `searchParams` **and two gated Supabase RPCs** —
+> real network round trips — and still flushed its own heading and intro to an
+> anonymous caller. What closes the leak is that `notFound()` **throws before
+> the JSX is constructed**.
+>
+> **② The "all clean" sweep was false.** This section claimed every other admin
+> and gated route was swept clean in HTML and RSC. The sweep searched for the
+> **four `/admin/content` card labels** — so it could not, by construction,
+> detect a *different* route leaking its *own* heading. Re-probed per-route at
+> 8-k: **`/admin/approvals`, `/admin/content/files`, `/pages`, `/admins` and
+> `/focus-areas` all leaked their own heading and intro.** All five are now
+> gated and re-verified clean.
+>
+> **What was true and stayed true:** *structure, never data.* Those payloads
+> carried headings and intros but **no topic title, no storage path, no
+> applicant email** — the gated RPCs fail closed, re-confirmed at 8-k.
+>
+> A source sweep for the same *shape* originally reported "exactly one other"
+> page. That sweep was scoped by the false mechanism above ("a gated segment
+> that awaits nothing"), so it under-counted. Under the correct rule — *does
+> the page gate itself before constructing JSX* — **five more shared it.**
 
 ### The stale `0031` check, corrected
 
@@ -966,3 +986,66 @@ before it could be believed, and ten of the eleven turned out to be the
 measuring instrument. Two of them — the blank `/focus-areas` band and the
 search palette returning nothing — would have been written up as severe defects
 on shipped, working features if the first result had been trusted.
+
+*(Superseded at 8-k: the ledger is now **2 product defects**, and the ratio
+above is the sprint's own argument turned against it — see below.)*
+
+---
+
+## 8-k — the independent review, and it was right for the sixth time
+
+An adversarial multi-agent review of the branch diff: **15 findings raised, 14
+refuted under independent scrutiny, 1 survived.** The survivor was aimed
+squarely at this document.
+
+### What it found
+
+**The mechanism recorded for the 8-c fix was false, and the sweep that
+mechanism scoped was false with it.**
+
+The reviewer's verifier rebuilt the branch, served it, and requested each admin
+route anonymously — searching for **each route's own strings** rather than the
+four `/admin/content` labels. **I reproduced this independently before accepting
+it:**
+
+| route (anonymous) | own heading + intro — before | after |
+|---|---|---|
+| `/admin/content` | clean (8-c fix) | clean |
+| `/admin/approvals` | **LEAKED** (html + rsc) | **clean** |
+| `/admin/content/files` | **LEAKED** | **clean** |
+| `/admin/content/pages` | **LEAKED** | **clean** |
+| `/admin/content/admins` | **LEAKED** | **clean** |
+| `/admin/content/focus-areas` | **LEAKED** | **clean** |
+
+`/admin/content/files` awaits `searchParams` **and two gated Supabase RPCs**.
+Real round trips. It flushed anyway. So the claim that "awaiting makes the
+render depend on a server round-trip, which is what actually stops the segment
+streaming ahead of the gate" is simply not how it works.
+
+**The rule that is actually true, now recorded in the code:**
+
+> Every gated segment must run its own server-side check and short-circuit with
+> `notFound()`/`redirect()` **before it constructs any JSX**. Awaiting something
+> is not a gate. A parent layout's `redirect()` does not stop the child segment
+> rendering into the streamed response.
+
+### Fixed
+
+All five routes now carry `if (!(await isAdmin())) notFound();` as their first
+statement. Re-verified anonymous: **0 own-string hits in HTML and RSC on all
+six**. Re-verified from a real **admin** session: all six still render with
+their correct `h1` — no 404s, no redirects. `typecheck` · `lint` · `build`
+green.
+
+### What this costs the sprint's own argument
+
+The 8-i ledger read *"ten probe defects, one product defect"* and drew the
+lesson that a failing check must be debugged before it is believed. That lesson
+stands. But the inverse was the real risk here, and this document walked into
+it: **a check that reports SUCCESS deserves exactly the same scrutiny, and this
+one got none.** A sweep searching for the wrong strings returns "all clean" and
+feels like evidence. It was published as evidence.
+
+The corrected ledger is **2 product defects** (`/academy/[slug]`, and five admin
+routes leaking their structure), **found by a review I did not run myself.**
+Six independent rounds across this series; six times the reviewer was right.

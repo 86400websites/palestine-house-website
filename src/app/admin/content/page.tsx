@@ -16,15 +16,33 @@ import { isAdmin } from "@/lib/auth/profile";
    resolves. This page was a synchronous component over a hardcoded array, so an
    ANONYMOUS request got a 200 carrying all four card labels and their
    /admin/content/* paths — in the HTML and in the RSC payload. Reproduced
-   against live production during PP8's security pass; structure only, never
-   data, because every data-bearing admin screen awaits a gated read and so
-   fails closed.
+   against live production during PP8's security pass.
 
-   The fix is the same rule CLAUDE.md states for routes: file location is never
-   access control, so the page checks for itself. Awaiting isAdmin() also makes
-   the render depend on a server round-trip, which is what actually stops the
-   segment streaming ahead of the gate. isAdmin() is request-cached, so this
-   costs no second query.
+   ⚠️ CORRECTED AT 8-k, AND THE FIRST VERSION OF THIS NOTE WAS WRONG IN A WAY
+   THAT COST FIVE ROUTES. It claimed the fix worked because "awaiting isAdmin()
+   makes the render depend on a server round-trip, which is what actually stops
+   the segment streaming ahead of the gate." That is false, and an independent
+   review disproved it by measurement: /admin/content/files awaits searchParams
+   AND two gated Supabase RPCs — real network round trips — and still flushed
+   its own heading and intro to an anonymous caller. /admin/approvals, /pages,
+   /admins and /focus-areas did the same.
+
+   THE RULE THAT IS ACTUALLY TRUE:
+
+     Every gated segment must run its own server-side check and short-circuit
+     with notFound()/redirect() BEFORE it constructs any JSX. Awaiting something
+     is not a gate. A parent layout's redirect does not stop the child segment
+     rendering into the streamed response.
+
+   What makes this page clean is that notFound() THROWS before the SECTIONS JSX
+   is built — not that a promise was awaited. The original wording also scoped
+   PP8's own source sweep ("a gated segment that awaits nothing"), which is why
+   that sweep concluded one other page shared the shape when five did.
+
+   The data half was, and remains, safe: the gated RPCs fail closed, so those
+   payloads carried headings and intros but never a topic title, a storage path
+   or an applicant email. Structure, never data. isAdmin() is request-cached,
+   so the check costs no second query.
 
    Canon-vs-scope reconciliation (PROJECT-STATUS D-S11-f): the copy canon lists a
    "Live Programming sessions" section, but programming was self-managed in the
