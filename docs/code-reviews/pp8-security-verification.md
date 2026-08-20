@@ -908,3 +908,61 @@ would have been a serious a11y finding on the headline feature. It is a *native*
 `<dialog>`: the role is implicit and the attribute is correctly absent. Every
 subsequent measurement had to be redone against `document.querySelector('dialog')`
 and `:modal`.
+
+---
+
+## 8-i — fix-all, and the regression the fix demanded
+
+The fix list is genuinely short: **one product defect** (`/academy/[slug]`),
+already fixed and re-verified in 8-e. Three further findings are logged
+deliberately unfixed, each with its reason recorded above.
+
+But that fix landed in **`next.config.ts` — the file that ships the security
+headers**. A redirect edit and the CSP live eight lines apart, so the rule
+applies: a fix touching a security surface re-runs the proof.
+
+### After the config change
+
+| | result |
+|---|---|
+| all six security headers still present | ✅ |
+| **CSP byte-identical to production** | ✅ |
+| `/admin/content` anon leak (8-c fix) after rebuild — HTML / RSC | **0 / 0** |
+| all 12 legacy paths still `307 → /dashboard` | ✅ |
+
+### After migration `0034` — every §15 invariant re-proven on TEST
+
+The revoke is the only schema change in this sprint, and the risk was never the
+grant but the `ensure_rls` safety net behind it. Re-run end to end:
+
+| | |
+|---|---|
+| approved: topics / `get_element` / download rows / storage objects | **22 / 1 / 1 / 110** |
+| pending: topics / storage objects | **0 / 0** — rows *and* bytes |
+| anon: `get_platform_topics()` | **DENIED (42501)** |
+| anon: `rls_auto_enable()` | **DENIED (42501)** — `0034` doing its job |
+| new table created after the revoke | **`relrowsecurity = true`** — net still armed |
+| ungated policies | **3**, the documented three |
+
+### Final gate
+
+`pnpm run typecheck` · `pnpm run lint` · `pnpm run build` — **all green**.
+`git status` clean; `.env.local` untracked and matched by `.gitignore:22`
+(`.env*.local`). The branch diff was scanned for credential patterns: the only
+hits are **documentation** — this file listing the variable *names* that were
+searched for, and the ACL string `service_role=X/postgres`, which is a privilege
+grant, not a credential. **No secret in the diff.**
+
+### The sprint's defect ledger
+
+| | |
+|---|---|
+| **Product defects found** | **1** — `/academy/[slug]` returned 404 instead of redirecting. **Fixed.** |
+| **Findings logged, deliberately unfixed** | **3** — `/admin/*` overflows at 320px (pre-existing since S11, HQ-only, a design change not a verification fix) · heading order skips `h1→h3` (a consequence of the deliberate single-group flattening; the obvious fix creates a latent collision) · 8 blocks invisible without JavaScript (site-wide since DR1) |
+| **Defects in my own probes** | **10** |
+
+Ten to one. Every single "failure" this sprint surfaced had to be debugged
+before it could be believed, and ten of the eleven turned out to be the
+measuring instrument. Two of them — the blank `/focus-areas` band and the
+search palette returning nothing — would have been written up as severe defects
+on shipped, working features if the first result had been trusted.
