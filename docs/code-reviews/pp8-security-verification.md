@@ -430,3 +430,118 @@ red line in this file is normal.
    sweep would have been meaningless and would have read as a pass. The final
    sweep is case-insensitive **and** asserts the pattern matches on
    `/focus-areas` first.
+
+---
+
+## 8-d / 8-f — the browser pass (public shell done; gated walkthrough BLOCKED)
+
+### ⛔ `.env.local` does not exist — the signed-in walkthrough cannot run
+
+This is a fresh clone. `scripts/verify-partner-path.ts` failed immediately with
+`ENOENT … .env.local`, and both `.env.local` and `.env.example` are fenced off
+by the harness permission settings. That fence is deliberate and was **not**
+routed around.
+
+Consequences, stated plainly:
+
+- **8-d (approved partner) and 8-e (pending · admin) cannot run.** They need a
+  session against TEST, which needs those two `NEXT_PUBLIC_*` values.
+- The delivered source documents (`docs/source-assets/Resource/…`) are also
+  absent — gitignored, OneDrive is canon — so template downloads cannot be
+  byte-compared against the originals. **`docs/content-v2-spec.json` carries a
+  per-file `md5` for all 88 templates** (added by PP7 round 5, H3), so the
+  byte-check is still possible against those digests when the walkthrough runs.
+
+**⚠️ This also qualifies an 8-c result.** The `/admin/content` fix was verified
+against a local build running *without* Supabase env vars. The strings it used
+to leak are hardcoded in the component, so their disappearance is real and
+meaningful. But the other half — *an actual admin still sees the hub* — is
+**not** proven. `isAdmin()` is the same function the layout already calls to let
+admins through, so the risk is low; it is unproven, not verified, and it is
+re-tested in 8-e once credentials exist.
+
+So 8-f was brought forward and completed instead of leaving the step idle.
+
+### The public pass ran against LIVE PRODUCTION, deliberately
+
+The first local run produced a console error — `500` on `/api/auth/session` —
+which looked like a defect and is not: production returns `200 {"authed":false}`
+for the same request, and the local 500 is purely the missing env. **Every
+console-error observation from a local run is therefore polluted**, so the
+public pass was re-run against `https://palestine-house-website.vercel.app`,
+which is also the surface the owner has to sign off.
+
+**Console across the entire production session: 0 errors, 0 warnings.**
+
+### Pages walked, 320px and 1440px
+
+| page | 320px overflow | broken images | legacy vocabulary |
+|---|---|---|---|
+| `/` | none (305/320) | 0 of 24 | none |
+| `/focus-areas` | none | 0 of 10 | none |
+| `/our-support` | none | 0 of 18 | none |
+| `/bring-ph` | none | 0 of 32 | none |
+| `/model` | none | 0 of 26 | none |
+| `/experience` | none | 0 of 19 | none |
+| `/apply` | none | 0 | — |
+| `/contact` | none | 0 | — |
+| `/login` | none | 0 of 10 | — |
+| `/about` · `/privacy` · `/terms` | 200, `h1` present | — | none |
+
+"Legacy vocabulary" = `200+ checklist items`, `11 focus areas`, `33 topics`,
+`297 templates`, `Academy`, `Live Programming`. **Zero occurrences anywhere.**
+
+Overflow was measured per element (`getBoundingClientRect().right > viewport`),
+not just by `scrollWidth`: **0 offending elements on every page**.
+
+### The public copy is correct, and cannot drift from the private side
+
+All **22** focus-area titles appear on `/focus-areas`, and they were checked
+against the titles read live from `platform_topics` — **22/22 present, 0
+missing**, in the exact 5 / 6 / 6 / 5 grouping. Proof band reads
+**4 sections · 22 focus areas · 88 real templates · 120 day launch**. Forms:
+`/apply` carries all six fields (incl. the D5 password) and `/contact` four —
+**every one labelled**, zero visible unlabelled fields. The single CTA renders
+as *Apply to bring a House* with *Every application is reviewed by HQ.*
+
+### ⚠️ Probe defect #5 — and it nearly became a false alarm
+
+The first full-page screenshot of `/focus-areas` showed **a large empty dark
+band** where the four sections and 22 focus areas should be. That reads as a
+severe production defect on the exact page PP7 built.
+
+It is a **screenshot artefact**. The reveals are `Reveal`/`FadeIn`
+(`src/components/motion/reveal.tsx`) — `initial={{opacity: 0, y: 20}}` with
+`whileInView`. `fullPage: true` renders the whole document while the viewport is
+still at scroll-top, so anything below the fold never intersects and never
+reveals.
+
+The follow-up test was **also** wrong: jumping `scrollTo(0, height/2)` then
+`scrollTo(0, height)` left the wrapper at `opacity: 0` and looked like
+confirmation that the reveal never fires. Scrolling the element into view
+properly (`scrollIntoView` + settle) made it visible immediately. Scrolling the
+page in **0.6-viewport steps** then re-checking gives
+**`stillHidden = 0`** — every reveal fires. The corrected screenshot renders the
+complete map.
+
+Two real things did come out of chasing it:
+
+1. **Reduced motion is handled correctly.** `Reveal`/`FadeIn` call
+   `useReducedMotion()` and return a plain `<div>` when set — no opacity trap,
+   so a reduced-motion user gets the content immediately rather than a blank
+   band. Verified in source and in the shipped CSS
+   (`prefers-reduced-motion` present in the 170 KB bundle).
+2. **Without JavaScript, 8 blocks stay invisible.** The server HTML carries 8
+   inline `opacity:0` wrappers, because `useReducedMotion()` is false during
+   SSR. The 22 titles *are* in the raw HTML (so a non-executing crawler still
+   reads them), but a no-JS visitor sees blank sections. This is a site-wide
+   consequence of the DR1 reveal system, **pre-dates PP7/PP8, and is not fixed
+   here** — redesigning the motion system is not this sprint's scope. Logged as
+   an observation for the owner, severity Low.
+
+### Repo hygiene
+
+The Playwright MCP writes snapshots, console logs and screenshots into the
+working directory, **untracked and un-ignored** — one `git add -A` would have
+committed them. `.gitignore` now covers `.playwright-mcp/` and the screenshot
+names; the captures were moved to the scratchpad.
