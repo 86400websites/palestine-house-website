@@ -104,7 +104,7 @@ above). **Conclusion: TEST is a valid stand-in for the partner-visible corpus.**
 |---|---|---|
 | 1 | Medium — public writes have no Upstash rate-limit / Turnstile | **Stands.** The only occurrence of those names in `src/` is the deferral comment at `src/app/api/resend/contact/route.ts:17`. Accepted per D-S6-a; §7's own preamble carves it out. |
 | 2 | Low — `rls_auto_enable()` anon-EXECUTE | **Stands, on BOTH databases.** It is still the only anon-executable `SECURITY DEFINER` function in `public`. Closed in 8-c. |
-| 3 | Low — `/admin/content` leaks its four labels + paths to anonymous RSC | **Stands, and the mechanism is confirmed from source.** `ContentAdminPage` is a *synchronous* component over a hardcoded `SECTIONS` array — it awaits nothing gated, so Next streams its flight data in parallel with `admin/layout.tsx`'s `redirect()`. The data-bearing admin screens fail closed because they await gated reads. Closed in 8-c. |
+| 3 | Low — `/admin/content` leaks its four labels + paths to anonymous RSC | **Stands, and the mechanism is confirmed from source.** `ContentAdminPage` is a *synchronous* component over a hardcoded `SECTIONS` array — it awaits nothing gated, so Next streams its flight data in parallel with `admin/layout.tsx`'s `redirect()`. ⚠️ **THAT LAST CLAUSE IS THE FALSE RULE AND IS RETRACTED — see 8-k.** Awaiting a gated read does **not** make a screen fail closed: five of them awaited real RPCs and still flushed their own headings. Only throwing before the JSX exists does. Their *data* failed closed; their *structure* did not. Closed in 8-c. |
 | 4 | Low — a `.docx` upload once refused, never reproduced | **Stays open and self-diagnosing.** Unchanged; closes when the owner next uploads by hand and reports the message. |
 
 ### The `0031` policy sweep — both databases
@@ -768,7 +768,18 @@ anonymous leak without locking admins out.**
 
 All 13 gated and admin routes redirect to `/login` with the correct `next=`
 target, and **not one leaks a focus-area title, a `.docx`, a storage path or an
-email address**. `/api/auth/session` reports `{"authed":false}`. This repeats
+email address**.
+
+> ⚠️ **Measured precisely at 8-k, because this sentence was looser than it sounds.**
+> "Redirect" here is what the **browser** does, not the HTTP status. The raw
+> anonymous response is **`200` with no `Location` header** — Next encodes the
+> redirect in the streamed flight payload and the client navigates. Verified per
+> route after the six gates were added: the payload carries **both**
+> `NEXT_REDIRECT` → `/login` (from the layout) **and** `NEXT_HTTP_ERROR_FALLBACK;404`
+> (from the page's own `notFound()`), and **no 404 page is rendered**. So the two
+> mechanisms coexist rather than race: the page's throw is what stops the JSX
+> being constructed, and the layout's redirect is what the visitor experiences.
+> The user-visible outcome is unchanged — anonymous lands on `/login`. `/api/auth/session` reports `{"authed":false}`. This repeats
 8-c's sweep **with the env present**, so the earlier qualified result now
 stands unqualified.
 

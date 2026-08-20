@@ -18,8 +18,18 @@ The full evidence, every query and every measurement, is
 
 - **`0034_revoke_rls_auto_enable`** (+ `.down.sql` + `0034_verify_PROD_safe_readonly.sql`)
   — closes §7 issue #2, the last anon-executable `SECURITY DEFINER` function.
-- **`src/app/admin/content/page.tsx`** — now `async` and gates on `isAdmin()`; closes
-  §7 issue #3, the anonymous RSC structure leak.
+- **All SIX `/admin` pages now gate themselves before constructing any JSX** —
+  `src/app/admin/content/page.tsx` (§7 issue #3) plus `admin/approvals`,
+  `admin/content/files`, `admin/content/pages`, `admin/content/admins` and
+  `admin/content/focus-areas`, all five added at 8-k after two independent
+  reviews found them leaking their own headings to anonymous callers.
+- **`docs/SECURITY-CHECKLIST.md` §15 + `AGENTS.md`** — a new blocking invariant:
+  *a gate is a throw, not an await, and a parent layout is not a gate for its
+  child.* Added because the previous wording ("verify … on every request") is
+  satisfied by a layout alone — the exact reading that produced the defect.
+- **`supabase/sql/verification/PP8_probes_TEST_db_only.sql`** — the four §15
+  probes, committed so they can be replayed.
+- **`supabase/sql/bundles/PP8_apply_prod.sql`** — the owner's production paste.
 - **`next.config.ts`** — `/academy` added to the child-redirect list; `/academy/[slug]`
   now redirects instead of 404ing.
 - **`0031_verify_PROD_safe_readonly.sql`** — check 1 amended; it was reporting `ok=false`

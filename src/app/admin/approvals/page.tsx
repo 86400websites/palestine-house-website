@@ -6,9 +6,17 @@ import {
   type ApplicationRow,
 } from "@/components/admin/approvals-queue";
 
-/* /admin/approvals — the HQ approval queue. The admin layout already gated this
-   request; admin_list_applications() is itself is_admin()-gated, so a
-   non-admin would get zero rows even if the layout were bypassed. */
+/* /admin/approvals — the HQ approval queue.
+
+   This header used to open "the admin layout already gated this request", and
+   that complacency is exactly why this page shipped without a gate of its own
+   and leaked its heading and intro to anonymous callers until PP8 8-k. The
+   layout's redirect() does NOT stop this segment rendering into the streamed
+   response — see SECURITY-CHECKLIST §15 and src/app/admin/content/page.tsx.
+
+   admin_list_applications() is itself is_admin()-gated, so the DATA always
+   failed closed — a non-admin got zero rows. It was the structure that
+   leaked, and the gate below is what closes it. */
 
 type RpcRow = {
   id: string;

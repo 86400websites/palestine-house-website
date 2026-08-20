@@ -31,6 +31,17 @@
 --      on TEST: after this revoke, a freshly created table still came out with
 --      relrowsecurity = true. Check 5 below re-proves it on production.
 --
+-- ⚠️ THE VERSION RUN ON PRODUCTION (2026-08-20) CARRIED WEAKER CHECKS 5 AND 6.
+--   Its check 5 was `evtenabled <> 'D'`, which ACCEPTS 'R' (replica-only — it
+--   would not fire for ordinary DDL) and returned NO ROW at all if the trigger
+--   were missing; its check 6 used `relkind = 'r'`, missing partitioned tables.
+--   Both are hardened below. This does not invalidate the production apply: the
+--   post-apply state was RE-VERIFIED separately through the read-only MCP using
+--   exactly these hardened predicates, and passed — ensure_rls came back
+--   `ensure_rls / ddl_command_end / enabled=O / tags=CREATE TABLE+CREATE TABLE
+--   AS+SELECT INTO`, with every table (incl. partitioned) RLS-enabled. The file
+--   is corrected because it is the one an operator re-pastes.
+--
 -- HOW TO RUN
 --   Supabase SQL Editor → PRODUCTION project → paste this whole file → Run.
 --   It prints a 6-row verification table at the end. EVERY `ok` MUST BE true.
@@ -80,22 +91,33 @@ select '4 no anon-executable SECURITY DEFINER left',
    and has_function_privilege('anon', p.oid, 'EXECUTE')
 
 union all
--- ⚠️ THE ONE THAT MATTERS. 'O' = enabled, 'D' would mean disabled.
+-- ⚠️ THE ONE THAT MATTERS — HARDENED AT 8-k (see the header note).
+--    Aggregate, so a MISSING trigger fails instead of returning no row; name,
+--    event and enabled-mode pinned. 'R' is rejected: it fires only in replica
+--    mode, so it would NOT fire for ordinary DDL.
 select '5 ensure_rls STILL ARMED  <-- the safety net',
-       (et.evtenabled <> 'D'),
-       et.evtname || ' / ' || et.evtevent || ' / enabled=' || et.evtenabled::text
+       (count(*) = 1),
+       coalesce(string_agg(et.evtname || ' / ' || et.evtevent || ' / enabled=' || et.evtenabled::text ||
+                ' / tags=' || coalesce(array_to_string(et.evttags, '+'), '(all)'), ', '),
+                '*** NO ARMED ensure_rls TRIGGER FOUND ***')
   from pg_event_trigger et
   join pg_proc p on p.oid = et.evtfoid
   join pg_namespace n on n.oid = p.pronamespace
  where n.nspname = 'public' and p.proname = 'rls_auto_enable'
+   and et.evtname = 'ensure_rls' and et.evtevent = 'ddl_command_end'
+   and et.evtenabled in ('O', 'A')
 
 union all
 -- If the net had broken, this is where it would surface first.
-select '6 every public table has RLS enabled',
+-- HARDENED AT 8-k: relkind 'p' (PARTITIONED) included. With 'r' alone, an
+-- RLS-disabled partitioned table was invisible while this still reported
+-- "every public table has RLS enabled".
+select '6 every public table (incl. partitioned) has RLS',
        (count(*) filter (where not c.relrowsecurity) = 0),
-       coalesce(string_agg(c.relname, ', ') filter (where not c.relrowsecurity), '(all enabled)')
+       coalesce(string_agg(c.relname || ' (' || c.relkind::text || ')', ', ')
+                  filter (where not c.relrowsecurity), '(all enabled)')
   from pg_class c join pg_namespace n on n.oid = c.relnamespace
- where n.nspname = 'public' and c.relkind = 'r'
+ where n.nspname = 'public' and c.relkind in ('r', 'p')
 
 order by 1;
 
