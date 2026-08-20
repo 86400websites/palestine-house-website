@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/auth/profile";
 import {
   FocusAreasAdmin,
   type GroupRow,
@@ -32,6 +34,12 @@ export default async function FocusAreasAdminPage({
 }: {
   searchParams: Promise<{ id?: string | string[] }>;
 }) {
+  /* PP8 8-k: gate before producing any JSX. Awaiting a server round-trip does
+     NOT stop this segment streaming ahead of the layout's redirect() — this
+     page awaited one and still leaked its own heading and intro to anonymous
+     callers. Only throwing before the JSX exists closes it. */
+  if (!(await isAdmin())) notFound();
+
   const { id } = await searchParams;
   const raw = Array.isArray(id) ? id[0] : id;
   const sel = raw && UUID_RE.test(raw) ? raw : undefined;

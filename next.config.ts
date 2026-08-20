@@ -107,7 +107,13 @@ const nextConfig: NextConfig = {
       "/elements",
       "/resources",
     ];
-    const withChildren = ["/live", "/elements", "/resources"];
+    /* PP8 8-e: /academy was in `gone` but not here, so /academy/[slug] — a real
+       route until PP5, and one a partner could have bookmarked exactly as
+       easily as /elements/c2 — answered 404 while /live/123 redirected. Found
+       by requesting the children rather than the parents. The omission
+       contradicted this block's own stated intention, so it is corrected rather
+       than documented. */
+    const withChildren = ["/live", "/elements", "/resources", "/academy"];
     return [
       ...gone.map((source) => ({
         source,

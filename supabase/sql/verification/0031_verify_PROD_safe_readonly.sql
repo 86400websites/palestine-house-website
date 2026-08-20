@@ -9,11 +9,27 @@
 -- PostgREST. SECURITY-CHECKLIST §15 treats that as blocking.
 
 -- 1. THE FIX. Every policy on the table must require approval.
-select 'all programming_sessions policies require approval' as check,
+--
+-- ⚠️ AMENDED BY PP8 (2026-08-20). As originally written this check required
+-- `count(*) > 0` — policies must EXIST and all must be gated. `0033` then
+-- dropped all four `programming_sessions` policies, leaving the table
+-- RLS-enabled with NO policies at all, which is default-deny and strictly
+-- STRONGER than any set of gated policies. The check therefore returned
+-- `ok = false` for the safest state the table has ever been in.
+--
+-- That is not a harmless stale check. Run as-is after `0033` it puts a red line
+-- in front of an operator who is mid-migration, and the lesson they take from
+-- it is that a red line in this file is normal — which is exactly how a real
+-- one gets waved through later.
+--
+-- Both end states are now accepted, and only those two:
+--   (a) policies exist and EVERY one requires approval   — pre-`0033`
+--   (b) zero policies, with RLS enabled (check 3 proves the RLS half)
+-- A table with SOME ungated policy still fails, which is the point.
+select 'all programming_sessions policies require approval (or none, post-0033)' as check,
        count(*)                                                          as policies,
        count(*) filter (where predicate ilike '%is_approved%')           as gated,
-       (count(*) = count(*) filter (where predicate ilike '%is_approved%')
-        and count(*) > 0)                                                as ok
+       (count(*) = count(*) filter (where predicate ilike '%is_approved%')) as ok
 from (
   select coalesce(qual,'') || ' ' || coalesce(with_check,'') as predicate
   from pg_policies
@@ -62,10 +78,16 @@ where schemaname = 'public'
 -- 5. Every user-reachable table in `public` has RLS on. Default-deny from day
 --    one is the standing rule (CLAUDE.md); this catches a new table shipped
 --    without it.
-select 'every public table has RLS enabled' as check,
+--
+-- ⚠️ HARDENED AT PP8 8-k: this was `relkind = 'r'`, which covers ordinary tables
+--    only. A PARTITIONED table is relkind 'p', so one shipped with RLS disabled
+--    would have been skipped while this check still reported that every public
+--    table had RLS enabled.
+select 'every public table (incl. partitioned) has RLS enabled' as check,
        count(*) filter (where not c.relrowsecurity) as tables_without_rls,
-       string_agg(c.relname, ', ') filter (where not c.relrowsecurity) as which,
+       string_agg(c.relname || ' (' || c.relkind::text || ')', ', ')
+         filter (where not c.relrowsecurity) as which,
        (count(*) filter (where not c.relrowsecurity) = 0) as ok
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
-where n.nspname = 'public' and c.relkind = 'r';
+where n.nspname = 'public' and c.relkind in ('r', 'p');

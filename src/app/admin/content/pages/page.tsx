@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/auth/profile";
 import { PagesAdmin, type PageRow } from "./pages-admin";
 
 /* /admin/content/pages (PP6a) — the hero copy for the About landing and the
@@ -25,6 +27,12 @@ export default async function PagesAdminPage({
 }: {
   searchParams: Promise<{ page?: string | string[] }>;
 }) {
+  /* PP8 8-k: gate before producing any JSX. Awaiting a server round-trip does
+     NOT stop this segment streaming ahead of the layout's redirect() — this
+     page awaited one and still leaked its own heading and intro to anonymous
+     callers. Only throwing before the JSX exists closes it. */
+  if (!(await isAdmin())) notFound();
+
   const { page } = await searchParams;
   const raw = Array.isArray(page) ? page[0] : page;
   const sel = raw && PAGE_SLUGS.includes(raw) ? raw : undefined;
