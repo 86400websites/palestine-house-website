@@ -1049,3 +1049,72 @@ feels like evidence. It was published as evidence.
 The corrected ledger is **2 product defects** (`/academy/[slug]`, and five admin
 routes leaking their structure), **found by a review I did not run myself.**
 Six independent rounds across this series; six times the reviewer was right.
+
+### The owner's independent review — same blocker, plus three sharper findings
+
+The owner's own reviewer returned **BLOCKING** on committed HEAD `444c654`,
+naming the identical defect: the five admin pages lacking their own gate. That
+review targeted the commit **before** the fix (`b7d7f4e`), and said so — *"the
+current worktree contains uncommitted candidate changes to those pages … none
+were part of this review target."* Two independent reviews converging on the
+same finding from different starting points is the strongest signal this sprint
+produced.
+
+It also found **three things the multi-agent round missed**, all in the
+verification files rather than the product, and all correct:
+
+**① `evtenabled <> 'D'` was a weak assertion.** PostgreSQL's `evtenabled` is
+`O`/`D`/`R`/`A`. **`R` fires only in replica mode** — it does *not* fire for
+ordinary origin DDL, which is precisely the failure this check exists to catch,
+and `<> 'D'` passed it. Worse, a **missing** trigger returned *no row at all*
+rather than `ok = false`: drop `ensure_rls` entirely and the check printed
+nothing, so an operator scanning for a red `ok` would see none. And it never
+asserted *which* trigger. Now an aggregate requiring exactly one `ensure_rls`
+on `ddl_command_end` with `evtenabled in ('O','A')`, with the command tags
+printed.
+
+**② Both RLS sweeps used `relkind = 'r'` only.** A **partitioned** table is
+`relkind = 'p'`, so one shipped with RLS disabled would have been skipped while
+the check still reported *"every public table has RLS enabled"*. Doubly wrong
+because `rls_auto_enable()` itself already handles `'table'` **and**
+`'partitioned table'` — the verifier was narrower than the thing it verified.
+Fixed in `0031` and `0034`.
+
+**③ The probes were not committed, so nothing could be replayed.** Fair, and
+the sharpest of the three: reading ACLs, `relrowsecurity`, role-scoped results
+and constraint names before a forced abort is valid, but *an un-replayable proof
+is a claim, not a proof.* All four are now committed as
+`supabase/sql/verification/PP8_probes_TEST_db_only.sql`, carrying the two probe
+defects they exist to prevent (never `PERFORM` a TABLE-returning function; always
+assert which constraint rejected you). **Re-run from the committed file to
+confirm it works**, reproducing every §15 result: approved 22/1/1/110, pending
+0/0/0 with own-profile 1, draft 22→21 and objects 110→107, anon denied `42501`
+on both `get_platform_topics` and `rls_auto_enable`.
+
+The reviewer also confirmed, independently, three things this sprint claimed:
+relaxing `0031` check 1 is **sound** (RLS-off still fails checks 3 and 5, so the
+proposed regression cannot make the file pass); `0034`'s REVOKE is safe and the
+event trigger still fires; and `/academy/:path*` redirects correctly.
+
+**Residual limitation, recorded rather than papered over:** production's
+*pre*-migration ACL was never captured in full — only that `anon` effectively
+held EXECUTE. Its post-migration ACL (`postgres=X | service_role=X`) matches
+TEST's post-migration ACL exactly, and TEST's pre-migration ACL *was* captured
+in full, so the inference is strong. It is an inference, not a measurement.
+
+### ✅ `0034` IS APPLIED TO PRODUCTION — verified independently
+
+The owner ran `supabase/sql/bundles/PP8_apply_prod.sql`. Re-verified through the
+**read-only** MCP, using the hardened checks above rather than the ones that
+shipped in the bundle:
+
+| check | production |
+|---|---|
+| `anon` cannot execute | ✅ ACL is exactly `postgres=X/postgres \| service_role=X/postgres` |
+| `authenticated` cannot execute | ✅ |
+| no PUBLIC grant remains | ✅ |
+| **anon-executable `SECURITY DEFINER` functions remaining** | ✅ **0** |
+| **`ensure_rls` armed (hardened)** | ✅ `ensure_rls / ddl_command_end / enabled=O / tags=CREATE TABLE+CREATE TABLE AS+SELECT INTO` |
+| every table **incl. partitioned** has RLS | ✅ all enabled |
+
+**§7 issue #2 is closed on production**, and the safety net survived there too.

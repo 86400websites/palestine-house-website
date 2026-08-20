@@ -78,10 +78,16 @@ where schemaname = 'public'
 -- 5. Every user-reachable table in `public` has RLS on. Default-deny from day
 --    one is the standing rule (CLAUDE.md); this catches a new table shipped
 --    without it.
-select 'every public table has RLS enabled' as check,
+--
+-- ⚠️ HARDENED AT PP8 8-k: this was `relkind = 'r'`, which covers ordinary tables
+--    only. A PARTITIONED table is relkind 'p', so one shipped with RLS disabled
+--    would have been skipped while this check still reported that every public
+--    table had RLS enabled.
+select 'every public table (incl. partitioned) has RLS enabled' as check,
        count(*) filter (where not c.relrowsecurity) as tables_without_rls,
-       string_agg(c.relname, ', ') filter (where not c.relrowsecurity) as which,
+       string_agg(c.relname || ' (' || c.relkind::text || ')', ', ')
+         filter (where not c.relrowsecurity) as which,
        (count(*) filter (where not c.relrowsecurity) = 0) as ok
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
-where n.nspname = 'public' and c.relkind = 'r';
+where n.nspname = 'public' and c.relkind in ('r', 'p');

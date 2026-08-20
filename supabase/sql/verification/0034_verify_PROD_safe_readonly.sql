@@ -41,22 +41,52 @@ where n.nspname = 'public'
 --    created from here on ships without RLS — which would make this migration
 --    far worse than the finding it closes.
 --
---    ('O' = origin, i.e. enabled. 'D' would mean disabled.)
+-- ⚠️ HARDENED AT 8-k. The first version of this check was
+--        (et.evtenabled <> 'D')
+--    over a bare row select, and an independent review was right that it was
+--    weaker than its own headline claimed, in three separate ways:
+--
+--      ① `<> 'D'` ACCEPTS 'R'. PostgreSQL's evtenabled is O/D/R/A: 'R' fires
+--         only in replica mode, so a trigger set to 'R' does NOT fire for
+--         ordinary origin DDL — the exact scenario this check exists to catch —
+--         and the old predicate passed it.
+--      ② A MISSING TRIGGER RETURNED NO ROW AT ALL, not `ok = false`. Drop
+--         `ensure_rls` entirely and the check simply printed nothing; an
+--         operator scanning for a red `ok` sees none and moves on. It is now an
+--         aggregate, so absence yields `count(*) = 0` and fails loudly.
+--      ③ It never asserted WHICH trigger. Name, event and command tags are now
+--         pinned, so a differently-wired trigger on the same function cannot
+--         satisfy it.
 select 'ensure_rls event trigger still armed' as check,
-       et.evtname, et.evtevent, et.evtenabled::text as enabled,
-       (et.evtenabled <> 'D') as ok
+       count(*) as matching_triggers,
+       coalesce(
+         string_agg(et.evtname || ' / ' || et.evtevent || ' / enabled=' || et.evtenabled::text ||
+                    ' / tags=' || coalesce(array_to_string(et.evttags, '+'), '(all)'), ', '),
+         '*** NO ARMED ensure_rls TRIGGER FOUND ***') as detail,
+       (count(*) = 1) as ok
 from pg_event_trigger et
 join pg_proc p on p.oid = et.evtfoid
 join pg_namespace n on n.oid = p.pronamespace
-where n.nspname = 'public' and p.proname = 'rls_auto_enable';
+where n.nspname = 'public'
+  and p.proname = 'rls_auto_enable'
+  and et.evtname = 'ensure_rls'
+  and et.evtevent = 'ddl_command_end'
+  and et.evtenabled in ('O', 'A');   -- fires on origin DDL; 'R'/'D' do not
 
 -- 6. And the net still catches: every table in `public` has RLS on. If the
 --    trigger had been broken by the revoke, this is where it would show up
 --    first — as a new table with RLS off.
-select 'every public table has RLS enabled' as check,
+--
+-- ⚠️ HARDENED AT 8-k: `relkind = 'r'` covers ordinary tables only. A PARTITIONED
+--    table is relkind 'p', so an RLS-disabled partitioned table was invisible to
+--    this sweep while it still reported "every public table has RLS enabled".
+--    `rls_auto_enable()` itself already handles both ('table' and 'partitioned
+--    table'), so the verifier was narrower than the thing it verifies.
+select 'every public table (incl. partitioned) has RLS enabled' as check,
        count(*) filter (where not c.relrowsecurity) as tables_without_rls,
-       coalesce(string_agg(c.relname, ', ') filter (where not c.relrowsecurity), '(all enabled)') as which,
+       coalesce(string_agg(c.relname || ' (' || c.relkind::text || ')', ', ')
+                  filter (where not c.relrowsecurity), '(all enabled)') as which,
        (count(*) filter (where not c.relrowsecurity) = 0) as ok
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
-where n.nspname = 'public' and c.relkind = 'r';
+where n.nspname = 'public' and c.relkind in ('r', 'p');
