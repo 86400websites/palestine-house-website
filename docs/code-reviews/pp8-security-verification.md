@@ -623,3 +623,109 @@ on the 22, guide/template downloads and their byte-check against the 88 spec
 md5s, Ctrl/⌘+K search, `#topic-slug` deep links, Ask HQ, the pending-partner
 state, the admin CMS write path — and the re-test of 8-c's `/admin/content` fix
 from an **admin's** session.
+
+---
+
+## 8-d — the approved-partner walkthrough (UNBLOCKED and run)
+
+The owner authorised the browser to read `.env.local` so the credentials stay
+out of this transcript. The Playwright snippet VM turned out to have **no
+`require` and no dynamic `import`**, so it cannot read a file at all. A
+**login bridge** was used instead — a scratchpad-only Node server that reads the
+credentials, signs in, and emits **nothing but `Set-Cookie`**. Cookies are not
+port-scoped, so a cookie set for `localhost` by the bridge on `:3101` reaches
+the app on `:3000`. The cookie encoding comes from **`@supabase/ssr` itself**
+via a capturing cookie adapter, so it cannot drift from what the app reads, and
+the bridge refuses to start unless the URL is the TEST project.
+
+⚠️ **The rebuild mattered.** The earlier build was compiled with no
+`NEXT_PUBLIC_*` values, so they were baked in as undefined. After rebuilding
+with the env present, `/api/auth/session` returns `200 {"authed":false}`
+locally — matching production and confirming 8-f's diagnosis of the 500.
+
+### The four toolkit pages
+
+`/setup` renders **5 cards** with exactly the 5 expected titles, 5 guide links,
+5 Watch Video controls, 0 broken images, no overflow. Expanding *Get Legally
+Ready* produces the **D-PP-f model exactly**:
+
+> summary → *See more* → *Back to Main Menu* → *Watch Video* → **START HERE** →
+> Simple guide card (**Read Now** · **Download Now**) → **TEMPLATES** → "2 files"
+> → T01 *Palestine House Brand Guide*, T02 *Palestine House Setup Checklist*
+
+Two templates + one guide = the 3 files the database holds for that focus area.
+No Overview card, no checklist card, no watch-out card. **This is the "signed-in
+visual" PP7 recorded as owed** — screenshot in the sprint record.
+
+### The reader, on all 22
+
+All 22 routes driven in one pass. **22/22 pass**, with structural assertions
+only (the first attempt's heuristics were wrong — see probe defects below):
+
+- exactly **one `<h1>`** per guide, and **no duplicate title heading** — PP6b's
+  cover-strip rule holds across the whole real corpus
+- **5–10 `<h2>` Step headings** each, per **D-PP-q**
+- 2,553–4,737 characters each, **70,659 total** rendered
+
+### Downloads — byte-exact, through real signed URLs
+
+Seven templates downloaded by clicking the actual UI, each served from
+`…/storage/v1/object/sign/resources/…` with a short-lived token, then hashed and
+compared against `docs/content-v2-spec.json`'s per-file md5s (computed from the
+owner's delivered documents at extraction):
+
+| focus area | template | bytes | md5 |
+|---|---|---|---|
+| get-legally-ready | T02 Palestine House Setup Checklist | 186,401 | ✅ |
+| money | T04 Simple Financial Policy | 184,276 | ✅ |
+| money | T05 Supplier Payment Tracker | 184,143 | ✅ |
+| plan-an-event | T04 Guest List | 187,231 | ✅ |
+| plan-an-event | T05 Simple Event Budget | 186,983 | ✅ |
+| marketing | T04 Press Release Template | 186,204 | ✅ |
+| marketing | T05 Simple Marketing Plan | 186,723 | ✅ |
+
+**byte-exact: 7 · mismatched: 0 · unmatched: 0**, spanning all four sections.
+
+### Search, deep links, Ask HQ, `/account`
+
+- **Ctrl/⌘+K** opens the palette; **Escape** closes it. Typing `brand` returns 3
+  results across **both** kinds — `FOCUS AREA Get Legally Ready`,
+  `TEMPLATE Palestine House Brand Guide`, `FOCUS AREA Ask Community Support for
+  Help` — each with a breadcrumb path and an anchor link.
+- **D-PP-j holds in the UI**: the rendered result markup carries **no storage
+  path, no `.docx`, no resource UUID** — only `/setup#topic-get-legally-ready`.
+- **Deep links** work: `/program#topic-promote-the-event` preserves the hash and
+  opens that focus area with its guide card.
+- **Ask HQ** renders a form with name, email, subject and message — all
+  labelled.
+- **`/account`** renders *"Your account."* with `displayName` and `optIn` — the
+  one deliberately approval-free gated page (§15).
+
+### 320px
+
+All four toolkit pages at 320px: **no horizontal overflow, 0 offending elements
+measured per-element, 0 broken images** (`scrollWidth` 305 against a 320
+viewport on every one).
+
+### ⚠️ Probe defects #6–#9 — four more, all mine
+
+1. **`waitUntil: 'domcontentloaded'` fires before RSC content renders.** Two
+   guide routes reported `chars: 0`, which reads as a blank page — one of them
+   had rendered 3,996 characters moments earlier when visited alone.
+2. **`/pending|approval/i` matched legitimate guide prose.** Guides about
+   permits and licensing legitimately contain the word "approval", so 11 of 22
+   readers were flagged as showing a pending state. None was.
+3. **Counting title occurrences in body text.** `Money` appeared 3 times and
+   `Marketing` twice — because those are ordinary words in their own prose. The
+   real assertion is structural: is the title an `<h1>`, and is it repeated as a
+   lower heading?
+4. **`[class*="pw-search"]` matched `.pw-search-tools` first.** The search
+   palette appeared to return **zero results for every query**, which reads as a
+   broken headline feature. The results were rendering the whole time in
+   `.pw-search-results`, one sibling away. This one was two `document.querySelector`
+   calls away from being written up as a defect on a shipped feature.
+
+That is **nine probe defects and zero product defects** found by my own checks
+across this sprint — the same ratio PP6c recorded (five of five). The lesson is
+not that the checks are useless; it is that a check that reports a failure has
+to be debugged before it is believed, exactly as hard as the product would be.
