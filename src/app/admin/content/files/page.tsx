@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth/profile";
 import { FilesAdmin, type FileRow, type TopicOption } from "./files-admin";
 
 /* /admin/content/files (PP6a, 6a-g) — the guide and templates a partner
@@ -26,12 +24,6 @@ export default async function FilesAdminPage({
 }: {
   searchParams: Promise<{ topic?: string | string[] }>;
 }) {
-  /* PP8 8-k: gate before producing any JSX. Awaiting a server round-trip does
-     NOT stop this segment streaming ahead of the layout's redirect() — this
-     page awaited one and still leaked its own heading and intro to anonymous
-     callers. Only throwing before the JSX exists closes it. */
-  if (!(await isAdmin())) notFound();
-
   const { topic } = await searchParams;
   const raw = Array.isArray(topic) ? topic[0] : topic;
   const sel = raw && UUID_RE.test(raw) ? raw : undefined;

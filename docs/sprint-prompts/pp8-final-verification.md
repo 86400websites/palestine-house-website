@@ -180,7 +180,7 @@ file:line locations · suggested fix for each · merge recommendation
 |---|---|
 | 1 | ✅ **DONE — `0034` is applied to production** (owner ran `supabase/sql/bundles/PP8_apply_prod.sql`, 2026-08-20) and re-verified independently through the read-only MCP with hardened checks. §7 issue #2 is closed on prod. |
 | 2 | **Owner: the off-machine copy of the 297-file cold archive** (`ROLLBACK-RUNBOOK` §1, copy 3). Still outstanding from PP7. |
-| 3 | **Owner: sign off the public copy** (D-PP-s) — now a **live** sign-off; screenshot supplied. |
+| 3 | ✅ **DONE — the owner signed off the public focus-area copy on the live site, 2026-08-20.** D-PP-s is fully discharged. Verified before the ask: 22/22 focus-area titles on `/focus-areas` match the titles read live from `platform_topics`, in the exact 5/6/6/5 grouping, so public and private cannot drift. |
 | 4 | **`/admin/*` is not responsive** — every admin screen overflows at 320px (`scrollWidth` 480–736). Pre-existing since S11, HQ-only, no security or partner consequence. A design change, not a verification fix. |
 | 5 | **Heading order skips `h1 → h3`** on the toolkit pages — a consequence of the deliberate single-group flattening. The obvious fix collides with the real group `h2` when a section gains a second group. Advisory under WCAG 1.3.1. |
 | 6 | **8 blocks are invisible without JavaScript** — SSR emits `opacity:0` for the DR1 reveal system. Site-wide, pre-dates PP7/PP8. |
