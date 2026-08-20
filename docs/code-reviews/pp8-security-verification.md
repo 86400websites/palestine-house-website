@@ -820,3 +820,91 @@ outside "the smallest safe change". It is HQ-only, desktop-used, and carries no
 security or partner-facing consequence. **Logged for the owner to schedule**;
 severity Low, raised only because PP8's scope asked for 320px on the admin
 flows and silently omitting the answer would misrepresent the pass.
+
+---
+
+## 8-g — accessibility
+
+### Keyboard-only traversal
+
+- **The skip link is the first tab stop**, and `#pw-main` exists as its target.
+- **Focus is visibly indicated on every stop** — a solid 2.4px outline on all
+  ten sampled stops, with no `outline: none` anywhere in the path.
+- Tab order follows the visual order: skip → brand → About · Setup · Operate ·
+  Program · Support → Partner Platform → *See more* → *Explore …*.
+- **The accordion opens from the keyboard** (`Enter` on *Explore Get Legally
+  Ready*) and **focus is deliberately moved to "Back to Main Menu"** inside the
+  newly-revealed panel, rather than left stranded on a button whose label has
+  changed meaning.
+
+### The search palette
+
+It is a **native `<dialog>` driven by `showModal()`**, which is why it behaves
+correctly: measured live, `dialog.open === true` and **`dialog.matches(':modal')
+=== true`**, so the browser itself owns the focus trap and the inert background.
+
+| | |
+|---|---|
+| labelled | `aria-labelledby="pw-search-title"` → *"Search all knowledge resources"* (visually hidden) |
+| input | labelled *"Search all resources"* |
+| results | `aria-busy` toggles with load state — **deliberately not `aria-live`**, per the component's own note, so a live region cannot re-announce on every keystroke |
+| empty state | `role="status"` → *"No results found. Try a shorter word or a topic name."* is announced |
+| filters | `role="group"` with an accessible label |
+| close | `aria-label="Close search"` |
+| **Escape** | closes **and returns focus to the trigger** that opened it |
+
+**Focus trap verified by walking it**: Close → All → Focus Areas → Guides →
+Templates → input → Close → … The cycle never reaches a background control.
+
+### Structure, contrast, motion
+
+- **Landmarks**: 1 `banner`, 2 `nav` — both labelled (*"Partner platform"*,
+  *"Partner platform, mobile"*) — 1 `main`, 1 `contentinfo`. One `<h1>`.
+  `lang="en"`. **0 images without `alt`** (the topic photo is `alt=""`, correct:
+  it is decorative and the title sits beside it as text).
+- **Contrast, computed from the live rendered colours** — every sampled pair
+  passes **AA** with room to spare:
+
+  | element | size | ratio | AA threshold |
+  |---|---|---|---|
+  | `h1` | 55px | **17.21** | 3 |
+  | `.pw-topic-title` | 24px | **17.21** | 3 |
+  | `p` | 18px | **17.21** | 4.5 |
+  | `a` | 15px | **7.71** | 4.5 |
+  | `button` | 14px | **15.05** | 4.5 |
+  | `.pw-topic-summary` | 14px | **12.21** | 4.5 |
+
+- **Reduced motion**: with `prefers-reduced-motion: reduce` emulated, the media
+  query matches and **all five topic titles render visible**. `Reveal`/`FadeIn`
+  return a plain `<div>` in that mode, so there is no opacity trap — the failure
+  mode where reduced motion disables the animation and leaves the content at
+  `opacity: 0` does **not** occur here.
+
+### ⚠️ Advisory finding — heading order skips `h1 → h3` (not fixed, deliberately)
+
+The toolkit pages emit `1, 3, 4, 5, 4, 3, …, 2, 2` — no `<h2>` between the page
+title and the focus-area titles.
+
+It is not an oversight. `pw-section-explorer.tsx` renders
+`<h2 class="pw-group-heading">` **only when a section has more than one group**;
+with a single group it deliberately drops the heading, its chevron and its count
+("*with one group the count is simply the list you can see*"). Every section
+currently has exactly one group, so every toolkit page skips the level.
+
+**Not fixed, and the reason is the fix is worse.** Promoting the focus-area
+title from `h3` to `h2` would close today's gap and then collide with the real
+group `h2` the moment any section gains a second group — trading an advisory
+issue for a latent structural one. Heading order is best practice under WCAG
+1.3.1 rather than a hard AA failure, screen readers navigate this page correctly
+by landmark and by heading regardless, and re-architecting the heading hierarchy
+is a design decision, not a verification fix. **Logged for the owner**, severity
+Low.
+
+### ⚠️ Probe defect #10
+
+`document.querySelector('[role="dialog"]')` matched nothing, so the palette
+appeared to have **no dialog role, no aria labelling and no focus trap** — which
+would have been a serious a11y finding on the headline feature. It is a *native*
+`<dialog>`: the role is implicit and the attribute is correctly absent. Every
+subsequent measurement had to be redone against `document.querySelector('dialog')`
+and `:modal`.
