@@ -97,6 +97,58 @@ typecheck ✅ · lint ✅ · build ✅ · 320px ✅ · live production pass ✅ 
   scratchpad **login bridge** that reads the credentials and emits nothing but a session
   cookie — so they never entered the transcript.
 
+## The independent review prompt (step 8-k)
+
+Five rounds across this series have returned BLOCKING and been right five times.
+
+```text
+You are my independent code reviewer for the Palestine House website.
+Read AGENTS.md in the repo root — it defines your rules, priorities, and the
+blocking gating checks. Review the branch DIFF only (vs main), not the whole repo.
+
+Context: this is PP8, the final verification sprint of Stage 4. FIVE previous
+independent rounds in this series each returned BLOCKING and each found a real
+Critical — including two in the single function that edits the owner's prose,
+the second found AFTER a round had gone looking for exactly that class of bug.
+Production is LIVE and serves real partners.
+
+The diff is small and mostly evidence. It carries:
+  - migration 0034 (+ .down.sql + a verification file): revokes EXECUTE on
+    public.rls_auto_enable() from public, anon, authenticated. That function
+    returns event_trigger and backs the `ensure_rls` trigger which auto-enables
+    RLS on every new public table. Applied to TEST only.
+  - src/app/admin/content/page.tsx: made async, gates on isAdmin(), to stop a
+    synchronous segment streaming its hardcoded labels into an anonymous RSC
+    payload before the layout's redirect() resolves.
+  - next.config.ts: "/academy" added to the child-redirect list.
+  - an amendment to supabase/sql/verification/0031_verify_PROD_safe_readonly.sql
+    relaxing check 1 so that ZERO policies also passes (0033 dropped all four
+    programming_sessions policies).
+  - docs/code-reviews/pp8-security-verification.md: the sprint's claim-set.
+
+Report serious issues only: correctness, security/data safety, secret leaks,
+broken approval gating, App Router boundary mistakes (server/client, secrets
+into client components), Supabase/RLS risks, migration risk, Vercel/env risks,
+build breakage. No style nits; do not critique approved copy or the locked design.
+
+JUDGE THE EVIDENCE, NOT ONLY THE CODE. Where the evidence file claims an
+invariant holds, decide whether what was actually RUN proves what is CLAIMED.
+Pay particular attention to:
+  - whether relaxing 0031's check 1 has weakened a security verification file
+    such that a real regression could now pass (e.g. RLS disabled + no policies);
+  - whether 0034 is safe against a live production database, and whether its
+    down-migration truly restores the prior ACL;
+  - whether awaiting isAdmin() genuinely prevents the streaming leak;
+  - whether any claim rests on a probe run inside an aborting transaction in a
+    way the abort could have masked.
+
+Any failure of the AGENTS.md "Palestine House gating checks" is blocking.
+
+Return: Blocking issues · Non-blocking issues · Missing checks · exact
+file:line locations · suggested fix for each · merge recommendation
+(approve / request changes / blocking). Do not make changes, push, or merge.
+```
+
 ## Follow-ups
 
 | # | |
