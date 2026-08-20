@@ -729,3 +729,94 @@ That is **nine probe defects and zero product defects** found by my own checks
 across this sprint — the same ratio PP6c recorded (five of five). The lesson is
 not that the checks are useless; it is that a check that reports a failure has
 to be debugged before it is believed, exactly as hard as the product would be.
+
+---
+
+## 8-e — pending · anonymous · admin
+
+### 8-c's caveat is now closed
+
+The `/admin/content` fix was previously verified only against a build with no
+Supabase env, so "an admin still sees the hub" was recorded as **unproven**.
+Re-tested from a real admin session: `/admin/content` renders *"Content admin."*
+with all four hub cards (Pages · Focus areas · Files · Admins), and all six
+admin screens load — `/admin/approvals`, `/admin/content`, and
+`/admin/content/{focus-areas,files,pages,admins}`. **The fix closes the
+anonymous leak without locking admins out.**
+
+### Anonymous, cookies cleared
+
+All 13 gated and admin routes redirect to `/login` with the correct `next=`
+target, and **not one leaks a focus-area title, a `.docx`, a storage path or an
+email address**. `/api/auth/session` reports `{"authed":false}`. This repeats
+8-c's sweep **with the env present**, so the earlier qualified result now
+stands unqualified.
+
+### Pending partner — flipped on TEST, then restored
+
+`is_approved` was set false for the signed-in account, the whole gated surface
+re-walked, and approval restored immediately after.
+
+| route | what a pending partner sees |
+|---|---|
+| `/dashboard` | *"Welcome."* → **"Your application is under review."** · "HQ reads every one by hand. The moment yours is approved, everything here opens up" |
+| `/setup` `/operate` `/program` `/support` | **"Request received — under review."** |
+| `/setup/get-legally-ready/guide` | the same pending state — the reader does not leak |
+| `/account` | **"Your account."**, `displayName` + `optIn` still editable |
+
+**Content leaked: none.** No *Read Now*, no *Download Now*, no *TEMPLATES*, no
+*Simple guide*, and none of the focus-area titles, on any of them. `/account`
+staying editable while pending is the deliberate §15 exception, working.
+
+**TEST was restored and the restoration verified**: 5 approved of 6 profiles ·
+2 admins · 22 topics live · 112 resources · 110 objects — identical to the 8-a
+baseline.
+
+### 🐞 Defect found and fixed — `/academy/[slug]` answered 404
+
+`next.config.ts`'s redirect block states its own intent plainly: *"Rather than
+404 someone who saved `/elements/c2`, send them to the About landing."* But
+`withChildren` listed only `/live`, `/elements` and `/resources`. `/academy` was
+in `gone` (so `/academy` itself redirected) and **absent from `withChildren`**,
+so `/academy/some-module` — a real route until PP5, and as bookmarkable as
+`/elements/c2` — returned **404** while `/live/123` redirected.
+
+Found by requesting the **children** rather than the parents. Fixed by adding
+`/academy` to `withChildren`; verified after rebuild:
+
+```
+/academy/foo          307 → /dashboard
+/academy/some-module  307 → /dashboard
+/live/123             307 → /dashboard
+/elements/c2          307 → /dashboard
+/resources/forms      307 → /dashboard
+```
+
+This is the sprint's **first product defect**, and it is a small one.
+
+### 🔴 Finding NOT fixed — every `/admin/*` screen overflows at 320px
+
+| screen | `scrollWidth` at 320px | offending elements |
+|---|---|---|
+| `/admin/approvals` | **480** | 65 |
+| `/admin/content` | **480** | 6 |
+| `/admin/content/focus-areas` | **736** | 217 |
+| `/admin/content/files` | **480** | 6 |
+| `/admin/content/pages` | **736** | 33 |
+| `/admin/content/admins` | **480** | 23 |
+| `/dashboard` (partner) | 305 | **0** |
+| `/account` (partner) | 305 | **0** |
+
+The partner-facing platform is clean; the **HQ admin UI is not responsive**. The
+first offenders are the admin nav links at 349/431px, and the two worst screens
+are wide data tables.
+
+**Pre-existing, not introduced here** — it affects `/admin/approvals`, which
+this sprint never touched, and the admin UI has been desktop-first since S11.
+
+**Deliberately not fixed.** Making six admin screens responsive is a design
+change against `docs/page-designs/admin/`, not a verification fix, and it is far
+outside "the smallest safe change". It is HQ-only, desktop-used, and carries no
+security or partner-facing consequence. **Logged for the owner to schedule**;
+severity Low, raised only because PP8's scope asked for 320px on the admin
+flows and silently omitting the answer would misrepresent the pass.
