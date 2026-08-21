@@ -28,8 +28,8 @@ When the user gives a rough dump, a sprint ID (e.g. "0.1", "S3a"), or says "plan
    - **C. Branch name** — per CLAUDE.md convention, e.g. `claude/sprint-0-1-foundation`.
    - **D. Step checklist** — sequential build steps for this sprint, each small and verifiable. These become the numbered **gated sub-steps** in the prompt (section E) — the owner gates each one with "proceed".
    - **E. Ready-to-copy Claude Code prompt** — one clean code block using the template below. *(Bug-fix variant: same template, but replace the Goal block with `Problem: <paste the bug/error/behavior>` and add to the report: root cause + fix summary. UI-only variant: add "reuse existing components/styles; no new dependencies; responsive + accessible".)*
-   - **F. Optional Codex review prompt** — only for risky sprints (auth, approval gate, RLS/schema, env, headers, CSP); use the template below. Otherwise say review is optional and skip it.
-   - **G. Checklists** — don't restate; point to `WORKFLOW.md` §9 (local), §10 (PR), §11 (Preview), §12 (merge), §13 (rollback).
+   - **F. Independent review prompt — MANDATORY for a risky sprint (D-SYS-1).** Risky = auth · approval gate · RLS/schema · env · security headers · CSP. For those, the review is a merge gate, not a suggestion: commission it over an immutable `[MERGE_BASE_SHA]..[HEAD_SHA]` range, save the record at `docs/code-reviews/[SPRINT_ID]-[SLUG]-review.md`, and **no merge while a Blocking finding stands**; a substantive change after approval means re-reviewing at the new head. For a trivial sprint (docs, copy, config with no gate/schema/env surface) say review is optional and skip it. Guide: `docs/CODEX-REVIEW-PROMPT.md` · skeleton: `docs/templates/CODEX-REVIEW-PROMPT-TEMPLATE.md` · the ready prompt is below.
+   - **G. Checklists** — don't restate; point to `WORKFLOW.md` §9 (local), §10 (PR), §11 (Preview), §12 (merge), §13 (rollback), and `docs/QA-CHECKLIST.md` for the per-PR two-part gate.
 5. **Offer execution:** since this *is* Claude Code, offer to execute the prompt directly in this session on the new branch — or the user can paste it into a fresh session.
 
 ### Implementation prompt template (Mode A, section E)
@@ -46,6 +46,11 @@ Branch: [claude/sprint-x-y-name] (create from latest main)
 
 Goal:
 [2–5 lines: exactly what this sprint delivers, from ROADMAP + the user's intent]
+
+Allowed to change (WORKFLOW.md §0.8 — the diff stays inside this list):
+[the exact paths/globs this sprint may touch, e.g. src/app/(platform)/**, docs/PROJECT-STATUS.md]
+Explicitly NOT in scope: [the tempting neighbours — e.g. no migrations, no public pages, no new deps]
+If the work genuinely needs a file outside the list, STOP and say why before touching it.
 
 Execute in gated sub-steps (one owner gate after each):
 [1. (1a) <first sub-step — small and verifiable>]
@@ -68,7 +73,7 @@ Locked inputs (never invent, never paraphrase):
 - Copy, verbatim: docs/page-copy/[exact file(s)]
 - Design: docs/page-designs/[exact mockup file(s)] + design-system tokens (values recorded in docs/DESIGN.md §3)
 - [If artwork: copy the needed PH-* files from docs/page-designs/assets/art/ into /public/assets/]
-- Proof numbers: 11 · 33 · 200+ · 297 · 120-day launch (updated from 10 · 30 · 267 with Focus Area 11, FA11 2026-07-18). Header/footer chrome is locked — never redesign per page.
+- Proof numbers: 4 sections · 22 focus areas · 88 templates (reconciled public-and-private at PP7; owner-signed live 2026-08-20, D-PP-s; a copy checker enforces them). The old band — 11 · 33 · 200+ · 297 · 120-day — names content deleted by `0030`; never carry it into a new prompt. Header/footer chrome is locked — never redesign per page.
 
 Before editing:
 1. Inspect the repo (package.json, next.config.ts, src/app/) and read every locked input above.
@@ -90,12 +95,14 @@ When the sprint is complete, in the same branch: update docs/PROJECT-STATUS.md (
 Report at the end: summary · files changed · commands + results · risks/follow-ups · suggested commit message · sprint status. Push policy: commit + push after every gated sub-step (standing authorization, 2026-06-12) so the owner reviews in the open PR; never merge, never push beyond the task branch.
 ```
 
-### Codex review prompt template (Mode A, section F — risky sprints only)
+### Independent review prompt template (Mode A, section F — mandatory on risky sprints, D-SYS-1)
 
 ```text
 You are my independent code reviewer for the Palestine House website.
 Read AGENTS.md in the repo root — it defines your rules, priorities, and the
-blocking gating checks. Review the branch DIFF only (vs main), not the whole repo.
+blocking gating checks. Review ONLY the diff over the immutable range
+[MERGE_BASE_SHA]..[HEAD_SHA] (a branch name or "main..branch" is not an exact
+range — both ends move), not the whole repo.
 
 Report serious issues only: correctness, security/data safety, secret leaks,
 broken approval gating, App Router boundary mistakes (server/client, secrets
@@ -108,6 +115,10 @@ Return: Blocking issues · Non-blocking issues · Missing checks · exact
 file:line locations · suggested fix for each · merge recommendation
 (approve / request changes / blocking). Do not make changes, push, or merge.
 ```
+
+Save the verdict at `docs/code-reviews/[SPRINT_ID]-[SLUG]-review.md` — the review is only a
+gate if its result is on the record. **No merge while a Blocking finding stands**, and any
+substantive change after an approval invalidates it: re-review at the new head (D-SYS-1).
 
 ## Mode B — Save the sprint record ("save", after merge)
 
@@ -129,4 +140,5 @@ If the user asks for a prompt that is *not* a sprint for this repo (research, wr
 - Never write an implementation prompt without the gated sub-step protocol, and never let the engine run past a sub-step without the owner's "proceed".
 - Never write copy or invent design values in the prompt — point to the exact locked files.
 - Never include secret values anywhere; env vars by name only.
-- Never instruct pushing/merging — the owner decides; prompts end with "do not push unless I explicitly ask".
+- **Never instruct merging** — the owner merges, always. **Pushing is different here and this rule used to contradict the template above:** a standing owner authorization dated 2026-06-12 (**D-SYS-2**, `PROJECT-STATUS.md` §4) has the engine commit **and push to the task branch after every gated sub-step**, so the owner reviews live in the open PR. Never push to `main`, never push another branch, never force-push, never skip hooks.
+- Never let a risky sprint (auth · approval gate · RLS/schema · env · security headers · CSP) reach the merge gate without an independent review and its saved record — **D-SYS-1**. This project's record is why: PP6b, PP6c, PP7 and PP8 each drew a BLOCKING verdict that was right.

@@ -49,7 +49,19 @@ docs/PH - Palestine House Final.html
 # offers itself up for commit.
 .playwright-mcp/
 *-1440.png
+*-768.png
 *-320.png
+
+# SYS1 (D-SYS-5): the Website-Development-System SOP pack was a reusable master
+# copied in for reference, never part of this repo's doc set. Its whole
+# development track is now installed and PH-filled at docs/*.md,
+# docs/templates/, docs/testing-setup/, docs/error-tracking/ and the five
+# skills — so the copy was DELETED from the repo on 2026-08-22 (owner
+# confirmed he holds the master elsewhere; it was never tracked, so nothing
+# left git history). The rule stays as a guard: if the pack is ever dropped in
+# here again it must not be committed, because 57 duplicate governing docs
+# would immediately start drifting against the real ones.
+docs/Website-Development-System/
 
 # PP6c: 0030's down-migration carries 1.6 MB of guide prose as literal inserts
 # (D-PP-k requires the bodies to be restorable). It was withheld from git while

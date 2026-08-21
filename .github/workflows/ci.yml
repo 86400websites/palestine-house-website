@@ -19,8 +19,18 @@ concurrency:
 
 jobs:
   verify:
+    # ⚠️ DO NOT RENAME. This string is the check-run context GitHub matches
+    # branch protection against. Renaming it (SYS1 1h briefly did, adding
+    # "· Audit") changes the required check's identity: the old name stops
+    # reporting, so either the merge button locks forever or — worse — the
+    # rule is left pointing at a check nobody emits and PRs merge green with
+    # nothing enforcing anything. Branch-protection state cannot be read from
+    # this repo (no gh CLI), so the name stays put and the steps change freely.
     name: Install · Typecheck · Lint · Build
     runs-on: ubuntu-latest
+    # A hung step should not burn a runner for six hours (the GitHub default).
+    # The job normally finishes in a few minutes; 20 is generous headroom.
+    timeout-minutes: 20
     env:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
@@ -57,3 +67,25 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      # Code Check 6 (docs/TECHNICAL-INTEGRITY.md), added at SYS1 1h.
+      #
+      # BLOCKING at "critical" only, and that threshold is a deliberate,
+      # recorded choice rather than a soft one: on 2026-08-21 this repo had
+      # 22 advisories — 0 critical, 14 high, 8 moderate — so gating at "high"
+      # would have shipped a permanently red CI, which teaches everyone to
+      # ignore it. "No known-critical vulnerabilities" is also the standard
+      # docs/TECHNICAL-INTEGRITY.md actually states.
+      #
+      # The highs are NOT dismissed: the step below reports them on every run,
+      # and the outstanding ones are tracked in PROJECT-STATUS.md §7. Raise
+      # this gate to "high" once that backlog is cleared.
+      - name: Audit (blocking — critical only)
+        run: pnpm audit --audit-level critical
+
+      # Visibility, not a gate: prints high/moderate advisories so a reviewer
+      # sees them on the PR instead of discovering them at the next upgrade.
+      - name: Audit report (non-blocking — high & moderate)
+        if: always()
+        continue-on-error: true
+        run: pnpm audit --audit-level moderate || true
