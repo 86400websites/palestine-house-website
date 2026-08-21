@@ -49,6 +49,7 @@ docs/PH - Palestine House Final.html
 # offers itself up for commit.
 .playwright-mcp/
 *-1440.png
+*-768.png
 *-320.png
 
 # PP6c: 0030's down-migration carries 1.6 MB of guide prose as literal inserts

@@ -14,7 +14,8 @@ Read, don't restate from memory — these define the gates you are checking (cit
 - `docs/WORKFLOW.md` §9 (local checks), §10 (PR), §11 (Preview), §12 (merge), §17 (definition of done), §14 (database protocol).
 - `docs/ROADMAP.md` — the active sprint's exit gate.
 - `docs/SECURITY-CHECKLIST.md` — the quick gate + §15 blocking invariants.
-- `docs/PROJECT-STATUS.md` §1–§2 — what the trackers should now say.
+- `docs/PROJECT-STATUS.md` §1–§2 — what the trackers should now say; **§4 for the D-SYS decisions** that govern the review gate, the push policy and the waived checks.
+- `docs/QA-CHECKLIST.md` — the two-part per-PR gate · `docs/TECHNICAL-INTEGRITY.md` — what CI does and does not cover · `docs/CODEX-REVIEW-PROMPT.md` — how a review is commissioned and recorded.
 
 ## Step 0 — work out what this sprint shipped
 
@@ -47,7 +48,9 @@ Run top to bottom. For each item give **PASS / FAIL / N/A** + the evidence (comm
 
 ### 5. Security invariants — only those the diff touches (SECURITY-CHECKLIST §15)
 For each invariant the change could affect, confirm it holds and cite the file:
-- Approval enforced server-side; reference content never public; **Apply = the only sign-up door**; templates/booklets only via server-issued signed URLs; public writes zod + rate-limit + Turnstile, **fail closed in production**; admin via server-checked `admins` table; CSP allow-list tight.
+- Approval enforced server-side; reference content never public; **Apply = the only sign-up door**; templates/booklets only via server-issued signed URLs; admin via server-checked `admins` table; CSP allow-list tight.
+- **Public writes: zod — yes; rate limit + Turnstile — NOT SHIPPED YET.** `/apply`, contact and `/support` are live and unthrottled (`PROJECT-STATUS.md` §7 #1); the Upstash + Turnstile + fail-closed half of this invariant arrives in **SYS1.5** (D-SYS-9). Until then, check zod validation only and do **not** record the full §15 public-writes invariant as passing — a gate that reports a control the site does not have is worse than no gate.
+- **CSP note:** the allow-list is YouTube-embed-only *today*. **SYS3** adds the Sentry ingest origin to `connect-src` (D-SYS-10) — when that lands, a widened `connect-src` is expected, not a finding.
 
 ### 6. Database — only if `supabase/sql/**` changed (WORKFLOW §14)
 - Every `*.up.sql` has a matching `*.down.sql`; RLS **default-deny** on every new table; every `SECURITY DEFINER` function hardened (`search_path = ''`, fully-qualified, `auth.uid()` authz, narrow returns, `revoke execute from public, anon` then `grant` to the intended role; trigger fns granted to no client role).
@@ -58,6 +61,18 @@ For each invariant the change could affect, confirm it holds and cite the file:
 
 ### 8. Preview (owner-confirmed)
 - Remind the owner to confirm the **Vercel Preview** was tested per WORKFLOW §11 (desktop + 320px; auth flows + email-origin if auth changed; forms behave or no-op). For SQL-only sprints, note Preview shows the unchanged site and the real artifact is the SQL + verification results.
+- The exploratory browser pass is `/browser-qa` (`docs/BROWSER-TOOLS.md`); the per-PR form is `docs/templates/VERCEL-PREVIEW-TEST-TEMPLATE.md`. **Record the head SHA that was tested** — an approval does not carry to a new head.
+
+### 9. Independent review — MANDATORY if the diff is risky (D-SYS-1)
+- **Risky = the diff touches any of:** auth · the approval gate · RLS/schema (`supabase/sql/**`) · env handling · security headers · CSP. Decide from the diff, not from the sprint's title.
+- If risky, all four must hold or this is a **NO-GO**: the review ran over an **immutable `<merge-base>..<head>` range** (a branch name is not a range — both ends move); its record is saved at `docs/code-reviews/<id>-<slug>-review.md`; **no Blocking finding is left standing**; and if anything substantive changed after the verdict, it was **re-reviewed at the new head**.
+- If not risky, mark N/A and say why in one clause.
+- Guide: `docs/CODEX-REVIEW-PROMPT.md` · skeleton: `docs/templates/CODEX-REVIEW-PROMPT-TEMPLATE.md` · prompt: `/sprint-prompt` section F.
+- *Why this is a gate here and not a suggestion:* PP6b, PP6c, PP7 and PP8 each drew a BLOCKING verdict, and each was right — two of PP7's Criticals were in the one function that edits the owner's prose.
+
+### 10. Technical integrity (`docs/TECHNICAL-INTEGRITY.md`)
+- CI is green on the head being merged: typecheck · lint · build · gitleaks (workflow **CI**, job **`verify`**). There is deliberately **no format check** (D-SYS-3) and **no test run yet** (the suite arrives in SYS2) — do not report either as a failure.
+- No new `any`, `@ts-ignore`, or unexplained `eslint-disable` in the diff; a suppression needs its reason on the line above.
 
 ## Output — a single verdict
 
