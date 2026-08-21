@@ -15,7 +15,16 @@ const eslintConfig = [
     // docs/ holds locked reference inputs (design mockups, the bundled design
     // system) — never app source, never linted. Built output + generated
     // files are excluded too. next-env.d.ts is committed but not edited/linted.
-    ignores: [".next/**", "node_modules/**", "next-env.d.ts", "docs/**"],
+    // playwright-report/ and test-results/ are gitignored run evidence (SYS2)
+    // whose bundled viewer JS otherwise floods `eslint .` with warnings.
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "next-env.d.ts",
+      "docs/**",
+      "playwright-report/**",
+      "test-results/**",
+    ],
   },
 ];
 

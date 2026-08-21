@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ROLES, rolePassword } from "./helpers/roles";
+import { ROLES } from "./helpers/roles";
 import { probe } from "./helpers/app";
 
 /* Section B (auth halves) + the reject halves of Section D. Nothing in this
@@ -7,30 +7,10 @@ import { probe } from "./helpers/app";
    form here is an undeliverable robot one, and the contact form is only ever
    given INVALID input (its one real send lives in journeys.spec.ts). */
 
-test("AC-010: login and logout work, and the door locks again", async ({
-  page,
-}) => {
-  test.setTimeout(120_000);
-  await page.goto("/login");
-  await page.getByLabel("Email").fill(ROLES.approved.email);
-  await page.getByLabel("Password").fill(rolePassword("approved"));
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForURL("**/dashboard");
-
-  // Sign out from the public chrome (present on every public page).
-  await page.goto("/");
-  await page
-    .getByRole("button", { name: "Sign out" })
-    .or(page.getByRole("link", { name: "Sign out" }))
-    .first()
-    .click();
-  // The same gated door is shut again immediately.
-  await expect
-    .poll(async () => (await probe(page.request, "/dashboard")).status, {
-      timeout: 20_000,
-    })
-    .toBeGreaterThanOrEqual(300);
-});
+/* AC-010 (login + logout) lives in journeys.spec.ts as the FINAL test of the
+   whole run: the site's sign-out revokes every session the account holds
+   (global scope), so running it here would kill the stored session that all
+   the other approved-partner specs share — the second full run proved it. */
 
 test("AC-011: a signed-in visitor who opens /login is sent onward", async ({
   browser,
@@ -42,7 +22,7 @@ test("AC-011: a signed-in visitor who opens /login is sent onward", async ({
   });
   const page = await context.newPage();
   await page.goto("/login");
-  await page.waitForURL("**/dashboard");
+  await page.waitForURL("**/dashboard", { timeout: 55_000 });
   await context.close();
 });
 
@@ -51,13 +31,14 @@ test("AC-012: a wrong password fails safely", async ({ page }) => {
   await page.getByLabel("Email").fill(ROLES.approved.email);
   await page.getByLabel("Password").fill("definitely-not-the-password");
   await page.getByRole("button", { name: "Sign in" }).click();
-  // A clear message, still on /login, and no session was created.
+  // A clear message inside the form, still on /login, no session created.
   await expect(page).toHaveURL(/\/login/);
-  await expect(page.locator('[role="alert"], .auth-error, p')).toContainText(
-    /password|sign in|try/i,
-  );
-  const { status } = await probe(page.request, "/dashboard");
-  expect(status).toBeGreaterThanOrEqual(300);
+  await expect(
+    page.locator("form").filter({ has: page.getByLabel("Email") }),
+  ).toContainText(/password|match|try|couldn|didn/i, { timeout: 30_000 });
+  // No session was created: a gated URL still lands on the sign-in page.
+  await page.goto("/dashboard");
+  await page.waitForURL(/\/login/, { timeout: 30_000 });
 });
 
 test("AC-013: password-reset is safe in both directions", async ({
@@ -84,8 +65,9 @@ test("AC-013: password-reset is safe in both directions", async ({
   );
   expect(status).toBeGreaterThanOrEqual(300);
   expect(location).toContain("/forgot-password");
-  const dashboard = await probe(request, "/dashboard");
-  expect(dashboard.status).toBeGreaterThanOrEqual(300);
+  // And no session was minted by the garbage link.
+  await page.goto("/dashboard");
+  await page.waitForURL(/\/login/, { timeout: 30_000 });
 });
 
 test("FM-001: the contact form rejects bad input, client and server", async ({
@@ -111,7 +93,7 @@ test("FM-003: the apply form rejects bad input with clear messages", async ({
   await page.getByLabel("Your name").fill("ROBOT TEST invalid-input probe");
   await page.getByLabel("Email").fill("not-an-email");
   await page.getByLabel(/^Password/).fill("short");
-  await page.getByLabel("City").fill("Robot Test City");
+  await page.getByLabel("City", { exact: true }).fill("Robot Test City");
   await page.getByLabel(/Tell us about your city/).fill("ROBOT TEST — invalid input probe.");
   await page.getByRole("button", { name: /submit|apply|send/i }).click();
   // Still on the form — no confirmation view, no account created.

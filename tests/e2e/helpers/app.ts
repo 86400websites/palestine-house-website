@@ -101,7 +101,18 @@ export async function probe(
   path: string,
   headers?: Record<string, string>,
 ): Promise<{ status: number; location: string; body: string }> {
-  const response = await request.get(path, { maxRedirects: 0, headers });
+  let response = await request.get(path, { maxRedirects: 0, headers });
+  /* Vercel's protection can answer some requests with a redirect-to-self hop
+     that sets its bypass cookie. That hop is infrastructure, not the app —
+     follow it exactly once so assertions see the app's own answer. */
+  const location = response.headers()["location"] ?? "";
+  if (
+    response.status() >= 300 &&
+    response.status() < 400 &&
+    (location === path || location.endsWith(path))
+  ) {
+    response = await request.get(path, { maxRedirects: 0, headers });
+  }
   return {
     status: response.status(),
     location: response.headers()["location"] ?? "",
@@ -134,10 +145,27 @@ export async function discoverPlatformContent(
 
   const guideLinks: string[] = [];
   for (const section of ["/setup", "/operate", "/program", "/support"]) {
-    await page.goto(section);
-    const hrefs = await page.$$eval('a[href$="/guide"]', (as) =>
-      as.map((a) => (a as HTMLAnchorElement).getAttribute("href") ?? ""),
-    );
+    /* The section pages STREAM their topic cards — scraping at `load` races
+       the content and reads an empty page (first-run lesson). Wait for the
+       first guide link, retrying the navigation once on a transient failure. */
+    let hrefs: string[] = [];
+    for (let attempt = 0; attempt < 2 && hrefs.length === 0; attempt += 1) {
+      try {
+        await page.goto(section);
+        /* state:"attached", NOT the visible default: the guide links live
+           inside the topic cards' collapsed bodies (server-rendered, hidden
+           until "Explore" opens them) — a visibility wait never resolves. */
+        await page.waitForSelector('a[href$="/guide"]', {
+          state: "attached",
+          timeout: 45_000,
+        });
+        hrefs = await page.$$eval('a[href$="/guide"]', (as) =>
+          as.map((a) => (a as HTMLAnchorElement).getAttribute("href") ?? ""),
+        );
+      } catch {
+        hrefs = [];
+      }
+    }
     guideLinks.push(...hrefs.filter(Boolean));
   }
 

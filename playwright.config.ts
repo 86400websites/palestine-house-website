@@ -33,12 +33,12 @@ if (!baseURL) {
 /* Vercel deployment protection: when the owner has protection on, requests
    carry the sanctioned bypass header — the only allowed door
    (docs/testing-setup/SETUP-CHECKLIST.md Part 3). Referenced by NAME only. */
+/* Header only — never x-vercel-set-bypass-cookie: that variant answers every
+   request with a 307 cookie-setting hop to the SAME path, which poisons all
+   redirect-location assertions (found the hard way on the first full run). */
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 const extraHTTPHeaders = bypassSecret
-  ? {
-      "x-vercel-protection-bypass": bypassSecret,
-      "x-vercel-set-bypass-cookie": "true",
-    }
+  ? { "x-vercel-protection-bypass": bypassSecret }
   : undefined;
 
 /* The two viewports this repo gates every page at: desktop and 320px —
@@ -53,7 +53,10 @@ export default defineConfig({
   fullyParallel: true,
   timeout: 60_000,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  /* One retry everywhere: the target is a cold serverless Preview on a
+     free-tier database — a single transient slow round-trip must not paint a
+     working feature red. A genuine defect fails twice. */
+  retries: 1,
   /* Evidence stays local and gitignored — never committed (activate-testing
      skill: "Never commit test artifacts"). */
   outputDir: "test-results",

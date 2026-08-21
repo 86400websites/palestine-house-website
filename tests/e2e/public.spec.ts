@@ -97,13 +97,13 @@ test("PG-006: the proof numbers are consistent and the retired ones are gone", a
   page,
 }) => {
   test.setTimeout(120_000);
-  // The pages that state the numbers state today's: 4 · 22 · 88.
-  for (const route of ["/", "/focus-areas"]) {
-    await page.goto(route);
-    const text = (await page.locator("body").innerText()).replace(/\s+/g, " ");
-    expect(text, `${route} lacks the focus-area count`).toContain("22");
-    expect(text, `${route} lacks the template count`).toContain("88");
-  }
+  // The page that states the numbers states today's: 4 · 22 · 88. (The v3
+  // home deliberately carries no proof-number strip — first-run correction;
+  // /focus-areas is where the public site counts things.)
+  await page.goto("/focus-areas");
+  const focusText = (await page.locator("body").innerText()).replace(/\s+/g, " ");
+  expect(focusText, "/focus-areas lacks the focus-area count").toContain("22");
+  expect(focusText, "/focus-areas lacks the template count").toContain("88");
   // The retired band appears nowhere on the public shell.
   for (const route of PUBLIC_ROUTES) {
     await page.goto(route);
@@ -127,10 +127,14 @@ test("PG-007: the Apply conversion is reachable from every page", async ({
     const applyHrefs = await page.$$eval('header a[href="/apply"]', (as) => as.length);
     expect(applyHrefs, `${route} header has no Apply link`).toBeGreaterThan(0);
   }
-  await page.goto("/apply");
+  // The review promise: home carries the "reviewed by HQ" sentence; /apply
+  // states it in its own approved copy ("HQ reviews your application").
+  await page.goto("/");
   await expect(
-    page.getByText("Every application is reviewed by HQ."),
+    page.getByText(/Every application is reviewed by HQ/).first(),
   ).toBeVisible();
+  await page.goto("/apply");
+  await expect(page.getByText(/HQ reviews your application/).first()).toBeVisible();
 });
 
 test("PG-008: sitemap, robots and manifest resolve and expose only the public shell", async ({

@@ -16,16 +16,25 @@ test("IN-001: the session probe reveals a boolean and nothing else", async ({
   const anonBody = await anon.json();
   expect(anonBody).toEqual({ authed: false });
 
-  // Signed in: true — and still nothing else.
+  // Signed in: true — and still nothing else. Asserted the way the header
+  // actually uses it (an in-page fetch), polled because the probe validates
+  // the session against the free-tier auth server, which can be slow under
+  // parallel load.
   const context = await browser.newContext({
     baseURL,
     storageState: ROLES.approved.storageState,
   });
-  const signedIn = await context.request.get("/api/auth/session");
-  expect(signedIn.status()).toBe(200);
-  const body = await signedIn.json();
-  expect(body).toEqual({ authed: true });
-  const raw = await signedIn.text();
-  expect(raw.includes("@"), "an email leaked from the session probe").toBe(false);
+  const page = await context.newPage();
+  await page.goto("/");
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(async () => {
+          const res = await fetch("/api/auth/session", { cache: "no-store" });
+          return res.text();
+        }),
+      { timeout: 30_000 },
+    )
+    .toBe(JSON.stringify({ authed: true }));
   await context.close();
 });

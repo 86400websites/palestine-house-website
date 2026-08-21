@@ -17,6 +17,7 @@ import { ROLES } from "./helpers/roles";
 let content: PlatformContent;
 
 test.beforeAll(async ({ browser, baseURL }) => {
+  test.setTimeout(240_000);
   content = await discoverPlatformContent(browser, baseURL!);
 });
 
@@ -63,9 +64,19 @@ test.describe("as the approved partner", () => {
     let total = 0;
     for (const [section, expected] of Object.entries(SECTION_TOPIC_COUNTS)) {
       await page.goto(section);
-      const count = await page.getByRole("link", { name: "Read Now" }).count();
-      expect(count, `${section} focus-area count`).toBe(expected);
-      total += count;
+      // The cards stream in, and their guide links sit in collapsed bodies —
+      // wait attached, then count UNIQUE guide targets (one per focus area).
+      await page.waitForSelector('a[href$="/guide"]', {
+        state: "attached",
+        timeout: 60_000,
+      });
+      const unique = new Set(
+        await page.$$eval('a[href$="/guide"]', (as) =>
+          as.map((a) => (a as HTMLAnchorElement).getAttribute("href") ?? ""),
+        ),
+      );
+      expect(unique.size, `${section} focus-area count`).toBe(expected);
+      total += unique.size;
     }
     expect(total).toBe(22);
   });
@@ -74,12 +85,20 @@ test.describe("as the approved partner", () => {
     page,
   }) => {
     await page.goto("/setup");
-    // Every topic card: one Read Now, one Download Now, one Watch Video.
-    const readCount = await page.getByRole("link", { name: "Read Now" }).count();
-    const body = await page.content();
-    expect(readCount).toBeGreaterThan(0);
-    expect(body).toContain("Download Now");
-    expect(body).toContain("Watch Video");
+    await page.waitForSelector('a[href$="/guide"]', {
+      state: "attached",
+      timeout: 60_000,
+    });
+    // A topic card closed: summary + Explore + Watch Video. Opened with
+    // Explore: the one Simple guide card (Read Now · Download Now) and the
+    // templates below — the exact D-PP-f model.
+    await expect(page.getByRole("button", { name: /^Explore/ }).first()).toBeVisible();
+    await expect(page.getByText("Watch Video").first()).toBeVisible();
+    await page.getByRole("button", { name: /^Explore/ }).first().click();
+    await expect(page.getByRole("link", { name: /Read Now/ }).first()).toBeVisible({
+      timeout: 20_000,
+    });
+    expect(await page.content()).toContain("Download Now");
     // And none of the retired card types exist in this model.
     for (const retired of ["Overview", "Checklist", "Watch out for"]) {
       expect(
@@ -99,6 +118,8 @@ test.describe("as the approved partner", () => {
       const response = await page.goto(link);
       expect(response!.status(), link).toBe(200);
       await expect(page.locator("h1").first()).toBeVisible();
+      // The reader streams its body — let the page settle before measuring.
+      await page.waitForLoadState("networkidle").catch(() => {});
       const text = await page.locator("main").innerText();
       expect(text.length, `${link} looks empty`).toBeGreaterThan(400);
       expectClean(errors, link);
@@ -109,13 +130,16 @@ test.describe("as the approved partner", () => {
     page,
   }) => {
     await page.goto("/setup");
-    // Open the first focus area so its guide card and grid are interactive.
-    const firstRead = page.getByRole("link", { name: "Read Now" }).first();
-    await firstRead.scrollIntoViewIfNeeded();
-    // The Download Now control sits on the same card as Read Now.
-    const download = page.getByRole("link", { name: "Download Now" }).first();
-    const button = page.getByRole("button", { name: "Download Now" }).first();
+    await page.waitForSelector('a[href$="/guide"]', {
+      state: "attached",
+      timeout: 60_000,
+    });
+    // Open the first focus area — the guide card lives in the expanded body.
+    await page.getByRole("button", { name: /^Explore/ }).first().click();
+    const download = page.getByRole("link", { name: /Download Now/ }).first();
+    const button = page.getByRole("button", { name: /Download Now/ }).first();
     const control = (await download.count()) > 0 ? download : button;
+    await expect(control).toBeVisible({ timeout: 20_000 });
     await control.scrollIntoViewIfNeeded();
     const waiting = page.waitForEvent("download", { timeout: 45_000 });
     await control.click();
@@ -135,8 +159,11 @@ test.describe("as the approved partner", () => {
     await expect(input).toBeVisible();
     const query = content.gatedMarkers[0].split(" ")[0];
     await input.fill(query);
-    const results = page.locator('[role="dialog"] a[href]');
-    await expect(results.first()).toBeVisible({ timeout: 20_000 });
+    /* The overlay is a NATIVE <dialog> — implicit dialog role, no role
+       attribute, so '[role="dialog"]' never matches it (first-run lesson).
+       Results render inside .pw-search-results as links. */
+    const results = page.locator("dialog.pw-overlay .pw-search-results a[href]");
+    await expect(results.first()).toBeVisible({ timeout: 30_000 });
     const href = await results.first().getAttribute("href");
     await results.first().click();
     await page.waitForURL(`**${href}`);

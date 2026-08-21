@@ -373,3 +373,43 @@ test("AD-005 (J8): admin management adds and removes — and refuses self-remova
   await expect(m.getByText(ROLES.admin.email)).toBeVisible({ timeout: 30_000 });
   await admin.close();
 });
+
+test("AC-010 (J9, runs LAST): login and logout work, and the door locks again", async ({
+  browser,
+  baseURL,
+}) => {
+  /* Deliberately the final test of the entire run: the site's sign-out
+     revokes EVERY session the account holds (global scope), so it must
+     execute only when nothing else still needs the approved robot's stored
+     session. Ordering: this file is serial and this test sits last — do not
+     move it. */
+  test.setTimeout(120_000);
+  const context = await browser.newContext({ baseURL });
+  const page = await context.newPage();
+  await page.goto("/login");
+  await page.getByLabel("Email").fill(ROLES.approved.email);
+  await page.getByLabel("Password").fill(rolePassword("approved"));
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.waitForURL("**/dashboard", { timeout: 55_000 });
+
+  // Sign out from the public chrome (desktop bar or the 320px sheet menu).
+  await page.goto("/");
+  await expect
+    .poll(
+      async () =>
+        page.$$eval("header", (els) => els.map((el) => el.textContent ?? "").join(" ")),
+      { timeout: 30_000 },
+    )
+    .toContain("Sign out");
+  const menuButton = page.getByRole("button", { name: "Open menu" });
+  if (await menuButton.isVisible().catch(() => false)) {
+    await menuButton.click();
+    await page.getByRole("button", { name: "Sign out" }).last().click();
+  } else {
+    await page.locator("header form button", { hasText: "Sign out" }).first().click();
+  }
+  // The same gated door is shut again.
+  await page.goto("/dashboard");
+  await page.waitForURL(/\/login/, { timeout: 30_000 });
+  await context.close();
+});

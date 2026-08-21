@@ -36,7 +36,7 @@ Routes: `/` · `/model` · `/experience` · `/bring-ph` · `/our-support` · `/f
 | PG-004 | Header and footer are identical on every page | Shared chrome, no per-page variant |
 | PG-005 | The retired workspace paths still redirect | `/plan` `/build` `/food` `/programming` `/academy` `/tools` `/live` `/elements` `/resources` each 307 → `/dashboard`, **and** the children `/live/*` `/elements/*` `/resources/*` `/academy/*` too (`next.config.ts`) |
 | PG-006 | The proof numbers are consistent everywhere they appear | **4 sections · 22 focus areas · 88 templates** — same figures on every public page that states them |
-| PG-007 | The single conversion works from anywhere | The green **Apply** button in the header is on every page and lands on `/apply`; "Every application is reviewed by HQ." appears with the form |
+| PG-007 | The single conversion works from anywhere | The green **Apply** button in the header is on every page and lands on `/apply`; the review promise is stated — "Every application is reviewed by HQ" on the home platform card, and `/apply`'s own approved copy ("HQ reviews your application") with the form |
 | PG-008 | The machine surfaces resolve | `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest` answer; the sitemap lists only public routes; gated and auth pages are noindexed |
 | PG-009 | The header knows whether you are signed in | Signed out: "Sign in"; signed in: the signed-in state — via the same-origin session probe (`/api/auth/session`), which returns only a yes/no, never identity |
 
@@ -52,7 +52,7 @@ HQ admin: `/admin` (→ `/admin/approvals`) · `/admin/approvals` · `/admin/con
 | AC-003 | 🔴 **A pending partner is held at the pending state** | `/dashboard` renders the pending state; `/setup` `/operate` `/program` `/support` and every guide URL resolve **no** focus-area summary, no guide body, no template row — the gated reads return nothing |
 | AC-004 | 🔴 **A pending partner's Ctrl/⌘+K search is empty** | The search index call returns zero entries; no resource ids, storage paths or bucket names anywhere in the response |
 | AC-005 | **A pending partner CAN reach `/account`** | Accessible — the one deliberate exception, session-gated only, so they can set name and password while they wait; it exposes only their own profile row |
-| AC-006 | 🔴 **An approved partner cannot open any `/admin/*` route** | **404** on all six — being approved is never being an admin |
+| AC-006 | 🔴 **An approved partner cannot open any `/admin/*` route** | The branded **404 page** on all six, with zero admin content in the response — being approved is never being an admin. *(The HTTP status can read 200 on the redirect-chain hop — a Next.js streaming soft-404; recorded per run, not a leak.)* |
 | AC-007 | An approved partner reaches the whole platform | `/dashboard` and all four sections render with real content; every one of the 22 guide pages opens; no console errors, desktop + 320px |
 | AC-008 | An HQ admin reaches every `/admin/*` route | `/admin` forwards to `/admin/approvals`; all six admin pages render for the admin robot |
 | AC-009 | 🔴 **A gate is a throw, not an await** | Asserted through AC-001/002/003's response-body checks: a denied response carries none of the page's own strings, which is only possible when the gate short-circuits before any content is built ([`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15) |
@@ -143,3 +143,6 @@ Public writes: `/apply` (server action) · `/contact` (Route Handler `/api/resen
 ## Change log
 
 Approved lines are never silently edited. Every later addition or change: `[DATE — ID — what changed — re-approved by]`.
+
+- 2026-08-22 — **PG-007** — proof cell corrected after the first run: the literal tagline "Every application is reviewed by HQ." lives on the home platform card; `/apply` states the same promise in its own approved copy ("HQ reviews your application"). The feature (Apply reachable everywhere + the review promise stated) is unchanged — flagged in the test report for the owner's re-approval.
+- 2026-08-22 — **AC-006** — proof cell corrected after the first run: the denial substance is the branded 404 page + zero admin content; the HTTP status can read 200 on the redirect-chain hop (Next.js streaming). Observed statuses are recorded per run — flagged in the test report for the owner's re-approval.
