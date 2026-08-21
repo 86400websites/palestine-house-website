@@ -104,7 +104,7 @@ history.
 | [`docs/sprint-prompts/`](./docs/sprint-prompts/) · [`docs/code-reviews/`](./docs/code-reviews/) | Per-sprint records and independent review verdicts. |
 | [`docs/LAUNCH-CHECKLIST.md`](./docs/LAUNCH-CHECKLIST.md) | The launch gate — retro-filled, since this site launched 2026-06-19. Now the standing gate for the parked domain relaunch. |
 | [`docs/HANDOFF.md`](./docs/HANDOFF.md) | Every account the site depends on, and who must own it at handover. |
-| `docs/templates/` | Per-PR and per-sprint skeletons. *Arriving later in the current sprint (SYS1).* |
+| [`docs/templates/`](./docs/templates/) | Per-PR and per-sprint skeletons — the fill-in forms behind the gates above. |
 | `docs/FEATURE-LIST.md` · `tests/e2e/` | *Arriving in SYS2 (testing launch gate).* |
 | `docs/INCIDENT-LOG.md` · `docs/error-tracking/` | *Arriving in SYS3 (error tracking).* |
 

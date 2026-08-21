@@ -194,7 +194,7 @@ Migration(s) in this PR: [NUMBER(S) or N/A]
 
 - [ ] **UI sprints:** every touched page captured at **320 / 768 / 1440** on the deployed Preview, plus applicable states (default, hover/focus-visible, loading, empty, error), using [`BROWSER-TOOLS.md`](../BROWSER-TOOLS.md) — the [`browser-qa`](../../.claude/skills/browser-qa/SKILL.md) skill runs this.
 - [ ] Filenames `<SPRINT_ID>-<page>-<viewport>-<state>.png`; attached or linked in the PR beside this record.
-- [ ] 🔴 **Nothing committed.** No screenshot binaries, no `.playwright-mcp/` — it collects downloaded gated templates as well as snapshots. ⚠️ `.gitignore` covers `*-1440.png` and `*-320.png` but **not `*-768.png`**: write captures to an already-ignored location, or extend the rule in the same PR.
+- [ ] 🔴 **Nothing committed.** No screenshot binaries, no `.playwright-mcp/` — it collects downloaded gated templates as well as snapshots. `.gitignore` covers `*-1440.png`, `*-768.png` and `*-320.png`, so all three standard widths are ignored by default; a capture named anything else needs an already-ignored location, or extend the rule in the same PR.
 - [ ] 🔴 No capture contains applicant emails or partner PII.
 - [ ] `git status` clean of verification scratch — a browser run mutates the working tree, which is why files are staged explicitly and never with `git add -A` ([`WORKFLOW.md`](../WORKFLOW.md) §6).
 

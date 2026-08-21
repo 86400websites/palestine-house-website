@@ -20,7 +20,7 @@ Verified 2026-08-21 against `.github/workflows/ci.yml`, `package.json`, `tsconfi
 | Check 3 | Formatting (`format:check`) | **Waived — D‑SYS‑3.** Prettier is not installed. Adopting it on this already-built site would force one whole-repo reformat commit on stable `main`, which fails the smallest-safe-change rule. Adopt on the next fresh build |
 | Check 4 | Production build (`pnpm run build`) | **Present** — CI step "Build" |
 | Check 5 | Tests run when present | **Scheduled — SYS2.** There is no test script, no test runner and no test file in this repo today. The CI step lands in the same PR as the first suite |
-| Check 6 | No known-critical vulnerabilities (`pnpm audit`) | **Scheduled — SYS1 sub-step 1h.** Not in `ci.yml` yet; `.github/dependabot.yml` gives partial, non-blocking cover |
+| Check 6 | No known-critical vulnerabilities (`pnpm audit`) | **Present — added at SYS1 1h.** Blocking at `--audit-level critical`, plus a non-blocking step reporting high/moderate on every run. The threshold is deliberate: on 2026-08-21 the repo had 0 critical, 14 high, 8 moderate, so gating at `high` would have shipped permanently-red CI. Raise it once §7 #6 is cleared |
 | Extra | Secret scan over full history (gitleaks) | **Present — and the SOP does not ask for it.** A genuine addition on this repo's side |
 | Owner | Branch protection on `main`, verified once | **Owner action — SYS1.** The setting lives in GitHub, not on disk, and cannot be confirmed from this machine (no `gh` CLI). An unverified gate is the same as no gate |
 
@@ -46,7 +46,7 @@ Walls 1–3 are standing. Wall 4 is the honest gap: this site has been live sinc
 3. **Formatted** — **waived here (D‑SYS‑3)**, see the status table. Formatting stays a matter of matching the surrounding file.
 4. **It builds** — `pnpm run build` must succeed. "Works in dev" counts for nothing.
 5. **Tests pass** — **nothing to run yet.** SYS2 adds the Playwright suite and wires it into `ci.yml` in the same PR.
-6. **No known-critical vulnerabilities** — the blocking `pnpm audit` step is added at **SYS1 1h**. Until it lands, dependency risk is covered only by Dependabot's weekly PRs, which raise updates but do not block a merge.
+6. **No known-critical vulnerabilities** — `pnpm audit` runs on every PR since **SYS1 1h**: blocking at `critical`, reporting `high`/`moderate` without blocking. Dependabot's weekly PRs remain the update channel. **The high advisories are real and outstanding** — production runs `next@15.5.20` with SSRF advisories patched in `>=15.5.21` (`PROJECT-STATUS.md` §7 #6).
 7. **No secrets in history** — every PR is scanned by gitleaks over the branch's full history. This is Palestine House's own addition; it backs [`WORKFLOW.md`](./WORKFLOW.md) §15 and the env rules in [`ENV-VARS-SAFETY.md`](./ENV-VARS-SAFETY.md).
 
 **Line-level rule for the build agent:** no `any`, no `@ts-ignore`, no `eslint-disable` without a written reason. As of 2026‑08‑21 this repo satisfies it outright — `src/` contains **zero** `any` annotations, **zero** `@ts-ignore` / `@ts-expect-error` / `@ts-nocheck`, and all **11** `eslint-disable-next-line` comments are the same benign `@next/next/no-img-element`, each carrying its reason inline (ten as a trailing `--` note, one as a comment block directly above). Keep it that way: a new suppression without a reason is a review finding.
@@ -73,12 +73,15 @@ What the file actually does, in order:
 | 6 | Type check | `pnpm run typecheck` → `tsc --noEmit` |
 | 7 | Lint | `pnpm run lint` → `eslint .` |
 | 8 | Build | `pnpm run build` → `next build`, with `NEXT_TELEMETRY_DISABLED: "1"` set for the job |
+| 9 | Audit (blocking) | `pnpm audit --audit-level critical` — added at **SYS1 1h**. Critical-only on purpose; see Check 6 above |
+| 10 | Audit report (non-blocking) | `pnpm audit --audit-level moderate`, `continue-on-error` — prints high/moderate so a reviewer sees them on the PR |
+| — | Job timeout | `timeout-minutes: 20` — added at **SYS1 1h**, so a hung step cannot run to GitHub's six-hour default |
 
 The contract behind it: `package.json` defines `dev`, `build`, `start`, `lint` and `typecheck` — and nothing else. There is no `test` script and no `format:check` script. **Do not write a doc, prompt or checklist that assumes either exists.**
 
-### Two known deltas from the SOP template, both recorded
+### Known deltas from the SOP template, both recorded
 
-- **No `timeout-minutes` on the job.** A hung install or build would run to GitHub's six-hour default. The concurrency block cancels *repeat* pushes but not a single hung run. Added alongside the audit step at **SYS1 1h**.
+- ~~**No `timeout-minutes` on the job.**~~ **Closed at SYS1 1h** — the job now carries `timeout-minutes: 20`. *(Kept as a record of what was found and fixed.)* The original note: a hung install or build would run to GitHub's six-hour default. The concurrency block cancels *repeat* pushes but not a single hung run. Added alongside the audit step at **SYS1 1h**.
 - **`pull_request:` is filtered to `branches: [main]`.** A PR opened against any non-`main` base — a stacked phase branch, say — gets no CI run at all. Low practical risk given this project's one-sprint-one-branch-to-`main` habit, but it is a real gap; the fix (drop the filter under `pull_request:`, keep it under `push:`) is recorded in the audit §3.
 
 ---
@@ -115,7 +118,7 @@ Two working conventions that differ from the SOP and are recorded, not accidenta
 
 Per **D‑SYS‑1** (owner, 2026‑08‑21), independent review is **mandatory** for any PR touching auth, the approval gate, RLS or schema, env handling, security headers, or the CSP. Trivial PRs are exempt.
 
-⚠️ **[`WORKFLOW.md`](./WORKFLOW.md) has not caught up yet.** It still calls review optional in §3, in §8's own title ("Optional Codex / agent review workflow"), in §12 and in §17 — all of it predates this decision. **D‑SYS‑1 is the newer rule and wins.** Those sections are re-worded at **SYS1 sub-step 1h**; once they are, this section should cite §8 rather than restate it.
+✅ **[`WORKFLOW.md`](./WORKFLOW.md) has caught up — this was resolved at SYS1 1h.** §8 is now titled *"Independent review — mandatory on risky changes (D-SYS-1)"* and §3, §12 and §17 agree with it. **§8 is the binding statement; this section summarises it and must not drift from it.** *(Until 1h, all four called review optional.)* **D‑SYS‑1 is the newer rule and wins.** Those sections are re-worded at **SYS1 sub-step 1h**; once they are, this section should cite §8 rather than restate it.
 
 The regime, in four rules:
 

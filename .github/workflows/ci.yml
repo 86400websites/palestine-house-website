@@ -19,7 +19,14 @@ concurrency:
 
 jobs:
   verify:
-    name: Install · Typecheck · Lint · Build · Audit
+    # ⚠️ DO NOT RENAME. This string is the check-run context GitHub matches
+    # branch protection against. Renaming it (SYS1 1h briefly did, adding
+    # "· Audit") changes the required check's identity: the old name stops
+    # reporting, so either the merge button locks forever or — worse — the
+    # rule is left pointing at a check nobody emits and PRs merge green with
+    # nothing enforcing anything. Branch-protection state cannot be read from
+    # this repo (no gh CLI), so the name stays put and the steps change freely.
+    name: Install · Typecheck · Lint · Build
     runs-on: ubuntu-latest
     # A hung step should not burn a runner for six hours (the GitHub default).
     # The job normally finishes in a few minutes; 20 is generous headroom.

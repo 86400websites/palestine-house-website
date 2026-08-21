@@ -10,7 +10,7 @@ The reviewer's rules already live in the repo. Reuse them.
 |---|---|---|
 | [`AGENTS.md`](../AGENTS.md) (repo root) | **The canonical reviewer policy.** Review style (serious issues only), the seven review priorities, the security / App Router / Supabase / Vercel checks, and the 🔴 **Palestine House gating checks** — any failure of which is blocking. It also states what an agent may and may not change. | The reviewer, first, in full |
 | [`.claude/skills/sprint-prompt/SKILL.md`](../.claude/skills/sprint-prompt/SKILL.md) **section F** | The standing review-prompt body this project has actually used since S3 — [`code-reviews/s3-auth-complete.md`](./code-reviews/s3-auth-complete.md) and [`code-reviews/s5-content-schema.md`](./code-reviews/s5-content-schema.md) carry it near-verbatim. Short, and it works because it delegates: *read `AGENTS.md`, review the diff only, serious issues only, any gating-check failure is blocking, return findings + a merge recommendation, make no changes.* | The person commissioning the review, to copy |
-| `docs/templates/CODEX-REVIEW-PROMPT-TEMPLATE.md` — **arrives later in SYS1** | The fill-in brief that wraps section F with the PR facts: repo, PR, immutable SHA range, sprint record, expected changed paths, non-goals, check commands, CI and Preview evidence, and the returned-record format. | The person commissioning the review, to fill |
+| [`docs/templates/CODEX-REVIEW-PROMPT-TEMPLATE.md`](./templates/CODEX-REVIEW-PROMPT-TEMPLATE.md) | The fill-in brief that wraps section F with the PR facts: repo, PR, immutable SHA range, sprint record, expected changed paths, non-goals, check commands, CI and Preview evidence, and the returned-record format. | The person commissioning the review, to fill |
 
 So the commissioning act is: take section F, wrap it in the brief, fill the brief from real repo facts, save it, send it. Nothing here authorises a second, hand-written prompt with its own rules.
 
@@ -37,7 +37,7 @@ Two consequences worth stating plainly:
 - A sprint that starts trivial and grows into one of the five categories becomes a risky sprint. Judge the diff, not the plan.
 - "The engine reviewed its own diff at the exit gate" is not this review. Self-review is required by `CLAUDE.md` and is separate.
 
-> **Wording note.** [`WORKFLOW.md`](./WORKFLOW.md) §8 is titled *"Optional Codex / agent review workflow"* and the sprint-prompt skill still calls the review optional. Both are being brought into line inside this same SYS1 sprint. Where the older "optional" wording still appears, **D-SYS-1 governs.**
+> **Wording note — resolved.** [`WORKFLOW.md`](./WORKFLOW.md) §8 and the `/sprint-prompt` skill both called the review optional until SYS1 sub-steps 1h and 1g rewrote them. They now agree with this guide: mandatory on a risky diff. §8 is the binding statement. Where the older "optional" wording still appears, **D-SYS-1 governs.**
 
 ## 3. Why it is not optional here
 
@@ -168,4 +168,4 @@ Each file holds the filled brief and then the reviewer's returned record, append
 
 ---
 
-**Next step →** commission the review with the brief template (`docs/templates/CODEX-REVIEW-PROMPT-TEMPLATE.md` — **arrives later in SYS1**) wrapped around section F of [`.claude/skills/sprint-prompt/SKILL.md`](../.claude/skills/sprint-prompt/SKILL.md), save it under [`code-reviews/`](./code-reviews/), append the returned record, then merge only if the current head is approved.
+**Next step →** commission the review with the brief template ([`templates/CODEX-REVIEW-PROMPT-TEMPLATE.md`](./templates/CODEX-REVIEW-PROMPT-TEMPLATE.md)) wrapped around section F of [`.claude/skills/sprint-prompt/SKILL.md`](../.claude/skills/sprint-prompt/SKILL.md), save it under [`code-reviews/`](./code-reviews/), append the returned record, then merge only if the current head is approved.

@@ -47,6 +47,11 @@ Branch: [claude/sprint-x-y-name] (create from latest main)
 Goal:
 [2–5 lines: exactly what this sprint delivers, from ROADMAP + the user's intent]
 
+Allowed to change (WORKFLOW.md §0.8 — the diff stays inside this list):
+[the exact paths/globs this sprint may touch, e.g. src/app/(platform)/**, docs/PROJECT-STATUS.md]
+Explicitly NOT in scope: [the tempting neighbours — e.g. no migrations, no public pages, no new deps]
+If the work genuinely needs a file outside the list, STOP and say why before touching it.
+
 Execute in gated sub-steps (one owner gate after each):
 [1. (1a) <first sub-step — small and verifiable>]
 [2. (1b) <next sub-step>]

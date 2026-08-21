@@ -1,6 +1,6 @@
 # Security Checklist — Palestine House
 
-> A reusable, pre-flight security checklist for every website on this system. Companion to [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md) (§13 security), [`SUPABASE-VERCEL-SETUP.md`](./SUPABASE-VERCEL-SETUP.md), [`WORKFLOW.md`](./WORKFLOW.md), and the agent rules in [`CLAUDE.md`](./CLAUDE.md) / [`AGENTS.md`](./AGENTS.md). Replace `[PLACEHOLDER]` values per project.
+> A reusable, pre-flight security checklist for every website on this system. Companion to [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md) (§13 security), [`SUPABASE-VERCEL-SETUP.md`](./SUPABASE-VERCEL-SETUP.md), [`WORKFLOW.md`](./WORKFLOW.md), and the agent rules in [`CLAUDE.md`](../CLAUDE.md) / [`AGENTS.md`](../AGENTS.md). Replace `[PLACEHOLDER]` values per project.
 
 ## Purpose
 

@@ -52,6 +52,15 @@ docs/PH - Palestine House Final.html
 *-768.png
 *-320.png
 
+# SYS1 (D-SYS-5): the Website-Development-System SOP pack is a reusable master
+# copied in for reference, not part of this repo's doc set — the installed,
+# PH-filled versions live at docs/*.md and docs/templates/. It stayed merely
+# untracked through SYS1, which is one stray `git add -A` away from committing
+# 57 duplicate governing docs that would then drift against the real ones.
+# Ignored so the decision is mechanical rather than a matter of care.
+# Delete the folder once the owner confirms the external master still exists.
+docs/Website-Development-System/
+
 # PP6c: 0030's down-migration carries 1.6 MB of guide prose as literal inserts
 # (D-PP-k requires the bodies to be restorable). It was withheld from git while
 # that prose was treated as approval-gated; the owner DECLASSIFIED it on

@@ -80,7 +80,7 @@ as no gate. Whoever ticks this box for the next project must tick it from the Gi
 folder landed at **SYS1**. [`CLAUDE.md`](../../CLAUDE.md) and [`AGENTS.md`](../../AGENTS.md) sit at the root;
 the eleven core guides are mapped in [`docs/README.md`](../README.md); both record folders hold real
 records ([`sprint-prompts/`](../sprint-prompts/), [`code-reviews/`](../code-reviews/)). Skills:
-`sprint-prompt` and `close` are installed, `browser-qa` arrives later in SYS1. **`docs/testing-setup/`
+`sprint-prompt` and `close` are installed, `browser-qa` was added at SYS1 1g. **`docs/testing-setup/`
 arrives with SYS2** and **`docs/error-tracking/` with SYS3** — do not expect either today. The copy box is
 this project's one deliberate deviation (**D-SYS-8**): the copy canon lives on OneDrive and
 `docs/page-copy/` is untracked here, so new user-facing strings follow the brand-voice rules inline rather

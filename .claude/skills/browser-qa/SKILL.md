@@ -65,7 +65,7 @@ The owner works from a fresh clone per sprint and a fresh clone has no `.env.loc
 
 ## Evidence handling
 
-Screenshots are **working evidence, not committed artefacts** — attach or link them in the PR; commit nothing unless a sprint explicitly asks. `.gitignore` already ignores `.playwright-mcp/`, `*-1440.png` and `*-320.png` (added in PP8) — but **not `*-768.png`**, so write captures to an already-ignored location or extend the rule in the same PR. `.playwright-mcp/` also collects **downloaded partner templates**, which are approval-gated content. A browser run mutates the working tree: stage explicit files, never `git add -A` (`WORKFLOW.md` §6). Never capture applicant emails or partner PII — `/admin/approvals` shows them; redact or skip.
+Screenshots are **working evidence, not committed artefacts** — attach or link them in the PR; commit nothing unless a sprint explicitly asks. `.gitignore` already ignores `.playwright-mcp/`, `*-1440.png`, `*-768.png` and `*-320.png` (PP8, plus `768` at SYS1 1g), so all three standard widths are covered; a capture named anything else needs an already-ignored location. `.playwright-mcp/` also collects **downloaded partner templates**, which are approval-gated content. A browser run mutates the working tree: stage explicit files, never `git add -A` (`WORKFLOW.md` §6). Never capture applicant emails or partner PII — `/admin/approvals` shows them; redact or skip.
 
 ## Reporting findings
 
