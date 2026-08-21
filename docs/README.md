@@ -19,7 +19,7 @@ Any fresh AI session starts by reading **`PROJECT-STATUS.md`** (where we are) an
 
 | # | File | What it answers |
 |---|---|---|
-| 1 | **`README.md`** (this file) | What the project is, how to start, what never to do. |
+| 1 | **`docs/README.md`** (this file) | What the project is, how to start, what never to do. *(Not the repo-root `README.md`, which is the public front door installed at SYS1.)* |
 | 2 | **`PROJECT-STATUS.md`** | *Where we are right now.* The living tracker — current stage, sprint board, decisions, open questions. **Updated in every sprint-completing PR.** |
 | 3 | **`ROADMAP.md`** | *What we build, in what order.* Full feature list + the stage/sprint plan with exit gates. |
 | 4 | **`WORKFLOW.md`** | *How we work.* Sprint discipline + the branch → PR → Preview → merge loop, rollback, env safety. |
