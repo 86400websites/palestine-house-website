@@ -24,9 +24,16 @@
    pending signup's. */
 
 import { randomBytes } from "node:crypto";
-import { appendFileSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import { ROLES, type RoleName } from "../helpers/roles";
+
+/* --rotate <role>: sign in with the current password, set a freshly
+   generated one via the auth API, and update .env.local in place. Use after
+   any event that could have exposed a robot password (e.g. a Playwright
+   failure artifact of the login form — its DOM snapshot captures the typed
+   value in plain text, which is why test-results/ is gitignored and must be
+   treated as secret-bearing). */
 
 const NON_PRODUCTION_REF = "sdszcralogcrujtyghig";
 
@@ -173,7 +180,69 @@ async function ensureRobot(role: RoleName): Promise<Report> {
   };
 }
 
+function setEnvLocal(name: string, value: string) {
+  const line = `${name}=${value}`;
+  try {
+    const current = readFileSync(".env.local", "utf8");
+    const pattern = new RegExp(`^${name}=.*$`, "m");
+    writeFileSync(
+      ".env.local",
+      pattern.test(current) ? current.replace(pattern, line) : `${current}\n${line}`,
+    );
+  } catch {
+    appendFileSync(".env.local", `\n${line}`);
+  }
+  process.env[name] = value;
+}
+
+async function rotate(role: RoleName): Promise<never> {
+  const { email, passwordEnvVar } = ROLES[role];
+  const current = process.env[passwordEnvVar];
+  if (!current) {
+    console.error(`${passwordEnvVar} is not set — cannot rotate. Aborting.`);
+    process.exit(1);
+  }
+  const signIn = await supabase.auth.signInWithPassword({
+    email,
+    password: current,
+  });
+  if (signIn.error) {
+    console.error(`Rotate failed: sign-in as ${role} was refused.`);
+    process.exit(1);
+  }
+  const fresh = randomBytes(24).toString("base64url");
+  const updated = await supabase.auth.updateUser({ password: fresh });
+  if (updated.error) {
+    await supabase.auth.signOut();
+    console.error(`Rotate failed: password update refused (${role}).`);
+    process.exit(1);
+  }
+  await supabase.auth.signOut();
+  setEnvLocal(passwordEnvVar, fresh);
+  const verify = await supabase.auth.signInWithPassword({
+    email,
+    password: fresh,
+  });
+  await supabase.auth.signOut();
+  if (verify.error) {
+    console.error(`Rotate WROTE a new password but the verify sign-in failed (${role}).`);
+    process.exit(1);
+  }
+  console.log(`OK: ${role} password rotated and verified (stored in .env.local only).`);
+  process.exit(0);
+}
+
 async function main() {
+  const rotateIdx = process.argv.indexOf("--rotate");
+  if (rotateIdx !== -1) {
+    const role = process.argv[rotateIdx + 1] as RoleName;
+    if (!role || !(role in ROLES)) {
+      console.error("Usage: --rotate <pending|approved|admin>");
+      process.exit(1);
+    }
+    await rotate(role);
+  }
+
   const reports: Report[] = [];
   for (const role of Object.keys(ROLES) as RoleName[]) {
     reports.push(await ensureRobot(role));

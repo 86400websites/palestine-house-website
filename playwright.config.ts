@@ -73,6 +73,10 @@ export default defineConfig({
     {
       name: "setup",
       testMatch: /auth\.setup\.ts/,
+      /* One sign-in at a time: three parallel logins contend on the
+         free-tier test stack (cold serverless + free Supabase auth) and
+         push past the timeout. Serial is reliable; speed is irrelevant here. */
+      fullyParallel: false,
       use: { viewport: DESKTOP },
     },
     {

@@ -13,6 +13,10 @@ const roles: RoleName[] = ["pending", "approved", "admin"];
 
 for (const role of roles) {
   setup(`sign in: ${role}`, async ({ page }) => {
+    /* The login round-trip runs on cold serverless + the free-tier test
+       Supabase — measured ~20s on a cold Preview. Give it headroom. */
+    setup.setTimeout(90_000);
+
     const { email, storageState } = ROLES[role];
 
     await page.goto("/login");

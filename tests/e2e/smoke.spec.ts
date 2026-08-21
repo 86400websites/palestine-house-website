@@ -11,9 +11,16 @@ import { expect, test } from "@playwright/test";
 test("SMOKE-01 @morning: homepage loads with no console errors", async ({
   page,
 }) => {
+  /* Vercel injects its Preview toolbar script (vercel.live) into Preview
+     deployments only; this site's CSP correctly blocks it, which surfaces as
+     a console error that is Vercel's injection being refused — not a site
+     defect. Production carries no such injection, so this filter is inert on
+     @morning runs. Nothing else is filtered. */
+  const isPreviewToolbarNoise = (text: string) => text.includes("vercel.live");
+
   const consoleErrors: string[] = [];
   page.on("console", (message) => {
-    if (message.type() === "error") {
+    if (message.type() === "error" && !isPreviewToolbarNoise(message.text())) {
       consoleErrors.push(message.text());
     }
   });
