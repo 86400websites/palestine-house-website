@@ -47,7 +47,7 @@ This sheet **sequences** the gates; it does not restate them. The binding wordin
   - Do not tick this box, do not delete it, and do not claim manual clicking closed it. It is ticked the day SYS2's suite runs green.
 - [ ] Until SYS2 lands: **record the manual coverage actually run** in the PR — which roles, which routes, which denied-state checks — so the gap stays visible instead of implied.
 - [ ] 🔴 **Denied-state rule — applies now, manually; automated in SYS2.** Any change touching auth, the approval gate, RLS, an RPC or an `/admin/*` route is verified in **both** directions for every affected role: **anonymous · pending partner · approved partner · HQ admin**. Allowed *and* denied. What must hold is [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15 — read it, do not paraphrase it — and in particular its last bullet: **a gate is a throw, not an await**, so a gated page must short-circuit before it constructs any JSX.
-- [ ] When SYS2 ships, this block becomes: suite green · new behavior covered at the right layer · **at least one denied-state assertion per protected boundary**. The feature list and specs land in `docs/testing-setup/` and `tests/e2e/` — *both arrive in SYS2, neither exists yet*.
+- [ ] When SYS2 ships, this block becomes: suite green · new behavior covered at the right layer · **at least one denied-state assertion per protected boundary**. The method and its templates are in [`testing-setup/`](./testing-setup/) (installed at SYS1); the generated feature list, the specs in `tests/e2e/` and the reports in `docs/test-reports/` **arrive in SYS2 and do not exist yet**.
 
 ### Every touched page
 
