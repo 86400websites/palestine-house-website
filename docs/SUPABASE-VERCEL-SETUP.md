@@ -57,10 +57,12 @@ NEXT_PUBLIC_SUPABASE_URL=https://[SUPABASE_PROJECT_REF].supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=        # sb_publishable_... — browser-safe
 SUPABASE_SECRET_KEY=                         # sb_secret_... — server-only, add ONLY if a server path needs RLS bypass
 
-# Optional integrations (add only what this site uses; each no-ops when blank)
-NEXT_PUBLIC_POSTHOG_KEY=
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
-NEXT_PUBLIC_SENTRY_DSN=
+# Optional integrations (add only what this site uses; each no-ops when blank).
+# NOT WIRED IN THIS REPO — names reserved only. Sentry arrives in SYS3; PostHog is
+# unscheduled. Setting them today has no effect, because no code reads them.
+# NEXT_PUBLIC_POSTHOG_KEY=
+# NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+# NEXT_PUBLIC_SENTRY_DSN=
 MAILCHIMP_API_KEY=
 MAILCHIMP_SERVER_PREFIX=
 MAILCHIMP_AUDIENCE_ID=
@@ -89,10 +91,10 @@ In **Vercel → Settings → Environment Variables**, add the same **variable na
 | `SUPABASE_SECRET_KEY` | only if needed | only if needed | only if needed | **Server-only** | RLS bypass. Add only for trusted server paths; never expose. |
 | `MAILCHIMP_API_KEY` / `_SERVER_PREFIX` / `_AUDIENCE_ID` | optional | when newsletter tested | when newsletter live | **Server-only** | Marketing email. |
 | `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` | optional | when contact tested | when contact live | **Server-only** | Transactional email. |
-| `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT` | omit | optional | optional | **Server/build-time** | Source-map upload. |
-| `NEXT_PUBLIC_SENTRY_DSN` | optional | optional | optional | Public | Sentry no-ops when blank. |
-| `NEXT_PUBLIC_POSTHOG_KEY` / `_HOST` | optional | optional | optional | Public | PostHog no-ops when blank. |
-| `UPSTASH_REDIS_REST_URL` / `_TOKEN` | optional | optional | recommended | **Server-only** | Rate limiter no-ops when blank. |
+| `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT` | omit | omit | omit | **Server/build-time** | Source-map upload. **Not wired yet — arrives in SYS3** (`ROADMAP.md` Stage 5). |
+| `NEXT_PUBLIC_SENTRY_DSN` | omit | omit | omit | Public | **Name reserved, not wired.** There is no Sentry SDK in the codebase today, so this does not "no-op when blank" — it does nothing at all. SYS3 installs it. |
+| `NEXT_PUBLIC_POSTHOG_KEY` / `_HOST` | omit | omit | omit | Public | **Name reserved, not adopted.** No PostHog code exists; no sprint currently schedules it. |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN` | optional | optional | **required at SYS1.5** | **Server-only** | Rate limiter. **Not wired yet** — public writes are currently unthrottled (`PROJECT-STATUS.md` §7 #1); SYS1.5 ships it fail-closed in Production. |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | optional | optional | recommended | Public | Widget hidden when blank. |
 | `TURNSTILE_SECRET_KEY` | optional | optional | recommended | **Server-only** | Server verification skipped when blank. |
 
