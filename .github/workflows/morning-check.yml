@@ -1,0 +1,82 @@
+# Morning Check — daily watch on the live site.
+# Filled from docs/testing-setup/templates/MORNING-CHECK-TEMPLATE.md at SYS2.
+#
+# ⛔ SHIPPED DISABLED (SYS2, SETUP-CHECKLIST Part 2): the schedule is commented
+# out and stays out until (1) the Launch Gate has passed and (2) the owner has
+# made the Option A / B / C decision in the template and it is recorded in
+# PROJECT-STATUS.md. Until then the only trigger is a manual dispatch, which
+# cannot reach any site: the PRODUCTION_URL variable is deliberately unset, and
+# the Playwright config refuses to run without a target.
+#
+# 🔴 This file NEVER touches .github/workflows/ci.yml. That workflow's job id
+# `verify` (display name `Install · Typecheck · Lint · Build`) is the
+# branch-protection required check (D-SYS-4) — nothing here may reuse or
+# rename it.
+#
+# This is the ONLY run in the testing system that targets Production, and it
+# is read-only in behaviour (BROWSER-TOOLS.md §6): @morning specs navigate and
+# read — never submit, never sign up, never email.
+
+name: Morning Check
+
+on:
+  # ⛔ Disabled until activation. To enable: uncomment, pick a time the owner
+  # will actually read the email (GitHub cron is UTC).
+  # schedule:
+  #   - cron: "30 6 * * *"   # 06:30 UTC — adjust at activation
+  workflow_dispatch: # manual run from the Actions tab, anytime
+
+permissions:
+  contents: read
+
+concurrency:
+  group: morning-check
+  cancel-in-progress: true
+
+jobs:
+  # Any name EXCEPT ci.yml's job. Never "verify".
+  morning-check:
+    name: Morning Check — production canary
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # pnpm version comes from the "packageManager" field in package.json.
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run @morning tests against production
+        run: pnpm exec playwright test --grep "@morning"
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ vars.PRODUCTION_URL }}
+          # ── Option B ONLY. These stay commented out unless the owner picks
+          # Option B in MORNING-CHECK-TEMPLATE.md. Values live only in GitHub
+          # Actions secrets — never in a file, never in chat.
+          # MORNING_TEST_EMAIL: ${{ secrets.MORNING_TEST_EMAIL }}
+          # MORNING_TEST_PASSWORD: ${{ secrets.MORNING_TEST_PASSWORD }}
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morning-check-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
