@@ -71,7 +71,7 @@ For each invariant the change could affect, confirm it holds and cite the file:
 - *Why this is a gate here and not a suggestion:* PP6b, PP6c, PP7 and PP8 each drew a BLOCKING verdict, and each was right — two of PP7's Criticals were in the one function that edits the owner's prose.
 
 ### 10. Technical integrity (`docs/TECHNICAL-INTEGRITY.md`)
-- CI is green on the head being merged: typecheck · lint · build · gitleaks (workflow **CI**, job **`verify`**). There is deliberately **no format check** (D-SYS-3) and **no test run yet** (the suite arrives in SYS2) — do not report either as a failure.
+- CI is green on the head being merged: typecheck · lint · build · gitleaks (workflow **CI**, job **`verify`**). There is deliberately **no format check** (D-SYS-3) and **no test step in `verify`** — the Playwright suite (since SYS2) runs against deployed Previews, not in CI; when the sprint touched tested behavior, check the PR records a `test:e2e` run against the Preview instead.
 - No new `any`, `@ts-ignore`, or unexplained `eslint-disable` in the diff; a suppression needs its reason on the line above.
 
 ## Output — a single verdict

@@ -2,7 +2,7 @@
 
 > **This is a SKELETON. The `[BRACKETS]` stay brackets in this file, forever.** Copy the workflow out to `.github/workflows/morning-check.yml`, fill the copy, leave this original alone — same rule as [`docs/templates/`](../../templates/README.md).
 >
-> ⛔ **Installed at SYS1 · installed-as-disabled and switched on in SYS2.** There is no test runner in this repo today — `package.json` defines exactly five scripts (`dev`, `build`, `start`, `lint`, `typecheck`), there is no `tests/e2e/`, and `.github/workflows/` contains exactly one file: `ci.yml`. **`.github/workflows/morning-check.yml` arrives in SYS2.**
+> ✅ **Installed at SYS1 · shipped disabled at SYS2 (2026-08-22).** `.github/workflows/morning-check.yml` now exists, filled from this template with its schedule commented out. It is switched on only after the Launch Gate passes **and** the owner answers the Option A / B / C decision below.
 
 After the Launch Gate passes, GitHub re-runs a handful of critical tests against the **live** site every morning and notifies the owner **only on failure**. Silence = all green. This is how a silently broken form or an expired key gets caught before a partner notices.
 

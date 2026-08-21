@@ -375,7 +375,7 @@ Add each only when its feature is needed; each no-ops when its env vars are miss
 ## 16. Testing / build expectations
 
 - The required gates are `pnpm run typecheck`, `pnpm run lint`, and `pnpm run build`. All three must pass locally and in CI before merge.
-- There is **no `test` script by default.** If a project adds automated tests, wire them into CI and document the command in its `README.md`.
+- Automated tests: **`pnpm run test:e2e`** (Playwright, added at SYS2) runs the launch-gate suite in `tests/e2e/` against a deployed Preview via `PLAYWRIGHT_BASE_URL` — deliberately not named `test`, so nothing auto-invokes it without a target. It is not part of the `verify` CI job (no Preview URL exists at PR time); the only scheduled runner is `.github/workflows/morning-check.yml` (shipped disabled). See `tests/e2e/README.md`.
 - CI (`.github/workflows/ci.yml`) runs `pnpm install --frozen-lockfile`, typecheck, lint, build, and a secret scan on every PR.
 - A change is not "done" until local checks pass, CI is green, and the Vercel Preview is tested (see Definition of Done in [`WORKFLOW.md`](./WORKFLOW.md)).
 

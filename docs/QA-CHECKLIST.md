@@ -26,7 +26,7 @@ This sheet **sequences** the gates; it does not restate them. The binding wordin
 
 1. **The two-part split, stated as a merge condition** — local green and deployed green are separate gates, and neither substitutes for the other.
 2. **A per-PR record naming the tested head SHA.** `WORKFLOW.md` §11 says test the Preview; it does not say *which build you tested*. A new commit — code, config **or** SQL — creates a new head and invalidates the Part 2 record.
-3. **An honest status line for the automated-suite gate**, which this repo does not yet satisfy. See Part 1 → Automated tests.
+3. **An honest status line for the automated-suite gate** — the harness arrived at SYS2; the standing obligations are in Part 1 → Automated tests.
 
 ---
 
@@ -38,16 +38,15 @@ This sheet **sequences** the gates; it does not restate them. The binding wordin
 - [ ] Optional production smoke: `pnpm run start` after the build, per [`WORKFLOW.md`](./WORKFLOW.md) §5.
 - [ ] The same three gates run on the PR as [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — workflow **CI**, job **`verify`** — alongside `pnpm install --frozen-lockfile` and a gitleaks secret scan. A green **`verify`** on the *current head* satisfies this block; red never merges. See [`TECHNICAL-INTEGRITY.md`](./TECHNICAL-INTEGRITY.md).
   - **D-SYS-4:** the workflow keeps its `ci.yml` / "CI" identity and its required `verify` job. Where the SOP says "Code Check", read `verify`.
-- [ ] **Formatting — WAIVED (D-SYS-3).** There is no `format:check` and no Prettier gate in this repo, and none is being added: introducing one to an already-built site would force a whole-repo reformat and bury every future diff. `pnpm run lint` (`eslint .`) is the style gate. `package.json` defines exactly five scripts — `dev`, `build`, `start`, `lint`, `typecheck`. Never invent a sixth.
+- [ ] **Formatting — WAIVED (D-SYS-3).** There is no `format:check` and no Prettier gate in this repo, and none is being added: introducing one to an already-built site would force a whole-repo reformat and bury every future diff. `pnpm run lint` (`eslint .`) is the style gate. `package.json` defines exactly six scripts — `dev`, `build`, `start`, `lint`, `typecheck`, and (since SYS2, the sprint entitled to add it) `test:e2e`. Never invent a seventh. *(`test:e2e`, deliberately not `test`: a script named `test` would be auto-invoked by `CLAUDE.md`'s after-task ritual and the `/close` skill, and the Playwright suite cannot run without a deployed Preview URL — the naming rationale the compliance audit recorded.)*
 
 ### Automated tests
 
-- [ ] ⛔ **Not yet satisfiable — the Launch Gate suite arrives in SYS2** ([`ROADMAP.md`](./ROADMAP.md) Stage 5). There is no `test` script, no `tests/e2e/`, and no `docs/test-reports/` in this repo today.
-  - The SOP's rule is that "no suite" is permitted **only for a fully static site**, and that a project with auth, gated content or a database must have an automated suite — *a blocking gate, not a preference*. Palestine House has all three. **By that rule this repo does not pass Part 1 today**, and the compliance audit records exactly that ([`notes/system-compliance-audit-2026-08-21.md`](./notes/system-compliance-audit-2026-08-21.md), "System QA-CHECKLIST.md — net-new install; automated-suite blocking gate currently violated").
-  - Do not tick this box, do not delete it, and do not claim manual clicking closed it. It is ticked the day SYS2's suite runs green.
-- [ ] Until SYS2 lands: **record the manual coverage actually run** in the PR — which roles, which routes, which denied-state checks — so the gap stays visible instead of implied.
-- [ ] 🔴 **Denied-state rule — applies now, manually; automated in SYS2.** Any change touching auth, the approval gate, RLS, an RPC or an `/admin/*` route is verified in **both** directions for every affected role: **anonymous · pending partner · approved partner · HQ admin**. Allowed *and* denied. What must hold is [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15 — read it, do not paraphrase it — and in particular its last bullet: **a gate is a throw, not an await**, so a gated page must short-circuit before it constructs any JSX.
-- [ ] When SYS2 ships, this block becomes: suite green · new behavior covered at the right layer · **at least one denied-state assertion per protected boundary**. The method and its templates are in [`testing-setup/`](./testing-setup/) (installed at SYS1); the generated feature list, the specs in `tests/e2e/` and the reports in `docs/test-reports/` **arrive in SYS2 and do not exist yet**.
+*(The Playwright harness was installed at SYS2 — `tests/e2e/`, `pnpm run test:e2e`, targeting a deployed Preview via `PLAYWRIGHT_BASE_URL`. The method is [`testing-setup/`](./testing-setup/); the operator is the `/activate-testing` skill; full-gate reports live in `docs/test-reports/`.)*
+
+- [ ] **Suite green on the current head** — a PR that touches tested behavior re-runs the affected specs; the whole-site Launch Gate (full run, 100%, GO recorded in `docs/test-reports/`) is required before any major release, per [`testing-setup/TESTING-GUIDE.md`](./testing-setup/TESTING-GUIDE.md) §5.
+- [ ] **New behavior is covered at the right layer** — a new feature gets its line in `docs/FEATURE-LIST.md` and its spec in `tests/e2e/`; a changed feature gets its line re-approved by the owner, never silently rewritten.
+- [ ] 🔴 **Denied-state rule — now automated, still verified per change.** Any change touching auth, the approval gate, RLS, an RPC or an `/admin/*` route is verified in **both** directions for every affected role: **anonymous · pending partner · approved partner · HQ admin**. Allowed *and* denied — **at least one denied-state assertion per protected boundary**. What must hold is [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15 — read it, do not paraphrase it — and in particular its last bullet: **a gate is a throw, not an await**, so a gated page must short-circuit before it constructs any JSX.
 
 ### Every touched page
 

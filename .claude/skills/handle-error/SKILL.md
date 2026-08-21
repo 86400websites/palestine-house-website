@@ -71,7 +71,7 @@ Plain words: **what happened · who it hit (this one person / some / everyone) �
 
 A fix is not finished until this exact bug can never silently return.
 
-- **Honest state:** the Launch Gate suite — `tests/e2e/`, `docs/FEATURE-LIST.md`, `docs/test-reports/` — **arrives in SYS2 and does not exist today**. `package.json` defines five scripts (`dev`, `build`, `start`, `lint`, `typecheck`) and **no `test`**.
+- **Honest state:** the Launch Gate suite exists since SYS2 (2026-08-22) — `tests/e2e/`, run with `pnpm run test:e2e` against a deployed Preview. Every fixed incident earns its **permanent regression spec** there (plus its `docs/FEATURE-LIST.md` line, owner-approved). `docs/FEATURE-LIST.md` and `docs/test-reports/` are produced by the gate's own phases; check they exist before citing them.
 - **Until then:** write the regression case into the incident record as a concrete **steps → expected result** line, phrased so it can be pasted straight into the suite the moment SYS2 lands. Flag it for the feature list the owner will approve.
 - **Once SYS2 exists:** the regression test is added in the fix's own PR — failing before, passing after — and a gate incident becomes a four-role case (anonymous · pending partner · approved partner · HQ admin). The suite itself is driven by `/activate-testing`.
 - For a gate incident today, the manual stand-in is the **four-role walk** in `/browser-qa`, run on the fix's Preview and recorded.
