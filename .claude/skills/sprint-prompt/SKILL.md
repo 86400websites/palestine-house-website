@@ -68,7 +68,7 @@ Locked inputs (never invent, never paraphrase):
 - Copy, verbatim: docs/page-copy/[exact file(s)]
 - Design: docs/page-designs/[exact mockup file(s)] + design-system tokens (values recorded in docs/DESIGN.md §3)
 - [If artwork: copy the needed PH-* files from docs/page-designs/assets/art/ into /public/assets/]
-- Proof numbers: 11 · 33 · 200+ · 297 · 120-day launch (updated from 10 · 30 · 267 with Focus Area 11, FA11 2026-07-18). Header/footer chrome is locked — never redesign per page.
+- Proof numbers: 4 sections · 22 focus areas · 88 templates (reconciled public-and-private at PP7; owner-signed live 2026-08-20, D-PP-s; a copy checker enforces them). The old band — 11 · 33 · 200+ · 297 · 120-day — names content deleted by `0030`; never carry it into a new prompt. Header/footer chrome is locked — never redesign per page.
 
 Before editing:
 1. Inspect the repo (package.json, next.config.ts, src/app/) and read every locked input above.

@@ -43,7 +43,7 @@ Run top to bottom. For each item give **PASS / FAIL / N/A** + the evidence (comm
 
 ### 4. Copy & design — only if UI / strings changed
 - Any new or changed user-facing string is verbatim from `docs/page-copy/` or follows `docs/page-copy/00-global/brand-voice.md`.
-- Proof numbers intact (**11 · 33 · 200+ · 297 · 120-day launch** — updated from 10 · 30 · 267 with Focus Area 11, FA11 2026-07-18); never a certificate. Locked header/footer chrome unchanged.
+- Proof numbers intact (**4 sections · 22 focus areas · 88 templates** — reconciled public-and-private at PP7, owner-signed live 2026-08-20, D-PP-s; a copy checker enforces them). The retired band (11 · 33 · 200+ · 297 · 120-day) names deleted content — finding it in a diff is a defect. Never a certificate. Locked header/footer chrome unchanged.
 
 ### 5. Security invariants — only those the diff touches (SECURITY-CHECKLIST §15)
 For each invariant the change could affect, confirm it holds and cite the file:

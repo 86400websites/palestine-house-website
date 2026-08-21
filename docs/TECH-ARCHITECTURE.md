@@ -8,7 +8,7 @@
 
 **Two shells, one gate.** A thin, conversion-focused **public shell** and a private partner **reference platform**. Access is **approval-gated**: the single `/apply` form is also sign-up — submitting it creates a *pending* account and records the partner application; an HQ admin flips `profiles.is_approved` to unlock the platform. Reference content is never public. It is a reference, **not a course** (no quizzes, no certificate) and not a day-to-day ops tool. There is **no saved per-user state** beyond the partner's own account row.
 
-**The private model (D-PP-f).** Four sections → ten groups → **33 focus areas**. A focus area shows its **summary** (`platform_topics.description` + `intro`), **one Simple guide card** (Read Now → the reader · Download Now → a signed URL), **Watch Video**, and a **templates grid** of every `resources` row carrying its `element_id`. A global **Ctrl/⌘+K overlay** searches focus areas, guides and templates by title, breadcrumb path, kind and — for a focus area — its own summary (D-PP-j).
+**The private model (D-PP-f).** Four sections → four groups → **22 focus areas** (5 · 6 · 6 · 5), the shape production has carried since the `0030` cutover. A focus area shows its **summary** (`platform_topics.description` + `intro`), **one Simple guide card** (Read Now → the reader · Download Now → a signed URL), **Watch Video**, and a **templates grid** of every `resources` row carrying its `element_id`. A global **Ctrl/⌘+K overlay** searches focus areas, guides and templates by title, breadcrumb path, kind and — for a focus area — its own summary (D-PP-j).
 
 **Route map:**
 

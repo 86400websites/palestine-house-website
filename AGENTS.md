@@ -8,16 +8,16 @@
 - **The surface:** `/dashboard` (About landing) · four toolkit sections `/setup` `/operate` `/program` `/support` · the Simple guide reader at `/{section}/{topic}/guide` · `/account` · a global Ctrl/⌘+K search overlay.
 - **Per-topic model (D-PP-f):** summary → **one Simple guide card** (Read + Download) → Watch Video → a **many-template grid**. No Overview card, no per-topic checklist card, no "More guides" extras.
 - **No saved per-user state** beyond the partner's own account row (D-PP-b dropped checklist progress; Ask HQ emails HQ and opens no ticket).
-- **`resources.doc_key` is `('guide')`**; a topic's templates are the `resources` rows with its `element_id`, `doc_key IS NULL`, `code IS NOT NULL`, **`is_public = false`** and bucket `resources`. The bucket half of that predicate is **not yet enforced in SQL** — it is owed by PP6's `0029` (D-PP-i).
-- **Retired surfaces still have live tables.** `academy_modules`, `checklist_items`, `checklist_progress` and `programming_sessions` remain in the database until PP7's `0030`. Unreachable is not the same as unprotected: their RLS still matters, and nothing should add a new caller.
-- Migrations **0027 and 0028 are applied to production and are IMMUTABLE** — any schema fix is a new migration 0029+.
+- **`resources.doc_key` is `('guide')`**; a topic's templates are the `resources` rows with its `element_id`, `doc_key IS NULL`, `code IS NOT NULL`, **`is_public = false`** and bucket `resources`. The bucket half of that predicate **is enforced in SQL** — `0029`'s `resources_private_bucket_shape` CHECK (`is_public OR storage_bucket = 'resources'`), so **D-PP-i is discharged**.
+- **Retired surfaces, and what became of their tables.** `academy_modules`, `checklist_items` and `checklist_progress` were **dropped from production** by `0030` (2026-08-17). **`programming_sessions` still exists**: RLS on, **zero policies, zero rows** — default-deny to everyone. Unreachable is not the same as unprotected: nothing should add a caller to it, and a diff that gives it a policy needs a very good reason.
+- Migrations **0027–0034 are applied to production and are IMMUTABLE** — any schema fix is a new migration `0035`+. Production is on **`0034`**.
 
 ## Project assumptions
 
 - This repository is the **Palestine House** website on the locked Next.js 15 stack in `TECH-ARCHITECTURE.md`.
 - **Two shells, one gate:** a public marketing shell (single CTA: Apply) and a private, approval-gated partner reference platform. Apply = sign-up (one form → pending account → HQ approval via `profiles.is_approved` → unlock). Admin approval queue at `/admin/approvals` is server-checked via an `admins` table.
 - It is a **reference, not a course** — no quizzes, no certificate, and no saved per-user state beyond the partner's own account details (see the section above).
-- Copy is **verbatim** from `/docs/page-copy/`; design follows `/docs/page-designs/` + the design tokens in `/docs/page-designs/design-system/`; the header/footer are locked and identical on every page. Proof numbers: **11 · 33 · 200+ · 297 · 120-day launch** (updated from 10 · 30 · 267 with Focus Area 11 "Café & Culinary Experience", FA11 2026-07-18; they move only when real content is added, never invented).
+- Copy is **verbatim** from `/docs/page-copy/`; design follows `/docs/page-designs/` + the design tokens in `/docs/page-designs/design-system/`; the header/footer are locked and identical on every page. Proof numbers: **4 sections · 22 focus areas · 88 templates**, identical on the public site and in the platform since PP7 reconciled them (D-PP-s, owner-signed live 2026-08-20) with a copy checker enforcing it. The old band (11 · 33 · 200+ · 297 · 120-day) describes deleted content — treat any surviving instance as a defect. Numbers move only when real content is added, never invented.
 - GitHub is the source of truth; `main` is protected and production-ready. Vercel hosts Production and Preview.
 - The project is built **one sprint at a time** per `ROADMAP.md`. Agents make **focused, reviewable** contributions inside the active sprint. Default mode is **review**, not large edits.
 - Only code that ships in a production build is in scope. Verify claims against the repo before acting.
@@ -83,7 +83,7 @@
 - [ ] `service_role` / `sb_secret_*` / JWT secret / DB password never reach client code
 - [ ] RLS enabled default-deny on every user-reachable table; new tables ship with policies
 - [ ] Reads/writes run under the user's session + RLS or a hardened `SECURITY DEFINER` RPC — no normal path relies on the secret key
-- [ ] `programming_sessions`: public read anon-safe; writes owner-scoped to approved partners
+- [ ] `programming_sessions` stays **default-deny**: the table survives `0030` with RLS on and **no policies at all** (the `/live` feature it served was deleted at PP5). A diff that adds a policy, a caller, or a row to it is a finding unless the sprint explicitly revives the feature
 - [ ] Schema changes include the SQL, the `.down.sql`, **and** RLS policies in the PR (applied by hand, non-production project first)
 
 ## Vercel deployment checks
