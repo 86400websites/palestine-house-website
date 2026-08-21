@@ -123,9 +123,11 @@ If the on-disk reality disagrees with this list, **trust the code** (especially 
 
 GitHub `main` is the stable, protected, production-ready branch.
 
-1. Start from the latest `main` → focused task branch → one focused change → local checks → clear commit → prepare for review (push only if asked) → merge only after CI + Vercel Preview pass.
+1. Start from the latest `main` → focused task branch → one focused change → local checks → clear commit → push to the task branch → PR → CI green + Vercel Preview tested → independent review if the diff is risky (`WORKFLOW.md` §8, **D-SYS-1**) → **the owner merges**.
 
-**Do not push directly to `main`. Do not push at all unless the owner explicitly asks. Do not merge PRs unless explicitly asked. Do not skip Git hooks (`--no-verify`).**
+**Do not push directly to `main`. Do not push any branch other than the task branch. Do not merge PRs unless explicitly asked. Do not force-push. Do not skip Git hooks (`--no-verify`) — no exceptions.**
+
+**Pushing the task branch is pre-authorized** (**D-SYS-2**, standing owner authorization dated 2026-06-12, recorded in `PROJECT-STATUS.md` §4): during a gated sprint, commit **and push after every sub-step** so the owner can review live in the open PR. This replaces the older "push only if asked" rule, which contradicted the gated sub-step protocol the `/sprint-prompt` skill actually runs. Merging is still the owner's, always.
 
 Branch names: `claude/sprint-0-2-home-model`, `claude/fix-mobile-header`, `claude/sprint-4-admin-approvals`, `docs/update-status`.
 Commit messages (short, imperative): `Build Experience page live strip`, `Add approval check to elements RPC`.

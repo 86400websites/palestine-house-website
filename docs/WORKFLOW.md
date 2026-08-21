@@ -12,6 +12,13 @@ This project is built in **stages and sprints — never all at once**:
 4. **Sprint exit gate:** typecheck + lint + build green, CI green, Vercel Preview tested desktop + mobile, the sprint's checklist in `ROADMAP.md` ticked, relevant `SECURITY-CHECKLIST.md` sections passed, copy verbatim from `/docs/page-copy/`, and proof numbers correct (**4 sections · 22 focus areas · 88 templates** — reconciled public-and-private at PP7, owner-signed live 2026-08-20, with a copy checker enforcing them; the retired 11 · 33 · 200+ · 297 · 120-day band names deleted content — never a certificate).
 5. **Copy and design are locked inputs.** Page copy comes verbatim from `/docs/page-copy/`; layout/design comes from `/docs/page-designs/` (+ the `design-system/` tokens). Don't invent copy or redesign the locked header/footer — flag gaps in `PROJECT-STATUS.md` → Open decisions instead.
 6. **Database changes follow §14 strictly** — versioned up + `.down.sql` + RLS in the PR, tested on the non-production Supabase project first, expand → migrate → contract.
+7. **One status vocabulary, everywhere.** Every checklist, tracker row and record in this project uses the same lifecycle, so "done" means the same thing in `ROADMAP.md`, `PROJECT-STATUS.md` and a review record:
+
+   **Not Started → In Progress → Blocked *or* Ready for Review → Approved → Done**, plus **N/A** with a reason for anything deliberately skipped.
+
+   **Approved** means the required reviewer or the owner accepted it. **Done** means approved *and* filed, merged or handed off — never "the code is written". A sprint that has merged but whose trackers still say In Progress is not Done; that gap is exactly what the SYS1 tracker flip had to repair.
+8. **The task names the files it may change.** Work inside that list. If the job genuinely needs a file outside it, stop and say why rather than widening the diff quietly — an unexplained file in a diff is the cheapest bug to prevent and one of the more expensive to find.
+9. **Never destroy someone else's work to get a clean tree.** Do not `reset --hard`, discard, stash away or overwrite uncommitted changes you did not make. If the tree is dirty and you did not dirty it, ask. (This repo lives in a OneDrive folder that syncs underneath you — that is also why blanket `git add -A` is banned in §6.)
 
 ---
 
@@ -54,7 +61,7 @@ This system runs on the locked Next.js 15 stack in [`TECH-ARCHITECTURE.md`](./TE
 
 - Never commit directly to `main`. Never force-push or rewrite `main` history (except a coordinated emergency).
 - Set **branch protection** once per repo: require a PR before merge, require CI green, require a successful Preview deployment, block direct pushes and force-pushes.
-- A change only reaches `main` after: local checks pass → CI green → Preview tested → (optional) review done.
+- A change only reaches `main` after: local checks pass → CI green → Preview tested → review done **(mandatory if the diff is risky — §8, D-SYS-1)**.
 
 ---
 
@@ -119,7 +126,7 @@ One focused change at a time, top to bottom:
 
 ## 7. Claude Code implementation workflow
 
-Reuse this prompt for every feature. Paste it, then add your task at the bottom. (Project-specific rules also live in [`CLAUDE.md`](./CLAUDE.md), which Claude Code reads automatically.)
+Reuse this prompt for every feature. Paste it, then add your task at the bottom. (Project-specific rules also live in [`CLAUDE.md`](../CLAUDE.md), which Claude Code reads automatically.)
 
 > **Preferred:** inside Claude Code, run the **`/sprint-prompt`** skill (`.claude/skills/sprint-prompt/`) instead of pasting this by hand — it reads `PROJECT-STATUS.md` + `ROADMAP.md`, generates the sprint plan + implementation prompt, and after merge logs the record in `docs/sprint-prompts/`.
 
@@ -167,13 +174,24 @@ Task:
 
 ---
 
-## 8. Optional Codex / agent review workflow
+## 8. Independent review — mandatory on risky changes (D-SYS-1)
 
-A second pass from a review agent (Codex or similar) is optional but valuable on risky changes (auth, payments, data, security headers, env handling).
+A second pass from an independent review agent (Codex or similar) is **a merge gate, not a suggestion, whenever the diff is risky**. Risky means it touches any of: **auth · the approval gate · RLS or schema (`supabase/sql/**`) · env handling · security headers · CSP**. Decide from the diff, not from the sprint's title. For a genuinely trivial change (docs, copy, config with no gate/schema/env surface) the review is optional — say so explicitly rather than skipping silently.
+
+*(This section read "optional but valuable" until 2026-08-21. It was rewritten at SYS1 to match both the owner's decision **D-SYS-1** and what practice already did: `docs/code-reviews/` holds records for every major sprint, and PP6b, PP6c, PP7 and PP8 each drew a BLOCKING verdict that was right. It also used to list "payments" as a risky category — this site has no payment surface, so that has been removed.)*
+
+Four rules make the review a gate rather than a ritual:
+
+1. **Review an immutable range.** Commission it over an exact `<merge-base>..<head>` SHA range. A branch name — or `main..branch` — is **not** a range: both ends move, so the verdict stops describing what was reviewed.
+2. **Save the verdict.** The record goes to `docs/code-reviews/<sprint-id>-<slug>-review.md`. A review whose result is not on the record cannot gate anything later.
+3. **No merge while a Blocking finding stands.** Fix it, then show it fixed.
+4. **Approval does not carry forward.** Any substantive change after the verdict invalidates it — re-review at the new head, and refresh the Preview too.
+
+How to commission one: [`CODEX-REVIEW-PROMPT.md`](./CODEX-REVIEW-PROMPT.md) (the guide) · [`templates/CODEX-REVIEW-PROMPT-TEMPLATE.md`](./templates/CODEX-REVIEW-PROMPT-TEMPLATE.md) (the skeleton) · `/sprint-prompt` section F (the ready prompt). The reviewer's own rules live in [`../AGENTS.md`](../AGENTS.md).
 
 - Run it **on the PR / branch diff**, not the whole repo.
 - Ask for **serious issues only** — correctness, security, data safety, App Router boundary mistakes, leaked secrets — not style nits.
-- The agent reports findings; it does **not** merge, push, or make broad refactors. See [`AGENTS.md`](./AGENTS.md) for the full agent rules.
+- The agent reports findings; it does **not** merge, push, or make broad refactors. See [`AGENTS.md`](../AGENTS.md) for the full agent rules.
 - You decide which findings to act on, then loop back through §7 if fixes are needed.
 
 ---
@@ -214,6 +232,7 @@ Every PR gets a Preview deployment. Local green is necessary but **not sufficien
 - [ ] If auth is involved: sign in / sign out / signup / password reset all work, and email links resolve to the **Preview** origin (not Production)
 - [ ] If a form/integration is involved: submit it and confirm the server route behaves (or no-ops cleanly when its env vars are absent)
 - [ ] No obvious layout shift, broken images, or runtime errors
+- [ ] **Record the evidence, not just the outcome:** the Preview URL, the branch, and **the exact head SHA that was tested**. A Preview result belongs to one commit — push again and the earlier pass no longer describes what is being merged (same rule as §8's review: approval does not carry forward). The form is [`templates/VERCEL-PREVIEW-TEST-TEMPLATE.md`](./templates/VERCEL-PREVIEW-TEST-TEMPLATE.md); `/browser-qa` drives the walk ([`BROWSER-TOOLS.md`](./BROWSER-TOOLS.md)).
 
 > Adding or changing an env var requires a **redeploy** to take effect. `NEXT_PUBLIC_*` values are inlined at build time; server-only values are read at runtime per deployment.
 
@@ -221,13 +240,22 @@ Every PR gets a Preview deployment. Local green is necessary but **not sufficien
 
 ## 12. Production merge checklist
 
-After Preview passes and review (if any) is done:
+After Preview passes and the review is done (mandatory on a risky diff — §8):
 
-- [ ] Merge the PR on GitHub
+- [ ] Merge the PR on GitHub — **the owner merges, always**
 - [ ] Watch the Vercel **Production** deployment finish
-- [ ] Test the live site for the merged change (desktop + mobile)
+
+**Then the production smoke test — on the live site, not the Preview.** Deploying is not the same as working, so confirm the deploy is real before calling the sprint done:
+
+- [ ] The merged change is visibly live (desktop **and** 320px)
+- [ ] The home page and one gated route both respond; an anonymous request to a gated route still lands on `/login` — the approval gate is this project's core invariant and every production deploy re-proves it
+- [ ] No new console errors; security headers still present on the live response
+- [ ] If the change touched the database: run the read-only verification SQL and confirm the migration is applied (§14)
+- [ ] Browser tools on Production are **read-only** — never submit a form or create an account there ([`BROWSER-TOOLS.md`](./BROWSER-TOOLS.md))
+
 - [ ] Delete the merged branch
-- [ ] If something looks wrong on production, go to §13 immediately
+- [ ] Update [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §1/§2 and tick the sprint row in [`ROADMAP.md`](./ROADMAP.md) — **in the merging PR where possible**, because a tracker that lags is how a sprint ends up "BUILT" for a week after it merged
+- [ ] If something looks wrong on production, go to §13 immediately — **never hotfix straight on `main`** (§15)
 
 ---
 
@@ -268,6 +296,16 @@ Use this whenever a change touches auth, the database, or any env var. For the f
   - [ ] Keep changes **backwards-compatible / additive** so the current code works before and after (expand → migrate → contract); deploy schema before the code that depends on it.
   - [ ] Apply to Production at the right time relative to the merge; verify RLS with anon + signed-in checks.
   - [ ] Remember a **Vercel rollback does not roll back the database** — keep the (backwards-compatible) schema or apply the `.down.sql` deliberately. Prefer forward-fix.
+  - [ ] A schema change is always a **risky** diff — the independent review of §8 is mandatory, not optional.
+
+**Destructive changes — the extra protocol.** A change is destructive if it drops, deletes, truncates or rewrites data a partner can already see. Stage 4 proved every rule below the hard way, so none of it is theory (see [`ROLLBACK-RUNBOOK.md`](./ROLLBACK-RUNBOOK.md) and [`PRODUCTION-CUTOVER-RUNBOOK.md`](./PRODUCTION-CUTOVER-RUNBOOK.md)):
+
+  - [ ] **Classify it in the PR** — additive · reversible schema-only · destructive/data-changing. Say which, in words, before anyone reviews it.
+  - [ ] **Get explicit owner approval** for the production run. Destructive SQL is never applied on an engine's own initiative.
+  - [ ] **A `.down.sql` restores rows, never Storage objects** (D-PP-k). If the change deletes files, export a **cold backup first** and verify it from disk — by count, bytes and content hash — before anything is dropped. Objects go through the Storage API in their own ordered step; deleting an object row in SQL orphans the bytes.
+  - [ ] **Rehearse the rollback on the non-production project before the production run.** A rollback nobody has executed is a hypothesis, not a rollback — PP7 ran its full 1.68 MB restore on TEST first, and that is the only reason it was trusted.
+  - [ ] **Order matters and is not negotiable:** backup → delete objects → migrate rows → verify. Run the verification SQL afterwards and record the result.
+  - [ ] Generate a down-migration from **production** data when the two environments hold different generations of content — a TEST-sourced rollback restores the wrong generation and only reveals it during a real emergency.
 - Keep **Auth → URL Configuration** correct: Site URL = Production, plus Redirect URLs covering local, the Preview wildcard, and Production. Do **not** point Preview auth redirects at Production — signup/reset emails created on a Preview should return to the Preview origin.
 - Test auth flows (sign in, sign up, forgot/update password, protected route) on **local, Preview, and Production**.
 
@@ -283,7 +321,7 @@ Use this whenever a change touches auth, the database, or any env var. For the f
 - [ ] Never bundle unrelated changes into one branch
 - [ ] Never rely only on local testing — Preview must pass too
 - [ ] Never add dependencies you don't need, or make unrelated refactors
-- [ ] Never skip Git hooks or CI checks (`--no-verify`) without an explicit, recorded reason
+- [ ] **Never** skip Git hooks or CI checks (`--no-verify`). No exceptions — if a hook fails, fix what it caught. *(This line used to allow it "without an explicit, recorded reason", which contradicted `CLAUDE.md`'s absolute ban; aligned at SYS1, 2026-08-21.)*
 
 ---
 
@@ -330,6 +368,6 @@ A change is "done" only when **all** boxes are ticked:
 - [ ] CI green (typecheck, lint, build, secret scan)
 - [ ] Vercel Preview deployment tested (desktop + mobile)
 - [ ] No secrets committed (`.env.local` untracked, no keys in code)
-- [ ] (Optional) Review agent pass complete
+- [ ] Independent review complete over an immutable `<merge-base>..<head>` range, its record saved in `docs/code-reviews/`, and **no Blocking finding left standing** — mandatory if the diff is risky (§8, D-SYS-1); mark N/A with a reason if it is not
 - [ ] PR merged into `main`
 - [ ] Live production site tested after deploy
