@@ -173,22 +173,26 @@ async function ensureRobot(role: RoleName): Promise<Report> {
   };
 }
 
-const reports: Report[] = [];
-for (const role of Object.keys(ROLES) as RoleName[]) {
-  reports.push(await ensureRobot(role));
-}
+async function main() {
+  const reports: Report[] = [];
+  for (const role of Object.keys(ROLES) as RoleName[]) {
+    reports.push(await ensureRobot(role));
+  }
 
-console.log("\n=== Robot test accounts (non-production project) ===");
-for (const r of reports) {
+  console.log("\n=== Robot test accounts (non-production project) ===");
+  for (const r of reports) {
+    console.log(
+      `${r.ok ? "OK  " : "FAIL"} ${r.role.padEnd(8)} ${r.email}\n` +
+        `     ${r.outcome}; profile is_approved = ${String(r.isApproved)}`,
+    );
+  }
   console.log(
-    `${r.ok ? "OK  " : "FAIL"} ${r.role.padEnd(8)} ${r.email}\n` +
-      `     ${r.outcome}; profile is_approved = ${String(r.isApproved)}`,
+    "\nNext (one-time, via the supabase-test MCP — never production):\n" +
+      "  - approved robot: profiles.is_approved -> true, application -> approved\n" +
+      "  - admin robot:    profiles.is_approved -> true + row in admins",
   );
-}
-console.log(
-  "\nNext (one-time, via the supabase-test MCP — never production):\n" +
-    "  - approved robot: profiles.is_approved -> true, application -> approved\n" +
-    "  - admin robot:    profiles.is_approved -> true + row in admins",
-);
 
-process.exit(reports.every((r) => r.ok) ? 0 : 1);
+  process.exit(reports.every((r) => r.ok) ? 0 : 1);
+}
+
+void main();
