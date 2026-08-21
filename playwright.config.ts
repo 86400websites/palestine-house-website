@@ -51,6 +51,7 @@ const MOBILE_320 = { width: 320, height: 568 };
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
+  timeout: 60_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   /* Evidence stays local and gitignored — never committed (activate-testing
@@ -82,12 +83,25 @@ export default defineConfig({
     {
       name: "desktop",
       dependencies: ["setup"],
+      testIgnore: /journeys\.spec\.ts/,
       use: { browserName: "chromium", viewport: DESKTOP },
     },
     {
       name: "mobile-320",
       dependencies: ["setup"],
+      testIgnore: /journeys\.spec\.ts/,
       use: { browserName: "chromium", viewport: MOBILE_320, hasTouch: true },
+    },
+    /* The write journeys run ONCE, serially, after both viewport projects:
+       they send the run's few marked-TEST emails and briefly mutate
+       non-production data (draft toggle, robot applicant, test upload) that
+       the read-only specs above must never race. */
+    {
+      name: "journeys",
+      dependencies: ["desktop", "mobile-320"],
+      testMatch: /journeys\.spec\.ts/,
+      fullyParallel: false,
+      use: { browserName: "chromium", viewport: DESKTOP },
     },
   ],
 });

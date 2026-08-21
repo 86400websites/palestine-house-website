@@ -1,6 +1,6 @@
 # Feature List — Palestine House — 2026-08-22
 
-> **DRAFT — awaiting the owner's written approval (the line below).** No test is written until it is given. Filled from [`testing-setup/templates/FEATURE-LIST-TEMPLATE.md`](./testing-setup/templates/FEATURE-LIST-TEMPLATE.md).
+> **APPROVED by the owner, 2026-08-22** (in session: "Perfect Thanks - Approved"). Filled from [`testing-setup/templates/FEATURE-LIST-TEMPLATE.md`](./testing-setup/templates/FEATURE-LIST-TEMPLATE.md). Changes to any approved line go back to the owner — never silently edited.
 
 Everything the site does, one plain-English line each. **Everything on this list gets tested; nothing off this list does.** Drafted by Claude Code from a full scan of the code (`src/app/` — 39 routes, both Route Handlers, every Supabase RPC the app calls, all four email flows, the redirect map in `next.config.ts`, the Ctrl/⌘+K search boundary) cross-checked against the docs; approved by the owner before any test is written.
 
@@ -12,7 +12,7 @@ Everything the site does, one plain-English line each. **Everything on this list
   - HQ admin: `e2e-hq-admin@robot-test.invalid`
   - anonymous: no account
   - plus **one disposable robot applicant per full run**, created through the real Apply form and named so it cannot be mistaken for a person (e.g. `e2e-applicant-run<N>@robot-test.invalid`), used to prove the apply → approve/decline journey end to end
-- **Owner approval: ______, ______** ← no tests are written until this line is filled.
+- **Owner approval: 86400studio (owner), 2026-08-22** — given in session before any test was written.
 
 **How to read a line:** `ID | Who can do what | What proves it worked`.
 
