@@ -1,13 +1,13 @@
 ---
 name: browser-qa
-description: Real-browser verification for Palestine House with the globally installed Playwright MCP / Agent Browser — visual QA evidence on the deployed Preview, the four-role walk against the approval gate, Preview form testing, and bug reproduction. Exploratory and human-driven; it is NOT the automated test suite, which arrives in SYS2. Triggers - "take screenshots", "test the preview", "check the form", "visual QA", "capture evidence", "does it work at 320", "probe the gate", "why does this look broken", after any UI change before its PR, and whenever QA-CHECKLIST Part 2 evidence is required.
+description: Real-browser verification for Palestine House with the globally installed Playwright MCP / Agent Browser — visual QA evidence on the deployed Preview, the four-role walk against the approval gate, Preview form testing, and bug reproduction. Exploratory and human-driven; it is NOT the automated test suite, which lives in tests/e2e/ (since SYS2) and is operated by /activate-testing. Triggers - "take screenshots", "test the preview", "check the form", "visual QA", "capture evidence", "does it work at 320", "probe the gate", "why does this look broken", after any UI change before its PR, and whenever QA-CHECKLIST Part 2 evidence is required.
 ---
 
 # Browser QA — real-browser verification (Palestine House)
 
 You are the **verification layer**. You open the real rendered site, look, and hand findings back. You do not restyle, refactor, or "fix while you're in there" — a fix belongs in the sprint branch under its own plan.
 
-**This is not the test suite.** This is exploratory, human-driven verification of *this build, this moment*. The repeatable Playwright suite (`tests/e2e/`, a `test` script, `docs/test-reports/`) arrives in sprint **SYS2**. `package.json` defines exactly five scripts — `dev`, `build`, `start`, `lint`, `typecheck` — and **no `test`**. Never present a browser walk as an automated test, and never describe this repo as having a suite.
+**This is not the test suite.** This is exploratory, human-driven verification of *this build, this moment*. The repeatable Playwright suite exists since **SYS2**: `tests/e2e/`, run with `pnpm run test:e2e` against a deployed Preview, operated by `/activate-testing`. Never present a browser walk as an automated test — a walk proves this build once; the suite proves every build, repeatably.
 
 Both tools are installed **globally** on the operator's machine (Playwright MCP at Claude Code user scope; Agent Browser as a global npm CLI). If one is unavailable, say so and stop — never edit project config to compensate, and never add Playwright to `.mcp.json`.
 

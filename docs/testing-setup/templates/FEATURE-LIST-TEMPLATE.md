@@ -2,7 +2,7 @@
 
 > **This is a SKELETON. The `[BRACKETS]` stay brackets in this file, forever.** Copy it out to `docs/FEATURE-LIST.md`, fill the copy, leave this original alone — same rule as [`docs/templates/`](../../templates/README.md).
 >
-> ⛔ **Installed at SYS1 · filled and used in SYS2.** There is no test runner in this repo today — `package.json` defines exactly five scripts (`dev`, `build`, `start`, `lint`, `typecheck`), and there is no `tests/e2e/`. `docs/FEATURE-LIST.md` **arrives in SYS2**.
+> ✅ **Installed at SYS1 · in use since SYS2 (2026-08-22).** The harness exists (`tests/e2e/`, `pnpm run test:e2e`); `docs/FEATURE-LIST.md` is generated from this skeleton by the gate's Phase 1 and approved by the owner before any test is written.
 
 Everything the site does, one plain-English line each. **Everything on this list gets tested; nothing off this list does.** Drafted by Claude Code from a full scan of the code (`src/app/`, Route Handlers, Supabase RPCs and RLS policies, email triggers) cross-checked against the docs; approved by the owner before any test is written.
 

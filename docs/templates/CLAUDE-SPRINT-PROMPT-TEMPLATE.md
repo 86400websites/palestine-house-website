@@ -141,8 +141,9 @@ when that file is in the allowed list. Do not choose silently.
 - Lint: pnpm run lint
 - Production build: pnpm run build
 - [Local production smoke, when the sprint changes rendering: pnpm run start]
-- Automated tests: none in this repo yet — the Playwright suite arrives in sprint SYS2. Do not
-  invent a test command. (There is also no Prettier/format check here — D-SYS-3.)
+- Automated tests: [when the sprint touches tested behavior — re-run the affected specs against the
+  deployed Preview: `pnpm run test:e2e` with `PLAYWRIGHT_BASE_URL` set. The suite exists since SYS2;
+  it never runs without a Preview target.] (There is no Prettier/format check here — D-SYS-3.)
 - git status — .env.local untracked, nothing secret staged
 - Manual: [the 2–5 specific things to click or check for this sprint, at desktop AND 320px]
 - [Browser evidence, if the sprint is visible: docs/BROWSER-TOOLS.md, or run the /browser-qa skill.]

@@ -88,10 +88,11 @@ pnpm run build
 pnpm run start        # optional local production smoke
 ```
 
-Those are four of the five scripts `package.json` defines (the fifth is `dev`). There is:
+Those are four of the six scripts `package.json` defines (the others are `dev` and `test:e2e`). There is:
 
-- **no test script** — the Playwright suite arrives in sprint **SYS2**; never write a test command
-  into a prompt before then;
+- **a Playwright suite since SYS2** — `pnpm run test:e2e`, which needs a deployed Preview URL
+  (`PLAYWRIGHT_BASE_URL`); write it into a prompt only for steps that have one, and re-run the
+  affected specs when a sprint touches tested behavior;
 - **no Prettier / format check** — deliberately waived (**D-SYS-3**); do not add one.
 
 CI is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — workflow **CI**, job **verify**:

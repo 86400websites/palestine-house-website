@@ -93,8 +93,10 @@ If another file is needed, stop and explain why before editing it.
 - Lint: pnpm run lint
 - Production build: pnpm run build
 - [Local production smoke, if the bug is in rendering or a route: pnpm run start]
-- Automated tests: none in this repo yet — the Playwright suite arrives in sprint SYS2. Do not
-  invent a test command. (No Prettier/format check exists here either — D-SYS-3.)
+- Automated tests: the fixed bug earns a **permanent regression spec** in `tests/e2e/` (its line
+  added to `docs/FEATURE-LIST.md` for owner approval), and the affected specs re-run against the
+  deployed Preview: `pnpm run test:e2e` with `PLAYWRIGHT_BASE_URL` set. (No Prettier/format check
+  exists here — D-SYS-3.)
 - Reproduction: run the exact steps above before the fix (fails) and after the fix (passes)
 - Surrounding flow: [the 2–4 things nearest the fix that must still work], at desktop and 320px
 - git status — .env.local untracked, nothing secret staged

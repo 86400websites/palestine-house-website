@@ -33,10 +33,17 @@ it hard-refuses to run against anything but the non-production project.
 ```
 # against a deployed Preview (the normal gate run)
 $env:PLAYWRIGHT_BASE_URL = "<preview-url>"   # PowerShell
-pnpm test
+pnpm run test:e2e
 ```
 
-`pnpm test` runs every spec at both mandatory viewports (desktop 1440 and
+The script is deliberately named `test:e2e`, **not** `test`: a script named
+`test` would be auto-invoked by the after-task ritual in `CLAUDE.md` and by
+the `/close` skill on every future sprint, and this suite cannot run without
+a deployed Preview URL (the reasoning is recorded in
+`docs/notes/system-compliance-audit-2026-08-21.md`). The launch gate and the
+morning check invoke it deliberately; nothing invokes it by accident.
+
+`pnpm run test:e2e` runs every spec at both mandatory viewports (desktop 1440 and
 **320px** — `DESIGN.md` §10). Auth sessions are created once per role by
 `auth.setup.ts` through the real `/login` form and stored under
 `playwright/.auth/` (gitignored).

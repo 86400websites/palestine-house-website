@@ -1,15 +1,10 @@
 # Testing Setup — Start Here
 
-> ## ⛔ INSTALLED, NOT ACTIVATED
+> ## ✅ ACTIVATED AT SYS2 (2026-08-22)
 >
-> These documents were installed at **SYS1** (2026-08-22) from the `Website-Development-System` SOP pack, adapted to this repo. **They are activated in SYS2 — "Testing launch gate"** ([`ROADMAP.md`](../ROADMAP.md) §B, Stage 5).
+> These documents were installed at **SYS1** (2026-08-22) from the `Website-Development-System` SOP pack, adapted to this repo, and **activated at SYS2 — "Testing launch gate"** ([`ROADMAP.md`](../ROADMAP.md) §B, Stage 5): `@playwright/test` is a dev dependency, `playwright.config.ts` and `tests/e2e/` exist, `package.json` carries `test:e2e` (deliberately not `test` — see [`tests/e2e/README.md`](../../tests/e2e/README.md)), the four robot roles live in the non-production Supabase project, and `.github/workflows/morning-check.yml` is in place **disabled**.
 >
-> **Nothing in this folder runs anything today.** As of this install the repo has:
-> - **no test runner** — `package.json` defines exactly five scripts: `dev`, `build`, `start`, `lint`, `typecheck`. There is no `test` script and none is being added here.
-> - **no `@playwright/test`** dependency, **no `playwright.config`**, **no `tests/e2e/`**.
-> - **no `docs/FEATURE-LIST.md`**, **no `docs/test-reports/`**, **no `.github/workflows/morning-check.yml`**.
->
-> All of those arrive in **SYS2**. Installing them now was deliberately out of scope: SYS1 is docs-and-config only.
+> An installed harness is still not a passed gate: `docs/FEATURE-LIST.md` and the first `docs/test-reports/` report arrive with the first full gate run, and the gate is passed only when a full run is 100% green and the owner signs the **GO** — SYS2's exit gate.
 
 This folder is the **Launch Gate**: the system that proves every feature of the site works — big or small — *before* a real partner finds out that it doesn't.
 

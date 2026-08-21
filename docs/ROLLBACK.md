@@ -177,11 +177,12 @@ removed), or guarantee the prior data state.
 - [ ] Add whatever check would have caught it to [`QA-CHECKLIST.md`](./QA-CHECKLIST.md) or
       [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md).
 
-**On the checks, stated so nobody re-adds them by mistake:** there is **no test script in this repo
-yet** — the Playwright suite arrives in sprint **SYS2**, so "tests pass" is not a box you can tick
-today. And **Prettier / `format:check` is deliberately waived** for this already-built site
-(**D-SYS-3**): adding it now would force a whole-repo reformat, so it is not part of the chain and its
-absence is not an oversight.
+**On the checks, stated so nobody mis-runs them:** the Playwright suite (`pnpm run test:e2e`, since
+SYS2) targets a **deployed Preview**, not the local tree — during a rollback, re-running the affected
+specs against the restored deployment is the right use of it, and a local `test:e2e` without
+`PLAYWRIGHT_BASE_URL` refuses to run by design. **Prettier / `format:check` is deliberately waived**
+for this already-built site (**D-SYS-3**): adding it now would force a whole-repo reformat, so it is
+not part of the chain and its absence is not an oversight.
 
 ## Step 7 — Write the incident note
 

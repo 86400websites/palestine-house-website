@@ -113,9 +113,10 @@ not quietly re-scoped.
 State these so the reviewer does not re-litigate them. Assess **residual risk** if the diff makes
 one worse; do not report the deferral itself as a discovery.
 
-- **There is no test script.** `package.json` defines exactly `dev`, `build`, `start`, `lint`,
-  `typecheck`. The Playwright suite and `tests/e2e/` arrive in sprint **SYS2** — "Tests: N/A" is the
-  honest entry, not an omission. There is no Prettier / `format:check` here either (D-SYS-3).
+- **The test suite is not a review command.** `pnpm run test:e2e` (Playwright, since SYS2) needs a
+  deployed Preview URL and robot credentials a reviewer does not have — the build side runs it
+  against the Preview and records the result; the reviewer verifies that record, not the run.
+  There is no Prettier / `format:check` here (D-SYS-3).
 - **Public writes are not yet rate-limited or CAPTCHA-verified.** Upstash + Turnstile, fail-closed in
   Production, are sprint **SYS1.5** (D-SYS-9); the gap is `PROJECT-STATUS.md` §7 #1. Public writes
   must still zod-validate and fail closed on their own terms.

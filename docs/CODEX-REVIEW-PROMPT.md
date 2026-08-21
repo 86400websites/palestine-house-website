@@ -100,7 +100,7 @@ Do this after local checks are green, the PR is open, CI has passed, and the Ver
   pnpm run build
   ```
 
-  There is **no test script** in `package.json`. Playwright and `tests/e2e/` arrive in **SYS2** — until then, "Tests: N/A" is the honest entry, not an omission. Prettier / `format:check` is **waived** for this repo (D-SYS-3), so it is not a review command either.
+  The Playwright suite (`pnpm run test:e2e`, since SYS2) is **not a review command**: it needs a deployed Preview URL and the robot credentials, which a reviewer does not have — "Tests: run by the build side against the Preview" is the honest entry. Prettier / `format:check` is **waived** for this repo (D-SYS-3), so it is not a review command either.
 - [ ] List **owner-authorized exceptions** — anything the reviewer would otherwise flag: a deliberate deviation, a finding logged unfixed, a known issue from `PROJECT-STATUS.md` §7.
 - [ ] Record the **database / migration state** when the sprint touches `supabase/sql/`: which migration production is on, which migrations are applied where, and that migrations here are applied **by hand in the Supabase SQL Editor, non-production project first** ([`WORKFLOW.md`](./WORKFLOW.md) §14). Applied migrations are immutable; a fix is a new migration.
 - [ ] Point the reviewer at the context it needs: `AGENTS.md`, the sprint record, `PROJECT-STATUS.md` §1/§7, the active `ROADMAP.md` row, and the relevant sections of [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) (§5 RLS · §6 auth/session · §8 API routes and abuse controls · §15 blocking invariants), [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md), and [`SUPABASE-MCP-SAFETY.md`](./SUPABASE-MCP-SAFETY.md).

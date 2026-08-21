@@ -2,11 +2,9 @@
 
 The one-time setup that turns testing into a single ask forever after: `/activate-testing`.
 
-> ## ⛔ PART 1 IS DONE. PARTS 2–4 ARE SYS2 AND ARE NOT DONE.
+> ## ✅ PART 1 DONE AT SYS1 · PARTS 2–4 RUNNING AT SYS2 (started 2026-08-22)
 >
-> Installed at **SYS1** (2026-08-22). **Activated in SYS2 — "Testing launch gate"** ([`ROADMAP.md`](../ROADMAP.md) §B, Stage 5).
->
-> As of this install the repo has **no test runner**: `package.json` defines exactly five scripts — `dev`, `build`, `start`, `lint`, `typecheck`. There is no `@playwright/test`, no `playwright.config`, no `tests/e2e/`, no `docs/test-reports/` and no `.github/workflows/morning-check.yml`. **Do not tick a Part 2–4 box until SYS2 actually does the work.**
+> Installed at **SYS1** (2026-08-22). **Activation began at SYS2 — "Testing launch gate"** ([`ROADMAP.md`](../ROADMAP.md) §B, Stage 5) on branch `claude/sprint-sys2-testing-launch-gate`. Each box below is ticked only when the work is actually done; the per-box state notes say what remains.
 
 Every box says **who** does it and **where it stands today**. The owner's total hands-on time across the whole thing is about 20 minutes.
 
@@ -29,20 +27,20 @@ Nothing in Part 1 installed a package, wrote a test, or changed anything under `
 
 ## Part 2 — Install the tester (one normal PR) — **SYS2**
 
-**State: ⛔ NOT DONE. None of this exists in the repo today.**
+**State: ✅ DONE at SYS2, 2026-08-22 — except the environment-separation confirmation, blocked on the Part 3 bypass (Preview protection is ON, so the Preview cannot be read until the bypass exists).**
 
-- [ ] **Claude Code:** add `@playwright/test` as a **dev** dependency with **pnpm** (`pnpm add -D @playwright/test`) — never npm, never yarn. Free software: no account, no key, no cost. Commit the updated `pnpm-lock.yaml`.
-- [ ] **Claude Code:** create the Playwright config. Tests live in `tests/e2e/`. The target URL comes from the `PLAYWRIGHT_BASE_URL` environment variable (name only — the value is supplied per run, never committed). Two browser profiles: **desktop and 320px**.
+- [x] **Claude Code:** add `@playwright/test` as a **dev** dependency with **pnpm** (`pnpm add -D @playwright/test`) — never npm, never yarn. Free software: no account, no key, no cost. Commit the updated `pnpm-lock.yaml`. *(Done — `@playwright/test` 1.62, lockfile committed.)*
+- [x] **Claude Code:** create the Playwright config. Tests live in `tests/e2e/`. The target URL comes from the `PLAYWRIGHT_BASE_URL` environment variable (name only — the value is supplied per run, never committed). Two browser profiles: **desktop and 320px**. *(Done — `playwright.config.ts`: desktop 1440×900 + mobile 320×568; no default target, refuses to run without one.)*
   - ⚠️ **320px, not 390px.** This repo's own gates require desktop **and 320px** ([`DESIGN.md`](../DESIGN.md) §10, [`QA-CHECKLIST.md`](../QA-CHECKLIST.md) → "The two viewports"). The SYS2 row in [`ROADMAP.md`](../ROADMAP.md) still carries the SOP's generic **390px** — that is the source SOP's default, not a Palestine House decision. Build the profile at 320px and correct the roadmap row in the same PR, or have the owner confirm otherwise. Do not silently ship the narrower coverage.
-- [ ] **Claude Code:** one auth-setup step per role — **anonymous · pending partner · approved partner · HQ admin**. Anonymous needs no state; the other three each need a stored session.
-- [ ] **Claude Code:** create the test users. **See the rules below — this is the box most worth getting exactly right.**
-- [ ] **Claude Code:** confirm environment separation before a single test runs:
+- [x] **Claude Code:** one auth-setup step per role — **anonymous · pending partner · approved partner · HQ admin**. Anonymous needs no state; the other three each need a stored session. *(Done — `tests/e2e/auth.setup.ts` signs each role in through the real `/login` form; sessions stored under gitignored `playwright/.auth/`.)*
+- [x] **Claude Code:** create the test users. **See the rules below — this is the box most worth getting exactly right.** *(Done 2026-08-22, non-production project only, via `tests/e2e/setup/create-test-users.ts` — the real `signUp` door, `.invalid` addresses, passwords generated into the local gitignored `.env.local` and nowhere else. Approval/admin flips applied through the `supabase-test` MCP. Emails recorded in `tests/e2e/README.md` and, when generated, `docs/FEATURE-LIST.md`.)*
+- [ ] **Claude Code:** confirm environment separation before a single test runs: *(pending — blocked on the Part 3 bypass; verified the moment the Preview is readable, before the smoke test)*
   - Preview and Development env vars point at the **non-production** Supabase project, Production points at Production ([`PROJECT-STATUS.md`](../PROJECT-STATUS.md) §6). Verify, do not assume.
   - ⚠️ **Resend is set in Preview too.** `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` are configured in **both** Production and Preview, so a Preview `/contact` or Ask HQ submission **delivers a real email to a real inbox** ([`BROWSER-TOOLS.md`](../BROWSER-TOOLS.md) §6). Robot submissions must be unmistakably marked as tests, kept few, and flagged to the owner before the run.
   - If anything live-keyed turns up in Preview, **stop and report** — that is a blocker per [`ENV-VARS-SAFETY.md`](../ENV-VARS-SAFETY.md) and [`SECURITY-CHECKLIST.md`](../SECURITY-CHECKLIST.md) §12.
-- [ ] **Claude Code:** add the morning-check workflow from [`templates/MORNING-CHECK-TEMPLATE.md`](./templates/MORNING-CHECK-TEMPLATE.md) as a **new** file at `.github/workflows/morning-check.yml`, **disabled** — it is switched on only after the gate passes and the owner has answered its open decision.
+- [x] **Claude Code:** add the morning-check workflow from [`templates/MORNING-CHECK-TEMPLATE.md`](./templates/MORNING-CHECK-TEMPLATE.md) as a **new** file at `.github/workflows/morning-check.yml`, **disabled** — it is switched on only after the gate passes and the owner has answered its open decision. *(Done — schedule commented out; manual dispatch cannot reach any site while the `PRODUCTION_URL` variable is unset; `ci.yml` untouched.)*
   - 🔴 **Never touch [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) to do this.** Its job display name — `Install · Typecheck · Lint · Build`, job id `verify` — is the branch-protection required check. Renaming it breaks merges or, worse, leaves the rule pointing at a check nobody emits (**D-SYS-4**; the file itself carries the warning).
-- [ ] **Claude Code:** decide and record whether a `test` script is added to `package.json`. [`QA-CHECKLIST.md`](../QA-CHECKLIST.md) Part 1 says *"`package.json` defines exactly five scripts … never invent a sixth."* SYS2 is the sprint entitled to change that. Whatever is chosen, update that line in `QA-CHECKLIST.md`, `TECHNICAL-INTEGRITY.md` and `LAUNCH-CHECKLIST.md` in the same PR so no doc is left asserting "no test script" after one exists.
+- [x] **Claude Code:** decide and record whether a `test` script is added to `package.json`. [`QA-CHECKLIST.md`](../QA-CHECKLIST.md) Part 1 says *"`package.json` defines exactly five scripts … never invent a sixth."* SYS2 is the sprint entitled to change that. Whatever is chosen, update that line in `QA-CHECKLIST.md`, `TECHNICAL-INTEGRITY.md` and `LAUNCH-CHECKLIST.md` in the same PR so no doc is left asserting "no test script" after one exists. *(Decided 2026-08-22: the sixth script is **`test:e2e`**, deliberately not `test` — a script named `test` would be auto-invoked by `CLAUDE.md`'s after-task ritual and `/close`, and the suite cannot run without a deployed Preview URL; the compliance audit recorded this exact reasoning. All three docs updated in this PR, plus the other stale "no test script" lines repo-wide.)*
 
 ### Test users — the rules, not the preference
 
@@ -63,15 +61,13 @@ Nothing in Part 1 installed a package, wrote a test, or changed anything under `
 
 ## Part 3 — Unlock the robot's door (only if Previews are password-protected) — **OWNER, then SYS2**
 
-**State: ❓ UNKNOWN FROM INSIDE THE REPO. The owner must check.**
+**State: ✅ ANSWERED — protection is ON (verified empirically at SYS2, 2026-08-22: the branch Preview 302s to Vercel SSO). ⏳ The bypass steps below are with the owner.**
 
 Vercel can protect Preview links so strangers cannot see unfinished work. If that protection is on, the robot needs a **sanctioned key** through that door — never a workaround, never a scraped cookie.
 
 Whether it is on **cannot be determined from this repository**: it is a Vercel project setting, not a file. Nothing in `vercel.json`, `next.config.ts` or [`PROJECT-STATUS.md`](../PROJECT-STATUS.md) §6 records it. So this part opens with a question, not an instruction.
 
-- [ ] **👤 Owner — first, answer the question:** in Vercel → this project → **Settings → Deployment Protection**, is Preview protection **on or off**? Report the answer; do not paste any screen contents.
-  - **If OFF:** skip the rest of Part 3 entirely. Nothing to do.
-  - **If ON:** continue below.
+- [x] **👤 Owner — first, answer the question:** in Vercel → this project → **Settings → Deployment Protection**, is Preview protection **on or off**? Report the answer; do not paste any screen contents. *(Answered 2026-08-22: **ON** — confirmed both by the owner's settings screenshots and by probing the branch Preview, which redirects to Vercel SSO.)*
 - [ ] **👤 Owner:** enable **Protection Bypass for Automation**. Vercel generates a secret for you.
 - [ ] **👤 Owner:** add that secret in two places — the Vercel project's **Preview** environment variables, and **GitHub → Settings → Secrets and variables → Actions**. The variable name to use in both is:
 
@@ -79,7 +75,7 @@ Whether it is on **cannot be determined from this repository**: it is a Vercel p
 
   🔴 The **value** is typed directly into those two dashboards and nowhere else. Never into a file, never into a commit, never into `.env.example`, never into chat, never into a message to any agent. [`ENV-VARS-SAFETY.md`](../ENV-VARS-SAFETY.md) and [`WORKFLOW.md`](../WORKFLOW.md) §14 are the binding rules.
 - [ ] **👤 Owner:** confirm in the same breath that **Preview still points at the non-production Supabase project** — that is the other half of SYS2's entry gate in [`ROADMAP.md`](../ROADMAP.md).
-- [ ] **Claude Code:** reference the secret **by name only** in the Playwright config, so test requests carry the bypass header. The name may appear in code and in `.env.example`; the value must never be read, echoed or logged.
+- [x] **Claude Code:** reference the secret **by name only** in the Playwright config, so test requests carry the bypass header. The name may appear in code and in `.env.example`; the value must never be read, echoed or logged. *(Done — `playwright.config.ts` sends `x-vercel-protection-bypass` when the env var is present. For local gate runs the owner also types the value into the gitignored `.env.local` — the repo's designated local-secret store — which the config loads at runtime without any agent reading it.)*
 
 ## Part 4 — Prove it works, then close — **SYS2**
 

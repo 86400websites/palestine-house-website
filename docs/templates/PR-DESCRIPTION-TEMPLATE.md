@@ -69,7 +69,8 @@ Naming what you did not change stops reviewers filing false positives and stops 
 
 - [ ] Local: `pnpm run typecheck` · `pnpm run lint` · `pnpm run build` — all green
       [· `pnpm run build && pnpm run start` smoke, if rendering changed]
-- [ ] Tests: **N/A — no test script in this repo yet; the Playwright suite arrives in sprint SYS2**
+- [ ] Tests: [`pnpm run test:e2e` against the Preview at `[HEAD_SHA]` — which specs ran and the
+      result; or "not affected" with one line saying why the diff touches no tested behavior]
 - [ ] CI green at `[HEAD_SHA]` — workflow **CI**, job **`verify`** (gitleaks secret scan, install,
       typecheck, lint, build)
 - [ ] Vercel **Preview** tested at `[HEAD_SHA]`: [PREVIEW_URL] — desktop **and 320px**

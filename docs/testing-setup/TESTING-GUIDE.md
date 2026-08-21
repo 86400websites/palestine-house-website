@@ -2,11 +2,9 @@
 
 Written for the owner. No jargon survives past this line without being explained.
 
-> ## ⛔ INSTALLED AT SYS1 · ACTIVATED IN SYS2
+> ## ✅ INSTALLED AT SYS1 · ACTIVATED AT SYS2 (2026-08-22)
 >
-> This guide describes a system that **does not run yet**. It was installed at SYS1 (2026-08-22) so that SYS2 can be started by saying `/activate-testing`. Today the repo has **no test runner**: `package.json` defines exactly five scripts — `dev`, `build`, `start`, `lint`, `typecheck` — and there is no `tests/e2e/`, no `docs/FEATURE-LIST.md` and no `docs/test-reports/`.
->
-> Everything below is written in the present tense because that is how it will read once SYS2 lands. Until then, read it as the plan.
+> The harness this guide describes is real: Playwright lives in the repo (`tests/e2e/`, `pnpm run test:e2e`), the four robot roles exist in the non-production project, and the morning-check workflow is in place, disabled. `docs/FEATURE-LIST.md` and `docs/test-reports/` are produced by the gate itself — steps 2–5 below — and the gate is passed only on a 100%-green full run with the owner's signed **GO**.
 
 ---
 
