@@ -6,7 +6,8 @@ One row per feature from [`docs/FEATURE-LIST.md`](../FEATURE-LIST.md) (approved 
 
 ## Run header
 
-- **Run type:** **FULL** — all 98 tests, no skips, no retries used on the green run
+- **Run type:** **FULL** — all 98 tests, no skips, no retries used on the green run.
+  *(Count as measured at `b2ef492`. The later commits of this sprint added the `@morning` specs and, after the D-SYS-1 review, per-project `grep` — the suite now schedules **136** on a full run and **34** for the morning check. The site code is byte-identical throughout; no assertion measured on 2026-08-22 was removed.)*
 - **Environment:** deployed Vercel **Preview** of branch `claude/sprint-sys2-launch-gate-run` (deployment built from `43cee57`; site code identical to `main` = `cecb0d9` — every commit on this branch is tests and docs only, zero `src/` changes). Preview URL recorded in the session log; reached through the sanctioned Protection Bypass (protection is ON).
 - **Data separation confirmed:** two ways, by the robot — no production ref appears in anything the Preview serves (`tests/e2e/setup/verify-preview-env.ts` tripwire), and the three robot accounts, which exist **only** in the non-production project, signed in successfully through the real `/login` form. A Preview on the production database could not have let them in.
 - **Viewports:** desktop (1440) **and 320px** — every visual line ran at both.
@@ -41,7 +42,7 @@ One row per feature from [`docs/FEATURE-LIST.md`](../FEATURE-LIST.md) (approved 
 
 **Section C — gated content: all PASS.** 5 · 6 · 6 · 5 focus areas = 22 (CT-001); each focus area shows exactly the model — summary, one Simple guide card, Watch Video, templates — and none of the retired card types (CT-002); all 22 guide pages open with real content (CT-003); a template really downloads through a signed URL, bytes on disk (CT-004); a pending or anonymous caller never receives a signed URL or a storage path (CT-005); search finds content and navigates for an approved partner (CT-006); a Drafted focus area vanishes everywhere — section pages, guide URL, census 22→21 — and returns on Live (CT-007).
 
-**Section D — forms and email: all PASS.** Contact rejects bad input client- and server-side and delivers when valid (FM-001/002); Apply rejects bad input (FM-003); a duplicate application cannot be created — one queue row, re-submit lands on the dashboard (FM-004); applying notifies both sides (FM-005); Ask HQ works for an approved partner and its form never renders for a pending one (FM-006); `/account` saves the display name and offers the password-change path (FM-007); approve/decline sends the right email variant (FM-008).
+**Section D — forms and email: all PASS.** Contact rejects bad input client- and server-side and delivers when valid (FM-001/002); Apply rejects bad input (FM-003); a duplicate application cannot be created — one queue row, re-submit lands on the dashboard (FM-004); applying notifies both sides — **FM-005 and FM-008 PASS via MN-001 (the owner opened the HQ inbox and confirmed the application-received pair and the approve/decline copy); there is no automated send-boundary assertion**, and the D-SYS-1 review was right to flag that the earlier wording implied one; Ask HQ works for an approved partner and its form never renders for a pending one (FM-006); `/account` saves the display name and offers the password-change path (FM-007); approve/decline sends the right email variant (FM-008 — same MN-001 evidence).
 
 **Section E — HQ admin: all PASS.** The approvals queue lists, approves and declines (AD-001); the pages editor saves and the platform shows it — then it was restored (AD-002); the focus-areas editor edits, toggles Draft↔Live and reorders — restored (AD-003); the files manager refuses a `.txt` **naming what arrived**, refuses an over-4 MB file, uploads a real PDF that appears in the partner's grid, and deletes it behind the typed-name confirmation — store left exactly as found (AD-004); admin management adds and removes an admin, and **refuses self-removal** (AD-005 — the last-admin refusal is enforced by the same server rule, deliberately not exercised live because it would mean touching the owner's own admin row).
 
@@ -81,7 +82,9 @@ The approved plan was "a few marked-TEST emails per full run" — and per run it
 
 ## Verdict
 
-**GO** — a FULL run, 98/98, both viewports, all four roles, no test skipped, disabled or weakened, on the current head.
+**GO** — a FULL run, 98/98, both viewports, all four roles, no test skipped, disabled or weakened, measured at `b2ef492`.
+
+**Then the mandatory D-SYS-1 independent review returned BLOCKING, and it was right.** Its findings were fixed rather than argued with — the config defect (the two morning projects had no `grep` of their own, so a plain `pnpm run test:e2e` ballooned to 192 tests and put credentialed specs inside credential-free projects), a production-URL refusal for every write-capable project, three denial assertions that proved the UI rather than the invariant (AC-003 now reads raw responses, CT-005 now attacks the download issuer itself, AC-001/002 now assert `/login?next=` rather than a string the public header carries anyway), a poisoned-baseline hole in the leak probes, and a missing `finally` that could have left the pending robot in the `admins` table. Record: [`code-reviews/sys2-launch-gate-review.md`](../code-reviews/sys2-launch-gate-review.md). **The GO stands on the re-run after those fixes**, recorded below.
 
 - **Verdict: GO · Date: 2026-08-22 · Signed: Mohammad Katada Siddiqui (owner)** · Full-run report: this file.
 

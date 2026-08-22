@@ -177,11 +177,40 @@ export async function discoverPlatformContent(
   }
 
   await context.close();
-  if (guideLinks.length === 0 || gatedMarkers.length === 0) {
+
+  /* The baseline IS the leak probe. An empty one makes every denied-state
+     assertion vacuous; a GARBAGE one is worse, because it still passes.
+     (D-SYS-1 review finding F5: a failed guide navigation lands on the
+     branded 404, whose h1 is 22 chars long and would sail through a bare
+     length check — after which every "no gated string leaked" check would be
+     asserting that denied pages do not contain the 404 heading, which they
+     never do.) Refuse anything that is not real, distinct gated content. */
+  if (guideLinks.length !== 22) {
     throw new Error(
-      "Discovery as the approved robot found no gated content — cannot run " +
-        "leak probes against an empty baseline. Check the approved robot and " +
-        "the Preview before trusting any denied-state result.",
+      `Discovery found ${guideLinks.length} guide links, expected 22. The ` +
+        "baseline is not the real platform — refusing to run leak probes " +
+        "against it. Check the approved robot and the Preview first.",
+    );
+  }
+  const DENIAL_HEADINGS = [
+    "This page isn’t here.",
+    "Your application is under review.",
+    "We’re not moving forward right now.",
+    "Welcome.",
+  ];
+  const poisoned = gatedMarkers.filter((m) => DENIAL_HEADINGS.includes(m));
+  if (poisoned.length > 0) {
+    throw new Error(
+      `Discovery captured a denial/pending heading as a gated marker ` +
+        `(${poisoned.length} of ${gatedMarkers.length}). The approved robot is ` +
+        "not seeing real content — every leak probe built on this would pass " +
+        "vacuously.",
+    );
+  }
+  if (new Set(gatedMarkers).size < 3) {
+    throw new Error(
+      `Only ${new Set(gatedMarkers).size} distinct gated markers — the ` +
+        "baseline is not real content. Refusing to run leak probes.",
     );
   }
   cached = { guideLinks: [...new Set(guideLinks)], gatedMarkers };

@@ -8,7 +8,8 @@ import {
   probe,
   type PlatformContent,
 } from "./helpers/app";
-import { ROLES } from "./helpers/roles";
+import { createClient } from "@supabase/supabase-js";
+import { ROLES, rolePassword } from "./helpers/roles";
 
 /* Section B of docs/FEATURE-LIST.md — the DENIED half of the four-role grid.
    The most important file in this suite: every check here is "people who
@@ -57,7 +58,14 @@ test("AC-001: anonymous — every gated route denies with nothing in the body, a
         expect(location, `${path} redirect target`).toContain("/login");
       } else {
         expect(status, `${path} anonymous status`).toBe(200);
-        expect(body, `${path} carries no redirect to /login`).toContain("/login");
+        /* "/login?next=" — the app's real redirect signature. A bare
+           "/login" would be satisfied by the public header's own Sign in
+           link, which every 200 carries, so it proved nothing (D-SYS-1
+           review finding F4). */
+        expect(
+          body,
+          `${path} carries no redirect instruction to the sign-in page`,
+        ).toContain("/login?next=");
       }
       expectNoGatedStrings(body, `anonymous ${path}${headers ? " (RSC)" : ""}`);
     }
@@ -81,7 +89,14 @@ test("AC-002: anonymous — every /admin route denies with no admin strings in t
         expect(location, `${path} redirect target`).toContain("/login");
       } else {
         expect(status, `${path} anonymous status`).toBe(200);
-        expect(body, `${path} carries no redirect to /login`).toContain("/login");
+        /* "/login?next=" — the app's real redirect signature. A bare
+           "/login" would be satisfied by the public header's own Sign in
+           link, which every 200 carries, so it proved nothing (D-SYS-1
+           review finding F4). */
+        expect(
+          body,
+          `${path} carries no redirect instruction to the sign-in page`,
+        ).toContain("/login?next=");
       }
       /* RENDERED content only: Next emits the route's <title>/OG metadata
          ("Focus areas — Content admin · …") even on a gated stream — that is
@@ -189,15 +204,78 @@ test.describe("as the pending partner", () => {
     ).toHaveCount(0);
   });
 
-  test("CT-005 (denied half): no signed URL is ever issued to a pending caller", async ({
+  test("CT-005 (denied half): the ISSUER refuses a pending caller — no signed URL exists to leak", async ({
     page,
   }) => {
-    // Structural: the pending pages carry no Download control at all (checked
-    // in AC-003) — here, additionally, no request to a storage signed URL is
-    // observed anywhere in a full walk of the platform routes.
+    /* Attack the issuer, not the button. A pending partner sees no Download
+       control at all (AC-003), so "no storage request fired" is nearly
+       trivially true and would stay green even if get_resource_download lost
+       its is_approved() check. This calls the RPC that mints signed URLs
+       directly — as the approved robot (must WORK, proving the probe is
+       real) and as the pending robot (must return NOTHING).
+       (D-SYS-1 review finding F3.) */
+    test.setTimeout(120_000);
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    expect(
+      Boolean(url && key),
+      "Supabase env vars missing — cannot probe the issuer",
+    ).toBe(true);
+
+    const listAs = async (role: "approved" | "pending") => {
+      const client = createClient(url!, key!, { auth: { persistSession: false } });
+      const { error: signInError } = await client.auth.signInWithPassword({
+        email: ROLES[role].email,
+        password: rolePassword(role),
+      });
+      expect(signInError, `${role} robot could not sign in`).toBeNull();
+      const { data } = await client.rpc("get_resources");
+      await client.auth.signOut();
+      return ((data ?? []) as { id: string }[]);
+    };
+
+    const downloadAs = async (role: "approved" | "pending", resourceId: string) => {
+      const client = createClient(url!, key!, { auth: { persistSession: false } });
+      await client.auth.signInWithPassword({
+        email: ROLES[role].email,
+        password: rolePassword(role),
+      });
+      const result = await client.rpc("get_resource_download", { p_id: resourceId });
+      await client.auth.signOut();
+      return result;
+    };
+
+    // The approved robot lists templates — a REAL resource id, and proof the
+    // probe below is not shooting at a blank.
+    const rows = await listAs("approved");
+    expect(rows.length, "approved robot listed no templates").toBeGreaterThan(0);
+    const realId = rows[0].id;
+
+    // Same id, approved caller: the issuer WORKS.
+    const allowed = await downloadAs("approved", realId);
+    expect(
+      ((allowed.data ?? []) as unknown[]).length,
+      "the issuer refused an APPROVED partner — this probe is not measuring the gate",
+    ).toBeGreaterThan(0);
+
+    // Same id, pending caller: NOTHING — no row, so no bucket, no path, no URL.
+    const denied = await downloadAs("pending", realId);
+    expect(
+      ((denied.data ?? []) as unknown[]).length,
+      "🔴 the download issuer returned a row to a PENDING partner",
+    ).toBe(0);
+    const serialised = JSON.stringify(denied);
+    expect(serialised.includes("storage/v1"), "storage path leaked to pending").toBe(
+      false,
+    );
+    expect(serialised.includes('"resources"'), "bucket name leaked to pending").toBe(
+      false,
+    );
+
+    // And the passive check stays: nothing in the UI even asks for a file.
     const storageRequests: string[] = [];
-    page.on("request", (request) => {
-      if (request.url().includes("storage/v1")) storageRequests.push(request.url());
+    page.on("request", (r) => {
+      if (r.url().includes("storage/v1")) storageRequests.push(r.url());
     });
     for (const path of PLATFORM_ROUTES) {
       await page.goto(path);

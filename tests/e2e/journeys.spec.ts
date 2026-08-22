@@ -508,22 +508,51 @@ test("AD-005 (J8): admin management adds and removes — and refuses self-remova
   m.on("dialog", (dialog) => void dialog.accept());
   await m.goto("/admin/content/admins");
 
-  // Add the pending robot (an existing, obviously-fake account) as an admin…
-  const emailBox = m.locator("input[type='email'], input[name*='email']").first();
-  await emailBox.fill(ROLES.pending.email);
-  await m.getByRole("button", { name: /add/i }).first().click();
-  await expect(m.getByText(ROLES.pending.email)).toBeVisible({ timeout: 30_000 });
+  const pendingRow = () =>
+    m.locator("li, tr, article").filter({ hasText: ROLES.pending.email }).first();
 
-  // …and remove them again. The store ends exactly as it started.
-  const row = m.locator("li, tr, article").filter({ hasText: ROLES.pending.email }).first();
-  await row.getByRole("button", { name: "Remove" }).click();
-  await expect(m.getByText(ROLES.pending.email)).toHaveCount(0, { timeout: 30_000 });
+  let removed = false;
+  try {
+    // Add the pending robot (an existing, obviously-fake account) as an admin…
+    const emailBox = m.locator("input[type='email'], input[name*='email']").first();
+    await emailBox.fill(ROLES.pending.email);
+    await m.getByRole("button", { name: /add/i }).first().click();
+    await expect(m.getByText(ROLES.pending.email)).toBeVisible({ timeout: 30_000 });
 
-  // Removing yourself is refused — the refusal is the PASS.
-  const selfRow = m.locator("li, tr, article").filter({ hasText: ROLES.admin.email }).first();
-  await selfRow.getByRole("button", { name: "Remove" }).click();
-  await expect(m.getByText(ROLES.admin.email)).toBeVisible({ timeout: 30_000 });
-  await admin.close();
+    // …and remove them again. The store ends exactly as it started.
+    await pendingRow().getByRole("button", { name: "Remove" }).click();
+    await expect(m.getByText(ROLES.pending.email)).toHaveCount(0, { timeout: 30_000 });
+    removed = true;
+
+    // Removing yourself is refused — the refusal is the PASS.
+    const selfRow = m
+      .locator("li, tr, article")
+      .filter({ hasText: ROLES.admin.email })
+      .first();
+    await selfRow.getByRole("button", { name: "Remove" }).click();
+    await expect(m.getByText(ROLES.admin.email)).toBeVisible({ timeout: 30_000 });
+  } finally {
+    /* NEVER leave the pending robot in `admins`. If this test dies between
+       the add and the remove, the pending robot becomes a real admin on the
+       test project — and AC-003/AC-006 would then fail on the NEXT run
+       looking exactly like a gate breach, which is the worst possible false
+       alarm. (D-SYS-1 review finding F6; the same lesson J5/J6/J7 already
+       carry.) Best-effort, and it must not mask the original failure. */
+    if (!removed) {
+      try {
+        await m.goto("/admin/content/admins");
+        if (await pendingRow().count()) {
+          await pendingRow().getByRole("button", { name: "Remove" }).click();
+          await expect(m.getByText(ROLES.pending.email)).toHaveCount(0, {
+            timeout: 30_000,
+          });
+        }
+      } catch {
+        /* swallowed: the assertion that brought us here is the real report */
+      }
+    }
+    await admin.close();
+  }
 });
 
 test("AC-010 (J9, runs LAST): login and logout work, and the door locks again", async ({

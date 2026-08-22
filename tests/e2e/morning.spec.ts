@@ -28,7 +28,12 @@ test("MORNING-01 @morning: the gate is still shut for a stranger", async ({
       expect(location, `${path} redirect target`).toContain("/login");
     } else {
       expect(status, `${path} status for a stranger`).toBe(200);
-      expect(body, `${path} carries no redirect to /login`).toContain("/login");
+      // "/login?next=", not "/login": the header's Sign in link would
+      // satisfy the bare string on any page (D-SYS-1 finding F4).
+      expect(
+        body,
+        `${path} carries no redirect instruction to the sign-in page`,
+      ).toContain("/login?next=");
     }
     expect(
       body.includes("pw-topic-card") || body.includes('/guide"'),

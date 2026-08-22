@@ -83,6 +83,9 @@ jobs:
           --project=morning-desktop --project=morning-mobile
         env:
           PLAYWRIGHT_BASE_URL: ${{ vars.PRODUCTION_URL }}
+          # The one sanctioned production target in the whole system. The
+          # config refuses a production URL without this (D-SYS-1 F7).
+          MORNING_CHECK: "1"
           # ── Option B ONLY (not in use). Values would live in GitHub Actions
           # repository secrets, never in a file.
           # MORNING_TEST_EMAIL: ${{ secrets.MORNING_TEST_EMAIL }}
