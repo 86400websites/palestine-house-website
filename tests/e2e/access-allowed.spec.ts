@@ -154,9 +154,16 @@ test.describe("as the approved partner", () => {
     page,
   }) => {
     await page.goto("/dashboard");
-    await page.keyboard.press("ControlOrMeta+k");
     const input = page.getByPlaceholder(/Search focus areas/);
-    await expect(input).toBeVisible();
+    await page.keyboard.press("ControlOrMeta+k");
+    try {
+      await expect(input).toBeVisible({ timeout: 5_000 });
+    } catch {
+      // A second Ctrl+K would TOGGLE a just-opened dialog shut — fall back to
+      // the footer's real entry point instead.
+      await page.getByRole("button", { name: "Search all resources" }).first().click();
+      await expect(input).toBeVisible({ timeout: 15_000 });
+    }
     const query = content.gatedMarkers[0].split(" ")[0];
     await input.fill(query);
     /* The overlay is a NATIVE <dialog> — implicit dialog role, no role

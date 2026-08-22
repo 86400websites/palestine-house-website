@@ -56,7 +56,7 @@ test("PG-002: every same-origin link on every public page resolves", async ({
 test("PG-003: a wrong URL shows the site's own 404 page", async ({ page }) => {
   const response = await page.goto("/definitely-not-a-page-xyz");
   expect(response!.status()).toBe(404);
-  await expect(page.locator("h1")).toContainText("This page isn’t here.");
+  await expect(page.locator("h1").first()).toContainText("This page isn’t here.");
   // Branded, not bare: the site chrome is present.
   await expect(
     page.getByRole("link", { name: /Palestine House/ }).first(),

@@ -104,6 +104,11 @@ export default defineConfig({
       dependencies: ["desktop", "mobile-320"],
       testMatch: /journeys\.spec\.ts/,
       fullyParallel: false,
+      /* NEVER retried: several journeys send a real email or mutate data —
+         an automatic re-run means a duplicate submission (learned when a
+         retry re-sent the contact email). A journey failure is investigated,
+         not repeated. */
+      retries: 0,
       use: { browserName: "chromium", viewport: DESKTOP },
     },
   ],
