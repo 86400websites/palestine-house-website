@@ -1,29 +1,41 @@
-# Morning Check — daily watch on the live site.
+# Morning Check — the daily watchman on the LIVE site.
 # Filled from docs/testing-setup/templates/MORNING-CHECK-TEMPLATE.md at SYS2.
 #
-# ⛔ SHIPPED DISABLED (SYS2, SETUP-CHECKLIST Part 2): the schedule is commented
-# out and stays out until (1) the Launch Gate has passed and (2) the owner has
-# made the Option A / B / C decision in the template and it is recorded in
-# PROJECT-STATUS.md. Until then the only trigger is a manual dispatch, which
-# cannot reach any site: the PRODUCTION_URL variable is deliberately unset, and
-# the Playwright config refuses to run without a target.
+# ✅ SWITCHED ON at SYS2 (2026-08-22) as **OPTION A — logged-out only**.
+#
+# WHY THIS RUNS AGAINST PRODUCTION, NOT A PREVIEW. The launch gate proves a
+# release candidate on a Preview against the test database; this is the other
+# job — proving THE LIVE SITE is still up and still shut every morning. A
+# Preview cannot tell you that production broke. So this one run, alone in the
+# whole testing system, targets the real site.
+#
+# WHY THAT IS SAFE, AND WHY IT NEEDS NO CREDENTIALS AND NO TEST DATABASE:
+# Option A signs in as NOBODY. Every @morning spec is read-only — it loads
+# public pages, asks for gated URLs as a stranger and checks it is refused,
+# and reads response headers. It submits no form, creates no account, sends
+# no email and writes nothing, so it never touches the production database's
+# contents (BROWSER-TOOLS.md §6: on Production, automation is read-only).
+# There are therefore NO secrets to add to GitHub for this workflow.
+#
+# WHAT IT CANNOT TELL YOU (the honest limit of Option A): it proves the door
+# is shut, not that an approved partner's key still works. That is Option B —
+# a dedicated obviously-fake APPROVED production account whose password lives
+# as a GitHub Actions secret. It buys a login canary and costs a standing
+# credential that grants real access to all gated content. The owner can
+# upgrade later: create the account, add MORNING_TEST_EMAIL/PASSWORD as
+# repository secrets, uncomment the two env lines below, and add the signed-in
+# spec. Deliberately NOT done today.
 #
 # 🔴 This file NEVER touches .github/workflows/ci.yml. That workflow's job id
 # `verify` (display name `Install · Typecheck · Lint · Build`) is the
-# branch-protection required check (D-SYS-4) — nothing here may reuse or
-# rename it.
-#
-# This is the ONLY run in the testing system that targets Production, and it
-# is read-only in behaviour (BROWSER-TOOLS.md §6): @morning specs navigate and
-# read — never submit, never sign up, never email.
+# branch-protection required check (D-SYS-4).
 
 name: Morning Check
 
 on:
-  # ⛔ Disabled until activation. To enable: uncomment, pick a time the owner
-  # will actually read the email (GitHub cron is UTC).
-  # schedule:
-  #   - cron: "30 6 * * *"   # 06:30 UTC — adjust at activation
+  schedule:
+    # GitHub cron is UTC. 06:30 UTC ≈ 09:30 Doha — the owner's morning.
+    - cron: "30 6 * * *"
   workflow_dispatch: # manual run from the Actions tab, anytime
 
 permissions:
@@ -61,13 +73,21 @@ jobs:
       - name: Install browser
         run: pnpm exec playwright install --with-deps chromium
 
+      # The morning-* projects carry NO auth-setup dependency, so nothing
+      # signs in and no credential is needed; --grep "@morning" pins the
+      # safe-to-repeat set. (Selecting `desktop` would pull the auth setup in
+      # with it — that is exactly why these two projects exist.)
       - name: Run @morning tests against production
-        run: pnpm exec playwright test --grep "@morning"
+        run: >-
+          pnpm exec playwright test --grep "@morning"
+          --project=morning-desktop --project=morning-mobile
         env:
           PLAYWRIGHT_BASE_URL: ${{ vars.PRODUCTION_URL }}
-          # ── Option B ONLY. These stay commented out unless the owner picks
-          # Option B in MORNING-CHECK-TEMPLATE.md. Values live only in GitHub
-          # Actions secrets — never in a file, never in chat.
+          # The one sanctioned production target in the whole system. The
+          # config refuses a production URL without this (D-SYS-1 F7).
+          MORNING_CHECK: "1"
+          # ── Option B ONLY (not in use). Values would live in GitHub Actions
+          # repository secrets, never in a file.
           # MORNING_TEST_EMAIL: ${{ secrets.MORNING_TEST_EMAIL }}
           # MORNING_TEST_PASSWORD: ${{ secrets.MORNING_TEST_PASSWORD }}
 
