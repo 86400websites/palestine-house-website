@@ -88,6 +88,16 @@ The approved plan was "a few marked-TEST emails per full run" — and per run it
 
 - **Verdict: GO · Date: 2026-08-22 · Signed: Mohammad Katada Siddiqui (owner)** · Full-run report: this file.
 
+### The post-review re-run — the run this GO actually stands on
+
+| | |
+|---|---|
+| **Head** | `4b56272` (the review fixes + the session-scope fix) |
+| **Result** | **136 / 136 PASS · 0 fail · 0 flaky · 0 skipped**, 8.8 minutes |
+| **Scope** | the whole suite at both viewports, all four roles, plus all nine write journeys — with the strengthened assertions, not the ones the review criticised |
+
+The first attempt after the review fixes came back 15 red, and **the cause was mine, not the site's**: the new CT-005 issuer probe called `signOut()`, whose default scope in supabase-js is **global** — it revokes every session that user holds server-side, so it was killing the stored sessions the parallel specs were using. That is the AC-010 lesson (sign-out revokes everything, so it runs last) walking back in through a new door I had just built. The clients use `persistSession: false`, so nothing local needed clearing; the calls are gone and the reason is recorded at the call site. **No site defect was involved in any of the 15.**
+
 **The one thing this GO does not claim**, stated plainly so nobody later believes it did: **MN-003's final step is unproven** — the reset request, the link acceptance and the fail-closed behaviour are all proven, but no robot or human has yet typed a new password on `/update-password` and signed in with it. The owner has consciously accepted this at GO, on the strength of the three proven steps, and it is carried as an open manual line here and in `PROJECT-STATUS.md` §7 until the non-production `SUPABASE_SECRET_KEY` closes it automatically. It is not a discovered defect; it is a gap in coverage.
 
 **On this GO** → the Launch Gate line in [`LAUNCH-CHECKLIST.md`](../LAUNCH-CHECKLIST.md) → "The two that were never satisfied" is ticked for the first time in this project's life. Morning check: set up as **Option A** (logged-out only, **zero standing credentials — nothing to add to GitHub**), which is Claude Code's recommendation and the reversible default; the owner asked how it works rather than choosing, so the A→B upgrade stays open and is one commit away. Details in [`MORNING-CHECK-TEMPLATE.md`](../testing-setup/templates/MORNING-CHECK-TEMPLATE.md) and the workflow's own header.
