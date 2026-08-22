@@ -51,7 +51,7 @@ Not missing — not yet due. Each lands in the sprint that installs the module b
   historical record.
 - **The verification commands are three:** `pnpm run typecheck` · `pnpm run lint` · `pnpm run build`
   (plus `pnpm run start` for a local production smoke). Always `pnpm` — never `npm` or `yarn`.
-- **There is no `test` script.** `package.json` defines exactly `dev`, `build`, `start`, `lint`,
+- **`test:e2e` exists since SYS2** (Playwright, against a deployed Preview — not part of CI's `verify`). `package.json` defines `dev`, `build`, `start`, `lint`,
   `typecheck`. A template must never ask anyone to run a suite that does not exist — the Playwright suite
   arrives in **SYS2**.
 - **There is no formatting check.** Prettier is waived on this repo (**D-SYS-3**); do not add a

@@ -2,7 +2,7 @@
 
 > **This is a SKELETON. The `[BRACKETS]` stay brackets in this file, forever.** Copy it out to `docs/test-reports/[YYYY-MM-DD]-test-report.md`, fill the copy, leave this original alone — same rule as [`docs/templates/`](../../templates/README.md).
 >
-> ⛔ **Installed at SYS1 · filled and used in SYS2.** There is no test runner in this repo today — `package.json` defines exactly five scripts (`dev`, `build`, `start`, `lint`, `typecheck`), and there is no `tests/e2e/`. **`docs/test-reports/` arrives in SYS2**, and no report has ever been written for this project.
+> ✅ **Installed at SYS1 · in use since SYS2 (2026-08-22).** The suite is real (`tests/e2e/`, `pnpm run test:e2e`) and the first report — `docs/test-reports/2026-08-22-test-report.md`, 136/136 green with the owner's signed GO — is the model to follow.
 
 One row per feature from `docs/FEATURE-LIST.md`. Every failure explained in plain words. The newest report is the current truth.
 

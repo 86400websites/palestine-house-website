@@ -51,7 +51,7 @@ Sentry — a free error-tracking service, the only account this module needs —
 | The live incident register | `docs/INCIDENT-LOG.md` | **SYS3 seeds it**; rows are added at the first real incident |
 | The regression-test half of the lane — a permanent test per incident | `tests/e2e/`, `docs/FEATURE-LIST.md`, a `test` script, the morning check (`.github/workflows/morning-check.yml`) | **SYS2** |
 
-**The lane has a dependency.** Step 4 of the incident lane ("a new test, always") needs the testing launch gate — the companion module at [`../testing-setup/00-START-HERE.md`](../testing-setup/00-START-HERE.md), installed at SYS1 and activated in SYS2. `package.json` today defines exactly five scripts — `dev`, `build`, `start`, `lint`, `typecheck` — and **no `test` script**; there is no `tests/` directory. SYS2 lands before SYS3 for exactly this reason. If an incident somehow happens before SYS2 ships, log it with **"regression test owed — testing gate pending"** rather than marking it Closed.
+**The lane has a dependency.** Step 4 of the incident lane ("a new test, always") needs the testing launch gate — the companion module at [`../testing-setup/00-START-HERE.md`](../testing-setup/00-START-HERE.md), installed at SYS1 and **activated at SYS2 (2026-08-22)**. The suite exists: `tests/e2e/`, `pnpm run test:e2e`, 138 specs. Every incident must therefore earn a permanent regression spec there before its row moves to Closed — the dependency is satisfied, so "regression test owed" is no longer an acceptable resting state.
 
 ## Copy map — already applied at SYS1
 

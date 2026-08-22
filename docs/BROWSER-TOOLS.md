@@ -4,7 +4,7 @@
 >
 > Companion docs: [`QA-CHECKLIST.md`](./QA-CHECKLIST.md) (what to check), [`WORKFLOW.md`](./WORKFLOW.md) (the delivery chain), [`DESIGN.md`](./DESIGN.md) (what "looks right" means), [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) (what must not leak).
 
-**This is not the test suite.** What this doc describes is **exploratory, human-driven verification** — a person or an agent opening a real browser to look at a real page, once, for this change. The **repeatable, CI-run Playwright test suite arrives in sprint SYS2** (`tests/e2e/`, a `test` script, and the `activate-testing` setup). Today `package.json` defines `dev`, `build`, `start`, `lint` and `typecheck` and **no `test` script** — do not describe this repo as having automated tests, and do not let a browser walkthrough stand in for one. A browser pass proves *this build, this moment*; a test suite proves *every build after it*.
+**This is not the test suite.** What this doc describes is **exploratory, human-driven verification** — a person or an agent opening a real browser to look at a real page, once, for this change. The **repeatable Playwright suite shipped at SYS2** and lives in `tests/e2e/` (`pnpm run test:e2e`, operated by the `activate-testing` skill) — this repo **does** have automated tests, and a browser walkthrough must never stand in for one. A browser pass proves *this build, this moment*; a test suite proves *every build after it*.
 
 **Evidence the tools are already in use here.** [`.gitignore`](../.gitignore) carries a PP8 block (lines 46–52):
 

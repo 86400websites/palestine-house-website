@@ -11,7 +11,7 @@ One row per post-launch problem, newest on top. This file is the owner's five-mi
 ## The two closure rules (enforced, not suggested)
 
 1. **No Closed without a regression test** — the exact bug, reproduced as a permanent test in the launch-gate suite.
-   ⚠️ **The suite arrives in SYS2** (`tests/e2e/`, `docs/FEATURE-LIST.md`, a `test` script — none of which exist today). Until it ships, a row's test column reads **"owed — testing gate pending"** and the row stays **Verifying**, never Closed.
+   ✅ **The suite shipped at SYS2** — `tests/e2e/`, `docs/FEATURE-LIST.md` and `pnpm run test:e2e` all exist. Every incident earns a permanent regression spec there (and its feature-list line, owner-approved) before its row can move to **Closed**.
 2. **No Closed without User informed ✓** — or the recorded reason *"n/a — nobody was affected"*.
 
 ## ⚠️ This repository is public

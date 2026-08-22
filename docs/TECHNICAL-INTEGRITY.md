@@ -33,9 +33,9 @@ Verified 2026-08-21 against `.github/workflows/ci.yml`, `package.json`, `tsconfi
 | 1. The rules | How code must be written | [`../CLAUDE.md`](../CLAUDE.md), [`../AGENTS.md`](../AGENTS.md), [`TECH-ARCHITECTURE.md`](./TECH-ARCHITECTURE.md), [`DESIGN.md`](./DESIGN.md) |
 | 2. **The Code Check** | Every PR passes the checks below — red cannot merge, *provided* the branch-protection rule is enrolled (see Setup) | This file + [`../.github/workflows/ci.yml`](../.github/workflows/ci.yml) |
 | 3. Independent review | A second pair of eyes on risky PRs; no merge over a Blocking finding | [`WORKFLOW.md`](./WORKFLOW.md) §8, [`../AGENTS.md`](../AGENTS.md), records in [`code-reviews/`](./code-reviews/) |
-| 4. Behaviour proof | That the site actually works, before launch and after | **Unbuilt.** SYS2 builds 4a, SYS3 builds 4b |
+| 4. Behaviour proof | That the site actually works, before launch and after | **4a BUILT (SYS2, 2026-08-22)** — `tests/e2e/`, 138 specs, four roles, run against deployed Previews + a daily read-only production check. **4b unbuilt** — SYS3 (Sentry) |
 
-Walls 1–3 are standing. Wall 4 is the honest gap: this site has been live since 2026‑06‑19 (Production URL recorded in [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §1) with an approval gate, a private Storage bucket and real partner accounts, and **not one automated test and no runtime error capture**. Every behavioural claim made about it so far rests on a human or an agent walking the site by hand. Closing that is the whole point of Stage 5.
+Walls 1–3 are standing. **Wall 4a closed on 2026-08-22**: the site had been live since 2026‑06‑19 with an approval gate, a private Storage bucket and real partner accounts and **not one automated test**; SYS2's suite now proves all four roles in both directions on every gate run, and a daily read-only check watches the live site. **Wall 4b is still open** — there is no runtime error capture, so if a partner hits a 500 nobody is told. That is SYS3.
 
 ---
 
@@ -45,7 +45,7 @@ Walls 1–3 are standing. Wall 4 is the honest gap: this site has been live sinc
 2. **Lint-clean** — ESLint checks every line for known bad patterns. `eslint.config.mjs` extends `next/core-web-vitals` and `next/typescript` and **disables no rules** — its only `ignores` are `.next/**`, `node_modules/**`, `next-env.d.ts` and `docs/**` (locked reference inputs, never app source).
 3. **Formatted** — **waived here (D‑SYS‑3)**, see the status table. Formatting stays a matter of matching the surrounding file.
 4. **It builds** — `pnpm run build` must succeed. "Works in dev" counts for nothing.
-5. **Tests pass** — **nothing to run yet.** SYS2 adds the Playwright suite and wires it into `ci.yml` in the same PR.
+5. **Tests pass** — `pnpm run test:e2e` (Playwright, since SYS2) against a **deployed Preview**; deliberately not part of CI's `verify`, because the suite needs a Preview URL and credentials that a PR-time job does not have. The whole-site Launch Gate is operated by `/activate-testing`; a daily read-only subset runs against production.
 6. **No known-critical vulnerabilities** — `pnpm audit` runs on every PR since **SYS1 1h**: blocking at `critical`, reporting `high`/`moderate` without blocking. Dependabot's weekly PRs remain the update channel. **The high advisories are real and outstanding** — production runs `next@15.5.20` with SSRF advisories patched in `>=15.5.21` (`PROJECT-STATUS.md` §7 #6).
 7. **No secrets in history** — every PR is scanned by gitleaks over the branch's full history. This is Palestine House's own addition; it backs [`WORKFLOW.md`](./WORKFLOW.md) §15 and the env rules in [`ENV-VARS-SAFETY.md`](./ENV-VARS-SAFETY.md).
 
@@ -77,7 +77,7 @@ What the file actually does, in order:
 | 10 | Audit report (non-blocking) | `pnpm audit --audit-level moderate`, `continue-on-error` — prints high/moderate so a reviewer sees them on the PR |
 | — | Job timeout | `timeout-minutes: 20` — added at **SYS1 1h**, so a hung step cannot run to GitHub's six-hour default |
 
-The contract behind it: `package.json` defines `dev`, `build`, `start`, `lint` and `typecheck` — and nothing else. There is no `test` script and no `format:check` script. **Do not write a doc, prompt or checklist that assumes either exists.**
+The contract behind it: `package.json` defines `dev`, `build`, `start`, `lint`, `typecheck` and — since SYS2 — `test:e2e`. There is still no `format:check` (waived, D-SYS-3). `test:e2e` runs the Playwright suite against a **deployed Preview**, never in CI, so a doc or checklist may assume the suite exists but must not assume `verify` runs it.
 
 ### Known deltas from the SOP template, both recorded
 

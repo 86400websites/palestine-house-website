@@ -73,6 +73,6 @@ Claude Code supplies the exact click path in the SYS3 close-out. Do this **after
 
 ## One dependency, deliberately sequenced
 
-Step 4 of the incident lane ("a new test, always") needs the launch-gate suite from **SYS2** ([`../testing-setup/00-START-HERE.md`](../testing-setup/00-START-HERE.md)). Today there is no `tests/` directory and no `test` script — `package.json` defines `dev`, `build`, `start`, `lint`, `typecheck` and nothing else. SYS2 runs before SYS3 for this reason. Door A works standalone; the lane's regression step does not.
+Step 4 of the incident lane ("a new test, always") needs the launch-gate suite from **SYS2 — which shipped on 2026-08-22**. `tests/e2e/` and `pnpm run test:e2e` exist, so the regression step is live: an incident is not Closed until its spec is in the suite.
 
 **When every box above is ticked:** alerts land in the owner's inbox (Door A), reports go to [`/handle-error`](../../.claude/skills/handle-error/SKILL.md) (Door B), and [`ERROR-TRACKING-GUIDE.md`](./ERROR-TRACKING-GUIDE.md) §4 is the lane every incident travels. **Until then, nothing is watching.**
