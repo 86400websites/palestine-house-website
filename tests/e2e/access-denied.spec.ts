@@ -173,8 +173,13 @@ test.describe("as the pending partner", () => {
       for (const headers of [undefined, { RSC: "1" }] as const) {
         const { body } = await probe(request, path, headers);
         expectNoGatedStrings(body, `pending ${path}${headers ? " (RSC)" : ""}`);
+        /* Ignore the page's references to its OWN url (canonical + OG tags,
+           which Next emits even on a gated stream) — any OTHER guide link
+           would be content. Same correction AC-009 already carries; the
+           first run of this probe tripped on exactly that. */
+        const withoutSelf = body.split(path).join("");
         expect(
-          body.includes('/guide"'),
+          withoutSelf.includes('/guide"'),
           `pending partner was sent a guide link in ${path}`,
         ).toBe(false);
       }
