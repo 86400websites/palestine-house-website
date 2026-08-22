@@ -10,7 +10,7 @@ import { expect, test } from "@playwright/test";
    skipped test. Their feature-list lines are marked "pending SYS1.5" and the
    specs are added in that sprint, where rejection is the PASS. */
 
-test("PR-004: the six security headers are present and the CSP is the one we ship", async ({
+test("PR-004 @morning: the six security headers are present and the CSP is the one we ship", async ({
   request,
 }) => {
   const response = await request.get("/");

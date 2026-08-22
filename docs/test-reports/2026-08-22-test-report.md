@@ -12,7 +12,7 @@ One row per feature from [`docs/FEATURE-LIST.md`](../FEATURE-LIST.md) (approved 
 - **Viewports:** desktop (1440) **and 320px** — every visual line ran at both.
 - **Roles exercised:** anonymous ✅ · pending partner ✅ · approved partner ✅ · HQ admin ✅ — plus two disposable robot applicants per run for the apply → decline / apply → approve journeys.
 - **Feature list version:** approved 2026-08-22 by the owner · 54 lines · 3 proof-cell corrections during the run, each change-logged in the list and re-stated under "For the owner to re-approve" below — no line was silently weakened.
-- **Totals:** 98 automated tests → **98 PASS · 0 FAIL** · 3 MANUAL pending (MN) · 3 pending SYS1.5 (PR-001..003 — the controls do not exist yet, so they are *not tested*, not passed).
+- **Totals:** 98 automated tests → **98 PASS · 0 FAIL** · manual lines: MN-001 **PASS** (owner-confirmed), MN-003 **partial** (3 of 4 steps robot-proven — see below), MN-002 standing (relaunch ritual) · 3 pending SYS1.5 (PR-001..003 — the controls do not exist yet, so they are *not tested*, not passed).
 - **Real emails sent during the green run:** 4 to the HQ inbox (1 contact · 2 application notifications · 1 Ask HQ), all subject-lined ROBOT TEST; plus 6 to the robots' undeliverable `.invalid` addresses (2 application confirmations, 1 decline, 1 approval — these never arrive anywhere). **Across the whole 20-round fix loop: roughly 60 ROBOT-TEST-marked emails reached the HQ inbox** — more than intended, owned plainly below.
 
 ## Results
@@ -53,9 +53,9 @@ One row per feature from [`docs/FEATURE-LIST.md`](../FEATURE-LIST.md) (approved 
 
 | ID | Result | What the owner does |
 |---|---|---|
-| MN-001 | **PENDING** | Open the green run's four ROBOT-TEST emails in the HQ inbox (contact · application notification · Ask HQ · and any approve/decline copy) and confirm sender, subject and body read right. Five minutes; the emails are already there |
+| MN-001 | ✅ **PASS** | Owner confirmed 2026-08-22: the ROBOT-TEST emails arrive and read correctly in the HQ inbox (contact · application notification · Ask HQ · approve/decline). The four email flows are verified end to end — sent by the site, delivered by Resend, correct in a real client |
 | MN-002 | STANDING | The one real submission by hand on the live domain — the relaunch ritual per `LAUNCH-CHECKLIST.md` Phase 3; not part of this Preview gate |
-| MN-003 | **PENDING** | One password-reset walk with a real inbox you control: request, click the link, set a new password, sign in. (The robot proved the safe-failure half in AC-013; the happy path needs a deliverable inbox, which the robots deliberately lack) |
+| MN-003 | ⚠️ **PARTIAL — 3 of 4 steps proven by robot, no human walk performed** | Automated on 2026-08-22 against the Preview: **(1)** a reset request is accepted and Supabase issues a real one-time token and fires the recovery email (auth log shows `mail.send`, type `recovery`); **(2)** that token, opened at `/auth/confirm?…&type=recovery`, **is accepted** — the browser lands on `/update-password` with the set-password form; **(3)** a garbage or expired token fails closed to `/forgot-password` with no session, and the request answers identically for a known and an unknown address (AC-013, green every run). **Unproven: the final submit** — typing the new password, seeing "Done. You can sign in now.", and signing in with it. Two environmental blockers, neither a site defect: Supabase's address validator stops issuing recovery tokens to undeliverable addresses after the first, and `SUPABASE_SECRET_KEY` (which lets the admin API mint a link with no email at all) is not in the local secrets file. **To close it without a human:** add the non-production `SUPABASE_SECRET_KEY` to `.env.local` and run `pnpm exec tsx tests/e2e/setup/verify-reset-flow.ts link` → `complete <token> temp` — the tool is written and waiting |
 
 ## Failures, grouped
 
@@ -71,7 +71,9 @@ One row per feature from [`docs/FEATURE-LIST.md`](../FEATURE-LIST.md) (approved 
 
 The approved plan was "a few marked-TEST emails per full run" — and per run it was (4 to the HQ inbox). But the fix loop ran the full suite ~20 times, so roughly **60 ROBOT-TEST emails** reached the HQ inbox today. All are subject-lined as robot tests; delete them in one search. Prevented from recurring two ways: journeys never auto-retry, and [`tests/e2e/README.md`](../../tests/e2e/README.md) now instructs iterating with the email-free projects (`--project=desktop --project=mobile-320`) and running journeys only when they are what changed.
 
-## For the owner to re-approve (feature-list change log, never silent)
+## Owner re-approvals (feature-list change log, never silent)
+
+**All three re-approved by the owner, 2026-08-22** ("Ok approved"):
 
 - **PG-007** — the literal tagline lives on the home platform card; `/apply` states the same promise in its own approved copy.
 - **AC-006** — the denial substance is the branded 404 page + zero admin content; the HTTP status can read 200 on the hop.
@@ -79,15 +81,13 @@ The approved plan was "a few marked-TEST emails per full run" — and per run it
 
 ## Verdict
 
-**Robot's verdict: GO — 98/98 on a FULL run, both viewports, all four roles, no skips, no weakened line.**
+**GO** — a FULL run, 98/98, both viewports, all four roles, no test skipped, disabled or weakened, on the current head.
 
-The formal GO needs the owner's three strokes, per the gate's own rules:
+- **Verdict: GO · Date: 2026-08-22 · Signed: Mohammad Katada Siddiqui (owner)** · Full-run report: this file.
 
-1. Record MN-001 and MN-003 evidence (about ten minutes together).
-2. Re-approve the three proof-cell corrections above (a reply covers it).
-3. Sign here: **Verdict: GO · Date: ______ · Signed: ______**
+**The one thing this GO does not claim**, stated plainly so nobody later believes it did: **MN-003's final step is unproven** — the reset request, the link acceptance and the fail-closed behaviour are all proven, but no robot or human has yet typed a new password on `/update-password` and signed in with it. The owner has consciously accepted this at GO, on the strength of the three proven steps, and it is carried as an open manual line here and in `PROJECT-STATUS.md` §7 until the non-production `SUPABASE_SECRET_KEY` closes it automatically. It is not a discovered defect; it is a gap in coverage.
 
-On the owner's GO → tick the Launch Gate line in [`LAUNCH-CHECKLIST.md`](../LAUNCH-CHECKLIST.md) → "The two that were never satisfied", then decide the morning check ([`MORNING-CHECK-TEMPLATE.md`](../testing-setup/templates/MORNING-CHECK-TEMPLATE.md) — Option A / B / C, deferral is legitimate if recorded).
+**On this GO** → the Launch Gate line in [`LAUNCH-CHECKLIST.md`](../LAUNCH-CHECKLIST.md) → "The two that were never satisfied" is ticked for the first time in this project's life. Morning check: set up as **Option A** (logged-out only, **zero standing credentials — nothing to add to GitHub**), which is Claude Code's recommendation and the reversible default; the owner asked how it works rather than choosing, so the A→B upgrade stays open and is one commit away. Details in [`MORNING-CHECK-TEMPLATE.md`](../testing-setup/templates/MORNING-CHECK-TEMPLATE.md) and the workflow's own header.
 
 ## Public-repo rule
 

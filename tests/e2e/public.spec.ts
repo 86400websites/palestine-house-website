@@ -12,7 +12,7 @@ import {
 /* Section A of docs/FEATURE-LIST.md — the public shell. */
 
 for (const route of PUBLIC_ROUTES) {
-  test(`PG-001: ${route} renders clean`, async ({ page }) => {
+  test(`PG-001 @morning: ${route} renders clean`, async ({ page }) => {
     const errors = attachConsoleCapture(page);
     const response = await page.goto(route);
     expect(response!.status(), `${route} did not return 200`).toBe(200);
@@ -53,7 +53,7 @@ test("PG-002: every same-origin link on every public page resolves", async ({
   expect(broken, `dead links:\n${broken.join("\n")}`).toHaveLength(0);
 });
 
-test("PG-003: a wrong URL shows the site's own 404 page", async ({ page }) => {
+test("PG-003 @morning: a wrong URL shows the site's own 404 page", async ({ page }) => {
   const response = await page.goto("/definitely-not-a-page-xyz");
   expect(response!.status()).toBe(404);
   await expect(page.locator("h1").first()).toContainText("This page isn’t here.");
@@ -137,7 +137,7 @@ test("PG-007: the Apply conversion is reachable from every page", async ({
   await expect(page.getByText(/HQ reviews your application/).first()).toBeVisible();
 });
 
-test("PG-008: sitemap, robots and manifest resolve and expose only the public shell", async ({
+test("PG-008 @morning: sitemap, robots and manifest resolve and expose only the public shell", async ({
   request,
 }) => {
   const sitemap = await request.get("/sitemap.xml");

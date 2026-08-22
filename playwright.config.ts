@@ -95,6 +95,21 @@ export default defineConfig({
       testIgnore: /journeys\.spec\.ts/,
       use: { browserName: "chromium", viewport: MOBILE_320, hasTouch: true },
     },
+    /* The morning check's own projects — deliberately WITHOUT the `setup`
+       dependency, so the daily production run needs no robot credentials and
+       creates no session at all (Option A). Selecting `desktop` would drag
+       `setup` in with it; these two exist so the live run can stay
+       credential-free. Used only by .github/workflows/morning-check.yml. */
+    {
+      name: "morning-desktop",
+      testIgnore: /journeys\.spec\.ts/,
+      use: { browserName: "chromium", viewport: DESKTOP },
+    },
+    {
+      name: "morning-mobile",
+      testIgnore: /journeys\.spec\.ts/,
+      use: { browserName: "chromium", viewport: MOBILE_320, hasTouch: true },
+    },
     /* The write journeys run ONCE, serially, after both viewport projects:
        they send the run's few marked-TEST emails and briefly mutate
        non-production data (draft toggle, robot applicant, test upload) that
