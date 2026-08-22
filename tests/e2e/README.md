@@ -48,6 +48,20 @@ morning check invoke it deliberately; nothing invokes it by accident.
 `auth.setup.ts` through the real `/login` form and stored under
 `playwright/.auth/` (gitignored).
 
+## Iterating without sending email
+
+The journeys project (`journeys.spec.ts`) sends real, ROBOT-TEST-marked email
+from the Preview and never auto-retries. When iterating on anything else, run
+the email-free projects only:
+
+```
+pnpm run test:e2e -- --project=desktop --project=mobile-320
+```
+
+Run the full suite (journeys included) only when the journeys changed or a
+verdict needs a full run. The first fix loop ran full ~20 times and put ~60
+robot emails in the HQ inbox — once was enough to learn this.
+
 ## Rules that bind every spec
 
 - Target Previews, never Production; `@morning`-tagged specs are the only

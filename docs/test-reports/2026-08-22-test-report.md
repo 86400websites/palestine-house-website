@@ -1,0 +1,94 @@
+# Test Report — Palestine House — 2026-08-22
+
+One row per feature from [`docs/FEATURE-LIST.md`](../FEATURE-LIST.md) (approved by the owner 2026-08-22). Every result in plain words. The newest report is the current truth. **This is the first automated whole-site measurement this project has ever had** — the site launched 2026-06-19 and had never run a suite before today.
+
+---
+
+## Run header
+
+- **Run type:** **FULL** — all 98 tests, no skips, no retries used on the green run
+- **Environment:** deployed Vercel **Preview** of branch `claude/sprint-sys2-launch-gate-run` (deployment built from `43cee57`; site code identical to `main` = `cecb0d9` — every commit on this branch is tests and docs only, zero `src/` changes). Preview URL recorded in the session log; reached through the sanctioned Protection Bypass (protection is ON).
+- **Data separation confirmed:** two ways, by the robot — no production ref appears in anything the Preview serves (`tests/e2e/setup/verify-preview-env.ts` tripwire), and the three robot accounts, which exist **only** in the non-production project, signed in successfully through the real `/login` form. A Preview on the production database could not have let them in.
+- **Viewports:** desktop (1440) **and 320px** — every visual line ran at both.
+- **Roles exercised:** anonymous ✅ · pending partner ✅ · approved partner ✅ · HQ admin ✅ — plus two disposable robot applicants per run for the apply → decline / apply → approve journeys.
+- **Feature list version:** approved 2026-08-22 by the owner · 54 lines · 3 proof-cell corrections during the run, each change-logged in the list and re-stated under "For the owner to re-approve" below — no line was silently weakened.
+- **Totals:** 98 automated tests → **98 PASS · 0 FAIL** · 3 MANUAL pending (MN) · 3 pending SYS1.5 (PR-001..003 — the controls do not exist yet, so they are *not tested*, not passed).
+- **Real emails sent during the green run:** 4 to the HQ inbox (1 contact · 2 application notifications · 1 Ask HQ), all subject-lined ROBOT TEST; plus 6 to the robots' undeliverable `.invalid` addresses (2 application confirmations, 1 decline, 1 approval — these never arrive anywhere). **Across the whole 20-round fix loop: roughly 60 ROBOT-TEST-marked emails reached the HQ inbox** — more than intended, owned plainly below.
+
+## Results
+
+**Section A — public shell: all PASS.** Every public page renders clean at both sizes with zero console errors (PG-001); every same-origin link resolves (PG-002); a wrong URL gets the branded 404 (PG-003); header and footer are identical everywhere (PG-004); all nine retired workspace paths and their sub-pages 307 to `/dashboard` (PG-005); `/focus-areas` states 22 · 88 and no page anywhere shows the retired numbers (PG-006); the Apply button reaches `/apply` from every page and the review promise is stated on home and on `/apply` (PG-007); sitemap/robots/manifest expose only the public shell (PG-008); the header knows signed-in from signed-out (PG-009).
+
+**Section B — the approval gate: all PASS.** This is the section that matters most, and every cell held:
+
+| ID | Result | In plain words |
+|---|---|---|
+| AC-001 | PASS | An anonymous visitor typing any of the 28 gated URLs ends up on the sign-in page, and the raw response carries no focus-area title, no guide text, no storage path — checked against real content titles read at runtime |
+| AC-002 | PASS | Same for all six admin URLs — no admin content renders for a stranger |
+| AC-003 | PASS | A pending partner sees "Your application is under review." and nothing else — no summary, no guide, no template, anywhere |
+| AC-004 | PASS | A pending partner's Ctrl/⌘+K search returns an empty index — the raw payload carries no titles, ids, storage paths or bucket names |
+| AC-005 | PASS | A pending partner CAN reach `/account` (the one deliberate exception) and it shows only their own details |
+| AC-006 | PASS | An approved partner opening any admin URL gets the branded 404 page with zero admin content — approved is never admin |
+| AC-007 | PASS | An approved partner gets everything: all five platform pages with real content, clean at both sizes |
+| AC-008 | PASS | The HQ admin reaches all six admin screens |
+| AC-009 | PASS | Nothing gated is ever built into a denied response — the streamed body of a denied request carries no content markup |
+| AC-010 | PASS | Login works, sign-out works, and the same door is shut again immediately after |
+| AC-011 | PASS | An already-signed-in visitor who opens `/login` is sent straight on |
+| AC-012 | PASS | A wrong password gets a clear message and no session |
+| AC-013 | PASS | Password-reset requests answer identically whether or not the account exists, and a garbage reset link fails to a safe page with no session |
+| AC-014 | PASS | Apply = sign-up: one submission creates the pending account + application and lands the applicant on the pending dashboard |
+| AC-015 | PASS | Decline holds the door shut (the declined message shows, nothing resolves); approve is the one unlock (content appears with no re-login) |
+
+**Section C — gated content: all PASS.** 5 · 6 · 6 · 5 focus areas = 22 (CT-001); each focus area shows exactly the model — summary, one Simple guide card, Watch Video, templates — and none of the retired card types (CT-002); all 22 guide pages open with real content (CT-003); a template really downloads through a signed URL, bytes on disk (CT-004); a pending or anonymous caller never receives a signed URL or a storage path (CT-005); search finds content and navigates for an approved partner (CT-006); a Drafted focus area vanishes everywhere — section pages, guide URL, census 22→21 — and returns on Live (CT-007).
+
+**Section D — forms and email: all PASS.** Contact rejects bad input client- and server-side and delivers when valid (FM-001/002); Apply rejects bad input (FM-003); a duplicate application cannot be created — one queue row, re-submit lands on the dashboard (FM-004); applying notifies both sides (FM-005); Ask HQ works for an approved partner and its form never renders for a pending one (FM-006); `/account` saves the display name and offers the password-change path (FM-007); approve/decline sends the right email variant (FM-008).
+
+**Section E — HQ admin: all PASS.** The approvals queue lists, approves and declines (AD-001); the pages editor saves and the platform shows it — then it was restored (AD-002); the focus-areas editor edits, toggles Draft↔Live and reorders — restored (AD-003); the files manager refuses a `.txt` **naming what arrived**, refuses an over-4 MB file, uploads a real PDF that appears in the partner's grid, and deletes it behind the typed-name confirmation — store left exactly as found (AD-004); admin management adds and removes an admin, and **refuses self-removal** (AD-005 — the last-admin refusal is enforced by the same server rule, deliberately not exercised live because it would mean touching the owner's own admin row).
+
+**Section F — protection.** PR-004 PASS: all six security headers present, CSP shaped exactly as shipped (YouTube embed origin as the only third-party allowance). PR-001/002/003: **N/A — pending SYS1.5.** The rate-limit and Turnstile controls do not exist yet (§7 #1, deferred behind SYS2 by D-SYS-11); not passed, not failed, not tested. SYS1.5 has not merged, so this does not block the verdict.
+
+**Section G.** IN-001 PASS — the session probe answers exactly `{"authed": true/false}` and nothing else. IN-002 PASS — proven by the applicant journey succeeding end to end with Mailchimp absent.
+
+**Section H — manual lines, the owner's part:**
+
+| ID | Result | What the owner does |
+|---|---|---|
+| MN-001 | **PENDING** | Open the green run's four ROBOT-TEST emails in the HQ inbox (contact · application notification · Ask HQ · and any approve/decline copy) and confirm sender, subject and body read right. Five minutes; the emails are already there |
+| MN-002 | STANDING | The one real submission by hand on the live domain — the relaunch ritual per `LAUNCH-CHECKLIST.md` Phase 3; not part of this Preview gate |
+| MN-003 | **PENDING** | One password-reset walk with a real inbox you control: request, click the link, set a new password, sign in. (The robot proved the safe-failure half in AC-013; the happy path needs a deliverable inbox, which the robots deliberately lack) |
+
+## Failures, grouped
+
+**None open.** The first run found 33 red results; over ~20 fix-loop rounds every one traced to the *tests* learning the site's real architecture — not one site defect. The site's behaviors that initially *looked* wrong and turned out right, kept as recorded observations:
+
+1. **Gated pages stream** — a denied request can answer HTTP 200 whose stream carries only a loading shell plus the redirect; the browser always lands on `/login` and no content ever streams. Production behaves identically (verified live, read-only). The specs assert the substance, not the status code.
+2. **Admin route titles are visible to strangers** (Low, observation): the `<title>`/social metadata of admin pages (e.g. "Focus areas — Content admin") renders even on a denied stream. Structure only — the same class as the resolved §7 #3 — zero data. Logged here; owner may send it to the backlog.
+3. **A signed-in non-admin's `/admin` answer is the 404 page under a 200 status** on the redirect-chain hop (a Next.js streaming soft-404). The UI and content denial are complete; recorded per run as an annotation.
+4. **The apply thank-you view is a fallback** — a successful apply signs the applicant in and lands on the pending dashboard (S6 step 3.5, by design).
+5. **A decision is final in the approvals UI** — Approve/Decline exist only while pending, by design; hence one disposable applicant per branch.
+
+## Owned plainly: the fix-loop email volume
+
+The approved plan was "a few marked-TEST emails per full run" — and per run it was (4 to the HQ inbox). But the fix loop ran the full suite ~20 times, so roughly **60 ROBOT-TEST emails** reached the HQ inbox today. All are subject-lined as robot tests; delete them in one search. Prevented from recurring two ways: journeys never auto-retry, and [`tests/e2e/README.md`](../../tests/e2e/README.md) now instructs iterating with the email-free projects (`--project=desktop --project=mobile-320`) and running journeys only when they are what changed.
+
+## For the owner to re-approve (feature-list change log, never silent)
+
+- **PG-007** — the literal tagline lives on the home platform card; `/apply` states the same promise in its own approved copy.
+- **AC-006** — the denial substance is the branded 404 page + zero admin content; the HTTP status can read 200 on the hop.
+- **FM-007** — `/account` has no in-place password form by design; its Password card links into the reset flow.
+
+## Verdict
+
+**Robot's verdict: GO — 98/98 on a FULL run, both viewports, all four roles, no skips, no weakened line.**
+
+The formal GO needs the owner's three strokes, per the gate's own rules:
+
+1. Record MN-001 and MN-003 evidence (about ten minutes together).
+2. Re-approve the three proof-cell corrections above (a reply covers it).
+3. Sign here: **Verdict: GO · Date: ______ · Signed: ______**
+
+On the owner's GO → tick the Launch Gate line in [`LAUNCH-CHECKLIST.md`](../LAUNCH-CHECKLIST.md) → "The two that were never satisfied", then decide the morning check ([`MORNING-CHECK-TEMPLATE.md`](../testing-setup/templates/MORNING-CHECK-TEMPLATE.md) — Option A / B / C, deferral is legitimate if recorded).
+
+## Public-repo rule
+
+This report contains no real person's identity, no account id, no project ref, no credential, no gated content excerpt and no storage path. The only addresses referenced are the robots' undeliverable `.invalid` ones.

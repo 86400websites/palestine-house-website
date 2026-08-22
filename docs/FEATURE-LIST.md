@@ -4,7 +4,7 @@
 
 Everything the site does, one plain-English line each. **Everything on this list gets tested; nothing off this list does.** Drafted by Claude Code from a full scan of the code (`src/app/` — 39 routes, both Route Handlers, every Supabase RPC the app calls, all four email flows, the redirect map in `next.config.ts`, the Ctrl/⌘+K search boundary) cross-checked against the docs; approved by the owner before any test is written.
 
-- Source scan date: **2026-08-22** · Repo head: **`cecb0d9`** · Preview tested: *filled at the full run (Phase 3)*
+- Source scan date: **2026-08-22** · Repo head: **`cecb0d9`** (site code; tests on `claude/sprint-sys2-launch-gate-run`) · Preview tested: the branch's deployed Preview, 2026-08-22 — **FULL run 98/98 green**, report: [`test-reports/2026-08-22-test-report.md`](./test-reports/2026-08-22-test-report.md)
 - Content numbers asserted by this list: **4 sections · 22 focus areas · 88 templates** *(as of 2026-08-22; these move only when real content is added, never invented)*
 - Test users — **non-production Supabase project only, obviously fake, passwords never recorded anywhere**:
   - pending partner: `e2e-pending-partner@robot-test.invalid`
