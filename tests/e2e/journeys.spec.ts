@@ -343,7 +343,11 @@ test("AD-002 (J6): the pages editor saves — and the platform shows it", async 
   const p = await approved.newPage();
   const setupShows = async (needle: string) => {
     await p.goto("/setup");
-    return (await p.locator("main").innerText()).includes(needle);
+    /* .first(): during a client transition the old and new <main> can both
+       be mounted for a moment, and a bare locator("main") then fails strict
+       mode. Observed once on a slow Preview; not a site defect (the id is
+       React's, and only one survives the transition). */
+    return (await p.locator("main").first().innerText()).includes(needle);
   };
 
   const field = await openSetupEditor();

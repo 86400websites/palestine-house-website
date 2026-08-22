@@ -153,6 +153,39 @@ test.describe("as the pending partner", () => {
     expect(errors, `console errors:\n${errors.join("\n")}`).toHaveLength(0);
   });
 
+  test("AC-003 (raw): nothing gated is in the pending partner's RESPONSES either", async ({
+    request,
+  }) => {
+    /* The check above reads the finished page. This one reads what the server
+       actually SENT to the pending session — raw HTML and the RSC payload.
+       The PP8 8-k failure shape (content streamed, then replaced by React) is
+       invisible to page.content() and visible here, and that shape is exactly
+       what SECURITY-CHECKLIST §15 exists to catch.
+
+       This probe was recorded as shipped in the D-SYS-1 review record and was
+       NOT actually present — the script that wrote it aborted before saving,
+       and nobody re-checked. A post-merge audit caught the false record. The
+       lesson this project already had: a step that reports success still has
+       to be verified. The `request` fixture inherits this describe's pending
+       storageState. */
+    test.setTimeout(180_000);
+    for (const path of [...PLATFORM_ROUTES, ...content.guideLinks]) {
+      for (const headers of [undefined, { RSC: "1" }] as const) {
+        const { body } = await probe(request, path, headers);
+        expectNoGatedStrings(body, `pending ${path}${headers ? " (RSC)" : ""}`);
+        /* Ignore the page's references to its OWN url (canonical + OG tags,
+           which Next emits even on a gated stream) — any OTHER guide link
+           would be content. Same correction AC-009 already carries; the
+           first run of this probe tripped on exactly that. */
+        const withoutSelf = body.split(path).join("");
+        expect(
+          withoutSelf.includes('/guide"'),
+          `pending partner was sent a guide link in ${path}`,
+        ).toBe(false);
+      }
+    }
+  });
+
   test("AC-004: the pending partner's search is empty and leaks nothing", async ({
     page,
   }) => {

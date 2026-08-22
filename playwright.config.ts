@@ -1,4 +1,4 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig, type Project } from "@playwright/test";
 
 /* Playwright config — the Launch Gate harness (SYS2).
    docs/testing-setup/TESTING-GUIDE.md is the owner-facing contract;
@@ -30,27 +30,43 @@ if (!baseURL) {
   );
 }
 
-/* Nothing but the morning check may aim at Production. The write journeys
-   create accounts, draft focus areas, edit page copy and upload files — all
-   safe on the test database, catastrophic on the live one. The projects are
-   only accidentally protected (the robots do not exist in production, so
-   sign-in fails), so refuse the target outright. The morning workflow sets
-   MORNING_CHECK=1; nothing else does. (D-SYS-1 review finding F7.) */
+/* Nothing but the morning check may aim at Production, and "nothing" is
+   enforced STRUCTURALLY, not by permission. The write journeys create
+   accounts, draft focus areas, edit page copy, upload files and add admins —
+   safe on the test database, catastrophic on the live one.
+
+   The first version of this guard only *lifted the refusal* when
+   MORNING_CHECK=1, which meant one environment variable admitted all 136
+   tests (including the 9 write journeys) to the live site; the only thing
+   left stopping them was that the robots do not exist in production, which
+   the config's own comment admitted was luck. A post-merge audit reproduced
+   it. Now: against a production host the config EXPORTS ONLY the two
+   read-only morning projects, so the write journeys are not merely refused —
+   they do not exist to be run. Provable: `--list` against a production URL
+   returns 34, never 136. */
 const PRODUCTION_HOSTS = [
   "palestine-house-website.vercel.app",
   "www.palestine-house.com",
   "palestine-house.com",
 ];
-if (
-  PRODUCTION_HOSTS.includes(new URL(baseURL).host) &&
-  process.env.MORNING_CHECK !== "1"
-) {
+/* Vercel also serves the live app under generated aliases (…-git-main-….
+   vercel.app). Treat any host that is not clearly a per-commit Preview as
+   production-shaped: Preview deployments carry a per-deployment hash of the
+   form `<project>-<hash>-<scope>.vercel.app`, while the git-branch aliases
+   spell the branch out. Better to refuse a Preview by mistake (a loud,
+   harmless error) than to admit the live site by mistake. */
+const host = new URL(baseURL).host;
+const isProductionTarget =
+  PRODUCTION_HOSTS.includes(host) || /-git-[a-z0-9-]+-/.test(host);
+
+if (isProductionTarget && process.env.MORNING_CHECK !== "1") {
   throw new Error(
-    `REFUSING: PLAYWRIGHT_BASE_URL points at Production (${new URL(baseURL).host}). ` +
+    `REFUSING: PLAYWRIGHT_BASE_URL points at Production (${host}). ` +
       "Only the morning check may target the live site, and it is read-only " +
       "(docs/BROWSER-TOOLS.md §6). Point this at a deployed Preview.",
   );
 }
+
 
 /* Vercel deployment protection: when the owner has protection on, requests
    carry the sanctioned bypass header — the only allowed door
@@ -70,29 +86,10 @@ const extraHTTPHeaders = bypassSecret
 const DESKTOP = { width: 1440, height: 900 };
 const MOBILE_320 = { width: 320, height: 568 };
 
-export default defineConfig({
-  testDir: "tests/e2e",
-  fullyParallel: true,
-  timeout: 60_000,
-  forbidOnly: !!process.env.CI,
-  /* One retry everywhere: the target is a cold serverless Preview on a
-     free-tier database — a single transient slow round-trip must not paint a
-     working feature red. A genuine defect fails twice. */
-  retries: 1,
-  /* Evidence stays local and gitignored — never committed (activate-testing
-     skill: "Never commit test artifacts"). */
-  outputDir: "test-results",
-  reporter: [
-    ["list"],
-    ["html", { outputFolder: "playwright-report", open: "never" }],
-  ],
-  use: {
-    baseURL,
-    extraHTTPHeaders,
-    trace: "retain-on-failure",
-    screenshot: "only-on-failure",
-  },
-  projects: [
+/* Every project this suite can run. Against a PRODUCTION target only the
+   read-only `morning-*` pair is exported below — the write journeys are not
+   refused at run time, they are absent. */
+const ALL_PROJECTS: Project[] = [
     /* One auth-setup step per role (SETUP-CHECKLIST Part 2): each signs in
        once through the real /login form and saves its session for the role
        specs to reuse. Anonymous needs no state. */
@@ -157,5 +154,36 @@ export default defineConfig({
       retries: 0,
       use: { browserName: "chromium", viewport: DESKTOP },
     },
+];
+
+/* The structural half of the production guard (see PRODUCTION_HOSTS above).
+   A guard that merely refuses can be argued past with one env var; a guard
+   that removes the capability cannot. */
+const PROJECTS = isProductionTarget
+  ? ALL_PROJECTS.filter((project) => project.name?.startsWith("morning-"))
+  : ALL_PROJECTS;
+
+export default defineConfig({
+  testDir: "tests/e2e",
+  fullyParallel: true,
+  timeout: 60_000,
+  forbidOnly: !!process.env.CI,
+  /* One retry everywhere: the target is a cold serverless Preview on a
+     free-tier database — a single transient slow round-trip must not paint a
+     working feature red. A genuine defect fails twice. */
+  retries: 1,
+  /* Evidence stays local and gitignored — never committed (activate-testing
+     skill: "Never commit test artifacts"). */
+  outputDir: "test-results",
+  reporter: [
+    ["list"],
+    ["html", { outputFolder: "playwright-report", open: "never" }],
   ],
+  use: {
+    baseURL,
+    extraHTTPHeaders,
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+  },
+  projects: PROJECTS,
 });
