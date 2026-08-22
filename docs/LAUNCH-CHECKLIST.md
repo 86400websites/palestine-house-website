@@ -33,7 +33,13 @@ Three jobs, in order of how often you will use it:
 
 Stated first so nobody has to find them.
 
-### ⛔ The Launch Gate — no automated test run has ever gated a release here
+### ✅ The Launch Gate — SATISFIED 2026-08-22, for the first time in this project's life
+
+**A full automated run now gates releases here.** SYS2 installed the Playwright suite and ran it: **98/98 green** on a deployed Preview across both viewports and all four roles, against an owner-approved 54-line `docs/FEATURE-LIST.md`, with the **GO signed by the owner on 2026-08-22** — report: [`test-reports/2026-08-22-test-report.md`](./test-reports/2026-08-22-test-report.md). A daily **morning check** (Option A — logged-out, read-only, zero standing credentials) now watches the live site and emails only on failure. The honest edge, carried openly: **MN-003's final step** (typing a new password on the reset screen and signing in with it) is not yet robot-proven — the request, the link acceptance and the fail-closed behaviour are; see the report and `PROJECT-STATUS.md` §7 #7.
+
+*(The pre-SYS2 history is kept below, because a satisfied gate should still show what it replaced.)*
+
+### ⛔ (Historic) The Launch Gate — no automated test run had ever gated a release here
 
 The SOP's Phase 1 requires a **100% green whole-site test run on the release candidate**, with a **GO** verdict recorded in `docs/test-reports/`. None of that existed on 2026-06-19, and no automated run has ever gated a release here. *(The machinery now exists: `docs/testing-setup/` and the `/activate-testing` skill arrived at SYS1, and SYS2 installed the harness itself — `@playwright/test`, `tests/e2e/`, the `test:e2e` script, the four robot roles in the non-production project. An installed harness is still not a passed gate: this line stays un-ticked until a full run is 100% green and the owner signs the GO on the latest report in `docs/test-reports/`.)*
 
