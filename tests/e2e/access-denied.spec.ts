@@ -230,7 +230,12 @@ test.describe("as the pending partner", () => {
       });
       expect(signInError, `${role} robot could not sign in`).toBeNull();
       const { data } = await client.rpc("get_resources");
-      await client.auth.signOut();
+      /* NO signOut() here. Its default scope is GLOBAL: it revokes every
+         session that robot holds server-side, including the stored sessions
+         the other specs are using in parallel — which is exactly what
+         AC-010 taught this suite, and what this probe reintroduced on its
+         first run (15 spurious auth timeouts). The client is created with
+         persistSession:false, so there is nothing local to clean up. */
       return ((data ?? []) as { id: string }[]);
     };
 
@@ -241,7 +246,12 @@ test.describe("as the pending partner", () => {
         password: rolePassword(role),
       });
       const result = await client.rpc("get_resource_download", { p_id: resourceId });
-      await client.auth.signOut();
+      /* NO signOut() here. Its default scope is GLOBAL: it revokes every
+         session that robot holds server-side, including the stored sessions
+         the other specs are using in parallel — which is exactly what
+         AC-010 taught this suite, and what this probe reintroduced on its
+         first run (15 spurious auth timeouts). The client is created with
+         persistSession:false, so there is nothing local to clean up. */
       return result;
     };
 
