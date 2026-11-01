@@ -12,6 +12,13 @@ import {
 import { createClient } from "@supabase/supabase-js";
 import { ROLES, rolePassword } from "./helpers/roles";
 
+/* A marker as rendered element text. A flight payload is escaped inside the HTML and raw
+   on an RSC request. */
+const rendersMarker = (body: string, marker: string) =>
+  body.includes(`>${marker}<`) ||
+  body.includes(`\\"children\\":\\"${marker}\\"`) ||
+  body.includes(`"children":"${marker}"`);
+
 /* Section B of docs/FEATURE-LIST.md — the DENIED half of the four-role grid.
    The most important file in this suite: every check here is "people who
    shouldn't get in, can't". Real topic titles are discovered at runtime as
@@ -105,13 +112,8 @@ test("AC-002: anonymous — every /admin route denies with no admin strings in t
          leak is the marker as rendered element text or an exact flight
          children string. */
       for (const marker of ADMIN_MARKERS) {
-        // A flight payload is escaped inside the HTML and raw on an RSC request.
-        const rendered =
-          body.includes(`>${marker}<`) ||
-          body.includes(`\\"children\\":\\"${marker}\\"`) ||
-          body.includes(`"children":"${marker}"`);
         expect(
-          rendered,
+          rendersMarker(body, marker),
           `admin string "${marker}" rendered in anonymous ${path}`,
         ).toBe(false);
       }
@@ -365,7 +367,9 @@ test.describe("as the approved partner", () => {
 
   test("AC-006: approved is never admin — every /admin route answers with the 404 page", async ({
     page,
+    request,
   }, testInfo) => {
+    test.setTimeout(180_000);
     for (const path of ADMIN_ROUTES) {
       const response = await page.goto(path);
       /* The substance: the branded 404 page, zero admin content. The HTTP
@@ -386,6 +390,17 @@ test.describe("as the approved partner", () => {
           body.includes(`${marker}</h1>`) || body.includes(`${marker}</h2>`),
           `admin heading "${marker}" rendered for a non-admin on ${path}`,
         ).toBe(false);
+      }
+      /* The finished page cannot show a heading that streamed and was then replaced, and
+         a session-only gate would stop nothing for this role, so read what was sent too. */
+      for (const headers of [undefined, { RSC: "1" }] as const) {
+        const { body: raw } = await probe(request, path, headers);
+        for (const marker of ADMIN_MARKERS) {
+          expect(
+            rendersMarker(raw, marker),
+            `admin string "${marker}" sent to a non-admin on ${path}${headers ? " (RSC)" : ""}`,
+          ).toBe(false);
+        }
       }
     }
   });

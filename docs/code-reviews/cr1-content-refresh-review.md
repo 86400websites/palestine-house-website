@@ -288,6 +288,7 @@ exactly one verdict:
 ## After the review
 
 - Append the returned record here. Blocking findings are fixed by the builder on the same branch.
+- A commit that only appends the returned record does not change what was reviewed: name it in the record.
 - **Any substantive change after the reviewed head invalidates the approval:** re-run the checks,
   retest the Preview and re-review at the new head.
 - Merging is the owner's, and for CR1 it happens at step 6 of the runbook, not before.

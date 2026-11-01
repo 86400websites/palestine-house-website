@@ -31,12 +31,16 @@ is refused on purpose.
 first and on its own. Merge it with **Create a merge commit**, not squash or rebase, and wait
 for its Production deployment to reach Ready. A squash or rebase makes #104 conflict, which
 needs a new push and so a new review. It changes no content and does not start the release.
+Then sign in on the live site, click two tabs, open a guide and download one file. That is the
+old pages on the new packages, which the suite cannot run because TEST holds CR1's content. If
+any of it fails, use Instant Rollback (see Rollback, below) and stop.
 
 #104 (this release) is ready and not yet merged: CI green, which you confirm by eye, because
-GitHub does not require it on `main`; the Vercel Preview tested against TEST at desktop and
-320px; `pnpm run test:e2e` green against it; the independent review approved at the head you
-are about to merge. One thing only you can see: the marked-TEST email from that run's contact
-journey arrived in the inbox.
+GitHub does not require it on `main`; `pnpm run test:e2e` green on the Preview of the last head
+that changed anything but documents; the independent review approved at the head you are about
+to merge, or at that head plus commits that only append the review's record, named in it. One
+thing only you can see: the marked-TEST email from that run's contact journey arrived in the
+inbox.
 
 **5. Leave `/admin/content` alone from step 2 until the release is closed,** and tell anyone
 else who holds an admin login. The tool helps, but only so far. Before it has started,
@@ -188,14 +192,16 @@ confirmation and changes nothing. If that run passes, carry on. On the second ru
   or mixed with other lines: stop and ask, and do not roll back. Usually that is the
   connection, Storage or the credentials, and a rollback needs the same services. It can
   also be a missing file, so it does need someone to look.
-- Lines naming only a focus area's own fields (`N: title`, `summary`, `expanded copy`, `guide
-  body`, `photograph changed`, `card order changed`, `video link changed`): do not roll back. The
-  tool writes back what it reads for most of these, so someone has saved that card in the CMS
-  during the release. Stop and ask: re-running `switch` rewrites just that card's words and keeps
-  its link, which was seen on the non-production project. It writes back a changed photograph or
-  card order as it finds them, so those need putting right by hand.
-- Only other lines in the `FAILED` list (a file's bytes or title, counts, a wrong object): stop,
-  and go to Rollback.
+- Lines naming only a focus area's or a section's own fields (`N: title`, `summary`, `expanded
+  copy`, `guide body`, `photograph changed`, `card order changed`, `video link changed`, `section
+  x: title`, `lead`, `label`, `eyebrow`, `card description`): do not roll back. Someone has saved
+  that card or page in the CMS during the release. Stop and ask: re-running `switch` rewrites just
+  that card's words and keeps its link, which was seen on the non-production project, and it should
+  do the same for a section, which was not. It writes back a changed photograph or card order as
+  it finds them, so those need putting right by hand.
+- Only lines about a file's bytes, a wrong object, a lost id or a missing row: stop, and go to
+  Rollback.
+- Anything else, such as a count or a mix of these: stop and ask.
 
 A `note:` line is not a failure. `video link added since the snapshot` means a finished video
 went in through the CMS, which is fine.
@@ -279,7 +285,9 @@ pnpm exec tsx scripts/cr1-content.ts --step verify --phase retired --target prod
 Expect `ALL CHECKS PASSED`. If it fails, treat it as at step 5; a rollback from here starts
 with `restore-objects`.
 
-Only when it passes may you close the release and return to your usual clone routine. Keep
+Only when it passes may you close the release and return to your usual clone routine. Ask Claude
+for the docs-only PR that flips the trackers to Done, because they still describe the time before
+the release. Keep
 the whole folder you copied at step 2: the archive alone cannot run a rollback. To roll back from a
 fresh clone, first put it back with
 `robocopy E:\cr1-backup\content-refresh-cr1 docs\source-assets\content-refresh-cr1 /E`. Use
@@ -293,8 +301,12 @@ robocopy for this, because File Explorer can leave out delivery files on the way
 instant, and the previous pages tolerate either content state for a few minutes. If it has
 not (a failed step 5), skip Code: the live pages are already the previous ones.
 
-**Code.** Vercel, Deployments, the deployment before #104's merge, **Promote to Production**.
-That is the #103 deployment, so the dependency update and the lost-click fix stay live. If the
+**Code.** On the Vercel project page, press **Instant Rollback** on the Production Deployment
+tile, choose the deployment of #103's merge commit, and confirm. Do not use Promote to
+Production, which is for Preview rows and rebuilds that branch's code. It has worked when `/terms`
+shows the old Terms page again. That deployment keeps the dependency update and the lost-click fix
+live. From then on Vercel keeps new Production deployments off the live site: a later merge reaches
+Ready but is not served until you press **Undo Rollback** on the same tile and choose it. If the
 merge itself must go, revert #104's merge commit through a PR afterwards, and not #103's.
 
 **Content.**
@@ -327,11 +339,11 @@ pnpm exec tsx scripts/cr1-content.ts --step verify-rollback --target prod
 pnpm exec tsx scripts/cr1-content.ts --step remove-new-objects --target prod
 ```
 
-Every step can be repeated if it stops part-way. To go forward again after a rollback,
-start from step 3, and if you promoted an older deployment on Vercel, promote the CR1 one
-again at step 6. If you reverted #104's merge, promoting is not enough, because `main` no longer
-holds the code: at step 6, revert that revert through a PR and wait for its Production deployment
-to reach Ready.
+Every step can be repeated if it stops part-way. To go forward again after a rollback, start from
+step 3. At step 6, press **Undo Rollback** and choose the CR1 deployment. If you reverted #104's
+merge, first revert that revert through a PR and wait for its Production deployment to reach Ready,
+then press **Undo Rollback** and choose that one. Either way, check that `/terms` shows the site's
+404 before step 7.
 
 ---
 
@@ -392,5 +404,6 @@ rather than a plain partner, because
 production has no disposable accounts, and the tool ignores any test-account names it finds. So
 on production `verify` prints `as the approved admin` and `denied checks: anonymous`; step 7 is
 where a real partner's view gets checked.
-Production's private rows were compared read-only with TEST's before the rehearsal and match
-by checksum and size.
+Production's 110 private files were compared read-only with the 110 the rehearsal started from, on
+2026-11-02, and match by checksum and size. The Vercel half of a rollback has not been rehearsed:
+it follows Vercel's own documentation, read on the same day.

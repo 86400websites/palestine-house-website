@@ -202,6 +202,9 @@ function PageForm({ page }: { page: PageRow }) {
             onChange={(e) => setLead(e.target.value)}
           />
           <Counter value={lead} max={180} />
+          <span className="adm-field-hint">
+            Leave blank to keep the intro this page has.
+          </span>
         </label>
 
         <label className="adm-form-field">

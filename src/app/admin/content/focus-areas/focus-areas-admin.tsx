@@ -334,10 +334,16 @@ function FocusAreaForm({
   const [dirty, setDirty] = React.useState(false);
   const touch = () => setDirty(true);
   const panel = React.useRef<HTMLDivElement>(null);
+  /* The guide is written only if it was edited here, so a Save that only adds a video
+     link, from a tab opened before someone else's edit, cannot put old text back.
+     Comparing the box with its default would not do: a refresh moves the default and
+     leaves the box showing the older text. */
+  const guideEdited = React.useRef(false);
 
   React.useEffect(() => {
     if (!state.ok) return;
     setDirty(false);
+    guideEdited.current = false;
     if (state.id && onCreated) onCreated(state.id);
   }, [state, onCreated]);
 
@@ -371,12 +377,7 @@ function FocusAreaForm({
              wrote the wrong photograph. */
           e.preventDefault();
           const data = new FormData(e.currentTarget);
-          /* The guide is written only if it was edited. A Save that only adds a video
-             link, from a tab opened before someone else's edit, cannot put old text back. */
-          const box = e.currentTarget.elements.namedItem("simpleGuideMd");
-          if (box instanceof HTMLTextAreaElement && box.value === box.defaultValue) {
-            data.delete("simpleGuideMd");
-          }
+          if (!guideEdited.current) data.delete("simpleGuideMd");
           React.startTransition(() => formAction(data));
         }}
         className="adm-form"
@@ -627,7 +628,10 @@ function FocusAreaForm({
               name="simpleGuideMd"
               rows={14}
               defaultValue={guide?.simple_guide_md ?? ""}
-              onChange={touch}
+              onChange={() => {
+                guideEdited.current = true;
+                touch();
+              }}
             />
             <span className="adm-field-hint">
               What a partner reads when they press Read Now. Plain text is fine; a

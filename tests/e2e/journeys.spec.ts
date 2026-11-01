@@ -268,9 +268,11 @@ test("CT-007/AD-003 (J5): Draft hides a focus area everywhere; Live restores it;
   browser,
   baseURL,
 }) => {
-  test.setTimeout(300_000);
+  test.setTimeout(420_000);
   const admin = await roleContext(browser, baseURL!, "admin");
   const m = await admin.newPage();
+  // Every step is bounded, so a stuck one fails while the page is alive for the clean-up.
+  m.setDefaultTimeout(60_000);
   m.on("dialog", (dialog) => void dialog.accept());
   await m.goto("/admin/content/focus-areas");
 
@@ -379,7 +381,8 @@ test("CT-007/AD-003 (J5): Draft hides a focus area everywhere; Live restores it;
       await expect(newRow()).toHaveCount(0, { timeout: 30_000 });
     };
     try {
-      await m.goto("/admin/content/focus-areas");
+      // A leftover from a crashed run would be refused as a duplicate, so sweep it first.
+      await deleteNew();
       await m.getByRole("button", { name: "+ New focus area" }).click();
       await m.locator('input[name="title"]').fill(NEW_TITLE);
       await m.locator('input[name="code"]').fill("9.9");
@@ -695,6 +698,8 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
      Both kinds of placement: the four on /dashboard (Pages screen) and the 22 on the
      focus-area cards (Focus areas screen). The link is a well-formed id that is no video. */
   const LINK = "https://www.youtube.com/watch?v=aaaaaaaaaaa";
+  const GUIDE_LINE = "Robot test line, saved and then taken out again.";
+  const GUIDE_PAGE = "/setup/get-ready-to-open/guide";
   const admin = await roleContext(browser, baseURL!, "admin");
   const m = await admin.newPage();
   // Every step is bounded, so a stuck one fails here while the page is still alive for the
@@ -783,6 +788,15 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     await p.goto("/setup");
     await expect(cardVideos()).toHaveAttribute("href", LINK, { timeout: 60_000 });
     await expect(p.getByRole("link", { name: "Watch Video" })).toHaveCount(1);
+
+    // That Save did not send the guide, because nobody touched it. One that was edited is
+    // sent, and the partner reads it. The clean-up below puts the text back.
+    await editFocusArea();
+    await guideText.fill(`${guideNow}\n${GUIDE_LINE}`);
+    await pressSave();
+    await saved();
+    await p.goto(GUIDE_PAGE);
+    await expect(p.getByText(GUIDE_LINE)).toBeVisible({ timeout: 60_000 });
   } finally {
     // NEVER leave a link behind: CT-009 expects all 26 back on the placeholder. Each wait
     // for "Saved." follows a press that worked, so a Save with nothing to do costs no more.
@@ -809,6 +823,9 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
   await p.goto("/setup");
   await expect(p.locator("#topic-get-ready-to-open")).toBeVisible({ timeout: 60_000 });
   await expect(cardVideos()).toHaveCount(0);
+  await p.goto(GUIDE_PAGE);
+  await expect(p.locator("main").first()).toBeVisible({ timeout: 60_000 });
+  await expect(p.getByText(GUIDE_LINE)).toHaveCount(0);
 
   await approved.close();
   await admin.close();

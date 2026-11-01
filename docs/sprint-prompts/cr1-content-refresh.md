@@ -5,7 +5,7 @@
 | **Date merged** | Not merged. Pushed, CI green, the full suite green on its Preview. The independent review and the production release are still to come. |
 | **Branch / PR** | `claude/sprint-cr1-content-refresh` / [#104](https://github.com/86400websites/palestine-house-website/pull/104), on top of SEC1, [#103](https://github.com/86400websites/palestine-house-website/pull/103) |
 | **Goal** | Replace the private learner content with the owner's new delivery and align the website copy with it, without rebuilding the site. |
-| **Status** | 🔵 **Awaiting the independent review.** Not Done, and production is not updated. See "What is still owed". |
+| **Status** | 🔵 **Awaiting the independent review.** Not Done, and production is not updated. See "What is still owed". *(Written before the release. If you read this on `main`, #104 has merged at runbook step 6 and the release is under way or done.)* |
 
 Owner-requested on 2026-10-30, ahead of the planned next sprint (SYS1.5), with an explicit
 continuous-execution override: no sub-step gates, no commits or pushes until the owner says so.
@@ -302,9 +302,20 @@ no partner account, so an admin could have "checked a partner's view" through a 
 review's own challengers and its completeness pass stopped at a usage limit part-way, so its findings on the tool, the
 docs and the gates were judged here rather than challenged independently.
 
+**A last look, over the record and over what nobody had checked.** The record's numbers held. It found one more real bug,
+in the fix above: comparing the guide box with its default failed after any refresh of a stale tab, because a refresh moves
+the default and leaves the box showing older text, so that text was sent. The form now tracks whether the guide was edited
+at all, and AD-006 proves an edited guide still reaches the partner. AC-006 could not see a leak to a signed-in non-admin
+that streamed and was then replaced, so it now reads what was sent. J5's clean-up had the hole AD-006's just lost. In the
+runbook: the code rollback named the wrong Vercel control, and missed that after an Instant Rollback new deployments stay off
+the live site until Undo Rollback (read from Vercel's documentation on 2026-11-02, and corrected in `ROLLBACK.md` too); the
+triage sent a section's words to Rollback; and #104's trackers would have arrived on `main` already out of date at step 6, so
+they now say so, and step 12 asks for the PR that flips them. A hint now says a blank intro keeps what the page has.
+
 **The guards, watched failing, on a scratch build with the faults put in on purpose.**
 
-- The Files page's admin gate removed: AC-002 went red, naming the leaked heading.
+- The Files page's admin gate removed: AC-002 went red, naming the leaked heading, and so did AC-006 for a signed-in
+  approved partner, on the raw response.
 - React's fix taken out: CT-012 went red at once on the shipped-React check. Its clicks alone, 12 runs across both
   viewports: 7 lost a click, 1 ran out of time on a slow load, 4 passed. That is what a race allows, and why the first
   check exists. Before the review's changes to the test, the same clicks caught it in 5 of 12.
@@ -312,7 +323,8 @@ docs and the gates were judged here rather than challenged independently.
 **Production's rules, compared read-only.** 8 row and Storage policies, 100 columns, 37 constraints, 2 buckets, and 46
 functions with their grants equal TEST's, whitespace and comments aside. The one function that differs,
 `admin_cutover_focus_areas`, is a one-off from an earlier sprint that this release does not call. Production holds no
-video links today, and has 9 approved partner accounts and 2 approved admins.
+video links today, and has 9 approved partner accounts and 2 approved admins. Its 110 private files match, by checksum
+and size, the 110 the rehearsal started from (measured 2026-11-02, from TEST's snapshot).
 
 **The decisions.** D-CR1-1…6 are recorded in `PROJECT-STATUS` §5 as the engine's calls, not the owner's signature, for
 the owner to overrule. One stays with the owner because nothing here can reach it: the hosted Supabase email templates.

@@ -43,7 +43,7 @@ non-production project. It cannot execute one.
 | Situation | Action |
 |---|---|
 | Production broken, cause known | **Revert the PR on `main`** — the default fix |
-| Production broken, partners or visitors affected NOW | **Vercel → Deployments → previous good deployment → Promote to Production**, then still correct `main` |
+| Production broken, partners or visitors affected NOW | **Vercel → the project page → Instant Rollback → previous good deployment**, then still correct `main` |
 | A migration shipped with the break | Code rollback alone is NOT enough — see Step 4 |
 | The break involves the legacy content, its rows or its Storage objects | Use [`ROLLBACK-RUNBOOK.md`](./ROLLBACK-RUNBOOK.md), not this tree |
 | The break involves the current content release | Use the Rollback section of [`CR1-RELEASE-RUNBOOK.md`](./CR1-RELEASE-RUNBOOK.md), not this tree |
@@ -101,8 +101,9 @@ established that `list_migrations` returns `[]` there, because migrations are ap
 
 ## Step 2 — Instant restore (if users are affected)
 
-- [ ] **Vercel → Deployments → previous good deployment → Promote to Production.**
+- [ ] **Vercel → the project page → Instant Rollback on the Production Deployment tile → previous good deployment.** Promote to Production is for Preview rows and rebuilds that branch's code, so it is not this.
 - [ ] Confirm the live site works again.
+- [ ] **New Production deployments now stay off the live site** until you press **Undo Rollback** on the same tile and choose one.
 
 This is a stopgap, not the fix — `main` still needs the revert (Step 3). It also restores **code
 only**; read Step 4 before assuming anything about the database.
@@ -114,7 +115,7 @@ only**; read Step 4 before assuming anything about the database.
 - [ ] Confirm the new production deployment, built from the reverted `main`, is good.
 
 GitHub remains the source of truth: once the dust settles, **production must equal `main`** again. A
-promoted old deployment sitting on top of a poisoned `main` means the next merge re-ships the bug.
+rolled-back deployment sitting on top of a poisoned `main` means the next merge re-ships the bug.
 
 ## Step 4 — The data lever (skip only if the break involved no schema or data change)
 
