@@ -186,11 +186,14 @@ async function checkCode(
   id: string | null,
   code: string,
 ): Promise<string | null> {
-  const [{ data: files, error }, { data: topics }] = await Promise.all([
+  const [
+    { data: files, error: filesError },
+    { data: topics, error: topicsError },
+  ] = await Promise.all([
     supabase.rpc("admin_list_resource_files", { p_element_id: elementId }),
     supabase.rpc("admin_list_platform_topics"),
   ]);
-  if (error) return GENERIC;
+  if (filesError || topicsError) return GENERIC;
   const rows = (files as { id: string; code: string | null }[] | null) ?? [];
   const current = rows.find((r) => r.id === id);
   if (id && !current) return "That file is no longer here. Please reload the page.";

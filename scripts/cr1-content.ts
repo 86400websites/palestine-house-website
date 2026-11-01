@@ -194,6 +194,16 @@ function videoLink(value: string | null): string | null {
   return value && /^https?:\/\//i.test(value) ? value : null;
 }
 
+/* After the switch, what a link's difference from the snapshot means. This tool only ever
+   writes back the link it read, so one on a row whose snapshot had none is a finished video
+   added in the CMS, which needs no sprint and is no reason to stop or undo a release: it is
+   only noted. Losing or changing a link the snapshot held is still a failure. */
+function checkVideoLink(now: string | null, was: string | null, where: string, fails: string[]): void {
+  if (videoLink(now) === videoLink(was)) return;
+  if (videoLink(was) === null) notes.add(`${where}: video link added since the snapshot. A rollback takes it off.`);
+  else fails.push(`${where}: video link changed`);
+}
+
 function counted(what: string, detail: Record<string, unknown>): void {
   ops += 1;
   mkdirSync(DIR, { recursive: true });
@@ -760,29 +770,31 @@ async function stepSwitch(db: SupabaseClient, spec: Cr1Spec): Promise<void> {
       ] += 1;
     }
 
+    /* Read again here, not taken from the list above, which is as old as the confirmation
+       prompt. This RPC writes the link it is given, blank included, so it gets the one
+       there now: a finished video added in the CMS stays. */
+    const live = (await withRetry(() => readTopics(db))).find((x) => x.slug === t.slug)!;
     const guideNow = (await rpc<{ simple_guide_md: string | null }[]>(db, "admin_get_element", { p_slug: row.element_slug }))[0]?.simple_guide_md;
     const same =
-      row.title === t.title &&
-      row.description === t.summary &&
-      row.intro === t.introMd &&
+      live.title === t.title &&
+      live.description === t.summary &&
+      live.intro === t.introMd &&
       guideNow === t.guideMd;
     if (!same) {
       const { error } = await db.rpc("admin_upsert_platform_topic", {
-        p_id: row.id,
-        p_group_id: row.group_id,
+        p_id: live.id,
+        p_group_id: live.group_id,
         p_slug: null,
         p_title: t.title,
         p_description: t.summary,
         p_intro: t.introMd,
-        p_icon: row.icon,
-        p_image_path: row.image_path,
-        p_image_position: row.image_position,
-        /* This RPC writes the link it is given, blank included, so it gets the one
-           already there: a finished video added in the CMS stays. */
-        p_youtube_url: row.youtube_url,
-        p_sort_order: row.sort_order,
+        p_icon: live.icon,
+        p_image_path: live.image_path,
+        p_image_position: live.image_position,
+        p_youtube_url: live.youtube_url,
+        p_sort_order: live.sort_order,
         p_published: null,
-        p_element_code: row.element_code,
+        p_element_code: live.element_code,
         p_simple_guide_md: t.guideMd,
       });
       if (error) throw new Error(`focus area ${t.number} update failed (${error.message}). Re-run --step switch.`);
@@ -889,11 +901,14 @@ async function verifyDownload(db: SupabaseClient, id: string, file: SpecFile, fa
 }
 
 async function signInAs(emailVar: string, passwordVar: string): Promise<SupabaseClient | null> {
+  /* These names are the rehearsal's test accounts and carry no target. Production has no
+     such accounts, and a stray one would fail step 5 just after the content went live. */
+  if (TARGET === "prod") return null;
   const email = process.env[emailVar];
   const password = process.env[passwordVar];
   if (!email || !password) return null;
-  const url = TARGET === "prod" ? process.env.PROD_SUPABASE_URL! : process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = TARGET === "prod" ? process.env.PROD_SUPABASE_PUBLISHABLE_KEY! : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
   const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
   const { error } = await client.auth.signInWithPassword({ email, password });
   if (error) throw new Error(`${emailVar} sign-in failed: ${error.message}`);
@@ -924,7 +939,7 @@ async function verifyContent(db: SupabaseClient, spec: Cr1Spec, fails: string[],
     if (row.title !== t.title) fails.push(`${t.number}: title`);
     if (row.description !== t.summary) fails.push(`${t.number}: summary`);
     if (row.intro !== t.introMd) fails.push(`${t.number}: expanded copy`);
-    if (videoLink(row.youtube_url) !== videoLink(before.youtube_url)) fails.push(`${t.number}: video link changed`);
+    checkVideoLink(row.youtube_url, before.youtube_url, t.number, fails);
     if (row.image_path !== before.image_path) fails.push(`${t.number}: photograph changed`);
     if (row.sort_order !== before.sort_order) fails.push(`${t.number}: card order changed`);
 
@@ -1014,7 +1029,7 @@ async function verifyContent(db: SupabaseClient, spec: Cr1Spec, fails: string[],
       if (cur.eyebrow !== want.eyebrow) fails.push(`section ${want.slug}: eyebrow`);
       if (want.journeyDesc !== null && cur.journey_desc !== want.journeyDesc) fails.push(`section ${want.slug}: card description`);
       const before = snapshot.sections.find((s) => s.slug === want.slug);
-      if (videoLink(cur.youtube_url) !== videoLink(before?.youtube_url ?? null)) fails.push(`section ${want.slug}: video link changed`);
+      checkVideoLink(cur.youtube_url, before?.youtube_url ?? null, `section ${want.slug}`, fails);
     }
   }
   return checkedDownloads;
@@ -1381,7 +1396,7 @@ function stepRollbackSql(spec: Cr1Spec): void {
   const baseline = existsSync(BASELINE_PATH)
     ? new Map((JSON.parse(readFileSync(BASELINE_PATH, "utf8")) as { id: string; created_at: string }[]).map((r) => [r.id, r.created_at]))
     : null;
-  if (!baseline) console.warn("  ! no baseline-rows.json for this target: restored rows would take now() as created_at");
+  if (!baseline) console.log("  note: the restored rows take today's date as created_at, which nothing reads. Expected on production.");
 
   const values = retired.map((r) => {
     const created = baseline?.get(r.id);

@@ -21,6 +21,9 @@ git log  --oneline MERGE_BASE_SHA..HEAD_SHA
 git diff --stat     MERGE_BASE_SHA..HEAD_SHA
 ```
 
+If #103 has merged by the time this runs, that merge-base moves. The range of this first round stays
+`89ffe71..HEAD_SHA`, so it still covers both PRs.
+
 ---
 
 # The brief
@@ -38,8 +41,8 @@ database or bucket. Do not critique the approved copy or the locked design.
 ## Review target
 
 - Repo: `palestine-house` — **this GitHub repository is PUBLIC**
-- PRs: [#103](https://github.com/86400websites/palestine-house-website/pull/103) (SEC1) and CR1's, named
-  in the commissioning prompt
+- PRs: [#103](https://github.com/86400websites/palestine-house-website/pull/103) (SEC1) and
+  [#104](https://github.com/86400websites/palestine-house-website/pull/104) (CR1)
 - Branch: `claude/sprint-cr1-content-refresh`, on top of `claude/sec1-dependencies` (context only; neither
   is the review scope)
 - **Immutable range: `MERGE_BASE_SHA..HEAD_SHA`, given in the commissioning prompt, never a branch name**
@@ -138,6 +141,13 @@ privacy placeholder.
   back into nothing for every reader. It avoids a migration.
 - **A `.docx` is checked by name, not content** at the Files screen. That predates CR1, and only an admin can
   upload.
+- **`main` has no required status check** (`PROJECT-STATUS` §7 #17). It is a repo setting, logged for the owner,
+  and not something this diff can change.
+- **A comment in `next.config.ts` (line 55) still says the Files screen accepts PDFs.** It is history about an
+  earlier config decision, and that file is out of scope here, so it stays.
+- **`verify` only notes a video link added after the snapshot, and still fails on one the snapshot held that
+  has changed or gone.** The tool only writes back the link it read, so an addition cannot be its doing, and the
+  owner may add finished videos during the release. A rollback still takes such a link off, and the runbook says so.
 - `src/lib/admin/file-safety.ts` says what it can and cannot catch, and `scripts/verify-svg-safety.ts` holds
   its cases.
 
@@ -157,10 +167,13 @@ Measured before commit, on the working tree, against TEST. The full record is in
   140 exact hashes.
 - **Cleanup.** 110 superseded objects removed by an explicit list after a byte check of all 127; bucket
   holds 127; 0 strays; re-run removes nothing.
-- **Rollback.** Four times, three from the released state and one from straight after `switch`:
+- **Rollback.** Seven runs. The last, with the final tool on the final packages, from the released state:
   `restore-objects`, `rollback`, the retired-row SQL, `verify-rollback` and `remove-new-objects`, then
-  independent read-only fingerprints of all six stores equal to the pre-CR1 baseline. The release was then
-  run forward again, so TEST is in the final state.
+  independent read-only fingerprints of all six stores equal to the pre-CR1 baseline, with no hand fix. The
+  release then ran forward again with no step retried, so TEST is in the final state. From straight after
+  `switch`, all six matched on an earlier tool, and the four compared matched with the rollback code as it is
+  now. One earlier run wrote the "no video" marker on all five sections; `verify-rollback` missed it, only the
+  fingerprints caught it, and the sprint record has the account.
 - **Refusals seen on TEST, with no ledger write.** No target; `--target production`; missing production
   credentials; `rollback` before `restore-objects`; `switch` and `snapshot` after a content edit; `switch`,
   `snapshot` and `rollback` with a file added in the CMS. `--dry-run --target prod` creates no client.
@@ -184,8 +197,9 @@ the read-only MCP.** `--target prod` has only ever reached its refusals and a dr
   owner's robot password. J1 and J2 send real TEST-marked email to the operational inbox, so they run only
   on the owner's Preview run. J4, J8 and J9 need the owner's robots too.
 - **[PENDING]** One permitted contact-delivery test (D-CR1-4).
-- **[PENDING]** The owner's answers to D-CR1-1…6, including re-approval of the changed `FEATURE-LIST`
-  lines.
+- D-CR1-1…6 are decided as the engine's recorded calls (`PROJECT-STATUS` §5), for the owner to overrule, so
+  they are not a merge condition. Only the hosted email templates remain the owner's, because nothing here
+  can reach them.
 - **[PENDING]** Every production step in the runbook. The production path has never run.
 
 ## Hunt list
@@ -225,7 +239,9 @@ the read-only MCP.** `--target prod` has only ever reached its refusals and a dr
     sessions and cookies, `sanitize-html` and `marked` around guide rendering, `zod`, framer-motion 13?
 13. **The admin changes.** `checkCode` in `file-actions.ts`: can a code still be made untrue, and can it refuse
     something legitimate, such as a save that leaves the code alone? PDFs refused consistently, client and
-    server. No gate moved.
+    server. No gate moved. The focus-area and Pages forms now submit through `onSubmit` so a refusal resets
+    nothing: does any field still post a value the admin did not choose? When the guide read fails the form
+    leaves the guide field out: can any path still write an empty body over a real one?
 14. **Regressions.** Shared CSS edits, anchors, metadata, and the Playwright guards (the production
     guard, `@morning` read-only and credential-free, journeys `retries: 0`).
 

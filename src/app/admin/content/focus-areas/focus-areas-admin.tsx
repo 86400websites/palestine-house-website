@@ -312,9 +312,6 @@ function FocusAreaForm({
      click cannot rewrite a row with what it already said. */
   const [dirty, setDirty] = React.useState(false);
   const touch = () => setDirty(true);
-  /* Held here, not as a defaultValue: React resets a form's uncontrolled fields after
-     every action, so a refused link would vanish before it could be corrected. */
-  const [video, setVideo] = React.useState(topic?.youtube_url ?? "");
   const panel = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -342,7 +339,19 @@ function FocusAreaForm({
         </p>
       )}
 
-      <form action={formAction} className="adm-form">
+      <form
+        action={formAction}
+        onSubmit={(e) => {
+          /* Not the form action's own submit: React resets a form after that, whatever
+             the answer. A refused link would vanish with everything else just typed,
+             and the Photo select would drop to its first option, so the next Save
+             wrote the wrong photograph. */
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          React.startTransition(() => formAction(data));
+        }}
+        className="adm-form"
+      >
         {topic ? <input type="hidden" name="id" value={topic.id} /> : null}
 
         <label className="adm-form-field">
@@ -422,7 +431,8 @@ function FocusAreaForm({
             onChange={touch}
           />
           <span className="adm-field-hint">
-            A short reference for your own use, like 1.1. Partners never see it.
+            A short reference, like 1.1. Partners see it as the badge on this focus
+            area’s files where another focus area shares them.
           </span>
         </label>
 
@@ -559,12 +569,9 @@ function FocusAreaForm({
             className="adm-input"
             name="youtubeUrl"
             maxLength={500}
-            value={video}
+            defaultValue={topic?.youtube_url ?? ""}
             placeholder="https://www.youtube.com/watch?v=…"
-            onChange={(e) => {
-              setVideo(e.target.value);
-              touch();
-            }}
+            onChange={touch}
           />
           <span className="adm-field-hint">
             The Watch Video button on this card. Paste a link to one YouTube video
@@ -574,20 +581,31 @@ function FocusAreaForm({
           </span>
         </label>
 
-        <label className="adm-form-field">
-          <span className="adm-field-label">Guide text</span>
-          <textarea
-            className="adm-textarea"
-            name="simpleGuideMd"
-            rows={14}
-            defaultValue={guide?.simple_guide_md ?? ""}
-            onChange={touch}
-          />
-          <span className="adm-field-hint">
-            What a partner reads when they press Read Now. Plain text is fine; a
-            line starting with # becomes a heading.
-          </span>
-        </label>
+        {topic && !guide ? (
+          /* The read failed. No field, so a Save here leaves the guide as it is. */
+          <div className="adm-form-field">
+            <span className="adm-field-label">Guide text</span>
+            <p role="alert" className="adm-form-msg is-err">
+              The guide text didn’t load, so it can’t be edited just now. Saving
+              the rest of this page leaves it as it is. Reload to try again.
+            </p>
+          </div>
+        ) : (
+          <label className="adm-form-field">
+            <span className="adm-field-label">Guide text</span>
+            <textarea
+              className="adm-textarea"
+              name="simpleGuideMd"
+              rows={14}
+              defaultValue={guide?.simple_guide_md ?? ""}
+              onChange={touch}
+            />
+            <span className="adm-field-hint">
+              What a partner reads when they press Read Now. Plain text is fine; a
+              line starting with # becomes a heading.
+            </span>
+          </label>
+        )}
 
         {topic ? (
           <div className="adm-form-field">

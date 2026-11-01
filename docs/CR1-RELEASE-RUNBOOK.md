@@ -27,10 +27,16 @@ is never committed.
 **3. Run commands from the repo root in the VS Code terminal.** A pipe or a background job
 is refused on purpose.
 
-**4. The pull request is ready and not yet merged:** CI green; the Vercel Preview tested
-against TEST at desktop and 320px; `pnpm run test:e2e` green against it; the independent
-review approved at the head you are about to merge. One thing only you can see: the
-marked-TEST email from that run's contact journey arrived in the inbox.
+**4. The two pull requests.** #103 (the dependency update and the lost-click fix) goes
+first and on its own. Merge it with **Create a merge commit**, not squash or rebase, and wait
+for its Production deployment to reach Ready. A squash or rebase makes #104 conflict, which
+needs a new push and so a new review. It changes no content and does not start the release.
+
+#104 (this release) is ready and not yet merged: CI green, which you confirm by eye, because
+GitHub does not require it on `main`; the Vercel Preview tested against TEST at desktop and
+320px; `pnpm run test:e2e` green against it; the independent review approved at the head you
+are about to merge. One thing only you can see: the marked-TEST email from that run's contact
+journey arrived in the inbox.
 
 **5. Leave `/admin/content` alone from step 2 until the release is closed,** and tell anyone
 else who holds an admin login. The tool helps, but only so far. Before it has started,
@@ -39,9 +45,16 @@ nothing, and a text edit made while it is stopped part-way is simply overwritten
 refuses if a file was added in the CMS, or if a file CR1 added was replaced there. If a file
 CR1 replaced was replaced again, it names it and lets you stop and download it first, because
 the rollback will leave that file attached to nothing. And any words edited after step 2 go
-back to their step 2 version on a rollback, without a message. Video links count: the release
-keeps any link it finds, so add them before step 2 or after the release closes, because a rollback
-takes a link added in between back off.
+back to their step 2 version on a rollback, without a message.
+
+Video links are the one thing that can go in during the hold, but it is simplest to wait:
+
+- **Before step 2:** the 22 focus-area links, if you want them in now. The 4 `/dashboard`
+  links cannot go in yet, because the live Pages screen has no video field until step 6.
+- **Between steps 2 and 4:** don't. `switch` refuses until the snapshot is retaken.
+- **From step 4 until the release closes:** a new link stops nothing, and `verify` only notes
+  it, but a rollback takes it off again.
+- **After the release closes:** any of the 26, with no code change.
 
 ---
 
@@ -167,12 +180,18 @@ confirmation and changes nothing. If that run passes, carry on. On the second ru
   or mixed with other lines: stop and ask, and do not roll back. Usually that is the
   connection, Storage or the credentials, and a rollback needs the same services. It can
   also be a missing file, so it does need someone to look.
+- A line reading `video link changed`, alone: do not roll back. A link the snapshot held has
+  been changed or removed. If you or another admin did that, put the old link back in the CMS,
+  run this again, and make the change after the release closes. If nobody did, stop and ask.
 - Only other lines in the `FAILED` list (bytes, titles, counts, a wrong object): stop, and go
   to Rollback.
 
+A `note:` line is not a failure. `video link added since the snapshot` means a finished video
+went in through the CMS, which is fine.
+
 ### 6. Merge the PR
 
-Merge on GitHub. Wait for Vercel: Deployments, latest Production, status **Ready**. If the
+Merge #104 on GitHub with **Create a merge commit**. Wait for Vercel: Deployments, latest Production, status **Ready**. If the
 build fails or never reaches Ready, do not go on to step 7: stop and ask.
 
 ### 7. Smoke, as a partner
@@ -186,7 +205,8 @@ Signed in on the live site, desktop and phone:
 - Read Now on any guide. Press Ctrl+K and search "Master Opening": one template result.
 - `/support#community-contacts` lands on the contact block; its button opens `/contact`.
 - `/terms` shows the site's 404. `/privacy` shows the new policy.
-- Watch Video is greyed out on any card, and pressing it says "Video coming soon."
+- Watch Video is greyed out on any card with no link yet, and pressing it says "Video coming
+  soon." A card you gave a link before step 2 opens that video.
 - Every menu link answers the first click.
 
 Anything wrong here: stop before step 8 and ask. Steps 8 to 12 check the database and Storage
@@ -260,8 +280,9 @@ robocopy for this, because File Explorer can leave out delivery files on the way
 instant, and the previous pages tolerate either content state for a few minutes. If it has
 not (a failed step 5), skip Code: the live pages are already the previous ones.
 
-**Code.** Vercel, Deployments, the deployment before the merge, **Promote to Production**.
-If the merge itself must go, revert it through a PR afterwards.
+**Code.** Vercel, Deployments, the deployment before #104's merge, **Promote to Production**.
+That is the #103 deployment, so the dependency update and the lost-click fix stay live. If the
+merge itself must go, revert #104's merge commit through a PR afterwards, and not #103's.
 
 **Content.**
 
@@ -280,6 +301,8 @@ pnpm exec tsx scripts/cr1-content.ts --step rollback-sql --target prod
 #   -> open docs/source-assets/content-refresh-cr1/_private/prod/rollback-retired-rows.sql,
 #      paste it into the production Supabase SQL Editor, and run it once.
 #      Skip this if step 8 never ran: the rows are still there and it changes nothing.
+#      It prints a note that the restored rows take today's date as created_at. That is
+#      expected here, and nothing reads that date on these rows.
 
 # Field by field against the snapshot, must say MATCHES THE SNAPSHOT EXACTLY. If it does not,
 # stop and ask:
@@ -299,11 +322,11 @@ again at step 6.
 
 ## What the rehearsal proved
 
-The whole release ran on the non-production project forward and back to its exact starting
-state six times: from the released state and from straight after step 5, which is where a
-failed verify would send you, the last two on the final packages and the very last with the
-final version of the tool. It then ran forward once more. Full figures are in the sprint record,
-[`sprint-prompts/cr1-content-refresh.md`](./sprint-prompts/cr1-content-refresh.md).
+The whole release ran on the non-production project forward and back seven times: from the
+released state, and from straight after step 5, which is where a failed verify would send you.
+The last run, with this version of the tool on the final packages, went back from the released
+state with no hand fix and then forward again with no retry. Full figures are in the sprint
+record, [`sprint-prompts/cr1-content-refresh.md`](./sprint-prompts/cr1-content-refresh.md).
 
 - **Stopping is safe.** `upload` and `switch` were each stopped on purpose part-way, a real
   `Bad Gateway` hit mid-upload, and a real `fetch failed` hit mid-cleanup. Re-running the same
@@ -314,13 +337,22 @@ final version of the tool. It then ran forward once more. Full figures are in th
 - **Nothing is removed on trust.** `retire` and `cleanup` each byte-check all 127 downloads
   themselves before removing anything, so neither depends on someone having read the earlier
   output.
-- **Rollback is exact, from either state.** Each time, independent read-only fingerprints of
-  the rows, focus areas, guide bodies, sections, groups and Storage objects all equalled the
-  pre-CR1 baseline: after `retire` and `cleanup`, which needs `restore-objects` and the SQL,
-  and straight after `switch`, where neither has anything to do.
+- **Rollback is exact, from either state.** From the released state, with this tool
+  (`restore-objects`, `rollback`, the SQL, `verify-rollback`, `remove-new-objects`), independent
+  read-only fingerprints of the rows, focus areas, guide bodies, sections, groups and Storage
+  objects all equalled the pre-CR1 baseline. From straight after `switch`, where the restore and
+  the SQL have nothing to do, all six matched on an earlier tool, and the four compared matched
+  again with the rollback code as it is now. Two small things "exact" leaves out: on production
+  the 12 restored rows take today's date as `created_at`, which nothing reads, and a section
+  link taken off stores a "no video" marker where there was nothing, which every reader,
+  `verify-rollback` included, treats as no link.
+- **The fingerprints earned their place.** One rollback wrote that marker onto all five
+  sections, `verify-rollback` said it matched, and only the fingerprints caught it. It was fixed
+  before the run above.
 - **Video links are left alone.** With a link already on a focus area and on a section, `switch`
   kept both, `verify` passed, and a rollback put both back exactly. A link added after the
-  snapshot came off on rollback, on those rows only.
+  snapshot came off on rollback, on those rows only. `verify` notes such a link and passes, and
+  it fails when a link the snapshot held has gone: both seen on the non-production project.
 - **The refusals work.** No target, a misspelled target, missing credentials, a rollback before
   the old objects are restored, a `switch` or `snapshot` after someone edited content, and a
   `switch`, `snapshot` or `rollback` with a file added in the CMS were all refused, and the
@@ -334,7 +366,8 @@ for a `429`, a `404`, a stalled download and a deleted object.
 **What it could not prove, because it has not happened.** This has never run on production.
 The production path differs in three ways: the credentials, the typed confirmation, and the
 download proof, which the approved admin carries there rather than a plain partner, because
-production has no disposable accounts. So on production `verify` prints `as the approved
-admin` and `denied checks: anonymous`; step 7 is where a real partner's view gets checked.
+production has no disposable accounts, and the tool ignores any test-account names it finds. So
+on production `verify` prints `as the approved admin` and `denied checks: anonymous`; step 7 is
+where a real partner's view gets checked.
 Production's private rows were compared read-only with TEST's before the rehearsal and match
 by checksum and size.

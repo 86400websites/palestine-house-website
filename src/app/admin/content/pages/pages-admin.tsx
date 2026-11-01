@@ -67,10 +67,6 @@ export function PagesAdmin({
   selected: PageRow | null;
 }) {
   const router = useRouter();
-  const [state, formAction, pending] = React.useActionState(
-    savePlatformSectionAction,
-    INITIAL,
-  );
 
   const select = (slug: string) => {
     router.push(`/admin/content/pages?page=${slug}`, { scroll: false });
@@ -114,13 +110,7 @@ export function PagesAdmin({
       </div>
 
       {selected ? (
-        <PageForm
-          key={selected.slug}
-          page={selected}
-          state={state}
-          formAction={formAction}
-          pending={pending}
-        />
+        <PageForm key={selected.slug} page={selected} />
       ) : (
         <p className="adm-intro">Choose a page to edit its heading and photo.</p>
       )}
@@ -128,22 +118,15 @@ export function PagesAdmin({
   );
 }
 
-function PageForm({
-  page,
-  state,
-  formAction,
-  pending,
-}: {
-  page: PageRow;
-  state: AdminContentState;
-  formAction: (formData: FormData) => void;
-  pending: boolean;
-}) {
+function PageForm({ page }: { page: PageRow }) {
+  /* Here, not in the list above: this form is keyed by page, so one page's "Saved."
+     cannot show on the next. */
+  const [state, formAction, pending] = React.useActionState(
+    savePlatformSectionAction,
+    INITIAL,
+  );
   const [title, setTitle] = React.useState(page.title);
   const [lead, setLead] = React.useState(page.lead ?? "");
-  /* Held here, not as a defaultValue: React resets a form's uncontrolled fields after
-     every action, so a refused link would vanish before it could be corrected. */
-  const [video, setVideo] = React.useState(page.youtube_url ?? "");
   const panel = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => revealWhenStacked(panel.current), []);
@@ -159,7 +142,17 @@ function PageForm({
           : `The top of the ${page.label} page, above its focus areas.`}
       </p>
 
-      <form action={formAction} className="adm-form">
+      <form
+        action={formAction}
+        onSubmit={(e) => {
+          /* Not the form action's own submit: React resets a form after that, whatever
+             the answer, and a refused link would vanish before it could be corrected. */
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          React.startTransition(() => formAction(data));
+        }}
+        className="adm-form"
+      >
         {/* The slug is the identity of the page and is frozen in the database.
             It is round-tripped, never edited. */}
         <input type="hidden" name="slug" value={page.slug} />
@@ -240,8 +233,7 @@ function PageForm({
               className="adm-input"
               name="youtubeUrl"
               maxLength={500}
-              value={video}
-              onChange={(e) => setVideo(e.target.value)}
+              defaultValue={page.youtube_url ?? ""}
               placeholder="https://www.youtube.com/watch?v=…"
             />
             <span className="adm-field-hint">

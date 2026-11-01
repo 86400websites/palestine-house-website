@@ -117,20 +117,21 @@ the Word page header, so the reader has nothing to drop and the download keeps i
 | `cleanup` | 110 removed, bucket holds 127, 0 stray. Re-run: 0 removed |
 | `verify --phase retired` | ALL CHECKS PASSED, including after `cleanup` |
 
-**Rehearsal on TEST, back.** Run four times, and each ended with **independent read-only fingerprints
-of all six stores (resources, topics, elements, sections, groups, Storage objects) equal to the pre-CR1
-baseline**, and `verify-rollback` reporting MATCHES THE SNAPSHOT EXACTLY.
+**Rehearsal on TEST, back.** The first four runs, on the tool as it then stood, each ended with
+**independent read-only fingerprints of all six stores (resources, topics, elements, sections, groups,
+Storage objects) equal to the pre-CR1 baseline**, and `verify-rollback` reporting MATCHES THE SNAPSHOT
+EXACTLY. Three later runs are under "After the first report", the last of them with the final tool.
 
 | Rolled back from | Result |
 |---|---|
 | The released state, three times (`retire` and `cleanup` had run), the last with the final tool | The first time, `rollback` refused because the old objects were gone. `restore-objects` 110; `rollback` removed 29, repointed 98, restored 63 metadata changes, 22 focus areas, 5 sections; the retired rows' SQL restored 12; `remove-new-objects` 127 |
 | Straight after `switch`, where a failed step 5 leads, with the 12 `OLD-` rows still present | `rollback` removed 29, repointed 98, restored 75 metadata changes, 22 focus areas, 5 sections; 0 rows left to restore; the SQL changed nothing; `remove-new-objects` 127 |
 
-**Forward again, with the final tool.** `upload` 127; `switch` created 29, repointed 98, 22 focus areas and 5
-sections, in under two minutes; `verify --phase switched` passed; `retire` removed 12; `verify --phase retired`
+**Forward again, on the tool as it then stood.** `upload` 127; `switch` created 29, repointed 98, 22 focus areas
+and 5 sections, in under two minutes; `verify --phase switched` passed; `retire` removed 12; `verify --phase retired`
 passed. `cleanup` then hit a real `fetch failed` after 40 of 110, with no row affected: the bucket held 197 and
 every row still had its object. Re-running it, as the runbook says, removed the other 70, a further re-run
-removed 0, and `verify --phase retired` passed with the bucket at 127. TEST stays in this state.
+removed 0, and `verify --phase retired` passed with the bucket at 127.
 
 **Guards, each seen to refuse on TEST, and the ledger shows no write from any of them.** No `--target`;
 `--target production`; `--target prod` without credentials, naming the four missing variables; `rollback`
@@ -163,9 +164,10 @@ Figma, Illustrator, Canva, Inkscape's Optimized and Sketch pass, while exports c
 namespaces, or showing a visible web address, are refused with the reason. It reads text and is not a
 sanitizer, and its header says so.
 
-**The CMS in a real browser.** Journey AD-004, three times: a refused type, size, PNG code and script,
-then a PDF, a real PNG and a clean SVG uploaded, each downloaded by a partner under the name it was
-uploaded with, and all removed again.
+**The CMS in a real browser.** Journey AD-004, three times, in its first version: a refused type, size, PNG
+code and script, then a PDF, a real PNG and a clean SVG uploaded, each downloaded by a partner under the name
+it was uploaded with, and all removed again. A PDF has been refused since §7 #15, so the test now uploads a
+Word file there and asserts the refusal; its result is under "After the first report".
 
 **A real browser, local production build against TEST, as a real approved partner.** 140 downloads (127
 plus the 13 shared rows): 140 exact filenames, 140 exact hashes. 22 Overview rows, 83 template rows, 13
@@ -230,6 +232,41 @@ treats the marker as nothing, and only the independent fingerprints caught it. F
   are identical to the previous release's fingerprints. Resources differs only by the 29 new rows' new ids.
 
 A real `fetch failed` stopped one `switch` at its sign-in, before it wrote anything, and re-running finished it.
+
+**A self-review of that day's work, each finding challenged independently, and what it changed.** No broken gate and
+no leak. These were real:
+
+- *The CMS.* A failed guide read showed an empty box, so a Save, even one only adding a video link, could wipe the
+  guide. React resets a form after every action, a refusal included, so a refused link also lost what else had been
+  typed and dropped the Photo select to its first option, and the next Save wrote the wrong photograph. A "Saved."
+  carried over from one page or focus area to the next. `checkCode` failed open when one of its two reads failed. The
+  Short code hint said partners never see that code, and they do. All fixed, and AD-006 now guards the reset.
+- *The tests.* CT-012 could not pass at 320px, because its selector found the closed menu's link. It also inherited a
+  retry, the very thing that hid this bug. AD-006's clean-up could hang on a disabled button and report that instead
+  of the real failure. All fixed.
+- *The release.* `verify`, `retire` and `cleanup` failed on a video link added during the release, and the runbook
+  then pointed at Rollback, so a finished video could have undone a healthy release. `switch` wrote a link read before
+  the confirmation prompt, so one added while the prompt waited would have been erased. On production the tool would
+  have tried any test-account names it found. The runbook never mentioned #103, whose merge method decides whether #104
+  conflicts, and it told the owner to add the 4 `/dashboard` links at a time when the live screen has no field for them.
+  The claim that rollback was exact "each time" went further than the record. All fixed; the claim is now what was run.
+- *GitHub.* `main` lists no required status check (`PROJECT-STATUS` §7 #17). It is a repo-wide setting, so it is logged
+  for the owner and not changed here.
+
+Checked and left alone: all 22 summaries fit the form's limit (the longest is 929 of 1,000 characters), so every card
+can be saved. A comment in `next.config.ts` still mentions PDFs; it is history, in a file this sprint does not touch.
+
+**Rehearsed again, with the final tool on the final packages.**
+
+- `verify` with a link added since the snapshot, on a focus area and a section: two `note:` lines, ALL CHECKS PASSED.
+- `verify` against a snapshot holding links that are now gone: FAILED, with `video link changed` for both.
+- Back from the released state: `restore-objects` 110; `rollback` removed 29, repointed 98, metadata 63, focus areas 22,
+  sections 5; the SQL restored 12; `verify-rollback` MATCHES THE SNAPSHOT EXACTLY; `remove-new-objects` 127. **All six
+  fingerprints equal the pre-CR1 baseline, with no hand fix.**
+- Forward to the end: `upload` 127; `switch` created 29, repointed 98, 22 focus areas, 5 sections; `verify`; `retire` 12;
+  `verify`; `cleanup` 110; `verify`: bucket 127, ALL CHECKS PASSED, no step retried. Elements, groups, objects, sections
+  and topics are identical to the previous run's fingerprints, and resources differs only by the 29 new rows' new ids.
+  TEST stays in this state.
 
 **The decisions.** D-CR1-1…6 are recorded in `PROJECT-STATUS` §5 as the engine's calls, not the owner's signature, for
 the owner to overrule. One stays with the owner because nothing here can reach it: the hosted Supabase email templates.
@@ -296,9 +333,9 @@ admin session: its self-row names the owner's admin robot.
   with the data already arrived, and `main` does it too. Three wrong turns on the way, each killed by a
   measurement: a race right after load (still lost at a 3-second pause), my own expired test session (fresh
   sessions lost just as often), and a boundary left dehydrated (none was). `ERR_ABORTED`, which looked like
-  the cause, appears on good clicks as well. CR1's two links became plain anchors. The general fix is proven on
-  a scratch copy and left for the owner, because it changes how every private page navigates
-  (`PROJECT-STATUS` §7 #16, D-CR1-6).
+  the cause, appears on good clicks as well. CR1's two links became plain anchors. *Superseded the next day: that
+  first answer was loading boundaries, which this record then left for the owner. They were measured and dropped,
+  and the bug was fixed at source by SEC1. See "After the first report".*
 - **An access test could fail without checking anything.** AC-004 read the search index through the browser
   and swallowed a failed read, so on a slow machine it went red with nothing checked. It could not pass that
   way, because it needs a non-empty body, but a false alarm on an access test teaches people to ignore it. It

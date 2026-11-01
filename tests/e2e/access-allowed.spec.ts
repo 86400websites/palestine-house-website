@@ -498,6 +498,7 @@ test.describe("as the approved partner", () => {
         exact: true,
         disabled: true,
       });
+      // A journey that crashed before clearing its link leaves one here: clear it in the CMS.
       await expect(videos, `${path} placements`).toHaveCount(expected, {
         timeout: 60_000,
       });
@@ -546,28 +547,47 @@ test.describe("as the approved partner", () => {
     }
   });
 
-  test("CT-012: a link to a gated page answers the first click", async ({ page }) => {
-    /* React could drop the wake-up for a navigation whose data had already arrived, so
-       the click did nothing and only a second one worked: up to 9 clicks in 20 on the
-       worst tab, on the live site too. patches/next@15.5.28.patch carries React's own
-       fix. Nothing here clicks twice, because a second click is what hid this. Removing
-       the patch before Next 16.3 turns this red. */
-    test.setTimeout(240_000);
-    const clicks = [
-      ["/operate", "/program"],
-      ["/program", "/support"],
-      ["/support", "/setup"],
-      ["/setup#topic-get-ready-to-open", "/setup/get-ready-to-open/guide"],
-    ];
-    for (let round = 0; round < 3; round += 1) {
-      for (const [from, to] of clicks) {
-        await page.goto(from);
-        const link = page.locator(`a[href="${to}"]`).filter({ visible: true }).first();
-        await expect(link, `${from} offers ${to}`).toBeVisible({ timeout: 60_000 });
-        await link.click();
-        await page.waitForURL(`**${to}`, { timeout: 30_000 });
+  test.describe("a click that is lost, not slow", () => {
+    /* No retry, for the same reason nothing here clicks twice: a second try is what hid
+       this bug, so a pass on the retry must not read as a pass. */
+    test.describe.configure({ retries: 0 });
+
+    test("CT-012: a link to a gated page answers the first click", async ({
+      page,
+    }, testInfo) => {
+      /* React could drop the wake-up for a navigation whose data had already arrived, so
+         the click did nothing and only a second one worked. patches/next@15.5.28.patch
+         carries React's own fix; patches/README.md has the rates and what this test can
+         promise, which is likely detection and not certain, because the bug is a race.
+         The header's tabs on a desktop; on a phone the closed menu's links exist but
+         cannot be pressed, so the footer's. Mostly the section-to-guide click, the route
+         that lost the most before the fix. */
+      test.setTimeout(240_000);
+      const tabs = testInfo.project.name.startsWith("mobile") ? "footer.pw-footer" : "header nav";
+      const toGuide = [
+        "/setup#topic-get-ready-to-open",
+        '#topic-get-ready-to-open a[href="/setup/get-ready-to-open/guide"]',
+      ];
+      const clicks = [
+        ["/operate", `${tabs} a[href="/program"]`],
+        toGuide,
+        ["/program", `${tabs} a[href="/support"]`],
+        toGuide,
+        ["/support", `${tabs} a[href="/setup"]`],
+        toGuide,
+      ];
+      for (let round = 0; round < 3; round += 1) {
+        for (const [from, selector] of clicks) {
+          await page.goto(from);
+          const link = page.locator(selector).filter({ visible: true }).first();
+          await expect(link, `${from} offers ${selector}`).toBeVisible({ timeout: 60_000 });
+          await link.click();
+          await page.waitForURL(`**${selector.match(/href="([^"]+)"/)![1]}`, {
+            timeout: 30_000,
+          });
+        }
       }
-    }
+    });
   });
 
   test("CT-011: the private chrome carries the community wording", async ({

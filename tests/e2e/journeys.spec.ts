@@ -677,7 +677,7 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     await field.fill(value);
     await m.getByRole("button", { name: "Save", exact: true }).click();
   };
-  const saveFocusArea = async (value: string) => {
+  const editFocusArea = async () => {
     await m.goto("/admin/content/focus-areas");
     await m
       .locator("tbody tr")
@@ -687,9 +687,18 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
       .click();
     const field = m.locator('input[name="youtubeUrl"]').filter({ visible: true }).first();
     await expect(field).toBeVisible({ timeout: 60_000 });
-    await field.fill(value);
-    await m.getByRole("button", { name: /^Save/ }).first().click();
+    return field;
   };
+  // Bounded: with nothing changed this button stays disabled, and a click would wait out
+  // the whole test and report that instead of the real failure.
+  const pressSave = () =>
+    m.getByRole("button", { name: /^Save/ }).first().click({ timeout: 30_000 });
+  const saveFocusArea = async (value: string) => {
+    const field = await editFocusArea();
+    await field.fill(value);
+    await pressSave();
+  };
+  let cardLinkTried = false;
   const dashboardVideos = () => p.getByRole("link", { name: "Watch Video" });
   const cardVideos = () =>
     p.locator("#topic-get-ready-to-open").getByRole("link", { name: "Watch Video" });
@@ -698,6 +707,9 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     // The Overview: refused when it is not YouTube, live when it is, for that card only.
     await savePage("https://example.com/a-video");
     await expect(m.getByText(/doesn’t look like a YouTube link/)).toBeVisible({ timeout: 30_000 });
+    await expect(
+      m.locator('input[name="youtubeUrl"]').filter({ visible: true }).first(),
+    ).toHaveValue("https://example.com/a-video");
     await savePage(LINK);
     await expect(m.getByText("Saved.")).toBeVisible({ timeout: 30_000 });
     await p.goto("/dashboard");
@@ -708,7 +720,24 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
       p.getByRole("button", { name: "Watch Video. Video coming soon." }),
     ).toHaveCount(3);
 
+    // A refusal loses nothing, and writes nothing: what was typed stays for correcting, and
+    // the photo does not drop to the select's first option, which a second Save would write.
+    const field = await editFocusArea();
+    const guideText = m.locator('textarea[name="simpleGuideMd"]');
+    const photo = m.locator('select[name="imagePath"]');
+    const photoBefore = await photo.inputValue();
+    expect(photoBefore, "this card needs a photo to lose").not.toBe("");
+    const edited = `${await guideText.inputValue()}\nNever saved: this Save is refused.`;
+    await guideText.fill(edited);
+    await field.fill("https://example.com/a-video");
+    await pressSave();
+    await expect(m.getByText(/doesn’t look like a YouTube link/)).toBeVisible({ timeout: 30_000 });
+    await expect(field).toHaveValue("https://example.com/a-video");
+    await expect(guideText).toHaveValue(edited);
+    await expect(photo).toHaveValue(photoBefore);
+
     // A focus-area card, the same way.
+    cardLinkTried = true;
     await saveFocusArea(LINK);
     await expect(m.getByText("Saved.").first()).toBeVisible({ timeout: 30_000 });
     await p.goto("/setup");
@@ -718,8 +747,10 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     // NEVER leave a link behind: CT-009 expects all 26 back on the placeholder.
     await savePage("").catch(() => {});
     await expect(m.getByText("Saved.")).toBeVisible({ timeout: 30_000 }).catch(() => {});
-    await saveFocusArea("").catch(() => {});
-    await expect(m.getByText("Saved.").first()).toBeVisible({ timeout: 30_000 }).catch(() => {});
+    if (cardLinkTried) {
+      await saveFocusArea("").catch(() => {});
+      await expect(m.getByText("Saved.").first()).toBeVisible({ timeout: 30_000 }).catch(() => {});
+    }
   }
 
   // Cleared, and every one of them says so again.

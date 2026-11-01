@@ -158,8 +158,9 @@ export function FilesAdmin({
         <div className="adm-detail">
           <h2>{selected.title}</h2>
 
-          <GuideSlot topic={selected} guide={guide} />
-          <TemplateList topic={selected} templates={templates} />
+          {/* Keyed so one focus area's "Saved." or refusal cannot show on the next. */}
+          <GuideSlot key={`guide-${selected.id}`} topic={selected} guide={guide} />
+          <TemplateList key={`files-${selected.id}`} topic={selected} templates={templates} />
         </div>
       ) : (
         <p className="adm-intro">
