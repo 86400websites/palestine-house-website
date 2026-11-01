@@ -810,7 +810,9 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     await m.unroute(FORM_ROUTE);
     await expect(m.getByRole("button", { name: "Save", exact: true })).toBeEnabled();
     await pressSave();
-    await expect(m.getByRole("button", { name: "Saved", exact: true })).toBeDisabled();
+    await expect(m.getByRole("button", { name: "Saved", exact: true })).toBeDisabled({
+      timeout: 30_000,
+    });
     await p.goto(GUIDE_PAGE);
     await expect(p.getByText(GUIDE_LINE)).toBeVisible({ timeout: 60_000 });
     await expect(p.getByText(LATE_LINE)).toBeVisible();

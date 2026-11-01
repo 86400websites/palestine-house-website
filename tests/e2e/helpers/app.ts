@@ -145,7 +145,8 @@ export async function openPanel(
 ): Promise<Locator> {
   await page.goto(`${section}#topic-${slug}`);
   const panel = page.locator(`#topic-${slug}-body`);
-  await panel.waitFor({ state: "visible", timeout: 60_000 });
+  // A streaming page can briefly hold a hidden copy under the same id (tests/e2e/README.md).
+  await panel.filter({ visible: true }).waitFor({ state: "visible", timeout: 60_000 });
   return panel;
 }
 
