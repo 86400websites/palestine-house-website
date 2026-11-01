@@ -13,3 +13,7 @@
 # repo's existing behaviour.
 docs/content-v2-spec.json     text eol=lf
 docs/content-v2-manifest.json text eol=lf
+
+# A dependency patch has to apply, and pnpm pins its hash in the lockfile, so its bytes
+# are the same on every machine.
+patches/*.patch text eol=lf

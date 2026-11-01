@@ -1,0 +1,2 @@
+patchedDependencies:
+  next@15.5.28: patches/next@15.5.28.patch

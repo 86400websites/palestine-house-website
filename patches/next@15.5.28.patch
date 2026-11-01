@@ -1,0 +1,15 @@
+diff --git a/dist/compiled/react-dom/cjs/react-dom-client.production.js b/dist/compiled/react-dom/cjs/react-dom-client.production.js
+index 755076a5cf15273f024c18fdc6a8805f1e36860b..8ba86221b864cfa4b416dec9af6023219835eab9 100644
+--- a/dist/compiled/react-dom/cjs/react-dom-client.production.js	
++++ b/dist/compiled/react-dom/cjs/react-dom-client.production.js
+@@ -11733,7 +11733,9 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
+       (workInProgressRootRenderLanes & 62914560) ===
+         workInProgressRootRenderLanes &&
+       300 > now() - globalMostRecentFallbackTime)
+-      ? 0 === (executionContext & 2) && prepareFreshStack(root, 0)
++      ? 0 === (executionContext & 2)
++        ? prepareFreshStack(root, 0)
++        : (workInProgressRootPingedLanes |= pingedLanes)
+       : (workInProgressRootPingedLanes |= pingedLanes),
+     workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
+       (workInProgressSuspendedRetryLanes = 0));
