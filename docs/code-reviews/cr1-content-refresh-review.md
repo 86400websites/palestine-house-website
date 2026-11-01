@@ -111,7 +111,7 @@ privacy placeholder.
   change; a redesign; a major Next upgrade.
 - **Database state:** no migration ships. **Production is on `0034` and still serves the previous
   release.** TEST holds the CR1 content, released and rehearsed.
-- **Preview state:** the full suite ran at `9c28bfb` against that commit's Preview, at desktop and 320px, on
+- **Preview state:** the full suite ran at `1872ab8` against that commit's Preview, at desktop and 320px, on
   2026-11-02: 157 of 157. Only documents changed after it. The earlier red run at `a3ba14e` is explained in the
   sprint record.
 
@@ -182,7 +182,7 @@ Measured against TEST, apart from the Preview run named below. The full record i
 - **In a simulator only** (the real tool on a fake backend): an interrupted rollback, a failed retake, a
   file replaced in the CMS after `switch`, and injected download faults. The sprint record lists them.
 
-**Commands at the pushed head `9c28bfb`:** CI green; `pnpm run typecheck`, `lint` and `build` exit 0; the
+**Commands at the pushed head `1872ab8`:** CI green; `pnpm run typecheck`, `lint` and `build` exit 0; the
 extractor exit 0; the copy checker exit 0 with 74 checks; `verify-svg-safety` exit 0; `pnpm run test:e2e` on that
 commit's Preview, with the owner's robots, **157 of 157 with no flake**, all ten journeys included. Only documents
 changed after that head. The sprint record's "Checks & results" has the full table.
@@ -322,3 +322,8 @@ and treated the Preview results as recorded evidence.
 revision. AD-006 now holds a Save's answer back, types meanwhile, and proves that text survives. That test was run against
 the old code at `9c28bfb` and went red at the step the finding predicts. One limit: on a brand-new focus area, text typed
 during its first Save is dropped when the real row opens, which shows on screen and is not reported as saved.
+
+The next full run, at `041bde5`, was red for two test reasons: the new assertion's five-second wait was too short (the
+failure snapshot shows Saving…, the screenshot a moment later shows Saved), and `openPanel` met the hidden copy a streaming
+page briefly holds. Both were corrected in tests only. At `1872ab8`: 157 of 157, no flakes. Round 2 is owed over
+`723bd44..` the final head.

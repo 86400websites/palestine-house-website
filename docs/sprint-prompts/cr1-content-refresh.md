@@ -69,7 +69,7 @@ production results before they happen; do not commit or push.
 
 ## Checks & results
 
-**At the pushed head `9c28bfb`, 2026-11-02.** Only documents changed after it.
+**At the pushed head `1872ab8`, 2026-11-02.** Only documents changed after it. This head carries the independent review's one fix, and it passed 157 of 157 in 24.3 minutes. The run before it, at `041bde5`, was red for two test reasons, explained in the review record. The figures below are from `9c28bfb`, the head before that fix.
 
 | Check | Result |
 |---|---|
