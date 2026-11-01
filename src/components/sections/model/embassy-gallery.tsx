@@ -1,6 +1,6 @@
 import { PHOTO_SOURCES, type PhotoId } from "@/components/shared/photo";
 
-/* DR3.1 — the /model "cultural embassy" collage. Three columns — café, venue,
+/* DR3.1 — the /model "cultural home" collage. Three columns — café, venue,
    community — each a big image over a row of three thumbnails.
 
    DR3.1.1 (owner, 2026-07-08): the auto-rotating cross-fade was removed — this is
@@ -19,8 +19,8 @@ type Column = {
 const COLUMNS: Column[] = [
   {
     key: "cafe",
-    title: "A real café.",
-    subtitle: "Rooted in Palestinian hospitality, food, and daily life.",
+    title: "A place to gather",
+    subtitle: "Rooted in Palestinian hospitality, with food and drinks where they fit the local House.",
     photos: [
       "ph-photo-embassy-cafe-1",
       "ph-photo-embassy-cafe-2",
@@ -30,8 +30,8 @@ const COLUMNS: Column[] = [
   },
   {
     key: "venue",
-    title: "A real venue.",
-    subtitle: "For art, music, film, literature, ideas, and gatherings.",
+    title: "A place for culture",
+    subtitle: "For art, music, film, literature, ideas and gatherings.",
     // portrait shot first so the hero fills the 4/5 frame like café/community
     photos: [
       "ph-photo-embassy-venue-3",
@@ -42,8 +42,8 @@ const COLUMNS: Column[] = [
   },
   {
     key: "community",
-    title: "A real community anchor.",
-    subtitle: "Built for connection, reflection, and belonging.",
+    title: "A place to belong",
+    subtitle: "Built for connection, reflection and lasting local relationships.",
     photos: [
       "ph-photo-embassy-community-1",
       "ph-photo-embassy-community-2",
@@ -77,7 +77,7 @@ export function EmbassyGallery() {
     <div
       className="embassy"
       role="group"
-      aria-label="Scenes from inside a Palestine House: a real café, a real venue, a real community anchor"
+      aria-label="Scenes from inside a Palestine House: a place to gather, a place for culture, a place to belong"
     >
       {COLUMNS.map((col) => (
         <div className="embassy-col" key={col.key}>

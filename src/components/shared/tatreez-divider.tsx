@@ -47,7 +47,8 @@ export function TatreezDivider({
         height: 18,
         backgroundImage: TATREEZ_URLS[palette],
         backgroundRepeat: "repeat-x",
-        backgroundPosition: "center",
+        /* The tile's diamonds sit 6px right of its middle, so a row of them centres here. */
+        backgroundPosition: "calc(50% - 6px) center",
         opacity,
       }}
     />

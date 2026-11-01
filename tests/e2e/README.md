@@ -88,19 +88,31 @@ pnpm exec playwright test --project=desktop --project=mobile-320
 
 *(Use `pnpm exec playwright test …`, not `pnpm run test:e2e -- …`: the `--`
 passthrough mangles later flags — verified — so the direct form is the one
-that behaves. It schedules 95 tests: everything except the write journeys.)*
+that behaves. It schedules 115 tests: everything except the write journeys.)*
 
 Run the full suite (journeys included) only when the journeys changed or a
 verdict needs a full run. The first fix loop ran full ~20 times and put ~60
 robot emails in the HQ inbox — once was enough to learn this.
+
+A red where a test clicks a link to a gated page and the URL never changes is a
+finding, not a flake, so read it before re-running. React could drop the wake-up
+for such a navigation; `patches/next@15.5.28.patch` carries React's own fix, and
+CT-012 exists to catch that patch going missing. `docs/PROJECT-STATUS.md` §7 #16
+has the measurements. A re-run's green hid this defect for months.
+
+The same goes for a one-off `strict mode violation` naming two elements with one
+id. While a gated page streams it can briefly hold a second, hidden, zero-size
+copy of its content: about a quarter of a second, on a few loads in a hundred,
+and gone once the page settles. Measured at CR1, where 300 of 300 direct loads of
+a fragment still landed, including the loads where the copy appeared.
 
 ## Rules that bind every spec
 
 - Target Previews, never Production; `@morning`-tagged specs are the only
   sanctioned Production runs, via `.github/workflows/morning-check.yml`.
 - No test asserts a `429` or CAPTCHA until SYS1.5 ships those controls, and
-  no test hammers `/apply`, `/contact` or Ask HQ — Preview form submissions
-  send **real email** (Resend is live in Preview), so writes are few, clearly
+  no test hammers `/apply` or `/contact` — Preview form submissions send
+  **real email** (Resend is live in Preview), so writes are few, clearly
   marked as tests, and flagged to the owner first.
 - Every protected boundary gets an allowed **and** a denied assertion; denied
   means no gated string in the HTML **or** the RSC payload.

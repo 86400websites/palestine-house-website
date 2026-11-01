@@ -38,10 +38,10 @@ Allowed files/paths: `[EXACT_PATHS]`. Any other path needs owner approval before
 
 ## Locked inputs
 
-- Copy: `docs/page-copy/[file(s)]` — verbatim (owner-held set, not tracked in git).
+- Copy: `[file(s)]` under `docs/source-assets/content-refresh-cr1/`, or `docs/page-copy/` for anything those documents did not cover — verbatim (owner-held sets, not tracked in git).
 - Design: `docs/page-designs/[mockup(s)]` + tokens in [`docs/DESIGN.md`](../DESIGN.md) §3–§4.
 - [Schema / architecture: [`docs/TECH-ARCHITECTURE.md`](../TECH-ARCHITECTURE.md) §[N].]
-- Proof numbers: **4 sections · 22 focus areas · 88 templates**. Header and footer chrome is locked.
+- Proof numbers: **4 sections · 22 focus areas · 83 templates and practical tools**. Header and footer chrome is locked.
 
 ## Risk class (decides the review regime — D-SYS-1)
 
@@ -66,7 +66,7 @@ Allowed files/paths: `[EXACT_PATHS]`. Any other path needs owner approval before
       re-checked — **always §15** (blocking invariants) once auth is involved; §5 RLS · §6
       auth/session · §8 Route Handlers and abuse controls · §13 production deployment
 - [ ] Copy verbatim from the approved source; design matches the mockups and `DESIGN.md` tokens;
-      locked numbers correct (4 · 22 · 88)
+      locked numbers correct (4 · 22 · 83)
 - [ ] No new console errors and no hydration warnings
 - [ ] [Schema sprints only] up-SQL **and** `.down.sql` **and** RLS policies in the PR; applied by
       hand to the **non-production** Supabase project first and verified there; production applied

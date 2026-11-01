@@ -146,9 +146,9 @@ Until both land, the substitute is human: [`QA-CHECKLIST.md`](./QA-CHECKLIST.md)
 Green CI is necessary and nowhere near sufficient. It does not know about:
 
 - **Access control.** The approval gate, the admin gate and RLS are proved by [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §5 (RLS), §6 (auth / session) and §15 (this project's blocking invariants) and by review — never by `tsc`.
-- **Public-write abuse controls.** Rate limiting and Turnstile on `/apply`, contact and `/support` are **not shipped** (D‑SYS‑9; [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §7 issue #1) — the invariant they owe is [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §8, §13 and §15. Those writes are unthrottled on Production right now. Sprint **SYS1.5** ships them, fail-closed.
+- **Public-write abuse controls.** Rate limiting and Turnstile on `/apply` and contact are **not shipped** (D‑SYS‑9; [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §7 issue #1) — the invariant they owe is [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §8, §13 and §15. Those writes are unthrottled on Production right now. Sprint **SYS1.5** ships them, fail-closed.
 - **The database.** Migrations are applied by hand in the Supabase SQL Editor, non-production project first — [`WORKFLOW.md`](./WORKFLOW.md) §14 and [`SUPABASE-MCP-SAFETY.md`](./SUPABASE-MCP-SAFETY.md). Production is on migration `0034`. CI never touches a database, and a Vercel rollback never rolls one back — see [`ROLLBACK.md`](./ROLLBACK.md).
-- **Copy and design.** Verbatim copy and locked chrome are a human check against `/docs/page-copy/` and `/docs/page-designs/` — both **gitignored** (see `.gitignore`), so they live in the owner's working copy, not in a fresh clone.
+- **Copy and design.** Verbatim copy and locked chrome are a human check against the owner's CR1 documents (`docs/source-assets/content-refresh-cr1/`), `/docs/page-copy/` and `/docs/page-designs/` — all **gitignored** (see `.gitignore`), so they live in the owner's working copy, not in a fresh clone. `scripts/verify-public-copy.ts` automates the public-copy half where those documents are on disk; it is not a CI step.
 - **Whether it behaves.** See Wall 4.
 
 ## The boundary, one line

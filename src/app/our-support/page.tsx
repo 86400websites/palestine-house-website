@@ -18,127 +18,128 @@ import { Photo } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
-/* Our Support (/our-support) — copy verbatim from docs/page-copy/
-   01-public-pages/our-support.md; layout from docs/page-designs/public/
-   OurSupport.app.jsx (approved mockup). */
+/* The Community (/our-support) — copy verbatim from the owner's Public Website
+   Copy §6 (CR1); layout from docs/page-designs/public/OurSupport.app.jsx
+   (approved mockup). */
 
 export const metadata: Metadata = {
-  title: "Our Support",
+  title: { absolute: "The Community - Palestine House" },
   description:
-    "What HQ gives every partner — the full playbook (4 sections, 22 focus areas, 88 templates), the standards, Aswātna, and support from first decision to open doors.",
+    "Guides, templates, practical tools and voluntary peer connections for people building their own Palestine Houses.",
 };
 
 /* Hero proof row — the canonical numbers, shown under the lead (mockup).
-   Labels per the owner copy overhaul (2026-07-17).
+   Labels per the owner's Public Website Copy §6.1 (CR1).
 
-   PP7 / D-PP-a: 11 · 33 · 297 -> 4 · 22 · 88. The old figures described the
-   retired A–K curriculum that migration 0030 deletes; the delivered content is
-   four sections, 22 focus areas and 88 templates (D-PP-k). "Core topics" becomes
-   "focus areas" because the new model has no level between the two. */
+   The fourth position is a phrase, not a figure: the doc's one string is split
+   at its own comma across the existing number and label slots. */
 const SUP_PROOF = [
-  { icon: LayoutGrid, n: "4", label: "sections" },
+  { icon: LayoutGrid, n: "4", label: "resource sections" },
   { icon: BookOpen, n: "22", label: "focus areas" },
-  { icon: FileText, n: "88", label: "ready-to-use templates" },
-  { icon: CalendarDays, n: "120", label: "day guided launch plan" },
+  { icon: FileText, n: "83", label: "templates and practical tools" },
+  { icon: CalendarDays, n: "Your pace,", label: "your local opening plan." },
 ] as const;
 
-/* Aswātna — how the cultural partner shows up across the launch (mockup). */
+/* Aswātna — the optional programming provider, in the before-opening, launch and
+   after-launch positions (mockup). */
 const SUP_ASWATNA = [
   {
     assetId: "ph-photo-support-aswatna-1",
     alt: "A singer and guitarist performing together at a House.",
     label: "Before opening",
-    text: "We help define the programme, identify the right creative partners, and shape a launch that introduces the House with clarity and purpose.",
+    text: "If you choose Aswātna, discuss ideas for your first calendar and launch events.",
   },
   {
     assetId: "ph-photo-support-aswatna-2",
     alt: "A packed audience filming a candlelit night of live music.",
     label: "At launch",
-    text: "We support opening-week programming through artists, performances, conversations, cultural partnerships, and event development.",
+    text: "Request artist introductions or event support for the activities you agree together.",
   },
   {
     assetId: "ph-photo-support-aswatna-3",
     alt: "Guests dancing at a House celebration beside a keyboard player.",
     label: "After launch",
-    text: "We continue supporting the programme over time — helping the House maintain creative quality, cultural depth, and a coherent identity throughout the year.",
+    text: "Arrange further programming or event support when useful to your House.",
   },
 ] as const;
 
-/* "Support does not end on opening day" — the ongoing-support topics. (The
+/* The first links on the red band: the base link colour and focus outline are olive
+   and unreadable here, so both take the band's cream text instead. */
+const SUP_ASWATNA_LINK =
+  "text-inherit underline underline-offset-2 focus-visible:outline-current";
+
+/* "Keep using the resources after opening" — the four after-opening topics. (The
    who-brings-what split that used to close this page was removed in the
    2026-07-17 copy overhaul: it already lives on Bring a House.) */
 const SUP_ONGOING = [
   {
     icon: CalendarDays,
     title: "Programming",
-    text: "Build a coherent cultural calendar that gives people regular reasons to return.",
+    text: "Use calendar and event tools to develop activities that fit your audience and capacity.",
   },
   {
     icon: UtensilsCrossed,
-    title: "Food & Hospitality",
-    text: "Maintain consistency, quality, warmth, and a guest experience rooted in Palestinian hospitality.",
+    title: "Food and Hospitality",
+    text: "Use relevant routines and checklists where your House offers food and drinks, alongside applicable local requirements.",
   },
   {
     icon: InfinityIcon,
-    title: "Membership & Community",
-    text: "Turn first-time visitors into lasting relationships and build a community around the House.",
+    title: "Members and Visitors",
+    text: "Welcome people, listen to feedback and develop relationships around your local House.",
   },
   {
     icon: BarChart3,
-    title: "Finance & Operations",
-    text: "Use clear systems, reporting, and practical tools to keep the House stable and sustainable.",
+    title: "Finance and Operations",
+    text: "Keep the local records and practical checks your own team needs. Routine reporting to the community is not required.",
   },
 ] as const;
 
-/* The Backing — the three-stage, 120-day launch path as a numbered timeline. */
+/* One simple route into the community — three steps as a numbered timeline. */
 const SUP_STAGES = [
   {
     n: "01",
-    name: "Plan & Prepare",
-    lead: "Build the foundation.",
-    text: "Venue assessment, company structure, governance, early budgets, local partnerships, and launch planning.",
+    name: "Apply to join",
+    text: "Share a few basic details and a short introduction to your interest or idea. Your venue, team and plan can still be developing.",
   },
   {
     n: "02",
-    name: "Design & Build",
-    lead: "Turn the plan into a functioning House.",
-    text: "Fit-out, suppliers, permissions, brand implementation, operating systems, and guest experience.",
+    name: "Receive your access update",
+    text: "Your application is used to arrange community access. Once access is confirmed, sign in to the private platform.",
   },
   {
     n: "03",
-    name: "Operate & Program",
-    lead: "Prepare the House to open and grow.",
-    text: "Team training, cultural programming, hospitality, daily operations, soft opening, and public launch.",
+    name: "Use what helps",
+    text: "Choose relevant guides and templates, ask a peer question when useful and develop your own local plan.",
   },
 ] as const;
 
-/* Every focus area ships the same four artefacts — shown as documents, not icons.
+/* The four resource types in a focus area — shown as documents, not icons.
    PP7 / D-PP-a: this was six. "A step-by-step checklist" and "What to watch for"
    are removed because neither exists any more — checklists were dropped at
    D-PP-b (and its text promised "progress saved as you work", which went with
    them), and the watch-out body is rendered on no surface. What a partner
    actually opens per focus area is the D-PP-f model: a summary, one Simple
-   guide, a video, and the templates. */
+   guide, a video where one has been published, and the templates. */
 const SUP_ARTEFACTS = [
   {
     icon: Info,
     name: "A clear overview",
-    text: "Understand what the focus area covers and why it matters.",
+    text: "Understand the topic and the decisions it covers.",
   },
   {
     icon: Bookmark,
-    name: "A practical guide",
-    text: "Plain-language advice designed to be useful in real working conditions.",
+    name: "A simple guide",
+    text: "Work through practical steps at a pace that suits your local House.",
   },
   {
     icon: Play,
-    name: "A short walkthrough",
-    text: "A visual explanation you can return to whenever you need it.",
+    name: "A video walkthrough",
+    text: "Watch a clear explanation where the video has been published. More walkthroughs can be added to the existing video locations as they are produced.",
   },
   {
     icon: Download,
-    name: "Ready-to-use templates",
-    text: "Contracts, plans, rotas, budgets, policies, and working documents ready to adapt.",
+    name: "Templates and practical tools",
+    text: "Adapt useful checklists, plans, forms, samples and reference documents instead of starting from a blank page.",
   },
 ] as const;
 
@@ -148,18 +149,19 @@ export default function OurSupportPage() {
       {/* 1 — v3 split hero (DR3.3): cream copy + proof row · flag photo right */}
       <section className="support-hero">
         <Reveal className="support-hero-copy">
-          <p className="ph-eyebrow">Our Support</p>
+          <p className="ph-eyebrow">The Community</p>
           <h1 className="support-hero-h1">
-            You bring the commitment. We help you build it well.
+            Shared resources. Useful connections. Local ownership.
           </h1>
           <p className="support-hero-lead">
-            Opening a Palestine House involves hundreds of decisions — from
-            finding the right venue and building a team to shaping the
-            programme, managing the finances, and preparing to welcome your
-            first guests. You will not have to solve them alone. Every approved
-            partner receives a complete operating system, practical tools,
-            cultural guidance from Aswātna, and a clear 120-day path from first
-            decision to opening day.
+            The Palestine House community helps people learn, plan and connect
+            as they develop their own Houses. It brings practical tools together
+            in one place and makes room for people to share experience when they
+            can.
+          </p>
+          <p className="support-hero-lead">
+            Apply to join for access to the private resources and community
+            connections. Your local House remains yours to build and run.
           </p>
           <ul className="support-hero-proof">
             {SUP_PROOF.map((s) => (
@@ -181,19 +183,17 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      {/* 2 — The full playbook */}
+      {/* 2 — The toolkit */}
       <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head">
             <p className="ph-eyebrow">The toolkit</p>
-            <h2>A complete operating system, ready when you need it.</h2>
+            <h2>Find the resource for the question in front of you.</h2>
             <p className="ph-lead">
-              Everything required to plan, open, and run a House is organised in
-              one place. The system is divided into four sections and twenty-two
-              practical focus areas, so you can concentrate on the decisions that
-              matter now without losing sight of what comes next.
+              Four sections and 22 focus areas bring practical resources together
+              for preparing and running a local House. Begin with one question
+              rather than the entire library.
             </p>
-            <p className="sup-artefacts-intro">Every focus area includes:</p>
           </Reveal>
           <Reveal className="sup-artefacts">
             {SUP_ARTEFACTS.map((a) => (
@@ -214,10 +214,10 @@ export default function OurSupportPage() {
           </Reveal>
           <Reveal className="sup-templates">
             <p className="sup-templates-line">
-              Start with proven tools, not a blank page. With{" "}
-              <strong>88 templates</strong> across the platform, your team can
-              spend less time creating documents from scratch and more time
-              building the House itself.
+              The toolkit contains{" "}
+              <strong>83 templates and practical tools</strong>. Use what helps
+              your next step; you do not need to complete every document or
+              submit it to the community.
             </p>
             <Button asChild size="lg">
               <Link href="/focus-areas">
@@ -229,22 +229,25 @@ export default function OurSupportPage() {
         </div>
       </section>
 
-      {/* 3 — The Standard: copy · three arched photos · PH lockup (DR3.3) */}
+      {/* 3 — Shared identity: copy · three arched photos · PH lockup (DR3.3) */}
       <section className="ph-section-lg support-standard">
         <div className="ph-container support-standard-grid">
           <Reveal className="support-standard-copy">
-            <p className="ph-eyebrow">Shared standards</p>
+            <p className="ph-eyebrow">SHARED CULTURAL PURPOSE</p>
             <h2 className="support-standard-h">
-              One name. A consistent level of care.
+              A shared spirit. A House shaped by its city.
             </h2>
             <span className="support-orn" aria-hidden="true" />
             <p className="support-standard-body">
-              Every Palestine House responds to its own city, community, and
-              local character. What remains consistent is the standard behind
-              the experience: thoughtful hospitality, cultural integrity,
-              professional operation, and attention to detail. A guest should
-              feel the same level of care wherever they enter a Palestine House —
-              without every location looking or feeling identical.
+              Different cities will have different buildings, people, artists and
+              ways of coming together. Each local team develops the House that
+              fits its own community.
+            </p>
+            <p className="support-standard-body mt-4">
+              What connects the Houses is a commitment to Palestinian culture,
+              thoughtful hospitality, respect and responsible local practice.
+              Shared learning supports that commitment; it is not a central
+              inspection or management process.
             </p>
           </Reveal>
           <Reveal className="support-standard-arches">
@@ -277,44 +280,38 @@ export default function OurSupportPage() {
             <img
               className="support-standard-lockup"
               src="/assets/logo/ph-logo-lockup.png"
-              alt="Palestine House — Our Culture Embassy"
+              alt="Palestine House - Our Culture Embassy"
             />
             <p className="support-standard-tagline">
-              One name.
+              Shared cultural purpose.
               <br />
-              One shared standard.
+              Local expression.
               <br />
-              A House shaped by its city.
+              Useful help when it matters.
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* 4 — Aswātna: muted-red band + gold seal · three captioned photos (DR3.3) */}
+      {/* 4 — Aswātna: muted-red band · three captioned photos (DR3.3). The gold
+          seal left at CR1: the doc allows the logo only with permission, and none
+          is on record. */}
       <section className="ph-section-lg support-aswatna">
         <div className="ph-container support-aswatna-grid">
           <Reveal className="support-aswatna-intro">
-            {/* the doc's section label is "Cultural support from Aswātna" — the
-                "from Aswātna" half is carried by the wordmark directly below,
-                so the eyebrow states the rest without stuttering the name. */}
-            <p className="ph-eyebrow">Cultural support from</p>
+            <p className="ph-eyebrow">OPTIONAL PROGRAMMING PROVIDER</p>
             <h2 className="support-aswatna-name">Aswātna</h2>
             <p className="support-aswatna-tag">
-              Cultural direction that continues beyond launch.
+              Programming support when you choose it.
             </p>
             <p className="support-aswatna-body">
-              A strong Palestine House needs more than a busy events calendar.
-              Its programme should feel thoughtful, connected, and rooted in
-              Palestinian culture while responding meaningfully to the city
-              around it. Aswātna works alongside each House to shape that
-              cultural direction.
+              Aswātna is an optional provider of cultural programming and events.
+              Each House chooses its own programme and may work with its own
+              team, independent artists, Aswātna or other providers. If engaged,
+              Aswātna can help develop events and connect the House with
+              Palestinian artists and cultural practitioners. Agree the scope,
+              fees and availability directly.
             </p>
-            {/* eslint-disable-next-line @next/next/no-img-element -- partner seal, fixed size */}
-            <img
-              className="support-aswatna-seal"
-              src="/assets/partners/aswatna-mark-gold.png"
-              alt="Aswātna Studio"
-            />
           </Reveal>
           <Reveal className="support-aswatna-cols">
             {SUP_ASWATNA.map((c) => (
@@ -335,32 +332,52 @@ export default function OurSupportPage() {
           </Reveal>
           <Reveal>
             <p className="support-aswatna-note">
-              The goal is not simply to fill the calendar. It is to build a
-              cultural programme people trust and return to.
+              Your local team chooses the programme, collaborators and level of
+              support.
+            </p>
+            <p className="support-aswatna-col-text text-center">
+              <a
+                className={SUP_ASWATNA_LINK}
+                href="https://aswatnastudio.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                aswatnastudio.com
+              </a>
+              {" · "}
+              <a
+                className={SUP_ASWATNA_LINK}
+                href="mailto:nour@aswatnastudio.com"
+              >
+                nour@aswatnastudio.com
+              </a>
+              .
+            </p>
+            <p className="support-aswatna-col-text text-center">
+              If you would like to explore Aswātna’s services, send your city,
+              audience, dates, idea and budget. Confirm scope, fees, availability
+              and responsibilities directly.
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* 5 — The Backing: copy + button · horizontal numbered timeline (DR3.3) */}
+      {/* 5 — Join the community: copy + button · horizontal numbered timeline (DR3.3) */}
       <section className="ph-section-lg support-backing">
         <div className="ph-container support-backing-grid">
           <Reveal className="support-backing-copy">
-            <p className="ph-eyebrow">The 120-day path</p>
+            <p className="ph-eyebrow">JOIN THE COMMUNITY</p>
             <h2 className="support-backing-h">
-              Clear milestones. The right decisions in the right order.
+              One simple route into the community.
             </h2>
             <span className="support-orn" aria-hidden="true" />
-            {/* the old lead ("A 120-day path with clear milestones and constant
-                guidance.") is retired: the doc promoted that information into
-                the eyebrow + heading above, so it now only stutters. */}
             <Button
               asChild
               variant="outline"
               className="support-backing-cta"
             >
               <Link href="/bring-ph#checkpoints">
-                View the 120-day launch
+                Explore Local Opening Guidance
                 <ArrowRight aria-hidden="true" />
               </Link>
             </Button>
@@ -374,34 +391,35 @@ export default function OurSupportPage() {
                   </span>
                   <div className="support-timeline-body">
                     <p className="support-timeline-name">{s.name}</p>
-                    <p className="support-timeline-lead">{s.lead}</p>
                     <p className="support-timeline-text">{s.text}</p>
                   </div>
                 </li>
               ))}
             </ol>
             <p className="support-timeline-caption">
-              You always know where you are, what comes next, and what is ready.
+              This is a route into the community, not a staged approval process
+              for opening a venue.
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* 6 — What you're responsible for: ongoing-support band + who-brings-what
-          split (DR3.3) */}
+      {/* 6 — After opening: the resources band (DR3.3) */}
       <section className="support-duties">
         <div className="support-duties-band">
           <div className="ph-container support-duties-band-grid">
             <Reveal className="support-duties-intro">
               <h2 className="support-duties-h">
-                Support does not end on opening day.
+                Keep using the resources after opening.
               </h2>
               <p className="support-duties-sub">
-                Opening the doors is the beginning. The first public launch is an
-                important milestone, but a House succeeds through what happens in
-                the months and years that follow. We continue supporting you
-                across the areas that keep the House culturally meaningful,
-                operationally strong, and financially sustainable.
+                The questions change as your House develops. You may return to a
+                finance template, improve a daily routine, adjust the program or
+                share a lesson with another team.
+              </p>
+              <p className="support-duties-sub">
+                The community remains a place for resources and exchange. Your
+                local House remains yours to run.
               </p>
             </Reveal>
             <Reveal className="support-duties-topics">

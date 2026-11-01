@@ -12,12 +12,11 @@ local/Preview, and the **public contact form fails closed (a soft error) on
 real Production** so a message is never silently lost. **None of this touches
 the code** — it is all keys + DNS + a redeploy.
 
-**What it turns on — the four flows (all Resend, all plain-text):**
+**What it turns on — the three flows (all Resend, all plain-text):**
 
 1. **Contact form** (`/contact`) → emails **you** (`RESEND_TO_EMAIL`), Reply goes to the sender.
-2. **Support form** (signed-in partners) → emails **you**, Reply goes to the partner.
-3. **Application received** (`/apply`) → emails **you** (name, email, city, organisation, why + a link to `/admin/approvals`) **and** emails **the applicant** a "we received your application" confirmation.
-4. **Approve / decline** (`/admin/approvals`) → emails **the applicant** the approved ("sign in") or declined ("contact us") notice.
+2. **Application received** (`/apply`) → emails **you** (name, email, city, organisation, why + a link to `/admin/approvals`) **and** emails **the applicant** a "community application received" confirmation.
+3. **Approve / decline** (`/admin/approvals`) → emails **the applicant** the community-access-ready ("sign in") or access-not-offered ("contact us") notice.
 
 > Technical reference (env names, format hints, DNS): `docs/SUPABASE-VERCEL-SETUP.md` → "Email integrations".
 
@@ -50,11 +49,11 @@ Resend can only send from a domain you have verified. Ours is
 
 - [ ] **1.** Resend → **API Keys** → **Create API Key** (sending access only). Copy it once. → `RESEND_API_KEY`
 - [ ] **2.** **From:** `info@palestine-house.com` (on the verified domain). → `RESEND_FROM_EMAIL`
-- [ ] **3.** **To:** the inbox where contact/support/application notifications land — `info@palestine-house.com` (default; any inbox works, it does **not** need to be on the verified domain). → `RESEND_TO_EMAIL`
+- [ ] **3.** **To:** the inbox where contact/application notifications land — `info@palestine-house.com` (default; any inbox works, it does **not** need to be on the verified domain). → `RESEND_TO_EMAIL`
 
 > ⚠️ **All three are required.** The first two make sending possible; without
 > `RESEND_TO_EMAIL` the contact form still fails closed in Production and the
-> support/application notifications to you are skipped.
+> application notifications to you are skipped.
 
 ## Part 3 — Add the keys to Vercel, then redeploy
 
@@ -71,10 +70,9 @@ Resend can only send from a domain you have verified. Ours is
 ## Part 4 — Test it live (after the redeploy)
 
 - [ ] **Contact** (`/contact`): send a message → it lands in `info@`; **Reply** addresses the sender.
-- [ ] **Support** (signed in as an approved partner): submit → lands in `info@`; **Reply** addresses the partner.
-- [ ] **Apply** (`/apply`, use a test email you control): sign-up still lands on the pending dashboard → `info@` gets the **"New application"** notification (all fields present) → the test inbox gets the **"We received your application"** confirmation → both emails' links open the right pages.
-- [ ] **Approve** (`/admin/approvals`): approve the test application → the applicant gets **"You're approved"** with a working sign-in link.
-- [ ] **Decline**: create a second test application, decline it → the applicant gets the **"not moving forward — contact us"** email; signing in shows the declined notice linking `/contact`.
+- [ ] **Apply** (`/apply`, use a test email you control): sign-up still lands on the pending dashboard → `info@` gets the **"New application"** notification (all fields present) → the test inbox gets the **"Community application received"** confirmation → both emails' links open the right pages.
+- [ ] **Approve** (`/admin/approvals`): approve the test application → the applicant gets **"Your community access is ready"** with a working sign-in link.
+- [ ] **Decline**: create a second test application, decline it → the applicant gets the **"We cannot offer community access at the moment"** email; signing in shows the declined notice linking `/contact`.
 - [ ] Spot-check **spam placement** on at least one non-Gmail inbox. If it lands in spam, add the optional DMARC record (`_dmarc` TXT, `v=DMARC1; p=none;`) and retest.
 
 ---

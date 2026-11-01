@@ -125,8 +125,8 @@ one worse; do not report the deferral itself as a discovery.
   by this diff for any other reason is a finding.
 - **Migrations `0027`–`0034` are applied to production and immutable.** Production is on `0034`. Any
   schema fix is a new migration `0035`+, never an edit to an applied file.
-- **`docs/page-copy/` is gitignored** (the owner's copy is canon off-repo), so an approved-copy change
-  will not appear in the diff. Do not flag it as missing.
+- **`docs/page-copy/` and `docs/source-assets/` are gitignored** (the owner's copy is canon off-repo), so
+  an approved-copy change will not appear in the diff. Do not flag it as missing.
 - [Add or remove rows so this block is true on the day you send it.]
 
 ## Checks and evidence
@@ -180,9 +180,9 @@ pass, and state every command you did not run and why.
    listed in the PR by name and scoped per environment; Preview auth links resolve to the Preview
    origin, never Production.
 9. **Scope and content fidelity** — the changed paths match the sprint; approved copy was not
-   silently rewritten; the proof numbers are **4 sections · 22 focus areas · 88 templates**. The
-   retired band — 11 · 33 · 200+ · 297 · "120-day launch" — names content that no longer exists;
-   any surviving instance is a defect.
+   silently rewritten; the proof numbers are **4 sections · 22 focus areas · 83 templates and
+   practical tools**. The retired band — 11 · 33 · 200+ · 297 · "120-day launch", plus the previous
+   release's 88 — names content that no longer exists; any surviving instance is a defect.
 10. **Regressions** — the change does not weaken an existing guard or break a neighbouring flow.
 
 ## Safety lines — restated, never weakened

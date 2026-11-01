@@ -43,7 +43,7 @@ export type TopicOption = {
 
 const INITIAL: AdminContentState = { ok: false, message: null };
 const MAX_MB = 4; // must match MAX_BYTES in src/lib/admin/file-actions.ts
-const ALLOWED_EXT = ["docx", "pdf"];
+const ALLOWED_EXT = ["docx", "png", "svg"];
 
 function extOf(name: string) {
   const dot = name.lastIndexOf(".");
@@ -70,8 +70,8 @@ function extOf(name: string) {
 export function unsupportedMessage(fileName: string): string {
   const ext = extOf(fileName);
   return ext
-    ? `That’s a .${ext} file. Please save it as .docx or a PDF and upload it again.`
-    : "That file doesn’t have a file type in its name. Please save it as .docx or a PDF and upload it again.";
+    ? `That’s a .${ext} file. Please save it as .docx, a PNG or an SVG and upload it again.`
+    : "That file doesn’t have a file type in its name. Please save it as .docx, a PNG or an SVG and upload it again.";
 }
 
 /* Refuses the file before it is sent anywhere, and says why in one sentence. */
@@ -82,7 +82,7 @@ function FilePicker({ onProblem }: { onProblem: (m: string | null) => void }) {
       type="file"
       name="file"
       required
-      accept=".docx,.pdf"
+      accept=".docx,.png,.svg"
       onChange={(e) => {
         const f = e.target.files?.[0];
         if (!f) return onProblem(null);
@@ -192,7 +192,9 @@ function GuideSlot({
 
   React.useEffect(() => {
     if (upState.ok || repState.ok) router.refresh();
-  }, [upState.ok, repState.ok, router]);
+    /* The state objects, not their .ok: that stays true across a second success in
+       one visit, and the effect would not run again. Same in the three below. */
+  }, [upState, repState, router]);
 
   return (
     <section style={{ marginBottom: "var(--space-10)" }}>
@@ -200,8 +202,8 @@ function GuideSlot({
       {guide ? (
         <>
           <p className="adm-intro">
-            <strong>{guide.title}</strong> — this is what Download Now gives a
-            partner.
+            <strong>{guide.title}</strong> — this is what the Simple Guide card’s
+            download gives a member.
           </p>
           <form action={repAction} className="adm-form">
             <input type="hidden" name="id" value={guide.id} />
@@ -212,8 +214,8 @@ function GuideSlot({
               <span className="adm-field-label">Replace it</span>
               <FilePicker onProblem={setProblem} />
               <span className="adm-field-hint">
-                Word or PDF, up to {MAX_MB} MB. The old file is removed once the
-                new one is safely in place.
+                A Word file, up to {MAX_MB} MB. The old file is removed once the new
+                one is safely in place.
               </span>
             </label>
             {problem ? (
@@ -235,8 +237,8 @@ function GuideSlot({
           <input type="hidden" name="elementId" value={topic.element_id} />
           <input type="hidden" name="kind" value="guide" />
           <p className="adm-intro">
-            No guide file yet. Until one is here, Download Now tells partners it
-            is coming.
+            No guide file yet. Until one is here, the card’s download tells members
+            it is coming.
           </p>
           <label className="adm-form-field">
             <span className="adm-field-label">Name</span>
@@ -252,7 +254,7 @@ function GuideSlot({
             <span className="adm-field-label">File</span>
             <FilePicker onProblem={setProblem} />
             <span className="adm-field-hint">
-              Word or PDF, up to {MAX_MB} MB.
+              A Word file, up to {MAX_MB} MB.
             </span>
           </label>
           {problem ? (
@@ -294,7 +296,7 @@ function TemplateList({
       setAdding(false);
       router.refresh();
     }
-  }, [upState.ok, router]);
+  }, [upState, router]);
 
   const move = (index: number, delta: number) => {
     const to = index + delta;
@@ -315,38 +317,42 @@ function TemplateList({
       {templates.length === 0 ? (
         <p className="adm-intro">No templates on this focus area yet.</p>
       ) : (
-        <table className="adm-table">
-          <tbody>
-            {templates.map((t, i) => (
-              <tr key={t.id}>
-                <td className="adm-td-muted">{t.code}</td>
-                <td className="adm-td-strong">{t.title}</td>
-                <td style={{ whiteSpace: "nowrap" }}>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    aria-label={`Move ${t.title} up`}
-                    disabled={i === 0 || busy}
-                    onClick={() => move(i, -1)}
-                  >
-                    ↑
-                  </Button>{" "}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    aria-label={`Move ${t.title} down`}
-                    disabled={i === templates.length - 1 || busy}
-                    onClick={() => move(i, 1)}
-                  >
-                    ↓
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="adm-table-wrap">
+          <table className="adm-table adm-table--fit">
+            <tbody>
+              {templates.map((t, i) => (
+                <tr key={t.id}>
+                  <td className="adm-td-muted">{t.code}</td>
+                  <td className="adm-td-strong">{t.title}</td>
+                  <td>
+                    <div className="adm-row-actions">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        aria-label={`Move ${t.title} up`}
+                        disabled={i === 0 || busy}
+                        onClick={() => move(i, -1)}
+                      >
+                        ↑
+                      </Button>{" "}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        aria-label={`Move ${t.title} down`}
+                        disabled={i === templates.length - 1 || busy}
+                        onClick={() => move(i, 1)}
+                      >
+                        ↓
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {templates.map((t) => (
@@ -371,14 +377,15 @@ function TemplateList({
               placeholder="T01"
             />
             <span className="adm-field-hint">
-              The badge on the template card, like T01.
+              The badge on the card, like T01. Use LOGO for a PNG and SVG-1 for
+              an SVG. OV is kept for the focus area’s Overview.
             </span>
           </label>
           <label className="adm-form-field">
             <span className="adm-field-label">File</span>
             <FilePicker onProblem={setProblem} />
             <span className="adm-field-hint">
-              Word or PDF, up to {MAX_MB} MB.
+              Word, PNG or SVG, up to {MAX_MB} MB.
             </span>
           </label>
           {problem ? (
@@ -433,7 +440,7 @@ function TemplateEditor({
 
   React.useEffect(() => {
     if (renState.ok || repState.ok) router.refresh();
-  }, [renState.ok, repState.ok, router]);
+  }, [renState, repState, router]);
 
   if (!open) {
     return (
@@ -442,6 +449,7 @@ function TemplateEditor({
           type="button"
           size="sm"
           variant="secondary"
+          className="adm-btn-long"
           onClick={() => setOpen(true)}
         >
           Edit “{file.title}”
@@ -454,6 +462,7 @@ function TemplateEditor({
     <div style={{ marginBottom: "var(--space-6)" }}>
       <form action={renAction} className="adm-form">
         <input type="hidden" name="id" value={file.id} />
+        <input type="hidden" name="elementId" value={topic.element_id} />
         <label className="adm-form-field">
           <span className="adm-field-label">Name</span>
           <input
@@ -529,7 +538,7 @@ function FileRowActions({ file }: { file: FileRow }) {
 
   React.useEffect(() => {
     if (state.ok) router.refresh();
-  }, [state.ok, router]);
+  }, [state, router]);
 
   if (!confirming) {
     return (

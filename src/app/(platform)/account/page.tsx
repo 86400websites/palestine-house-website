@@ -22,12 +22,13 @@ import { PwAccountForm } from "./account-form";
    location is never access control (SECURITY-CHECKLIST §6/§15) and the check
    costs one cached call. One known consequence of the move: the layout's
    redirect carries ?next=/dashboard, so an anonymous visitor who deep-links
-   here lands on the About page after signing in rather than back on this one.
+   here lands on the Overview page after signing in rather than back on this one.
 
    The profile row is read directly under the owner-only RLS SELECT policy
    (0001); writes go through set_my_account (0018). The Delete account section
-   is intentionally hidden at launch (D-S6-c) — deletion requests route through
-   /support meanwhile. */
+   is intentionally hidden at launch (D-S6-c) — deletion requests go through the
+   public /contact form meanwhile, which /support's Community Contacts block
+   links to. */
 
 export const metadata: Metadata = { title: "Your account" };
 

@@ -18,8 +18,12 @@ import type { PwSearchItem, PwSearchKind } from "./types";
 
 export type PwSearchFilter = "all" | "topics" | "guides" | "templates";
 
+/* An Overview sits under the Guides chip because a chip is a way of narrowing, and
+   it keeps its own OVERVIEW label on the row, so it never reads as a second Simple
+   Guide or counts among the templates. */
 export const FILTER_OF: Record<PwSearchKind, PwSearchFilter> = {
   TOPIC: "topics",
+  OVERVIEW: "guides",
   GUIDE: "guides",
   TEMPLATE: "templates",
 };

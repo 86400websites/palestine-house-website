@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   CircleCheck,
@@ -15,50 +16,50 @@ import { EmbassyGallery } from "@/components/sections/model/embassy-gallery";
 import { FadeIn, Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
-/* The Model (/model) — copy overhaul 2026-07-17 (owner docs + the §6 "what it
-   is" reference mockup); v3 layout retained from the DR3.1 rebuild. */
+/* The Model (/model) — CR1 content refresh 2026-10-30 (owner's Public Website
+   Copy §3 + §12); v3 layout retained from the DR3.1 rebuild. */
 
 export const metadata: Metadata = {
-  title: "The Model",
+  title: { absolute: "The Model - Palestine House" },
   description:
-    "One name. Many Houses. A shared standard. How Palestine House fits together — three partners, one agreement, and three commitments every House shares.",
+    "Independent local Houses, shared cultural purpose, and community resources that support local decisions.",
 };
 
 const MODEL_NEVER = [
   {
     n: "01",
     title: "Cultural independence",
-    text: "A Palestine House does not endorse political parties, electoral candidates, or partisan organisations. It remains a space for Palestinian culture, critical thought, artistic expression, learning, and community.",
+    text: "Make room for Palestinian voices, creativity, heritage and contemporary life with dignity and care. Welcome conversation, learning and artistic expression without turning the House into an endorsement platform for political parties or electoral candidates.",
     tone: "olive",
   },
   {
     n: "02",
-    title: "Respect for the Palestine House name",
-    text: "The Palestine House identity is used consistently and with care. HQ approves major uses of the brand so that every House protects the trust, meaning, and reputation carried by the name. Should a partnership end, the Palestine House branding and licensed materials are removed.",
+    title: "Respectful identity",
+    text: "Use names, logos, artwork and other shared materials within the permissions that apply. Present your local House clearly and do not imply authority to speak for every House.",
     tone: "terra",
   },
   {
     n: "03",
-    title: "Honest and transparent operation",
-    text: "Every House agrees to clear reporting, shared performance measures, and appropriate financial and operational transparency. These systems help identify problems early, protect the network, and give partners the support they need to operate sustainably.",
+    title: "Responsible local practice",
+    text: "Look after people, meet local commitments and keep the records your own operation needs. Shared learning is voluntary; local accountability remains real. Your own funders, contracts and local authorities may have requirements separate from community participation.",
     tone: "terra",
   },
 ] as const;
 
 const MODEL_IS = [
-  "A professionally run cultural business.",
-  "A café and gathering place rooted in Palestinian hospitality.",
-  "A year-round venue for music, art, film, literature, food, and conversation.",
-  "A platform for Palestinian artists, makers, thinkers, and cultural workers.",
-  "A permanent community anchor with local ownership and global support.",
+  "A lasting local home for Palestinian culture.",
+  "A welcoming place for artists, audiences and community.",
+  "A venue for a cultural program shaped by its local team.",
+  "An independently run local operation with real responsibilities.",
+  "A place that can learn from and contribute to a wider community.",
 ] as const;
 
 const MODEL_ISNOT = [
-  "A temporary pop-up.",
-  "A decorative interpretation of Palestinian culture.",
-  "A passive franchise purchased without responsibility.",
-  "A one-off campaign or seasonal project.",
-  "A venue that uses the name without meeting the shared standard.",
+  "A branch office run by the community.",
+  "A centrally assigned program or compulsory partnership.",
+  "A guarantee of funding, staff, artists or specialist advice.",
+  "A shortcut around local permissions or asset-use rights.",
+  "A requirement to complete every resource before asking a question.",
 ] as const;
 
 export default function ModelPage() {
@@ -70,19 +71,19 @@ export default function ModelPage() {
         alt="Hands embroidering red tatreez patterns at a workshop table."
         position="50% 55%"
         eyebrow="The Model"
-        title="One name. Many Houses. A shared standard."
-        lead="Every Palestine House is locally owned and shaped by the people who understand their city best. What connects every House is a shared commitment to cultural integrity, Palestinian hospitality, professional practice, and long-term community care."
-        support="Every application is reviewed by HQ."
+        title="Independent Houses. Shared cultural purpose."
+        lead="Every Palestine House is shaped by the people who build and run it locally. The community connects those people through practical resources, shared learning and a commitment to Palestinian culture, hospitality and belonging."
+        support="Apply for community access, not permission to operate a House."
       >
         <Button asChild size="lg" className="v3-cta">
-          <Link href="/apply">Apply to bring a House</Link>
+          <Link href="/apply">Apply to Join</Link>
         </Button>
         <Button asChild variant="outline" size="lg" className="v3-cta">
-          <Link href="/our-support">See our support</Link>
+          <Link href="/our-support">Explore the Community</Link>
         </Button>
       </PageHero>
 
-      {/* 2 — A cultural embassy (café · venue · community collage) */}
+      {/* 2 — A cultural home (café · venue · community collage) */}
       <section className="ph-section-lg model-embassy">
         <div className="ph-container model-embassy-grid">
           <Reveal className="model-embassy-copy">
@@ -99,7 +100,7 @@ export default function ModelPage() {
               />
             </svg>
             <h2 className="model-h2">
-              A cultural embassy, <em>not a themed café.</em>
+              A cultural home, <em>shaped by the people around it.</em>
             </h2>
             {/* eslint-disable-next-line @next/next/no-img-element -- decorative fixed-size flourish */}
             <img
@@ -109,16 +110,16 @@ export default function ModelPage() {
               aria-hidden="true"
             />
             <p className="model-embassy-lead">
-              A Palestine House is a real café, a cultural venue, and a
-              community home under one roof. It carries the responsibility of
-              representing Palestinian culture with depth, care, and integrity —
-              and the joy of sharing it generously.
+              A House is a lasting cultural home, not simply a name on a venue.
+              Its purpose is visible in the program, the welcome, the
+              relationships and the way Palestinian stories and creativity are
+              shared.
             </p>
             <p className="model-embassy-lead">
-              Every meal served, every concert, every workshop, every film, and
-              every conversation contributes to a permanent Palestinian cultural
-              presence. Culture is not decoration here. It shapes the food, the
-              programme, the atmosphere, and the way people are welcomed.
+              It can bring together cultural activities, everyday gathering and
+              food or hospitality where those fit the local model. The size and
+              mix will vary. The aim is a place that can serve its city over
+              time.
             </p>
           </Reveal>
           <FadeIn className="model-embassy-gallery">
@@ -127,77 +128,84 @@ export default function ModelPage() {
         </div>
       </section>
 
-      {/* 3 — Three layers, one team (the network arches) */}
+      {/* 3 — Your local House, the community, direct collaborators (the arches) */}
       <section className="ph-section-lg model-network">
         <div className="ph-container">
           <Reveal className="sec-head">
-            <p className="ph-eyebrow">How the network works</p>
-            <h2>Three partners. One shared purpose.</h2>
+            <p className="ph-eyebrow">HOW THE COMMUNITY WORKS</p>
+            <h2>
+              Local ownership. Resources to share. <br />
+              People to learn from.
+            </h2>
             <p className="ph-lead">
-              Every Palestine House is built through a clear partnership between
-              Global HQ, the local operator, and Aswātna. Each partner brings a
-              distinct area of expertise. Together, they protect the culture,
-              strengthen the business, and help every House grow with
-              consistency and local character.
+              You build and run your House locally. The community brings
+              practical resources together and gives members opportunities to
+              exchange experience. Collaborations happen directly between the
+              people who choose to take part.
             </p>
           </Reveal>
           <Reveal className="model-arches">
             <div className="model-arch model-arch--green">
               <Key className="model-arch-icon" aria-hidden="true" />
-              <h3 className="model-arch-title">Global HQ</h3>
-              <p className="model-arch-role">Brand steward and operating partner</p>
+              <h3 className="model-arch-title">Your local House</h3>
+              <p className="model-arch-role">Your team. Your decisions.</p>
               <p className="model-arch-text">
-                Global HQ protects the Palestine House name and identity, sets
-                the shared standards, develops the operating system and partner
-                platform, and supports every House from application through
-                launch and long-term operation. It ensures that every location
-                meets the same level of cultural care, professionalism, and
-                quality.
+                Your local team is responsible for the venue, people, finances,
+                program and local relationships. It arranges the relevant
+                permissions, contracts, safety measures and professional advice
+                for its circumstances.
               </p>
             </div>
             <div className="model-arch model-arch--cream">
               <House className="model-arch-icon" aria-hidden="true" />
-              <h3 className="model-arch-title">The Local Partner</h3>
-              <p className="model-arch-role">Owner and operator</p>
+              <h3 className="model-arch-title">The community</h3>
+              <p className="model-arch-role">Shared resources and experience.</p>
               <p className="model-arch-text">
-                The local partner brings the venue, the team, local knowledge,
-                community relationships, and the daily commitment required to
-                run a sustainable cultural business. You lead your House, make
-                it meaningful in your city, and bring the shared Palestine House
-                standard to life locally.
+                Guides explain practical decisions. Editable templates help you
+                avoid starting from a blank page. Members may share experience,
+                ideas or introductions when they are able to help. The community
+                does not manage your House or require routine progress reports.
               </p>
             </div>
             <div className="model-arch model-arch--terra">
-              {/* eslint-disable-next-line @next/next/no-img-element -- decorative partner seal */}
-              <img
+              {/* decorative olive branch; fixed height keeps the card text in place */}
+              <Image
                 className="model-arch-seal"
-                src="/assets/partners/aswatna-mark.png"
+                src={ART_SOURCES["ph-art-branch-2"]}
                 alt=""
                 aria-hidden="true"
+                width={1106}
+                height={1131}
+                sizes="46px"
+                style={{ width: "auto", height: 42 }}
               />
-              <h3 className="model-arch-title">Aswātna</h3>
-              <p className="model-arch-role">Cultural programming partner</p>
+              <h3 className="model-arch-title">Direct collaborators</h3>
+              <p className="model-arch-role">Useful connections, agreed together.</p>
               <p className="model-arch-text">
-                Aswātna shapes the cultural direction of each House. It supports
-                launch programming, connects Houses with Palestinian artists and
-                cultural practitioners, develops meaningful events and
-                partnerships, and helps ensure that the creative programme
-                remains thoughtful, relevant, and culturally grounded over time.
+                Choose the collaborators who fit your House. Aswātna is one
+                optional provider of cultural programming and events; you may
+                also work with your own team, independent artists or other
+                providers. Agree scope, fees, availability and responsibilities
+                directly.
               </p>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* 4 — The Partnership (dark moss band) */}
+      {/* 4 — Local ownership (dark moss band) */}
       <section className="model-promise">
         <div className="ph-container model-promise-grid">
           <Reveal className="model-promise-head">
-            <p className="ph-eyebrow">The Partnership</p>
-            <h2 className="model-promise-h">One agreement. Clear responsibilities.</h2>
+            <p className="ph-eyebrow">LOCAL OWNERSHIP</p>
+            <h2 className="model-promise-h">
+              Community access is one step. <br />
+              Operating a House is another.
+            </h2>
             <p className="model-promise-lead">
-              Palestine House HQ licenses the name and operating system to
-              carefully selected local partners.
+              Applying to join the community is how you request access to the
+              private resources and connections. It is not an operating licence
+              or venue approval.
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element -- decorative branch */}
             <img
@@ -212,40 +220,39 @@ export default function ModelPage() {
               <span className="model-promise-icon">
                 <Handshake aria-hidden="true" />
               </span>
-              <p>You own and operate your House.</p>
+              <p>
+                Your local team handles the practical arrangements for its own
+                House. It checks the usage terms for any names, logos, artwork
+                or other protected materials it plans to use.
+              </p>
             </div>
             <div className="model-promise-col">
               <span className="model-promise-icon">
                 <ShieldCheck aria-hidden="true" />
               </span>
-              <p>HQ gives you the tools, standards, guidance, and ongoing support to build it well.</p>
+              <p>
+                Use the resources that fit your next step. You do not need to
+                complete the whole toolkit or submit routine progress reports to
+                the community.
+              </p>
             </div>
           </Reveal>
         </div>
-        {/* The doc frames the principle as the ONE thing the agreement binds
-            every partner to — so it closes the band rather than sitting as a
-            third peer responsibility. */}
+        {/* The doc's emphasized line closes the band rather than sitting as a
+            third peer column. */}
         <Reveal className="ph-container model-promise-close">
-          <p className="model-promise-principle-intro">
-            The agreement connects all partners around one principle:
-          </p>
           <p className="model-promise-principle">
-            Local ownership. Shared standards. Cultural integrity.
-          </p>
-          <p className="model-promise-note">
-            Each House has its own personality and responds to its own city, but
-            the quality of care, hospitality, cultural representation, and
-            professional practice remains consistent across the network.
+            Local ownership. Shared learning. Cultural integrity.
           </p>
         </Reveal>
       </section>
 
       <PageDivider />
 
-      {/* 5 — Three commitments every House shares */}
+      {/* 5 — Shared principles */}
       <section className="ph-section-lg">
         <Reveal className="ph-container">
-          <p className="ph-eyebrow">Three commitments every House shares</p>
+          <p className="ph-eyebrow">Shared principles</p>
           <div className="model-never-cards">
             {MODEL_NEVER.map((r) => (
               <div key={r.n} className="model-never-card">
@@ -259,7 +266,7 @@ export default function ModelPage() {
         </Reveal>
       </section>
 
-      {/* 6 — A cultural institution built to last (what it is / what it is
+      {/* 6 — A cultural home built to last (what it is / what it is
           not) + the closing still life (copy overhaul 2026-07-17; the
           "Culture leads" lockup + reciprocity pair were removed as repeated
           copy — owner dedupe, 2026-07-20) */}
@@ -268,7 +275,7 @@ export default function ModelPage() {
           <div className="model-plainly-main">
             <p className="ph-eyebrow">What it is</p>
             <h2 className="model-plainly-title">
-              A cultural institution built to last.
+              A cultural home built to last.
             </h2>
             <div className="model-plainly-grid">
               <div className="model-plainly-col">

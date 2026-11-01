@@ -1,5 +1,6 @@
 import { expect, test, type Browser, type BrowserContext } from "@playwright/test";
 import { writeFileSync } from "node:fs";
+import { DECLINED_HEADING, PENDING_HEADING, openPanel } from "./helpers/app";
 import { ROLES, rolePassword } from "./helpers/roles";
 
 /* The write journeys — run ONCE per full run (their own Playwright project,
@@ -9,7 +10,9 @@ import { ROLES, rolePassword } from "./helpers/roles";
 
    Emails per full run: one contact (J1), TWO application pairs (J2 — one
    applicant per decision branch, since a decision is final in the approvals
-   UI), one Ask HQ (J3). Every subject line announces the robot.
+   UI). Every subject line announces the robot. J3 sends none and writes nothing:
+   the Ask HQ form it used to submit left at CR1, and the block in its place only
+   links to the contact form.
    All data mutations are on the NON-PRODUCTION project (the Preview's
    database) and every one is reverted or deleted before the journey ends. */
 
@@ -29,17 +32,17 @@ test("FM-002 (J1): the contact form works end to end — one marked-TEST email t
   page,
 }) => {
   await page.goto("/contact");
-  await page.getByLabel("Name").fill("ROBOT TEST — launch gate");
-  await page.getByLabel("Email").fill("e2e-contact@robot-test.invalid");
+  await page.getByLabel("Your name").fill("ROBOT TEST — launch gate");
+  await page.getByLabel("Email address").fill("e2e-contact@robot-test.invalid");
   await page.getByLabel("Subject").fill(TEST_SUBJECT);
   await page
-    .getByLabel("Message")
+    .getByLabel("Your message")
     .fill(
       "This is an automated test submission from the Palestine House launch gate. No reply needed.",
     );
-  await page.getByRole("button", { name: /send/i }).click();
+  await page.getByRole("button", { name: "Send Message" }).click();
   await expect(
-    page.getByText("Thanks — your message is on its way.").first(),
+    page.getByText("Thank you. Your enquiry has been submitted.").first(),
   ).toBeVisible({ timeout: 30_000 });
 });
 
@@ -60,22 +63,22 @@ test("AC-014/AC-015/AD-001/FM-004/FM-005/FM-008/IN-002 (J2): the applicant journ
     const page = await context.newPage();
     await page.goto("/apply");
     await page.getByLabel("Your name").fill(label);
-    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Email address").fill(email);
     await page.getByLabel(/^Password/).fill(`Gate-${runId}-probe!`);
     await page.getByLabel("City", { exact: true }).fill("Robot Test City");
-    await page.getByLabel(/Organisation/).fill("Automated Launch Gate");
+    await page.getByLabel(/Organization or group name/).fill("Automated Launch Gate");
     await page
-      .getByLabel(/Tell us about your city/)
+      .getByLabel("What interests you about Palestine House?")
       .fill(
         "ROBOT TEST APPLICATION from the automated test suite. Not a real application — the robot admin decides and the account is cleaned up.",
       );
-    await page.getByRole("button", { name: /submit|apply|send/i }).click();
+    await page.getByRole("button", { name: "Send Application" }).click();
     // A successful apply signs the applicant in and lands them on the pending
     // dashboard (S6 step 3.5 — the in-form thank-you is a fallback only).
     await page.waitForURL("**/dashboard", { timeout: 60_000 });
-    await expect(
-      page.getByRole("heading", { name: "Your application is under review." }),
-    ).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: PENDING_HEADING })).toBeVisible({
+      timeout: 30_000,
+    });
     return { context, page };
   };
 
@@ -92,11 +95,13 @@ test("AC-014/AC-015/AD-001/FM-004/FM-005/FM-008/IN-002 (J2): the applicant journ
   const dupForm = d.page.getByLabel("Your name");
   if (await dupForm.isVisible().catch(() => false)) {
     await dupForm.fill(`ROBOT TEST Applicant D ${runId}`);
-    await d.page.getByLabel("Email").fill(declineEmail);
+    await d.page.getByLabel("Email address").fill(declineEmail);
     await d.page.getByLabel(/^Password/).fill(`Gate-${runId}-probe!`);
     await d.page.getByLabel("City", { exact: true }).fill("Robot Test City");
-    await d.page.getByLabel(/Tell us about your city/).fill("ROBOT TEST duplicate probe.");
-    await d.page.getByRole("button", { name: /submit|apply|send/i }).click();
+    await d.page
+      .getByLabel("What interests you about Palestine House?")
+      .fill("ROBOT TEST duplicate probe.");
+    await d.page.getByRole("button", { name: "Send Application" }).click();
     await d.page.waitForURL("**/dashboard", { timeout: 45_000 });
   }
 
@@ -122,15 +127,24 @@ test("AC-014/AC-015/AD-001/FM-004/FM-005/FM-008/IN-002 (J2): the applicant journ
     .poll(
       async () => {
         await d.page.goto("/dashboard");
-        return d.page
-          .getByRole("heading", { name: "We’re not moving forward right now." })
-          .count();
+        return d.page.getByRole("heading", { name: DECLINED_HEADING }).count();
       },
       { timeout: 45_000 },
     )
     .toBeGreaterThan(0);
-  await d.page.goto("/setup");
-  expect(await d.page.locator('a[href$="/guide"]').count()).toBe(0);
+  // A declined account gets the same truthful answer on every section page (CR1),
+  // and waiting for it means the count below reads a finished page.
+  for (const section of ["/setup", "/operate", "/program", "/support"]) {
+    await d.page.goto(section);
+    await expect(
+      d.page.getByRole("heading", { name: DECLINED_HEADING }),
+      `no declined notice on ${section}`,
+    ).toBeVisible({ timeout: 30_000 });
+    expect(
+      await d.page.locator('a[href$="/guide"]').count(),
+      `declined account saw a guide link on ${section}`,
+    ).toBe(0);
+  }
 
   // Approve branch — the one unlock this site has.
   await approveRow.click();
@@ -152,39 +166,61 @@ test("AC-014/AC-015/AD-001/FM-004/FM-005/FM-008/IN-002 (J2): the applicant journ
   await admin.close();
 });
 
-test("FM-006 (J3): Ask HQ works for an approved partner — and its form never shows for a pending one", async ({
+test("FM-006 (J3): the Community Contacts block links an approved partner to /contact and submits nothing — and never shows for a pending one", async ({
   browser,
   baseURL,
 }) => {
+  test.setTimeout(180_000);
+  /* The block replaced the Ask HQ form at CR1. It holds guidance and a link, so
+     this journey writes no row and sends no email: the contact form it leads to is
+     opened here and never filled. The old RPC and its table remain in the database,
+     unreached; the watcher below is what would notice a page reaching for them. */
   const approved = await roleContext(browser, baseURL!, "approved");
   const p = await approved.newPage();
+  const writes: string[] = [];
+  p.on("request", (request) => {
+    if (
+      request.method() === "POST" &&
+      (request.headers()["next-action"] || request.url().includes("/api/"))
+    ) {
+      writes.push(request.url());
+    }
+  });
+
   await p.goto("/support");
-  const opener = p.getByRole("button", { name: /ask hq/i }).first();
-  if (await opener.isVisible().catch(() => false)) {
-    await opener.click();
-  }
-  const send = p.getByRole("button", { name: "Send question" });
-  await expect(send).toBeVisible({ timeout: 20_000 });
-  // The form prefills name + work email; the robot supplies the two required
-  // choices: a focus area and the question itself.
-  await p.getByLabel("What do you need help with?").selectOption({ label: "Other" });
-  await p
-    .getByLabel("Your question")
-    .fill(`${TEST_SUBJECT} — automated launch-gate test question. No reply needed.`);
-  await send.click();
-  // The form replaces itself with the success view (approved copy).
+  const block = p.locator("section#community-contacts");
+  await expect(block).toBeVisible({ timeout: 30_000 });
   await expect(
-    p.getByRole("heading", { name: "Your question is ready." }),
-  ).toBeVisible({ timeout: 30_000 });
+    block.getByRole("heading", { name: "Need a community contact?" }),
+  ).toBeVisible();
+  await expect(block.locator("form, input, select, textarea, button")).toHaveCount(0);
+  await expect(block).toContainText("it does not post a question to community members");
+  // The optional Aswātna line: its address and its site, both plain links.
+  await expect(block.locator('a[href^="mailto:"]')).toHaveCount(1);
+  await expect(block.locator('a[href="https://aswatnastudio.com/"]')).toHaveCount(1);
+
+  const link = block.getByRole("link", { name: "Request Community Contacts" });
+  await expect(link).toHaveAttribute("href", "/contact");
+  await link.click();
+  await p.waitForURL("**/contact", { timeout: 45_000 });
+  await expect(p.getByRole("button", { name: "Send Message" })).toBeVisible({
+    timeout: 30_000,
+  });
+  expect(writes, "the Community Contacts walk submitted something").toHaveLength(0);
   await approved.close();
 
+  // Pending: the pending notice, and none of the block in what was sent.
   const pending = await roleContext(browser, baseURL!, "pending");
   const q = await pending.newPage();
   await q.goto("/support");
+  await expect(q.getByRole("heading", { name: PENDING_HEADING })).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(q.locator("#community-contacts")).toHaveCount(0);
   expect(
-    await q.getByRole("button", { name: "Send question" }).count(),
-    "the Ask HQ form rendered for a pending partner",
-  ).toBe(0);
+    (await q.content()).includes("Need a community contact?"),
+    "the Community Contacts block reached a pending partner",
+  ).toBe(false);
   await pending.close();
 });
 
@@ -261,6 +297,26 @@ test("CT-007/AD-003 (J5): Draft hides a focus area everywhere; Live restores it;
   ).toHaveText(title!, { timeout: 30_000 });
 
   // CT-007: open the editor and move it back to Draft.
+  const approved = await roleContext(browser, baseURL!, "approved");
+  const p = await approved.newPage();
+  const guideLinks = async () => {
+    const all = new Set<string>();
+    for (const section of ["/setup", "/operate", "/program", "/support"]) {
+      await p.goto(section);
+      await p
+        .waitForSelector('a[href$="/guide"]', { state: "attached", timeout: 30_000 })
+        .catch(() => {});
+      for (const href of await p.$$eval('a[href$="/guide"]', (as) =>
+        as.map((el) => (el as HTMLAnchorElement).getAttribute("href") ?? ""),
+      )) {
+        all.add(href);
+      }
+    }
+    return all;
+  };
+  const countAll = async () => (await guideLinks()).size;
+  const before = await guideLinks();
+
   const row = () => m.locator("tbody tr").filter({ hasText: title! }).first();
   const makeItLive = async () => {
     await m.goto("/admin/content/focus-areas");
@@ -271,24 +327,6 @@ test("CT-007/AD-003 (J5): Draft hides a focus area everywhere; Live restores it;
   await row().getByRole("button", { name: "Edit" }).click();
   await m.getByRole("button", { name: "Move back to Draft" }).click();
   await expect(row().getByText("Draft")).toBeVisible({ timeout: 30_000 });
-
-  const approved = await roleContext(browser, baseURL!, "approved");
-  const p = await approved.newPage();
-  const countAll = async () => {
-    let count = 0;
-    for (const section of ["/setup", "/operate", "/program", "/support"]) {
-      await p.goto(section);
-      await p
-        .waitForSelector('a[href$="/guide"]', { state: "attached", timeout: 30_000 })
-        .catch(() => {});
-      count += new Set(
-        await p.$$eval('a[href$="/guide"]', (as) =>
-          as.map((el) => (el as HTMLAnchorElement).getAttribute("href") ?? ""),
-        ),
-      ).size;
-    }
-    return count;
-  };
 
   let restored = false;
   try {
@@ -301,6 +339,25 @@ test("CT-007/AD-003 (J5): Draft hides a focus area everywhere; Live restores it;
         `"${title}" still on ${section}`,
       ).toBe(false);
     }
+
+    // Its guide URL, known from before, is now the private not-found page.
+    const after = await guideLinks();
+    const gone = [...before].filter((href) => !after.has(href));
+    expect(gone, "exactly one guide should have dropped out").toHaveLength(1);
+    await p.goto(gone[0]);
+    await expect(p.getByRole("heading", { name: "That page doesn’t exist." })).toBeVisible({
+      timeout: 30_000,
+    });
+
+    // And search does not offer it. The shortcuts appear once the index has arrived.
+    await p.goto("/dashboard");
+    await p.getByRole("button", { name: "Search Resources" }).first().click();
+    const dialog = p.locator("dialog.pw-overlay");
+    await expect(dialog.locator(".pw-search-shortcut").first()).toBeVisible({
+      timeout: 30_000,
+    });
+    await dialog.getByPlaceholder(/Search focus areas/).fill(title!);
+    await expect(dialog.locator(".pw-result-title").filter({ hasText: title! })).toHaveCount(0);
 
     // Restore Live, and the world comes back.
     await makeItLive();
@@ -391,9 +448,22 @@ test("AD-004 (J7): the files manager uploads, serves, refuses and deletes", asyn
   const admin = await roleContext(browser, baseURL!, "admin");
   const m = await admin.newPage();
 
+  const serverAnswered = () =>
+    m.waitForResponse(
+      (r) =>
+        r.request().method() === "POST" && !!r.request().headers()["next-action"],
+      { timeout: 45_000 },
+    );
+
   const openFocusArea = async () => {
     await m.goto("/admin/content/files");
-    await m.getByLabel("Focus area").selectOption({ label: "Get Legally Ready" });
+    /* The visible one: while the page streams in, a second copy of this select can
+       be in the document for a moment. */
+    await m
+      .getByLabel("Focus area")
+      .filter({ visible: true })
+      .first()
+      .selectOption({ label: "Find and Prepare the Space" });
     await expect(m.getByRole("button", { name: "+ Add template" })).toBeVisible({
       timeout: 30_000,
     });
@@ -403,8 +473,8 @@ test("AD-004 (J7): the files manager uploads, serves, refuses and deletes", asyn
      confirmation). Runs BEFORE the test (sweeping any leftover from a
      crashed earlier run) and again in finally. */
   const deleteRobotTemplates = async () => {
-    await openFocusArea();
     for (let i = 0; i < 6; i += 1) {
+      await openFocusArea();
       const editBtn = m
         .getByRole("button", { name: /Edit “ROBOT TEST template/ })
         .first();
@@ -415,10 +485,14 @@ test("AD-004 (J7): the files manager uploads, serves, refuses and deletes", asyn
       await editBtn.click();
       await m.getByRole("button", { name: "Delete file…" }).last().click();
       await m.locator('input[name="confirm"]').fill(match[1]);
+      /* Wait for the server, then let the fresh load above answer. This screen can
+         sit on "Deleting…" after the delete has finished (PROJECT-STATUS §7 #14), so
+         its own list proves nothing, and the old check on the Edit button passed
+         while the delete was still running, because an open row has none. The
+         partner-side poll after this is what proves the store is back. */
+      const done = serverAnswered();
       await m.getByRole("button", { name: "Delete for good" }).click();
-      await expect(m.getByRole("button", { name: label.trim() })).toHaveCount(0, {
-        timeout: 45_000,
-      });
+      await done;
     }
   };
 
@@ -433,73 +507,233 @@ test("AD-004 (J7): the files manager uploads, serves, refuses and deletes", asyn
     const addForm = m
       .locator("form")
       .filter({ has: m.getByRole("button", { name: "Add template" }) });
-    await addForm.locator('input[name="title"]').fill(title);
-    await addForm.locator('input[name="code"]').fill("T99");
+    /* React resets a form when its action finishes, refused or not, so a submit
+       puts every field back first. */
+    const submitAddForm = async (code: string, path: string, rowTitle = title) => {
+      await addForm.locator('input[name="title"]').fill(rowTitle);
+      await addForm.locator('input[name="code"]').fill(code);
+      await addForm.locator('input[type="file"]').setInputFiles(path);
+      const done = serverAnswered();
+      await addForm.getByRole("button", { name: "Add template" }).click();
+      await done;
+    };
+    // A fresh load, because this screen can go stale after a change that saved.
+    const expectSaved = async (rowTitle: string) => {
+      await openFocusArea();
+      await expect(m.getByRole("button", { name: `Edit “${rowTitle}”` })).toBeVisible({
+        timeout: 30_000,
+      });
+    };
 
     // The type check refuses what it should — and says what arrived.
     const txtPath = testInfo.outputPath("robot-test.txt");
     writeFileSync(txtPath, "not a document");
     await addForm.locator('input[type="file"]').setInputFiles(txtPath);
-    await expect(addForm.getByText(/That’s a \.txt file/)).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(
+      addForm.getByText(
+        "That’s a .txt file. Please save it as .docx, a PNG or an SVG and upload it again.",
+      ),
+    ).toBeVisible({ timeout: 10_000 });
+
+    // A PDF too: the copy has no download label for one (D-CR1-5).
+    const refusedPdfPath = testInfo.outputPath("robot-test-refused.pdf");
+    writeFileSync(refusedPdfPath, "%PDF-1.4");
+    await addForm.locator('input[type="file"]').setInputFiles(refusedPdfPath);
+    await expect(
+      addForm.getByText(
+        "That’s a .pdf file. Please save it as .docx, a PNG or an SVG and upload it again.",
+      ),
+    ).toBeVisible({ timeout: 10_000 });
 
     // The size check refuses a file over 4 MB, client-side, before any upload.
-    const bigPath = testInfo.outputPath("robot-test-too-big.pdf");
+    const bigPath = testInfo.outputPath("robot-test-too-big.docx");
     writeFileSync(bigPath, Buffer.alloc(4_200_000, 0x20));
     await addForm.locator('input[type="file"]').setInputFiles(bigPath);
     await expect(addForm.getByText(/over 4 MB/)).toBeVisible({ timeout: 10_000 });
 
-    // A tiny real PDF goes through and lands in the list.
-    const pdfPath = testInfo.outputPath("robot-test-template.pdf");
+    // The two formats CR1 added carry the server's own checks, both made before
+    // anything is stored: a PNG needs the code LOGO, and an SVG may not script.
+    const pngPath = testInfo.outputPath("robot-test-logo.png");
+    writeFileSync(pngPath, "not really a logo");
+    await submitAddForm("T99", pngPath);
+    await expect(addForm.getByText(/doesn’t match its code/)).toBeVisible({
+      timeout: 30_000,
+    });
+    const svgPath = testInfo.outputPath("robot-test-layout.svg");
     writeFileSync(
-      pdfPath,
-      [
-        "%PDF-1.4",
-        "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj",
-        "2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj",
-        "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj",
-        "trailer<</Root 1 0 R>>",
-        "%%EOF",
-        "",
-      ].join("\n"),
+      svgPath,
+      '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
     );
-    await addForm.locator('input[type="file"]').setInputFiles(pdfPath);
-    await addForm.getByRole("button", { name: "Add template" }).click();
-    await expect(m.getByRole("button", { name: `Edit “${title}”` })).toBeVisible({
-      timeout: 45_000,
+    await submitAddForm("SVG-9", svgPath);
+    await expect(addForm.getByText(/it has a script element/)).toBeVisible({
+      timeout: 30_000,
     });
 
-    // The partner side serves it: the topic's grid now carries the template.
+    // A tiny Word file goes through and lands in the list. This screen reads a
+    // .docx by its name only, so a zip's first bytes are enough.
+    const docxPath = testInfo.outputPath("robot-test-template.docx");
+    writeFileSync(docxPath, Buffer.from([0x50, 0x4b, 0x05, 0x06, ...new Array(18).fill(0)]));
+    await submitAddForm("T99", docxPath);
+    await expectSaved(title);
+
+    // A row's code says what it is, so it cannot be edited into something untrue.
+    await m.getByRole("button", { name: `Edit “${title}”` }).click();
+    const renameForm = m
+      .locator("form")
+      .filter({ has: m.getByRole("button", { name: "Save name" }) });
+    for (const [code, refusal] of [
+      ["LOGO", /doesn’t match its code/],
+      ["OV", /already has its Overview/],
+      ["T01", /already has a file with the code T01/],
+    ] as const) {
+      await renameForm.locator('input[name="code"]').fill(code);
+      const answered = serverAnswered();
+      await renameForm.getByRole("button", { name: "Save name" }).click();
+      await answered;
+      await expect(renameForm.getByText(refusal)).toBeVisible({ timeout: 30_000 });
+    }
+    await openFocusArea();
+
+    // A real PNG and a clean SVG go through as well, each under its own code.
+    const realPngPath = testInfo.outputPath("robot-test-real-logo.png");
+    writeFileSync(
+      realPngPath,
+      Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+        "base64",
+      ),
+    );
+    const cleanSvgPath = testInfo.outputPath("robot-test-clean-layout.svg");
+    writeFileSync(
+      cleanSvgPath,
+      '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>',
+    );
+    const logoTitle = `ROBOT TEST template ${runId} logo (delete me)`;
+    const layoutTitle = `ROBOT TEST template ${runId} layout (delete me)`;
+    for (const [code, path, rowTitle] of [
+      ["LOGO", realPngPath, logoTitle],
+      ["SVG-9", cleanSvgPath, layoutTitle],
+    ]) {
+      await m.getByRole("button", { name: "+ Add template" }).click();
+      await submitAddForm(code, path, rowTitle);
+      await expectSaved(rowTitle);
+    }
+
+    // The partner side serves them: the topic's grid now carries all three.
     const approved = await roleContext(browser, baseURL!, "approved");
     const p = await approved.newPage();
-    await expect
-      .poll(
-        async () => {
-          await p.goto("/setup");
-          return (await p.content()).includes(title);
-        },
-        { timeout: 60_000 },
-      )
-      .toBe(true);
+    const robotRowsOnSetup = async () => {
+      await p.goto("/setup");
+      const html = await p.content();
+      return [title, logoTitle, layoutTitle].filter((t) => html.includes(t)).length;
+    };
+    await expect.poll(robotRowsOnSetup, { timeout: 60_000 }).toBe(3);
 
-    // And is deleted again — typed-name confirmation, store back as it was.
+    // And each row hands its file over, under the name it was uploaded with: the stored
+    // key ends in the file's own name since CR1.
+    const panel = await openPanel(p, "/setup", "find-and-prepare-the-space");
+    for (const [name, fileName] of [
+      [`Download Word File: ${title}`, "robot-test-template.docx"],
+      [`Download Logo: ${logoTitle}`, "robot-test-real-logo.png"],
+      [`Download Editable Layout: ${layoutTitle}`, "robot-test-clean-layout.svg"],
+    ]) {
+      const row = panel.getByRole("button", { name, exact: true });
+      await expect(row).toBeVisible({ timeout: 30_000 });
+      const waiting = p.waitForEvent("download", { timeout: 45_000 });
+      await row.click();
+      expect((await waiting).suggestedFilename()).toBe(fileName);
+    }
+
+    // And all are deleted again — typed-name confirmation, store back as it was.
     await deleteRobotTemplates();
-    await expect
-      .poll(
-        async () => {
-          await p.goto("/setup");
-          return (await p.content()).includes(title);
-        },
-        { timeout: 60_000 },
-      )
-      .toBe(false);
+    await expect.poll(robotRowsOnSetup, { timeout: 60_000 }).toBe(0);
     await approved.close();
   } finally {
     // NEVER leave a robot template in the store.
     await deleteRobotTemplates().catch(() => {});
     await admin.close();
   }
+});
+
+test("AD-006 (J10): a video link pasted in the CMS goes live with no code change, and comes off again", async ({
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(240_000);
+  /* The owner adds finished videos without a sprint, so this is the promise: paste a
+     link, save, and the partner's button works; clear it, and the placeholder is back.
+     Both kinds of placement: the four on /dashboard (Pages screen) and the 22 on the
+     focus-area cards (Focus areas screen). The link is a well-formed id that is no video. */
+  const LINK = "https://www.youtube.com/watch?v=aaaaaaaaaaa";
+  const admin = await roleContext(browser, baseURL!, "admin");
+  const m = await admin.newPage();
+  const approved = await roleContext(browser, baseURL!, "approved");
+  const p = await approved.newPage();
+
+  const savePage = async (value: string) => {
+    await m.goto("/admin/content/pages?page=setup");
+    const field = m.locator('input[name="youtubeUrl"]').filter({ visible: true }).first();
+    await expect(field).toBeVisible({ timeout: 60_000 });
+    await field.fill(value);
+    await m.getByRole("button", { name: "Save", exact: true }).click();
+  };
+  const saveFocusArea = async (value: string) => {
+    await m.goto("/admin/content/focus-areas");
+    await m
+      .locator("tbody tr")
+      .filter({ hasText: "Get Ready to Open" })
+      .first()
+      .getByRole("button", { name: "Edit" })
+      .click();
+    const field = m.locator('input[name="youtubeUrl"]').filter({ visible: true }).first();
+    await expect(field).toBeVisible({ timeout: 60_000 });
+    await field.fill(value);
+    await m.getByRole("button", { name: /^Save/ }).first().click();
+  };
+  const dashboardVideos = () => p.getByRole("link", { name: "Watch Video" });
+  const cardVideos = () =>
+    p.locator("#topic-get-ready-to-open").getByRole("link", { name: "Watch Video" });
+
+  try {
+    // The Overview: refused when it is not YouTube, live when it is, for that card only.
+    await savePage("https://example.com/a-video");
+    await expect(m.getByText(/doesn’t look like a YouTube link/)).toBeVisible({ timeout: 30_000 });
+    await savePage(LINK);
+    await expect(m.getByText("Saved.")).toBeVisible({ timeout: 30_000 });
+    await p.goto("/dashboard");
+    await expect(dashboardVideos()).toHaveCount(1, { timeout: 60_000 });
+    await expect(dashboardVideos()).toHaveAttribute("href", LINK);
+    await expect(dashboardVideos()).toHaveAttribute("target", "_blank");
+    await expect(
+      p.getByRole("button", { name: "Watch Video. Video coming soon." }),
+    ).toHaveCount(3);
+
+    // A focus-area card, the same way.
+    await saveFocusArea(LINK);
+    await expect(m.getByText("Saved.").first()).toBeVisible({ timeout: 30_000 });
+    await p.goto("/setup");
+    await expect(cardVideos()).toHaveAttribute("href", LINK, { timeout: 60_000 });
+    await expect(p.getByRole("link", { name: "Watch Video" })).toHaveCount(1);
+  } finally {
+    // NEVER leave a link behind: CT-009 expects all 26 back on the placeholder.
+    await savePage("").catch(() => {});
+    await expect(m.getByText("Saved.")).toBeVisible({ timeout: 30_000 }).catch(() => {});
+    await saveFocusArea("").catch(() => {});
+    await expect(m.getByText("Saved.").first()).toBeVisible({ timeout: 30_000 }).catch(() => {});
+  }
+
+  // Cleared, and every one of them says so again.
+  await p.goto("/dashboard");
+  await expect(
+    p.getByRole("button", { name: "Watch Video. Video coming soon." }),
+  ).toHaveCount(4, { timeout: 60_000 });
+  await expect(dashboardVideos()).toHaveCount(0);
+  await p.goto("/setup");
+  await expect(p.locator("#topic-get-ready-to-open")).toBeVisible({ timeout: 60_000 });
+  await expect(cardVideos()).toHaveCount(0);
+
+  await approved.close();
+  await admin.close();
 });
 
 test("AD-005 (J8): admin management adds and removes — and refuses self-removal", async ({
@@ -534,6 +768,11 @@ test("AD-005 (J8): admin management adds and removes — and refuses self-remova
       .filter({ hasText: ROLES.admin.email })
       .first();
     await selfRow.getByRole("button", { name: "Remove" }).click();
+    /* The refusal itself: the row is already showing, so its being visible straight
+       after the click would pass before the server had answered. */
+    await expect(m.getByText("You can’t remove your own admin access.")).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(m.getByText(ROLES.admin.email)).toBeVisible({ timeout: 30_000 });
   } finally {
     /* NEVER leave the pending robot in `admins`. If this test dies between

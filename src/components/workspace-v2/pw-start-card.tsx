@@ -6,11 +6,11 @@ import { PwGuideDownload } from "@/components/workspace-v2/pw-guide-download";
 import { RESOURCE_KINDS } from "@/lib/workspace-v2/spec";
 import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
 
-/* The one "Start here" card (PP3) — under D-PP-f a topic has a single Simple
+/* The one Simple Guide card (PP3) — under D-PP-f a topic has a single Simple
    guide, not the mockup's row of four.
 
-   Card title and description come from the generated spec (mockup verbatim);
-   the two button labels are the mockup's own.
+   The group label is the handover's (Private copy section 8); the card names the
+   document itself. The description comes from the spec.
 
    Read Now became a real link in PP4 4d — the sprint's one mandatory hand-off.
    In PP3 it toasted "Reading coming soon." on all 33 focus areas, not because
@@ -18,15 +18,13 @@ import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
    one) but because the reader route did not exist yet and a card must never
    link at a URL that 404s. 4c built it, so the toast is gone.
 
-   Download Now still falls back to an honest coming-soon state: it needs a
-   resources row with doc_key='guide' and there are none until the owner uploads
-   them through PP6's CMS. That control and its string live in PwGuideDownload,
-   shared with the reader's own download. */
+   The download control and its string live in PwGuideDownload, shared with the
+   reader's own download. */
 
 const GUIDE = RESOURCE_KINDS[0];
 
 const COPY = {
-  subhead: "Start here",
+  subhead: "Simple Guide",
   note: "One simple guide explains this focus area from beginning to end.",
   read: "Read Now",
 } as const;
@@ -65,7 +63,7 @@ export function PwStartCard({
           <span className="pw-start-icon">
             <GuideGlyph />
           </span>
-          <h5 className="pw-start-title">{GUIDE.title}</h5>
+          <h5 className="pw-start-title">{topic.guide?.title ?? GUIDE.title}</h5>
           <p className="pw-start-desc">{GUIDE.desc}</p>
 
           <div className="pw-start-actions">

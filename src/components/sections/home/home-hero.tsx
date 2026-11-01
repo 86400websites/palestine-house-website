@@ -8,25 +8,25 @@ import { PHOTO_SOURCES } from "@/components/shared/photo";
 /* v3 Home hero (DR1-4, CTAs revised DR1-8) — full-bleed tatreez photo under
    the transparent header, per the owner's reference mockup (docs/source-assets/
    design-refs/v3/examples/home-page-hero-example.png). Headline/subline/
-   mini-features are the owner-approved copy from that reference; the CTA pair
-   is Apply + "Explore how it works" (copy overhaul 2026-07-17; the booklet
-   lead magnet was retired entirely at DR1-8, owner decision 2026-07-02). */
+   mini-features and the CTA pair (Apply to Join + Explore the Model) are the
+   owner's CR1 copy; the booklet lead magnet was retired entirely at DR1-8
+   (owner decision 2026-07-02). */
 
 const HERO_FEATS = [
   {
     icon: Coffee,
-    title: "A café by day",
-    sub: "Meet, work, eat, and stay awhile.",
+    title: "A welcome through the day",
+    sub: "Meet, talk, read and spend time together. Food and drinks can be part of the experience where the local House offers them.",
   },
   {
     icon: Music,
-    title: "A cultural stage by night",
-    sub: "Music, film, poetry, talks, and storytelling.",
+    title: "A cultural program to return to",
+    sub: "Discover performances, screenings, discussions and creative work rooted in Palestinian culture.",
   },
   {
     icon: Users,
-    title: "A community every day",
-    sub: "Workshops, markets, gatherings, and conversation.",
+    title: "A community around the House",
+    sub: "Build relationships through gatherings, shared interests and regular participation.",
   },
 ] as const;
 
@@ -65,18 +65,21 @@ export function HomeHero() {
       <div className="v3-hero-scrim" aria-hidden="true" />
       <div className="ph-container v3-hero-inner">
         <Stagger className="v3-hero-copy">
-          <h1>A home for Palestinian culture, in every city.</h1>
+          <h1>
+            A home for Palestinian culture, built by people in their own cities.
+          </h1>
           <p className="v3-hero-sub">
-            Palestine House helps local communities create permanent cultural
-            homes where Palestinian food, music, art, memory, and everyday life
-            can be experienced, shared, and kept alive.
+            Palestine House connects people who want to create lasting local
+            homes for Palestinian culture. Apply to join the community, use the
+            shared guides and templates, and find people to learn and
+            collaborate with as you build your own House.
           </p>
           <div className="v3-hero-ctas">
             <Button asChild size="lg" className="v3-cta">
-              <Link href="/apply">Apply to bring a House</Link>
+              <Link href="/apply">Apply to Join</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="v3-cta">
-              <Link href="/model">Explore how it works</Link>
+              <Link href="/model">Explore the Model</Link>
             </Button>
           </div>
         </Stagger>

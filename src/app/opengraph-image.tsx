@@ -61,6 +61,7 @@ export default async function OpenGraphImage() {
             color: "#6B6A63",
             textAlign: "center",
             marginTop: 10,
+            maxWidth: 960,
           }}
         >
           {SITE_TAGLINE}

@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { usePwSearch } from "@/components/workspace-v2/pw-search";
 
 /* The footer's two CTAs and its action-style links (PP2 2d).
 
-   Ask HQ is a real link: /support already carries a working Ask HQ form, so it
-   needs no placeholder.
+   Community Contacts is a real link: /support carries the contact guidance in
+   its #community-contacts block, so it needs no placeholder. A plain anchor, not
+   next/link, on purpose: on /support itself Link would change the fragment with
+   pushState, which fires no hashchange, so the explorer would never hear of it.
+   From any other page it is a full load, and the explorer lands it on arrival.
 
    The two search actions toasted "Search coming soon." until PP4 4g built the
    overlay; they now open it. These are the mockup's ONLY search entry points
@@ -15,6 +17,8 @@ import { usePwSearch } from "@/components/workspace-v2/pw-search";
    the way in, which is why the CTA band repeats on every page.
 
    Client islands so the Server-Component footer never needs "use client". */
+
+const COMMUNITY_CONTACTS_HREF = "/support#community-contacts";
 
 export function PwSearchCta({ label }: { label: string }) {
   const { openSearch } = usePwSearch();
@@ -26,25 +30,25 @@ export function PwSearchCta({ label }: { label: string }) {
   );
 }
 
-export function PwAskHqCta({ label }: { label: string }) {
+export function PwCommunityContactsCta({ label }: { label: string }) {
   return (
-    <Link href="/support" className="pw-btn pw-btn--outline">
+    <a href={COMMUNITY_CONTACTS_HREF} className="pw-btn pw-btn--outline">
       {label}
       <ArrowRight className="pw-icon" aria-hidden="true" />
-    </Link>
+    </a>
   );
 }
 
-/* Footer-column links. "Ask HQ" resolves to /support; "Search everything" opens
-   the same overlay as the CTA above it. */
+/* Footer-column links. "Community Contacts" resolves to the /support block;
+   "Search Resources" opens the same overlay as the CTA above it. */
 export function PwFooterAction({ label }: { label: string }) {
   const { openSearch } = usePwSearch();
 
-  if (label === "Ask HQ") {
+  if (label === "Community Contacts") {
     return (
-      <Link href="/support" className="pw-footer-link">
+      <a href={COMMUNITY_CONTACTS_HREF} className="pw-footer-link">
         {label}
-      </Link>
+      </a>
     );
   }
 

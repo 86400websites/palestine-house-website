@@ -14,7 +14,7 @@ import { WORKSPACE_CHROME } from "@/lib/workspace-v2/spec";
    in. It carries no topic detail for the same reason the reader's metadata does
    not — a missing page must not become a way to probe which slugs are real.
 
-   /dashboard is the About landing (PP2) and the one destination hardcoded
+   /dashboard is the Overview landing (PP2) and the one destination hardcoded
    everywhere else in the product, so it is the safe way back. */
 
 const COPY = {
@@ -23,7 +23,7 @@ const COPY = {
   back: "Back to",
 } as const;
 
-const ABOUT = WORKSPACE_CHROME.nav.items[0].label;
+const OVERVIEW = WORKSPACE_CHROME.nav.items[0].label;
 
 export default function PlatformNotFound() {
   return (
@@ -34,7 +34,7 @@ export default function PlatformNotFound() {
         <p className="pw-page-actions">
           <Link className="pw-action" href="/dashboard">
             <ArrowLeft className="pw-icon" aria-hidden="true" />
-            {COPY.back} {ABOUT}
+            {COPY.back} {OVERVIEW}
           </Link>
         </p>
       </div>

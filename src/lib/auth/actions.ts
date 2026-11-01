@@ -195,7 +195,7 @@ export async function applyAction(
     } else {
       return {
         ok: false,
-        error: "Something went wrong creating your account. Please try again.",
+        error: "We could not send your application. Please check the details and try again.",
       };
     }
   }
@@ -203,7 +203,7 @@ export async function applyAction(
   if (!userId) {
     return {
       ok: false,
-      error: "Something went wrong creating your account. Please try again.",
+      error: "We could not send your application. Please check the details and try again.",
     };
   }
 
@@ -235,7 +235,7 @@ export async function applyAction(
     console.error("applications insert failed:", insertError.message);
     return {
       ok: false,
-      error: "Something went wrong sending your application. Please try again.",
+      error: "We could not send your application. Please check the details and try again.",
     };
   }
 
@@ -258,7 +258,7 @@ export async function applyAction(
   // must NEVER block sign-up. Skipped on the idempotent-retry path above (that
   // applicant was emailed on their first apply). The HQ notification needs
   // RESEND_TO_EMAIL; the applicant confirmation needs only the sending pair.
-  // Both copy bodies are owner-approved (E1-1 gate, 2026-07-09).
+  // The applicant wording follows the CR1 public copy, section 7.5.
   try {
     const hq = process.env.RESEND_TO_EMAIL;
     if (hq) {
@@ -266,14 +266,14 @@ export async function applyAction(
         to: hq,
         replyTo: email,
         subject: `New application: ${name} — ${city}`,
-        text: `A new partner application just arrived.\n\nName: ${name}\nEmail: ${email}\nCity: ${city}\nOrganisation: ${organisation || "—"}\n\nWhy they want to bring a Palestine House:\n${why}\n\nReview and decide here:\n${SITE_URL}/admin/approvals\n\n— Palestine House website`,
+        text: `A new community application just arrived.\n\nName: ${name}\nEmail: ${email}\nCity: ${city}\nOrganisation: ${organisation || "—"}\n\nWhat interests you about Palestine House?\n${why}\n\nReview and decide here:\n${SITE_URL}/admin/approvals\n\n— Palestine House website`,
       });
     }
     await sendEmail({
       to: email,
       replyTo: process.env.RESEND_TO_EMAIL,
-      subject: "We received your application — Palestine House",
-      text: `Hello ${name},\n\nThank you for applying to bring a Palestine House. Your application is in, and it is now under review.\n\nYou can check its status any time by signing in:\n\n${SITE_URL}/dashboard\n\nWe read every application with care, and we will email you as soon as there is a decision. If you would like to add anything in the meantime, reach us here:\n\n${SITE_URL}/contact\n\n— Palestine House HQ`,
+      subject: "Palestine House - Community application received",
+      text: `Hello ${name},\n\nThank you. Your application has been received.\n\nYour account has been created and your community access is pending. Use the same account to sign in for your access update.\n\n${SITE_URL}/dashboard\n\nIf you would like to add anything in the meantime, reach us here:\n\n${SITE_URL}/contact\n\n— Palestine House`,
     });
   } catch (mailError) {
     console.error(
@@ -283,8 +283,8 @@ export async function applyAction(
   }
 
   // Account + application created and the user is signed in (instant session,
-  // email confirmation OFF) — land them on the dashboard's pending "under
-  // review" state instead of asking them to sign in (S6 Step 3.5). The apply
+  // email confirmation OFF) — land them on the dashboard's pending-access
+  // state instead of asking them to sign in (S6 Step 3.5). The apply
   // form's confirmation branch is kept as a defensive fallback only.
   redirect("/dashboard");
 }

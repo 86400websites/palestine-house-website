@@ -4,7 +4,7 @@
 export const SITE_NAME = "Palestine House";
 
 export const SITE_TAGLINE =
-  "A fixed address for Palestinian culture, in every city.";
+  "A lasting home for Palestinian culture, shaped locally and connected through community.";
 
 /* Canonical SEO origin: NEXT_PUBLIC_SITE_URL (set per environment in Vercel;
    see SUPABASE-VERCEL-SETUP.md). Local fallback keeps dev working. */
@@ -24,7 +24,6 @@ export const PUBLIC_ROUTES = [
   "/about",
   "/contact",
   "/privacy",
-  "/terms",
   "/login",
   "/forgot-password",
   "/update-password",

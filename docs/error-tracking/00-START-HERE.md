@@ -31,7 +31,7 @@ This site ships a tight Content-Security-Policy from [`../../next.config.ts`](..
 
 Sentry — a free error-tracking service, the only account this module needs — sits inside the site like a black-box recorder. When an error happens to a real user it records who it was (their account identifier, if signed in), which page, which device, what the error said, and their last few clicks, then emails you. That is **Door A**: most problems reach you before anyone writes in. **Door B** is when someone does write in — *"my application never went through"*, *"I can't sign in"*, *"the download does nothing"*. You paste their message into `/handle-error` and Claude Code checks the logs this site actually has — the Vercel logs, the Resend delivery log, Mailchimp, the database, and (only from SYS3) Sentry — then tells you in one plain paragraph what happened, whether it is even a bug, and how bad it is. From there both doors join the same lane: severity → fix sprint → new permanent test → user informed → incident logged closed.
 
-**This site takes no payments.** There is no Stripe, no checkout, no card flow, and no payment surface of any kind. The SOP's payment content has been removed from this folder rather than marked N/A — the failure modes here are applications, sign-in, approval, downloads, Ask HQ and guide pages.
+**This site takes no payments.** There is no Stripe, no checkout, no card flow, and no payment surface of any kind. The SOP's payment content has been removed from this folder rather than marked N/A — the failure modes here are applications, sign-in, approval, downloads, the contact form and guide pages.
 
 ## Files in this folder
 

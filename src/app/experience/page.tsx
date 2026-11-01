@@ -7,8 +7,8 @@ import { PageHero } from "@/components/sections/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 
-/* Experience (/experience) — the decision page. Copy verbatim from
-   docs/page-copy/01-public-pages/experience.md; §2 + §5 imagery/layout from the
+/* Experience (/experience) — the decision page. Copy verbatim from the owner's
+   Public Website Copy, section 4 (CR1); §2 + §5 imagery/layout from the
    owner's LH1 mockups (docs/source-assets/design-refs/v3/mockups/). The S9
    live strip is gone: sessions are members-only since LH1 (0025), so the public
    page carries zero session data and renders fully static. The old closing
@@ -16,45 +16,45 @@ import { Button } from "@/components/ui/button";
    site-wide premium CTA (DR3.1) is the one closing invitation. */
 
 export const metadata: Metadata = {
-  title: "Experience",
+  title: { absolute: "Experience - Palestine House" },
   description:
-    "What a Palestine House feels like — a café by day, a stage by night, and five threads of programming that hold a year together.",
+    "Explore the cultural experiences and everyday welcome a local Palestine House can create.",
 };
 
 const EXP_PILLARS = [
   {
     id: "PH-EXP-03a",
-    name: "Heritage & Memory",
-    text: "Keeping stories alive through food, music, craft, oral history, and collective remembrance. Recipes are shared. Songs are carried forward. Personal histories become part of a larger cultural memory.",
+    name: "Heritage and Memory",
+    text: "Create space for stories, craft, music, food traditions and knowledge shared between generations.",
     alt: "Speakers in conversation over a low table at a House talk.",
     objectPosition: "50% 54%",
   },
   {
     id: "PH-EXP-03b",
     name: "Contemporary Creativity",
-    text: "Music, visual art, film, literature, performance, comedy, and new ideas from Palestine and its diasporas.",
+    text: "Welcome the work of Palestinian artists, writers, musicians, filmmakers and creative practitioners.",
     alt: "A stone mosaic of the Dome of the Rock on the House wall.",
     objectPosition: "50% 50%",
   },
   {
     id: "PH-EXP-03c",
-    name: "Education & Exchange",
-    text: "Talks, readings, workshops, screenings, study groups, and conversations that create space for curiosity, reflection, and deeper understanding.",
+    name: "Learning and Exchange",
+    text: "Use talks, readings, workshops and discussions to invite curiosity and thoughtful conversation.",
     alt: "Readers sharing pages aloud in the armchairs of a House gathering.",
     objectPosition: "50% 57%",
   },
   {
     id: "PH-EXP-03d",
-    name: "Community & Belonging",
-    text: "The gatherings that turn a venue into a shared home. Community dinners, markets, celebrations, family activities, open tables, and regular reasons to return.",
+    name: "Community and Belonging",
+    text: "Build relationships through gatherings and regular reasons to participate, rather than relying only on occasional large events.",
     alt: "Red carnations gathered on a woven tray for the evening.",
     objectPosition: "50% 55%",
   },
   {
     id: "PH-EXP-03e",
-    name: "Everyday Sustainability",
-    text: "The café, shop, events, and partnerships that keep the House active and its doors open. A Palestine House is built to last. Its cultural work is supported by a thoughtful, responsible local economy.",
-    alt: "The café room set for the evening — cushioned seating, a balustrade, a projector ready.",
+    name: "A Sustainable Local Model",
+    text: "Choose activities and income sources that fit the House’s capacity and help it meet its ongoing costs. Not every House needs the same offer.",
+    alt: "The room set for the evening — cushioned seating, a balustrade, a projector ready.",
     objectPosition: "50% 54%",
   },
 ] as const;
@@ -68,21 +68,27 @@ export default function ExperiencePage() {
         alt="An oud player performing to a seated audience in a candlelit stone room."
         position="50% 32%"
         eyebrow="Experience"
-        title="Step inside a Palestine House."
-        lead="A place that feels familiar, even on your first visit. Come for Palestinian coffee and food made from recipes carried across generations. Stay for a concert, a film, a reading, or a conversation that changes the way you see something. A Palestine House is somewhere to meet, work, listen, eat, learn, and return to throughout the week and throughout the year."
-        support="Every application is reviewed by HQ."
+        title="A place to experience Palestinian culture together."
+        lead={[
+          "Picture a welcoming room, a thoughtful program and people who have a reason to return. Your Palestine House can bring Palestinian creativity, memory and everyday life into the rhythm of its city.",
+          "The examples here are inspiration. Each local team chooses the experience it can create and sustain.",
+        ]}
+        support="Apply for community access, not permission to operate a House."
       >
         <Button asChild size="lg" className="v3-cta">
-          <Link href="/apply">Apply to bring a House</Link>
+          <Link href="/apply">Apply to Join</Link>
         </Button>
       </PageHero>
 
-      {/* 2 — A café by day. A stage by night. */}
+      {/* 2 — Everyday connection. Cultural life throughout the year. */}
       <section className="ph-section-lg">
         <div className="ph-container">
           <Reveal className="sec-head is-center">
             <p className="ph-eyebrow">One room. Many ways to belong.</p>
-            <h2>A café by day. A cultural stage by night.</h2>
+            <h2>
+              Everyday connection. <br />
+              Cultural life throughout the year.
+            </h2>
             {/* the mockup's line-and-diamond mark under the heading (LH1) */}
             <span className="exp-orn" aria-hidden="true">
               <span />
@@ -94,15 +100,14 @@ export default function ExperiencePage() {
             <figure className="exp-mood">
               <Photo
                 assetId="ph-photo-exp-cafe-day"
-                alt="The café room by day — guests at wooden tables under the arches, listening in."
+                alt="The room by day — guests at wooden tables under the arches, listening in."
                 className="exp-mood-photo"
                 sizes="(max-width: 760px) 100vw, 45vw"
               />
               <figcaption className="exp-mood-cap">
-                By day, the House is open for everyday life. People arrive for
-                coffee, lunch, conversation, reading, working, or simply a place
-                to pause. Some stay for twenty minutes. Others remain for the
-                afternoon.
+                A House might offer a quiet place to read or meet during the
+                day. Where the local model includes food and drinks, Palestinian
+                hospitality can be part of that daily welcome.
               </figcaption>
             </figure>
             <figure className="exp-mood">
@@ -113,16 +118,16 @@ export default function ExperiencePage() {
                 sizes="(max-width: 760px) 100vw, 45vw"
               />
               <figcaption className="exp-mood-cap">
-                By night, the room shifts. Tables move, chairs turn towards the
-                stage, and the same space becomes a home for live music, film,
-                poetry, literature, talks, and shared conversation.
+                Later, the room might host a discussion, performance or
+                screening. The same space can support different activities as
+                the local team develops its program.
               </figcaption>
             </figure>
           </Reveal>
           <Reveal>
             <p className="exp-daynight-close">
-              One room, continually renewed by the people and stories that pass
-              through it.
+              What matters is that the room works for the people using it and
+              feels cared for each time they return.
             </p>
           </Reveal>
         </div>
@@ -135,14 +140,11 @@ export default function ExperiencePage() {
         <div className="ph-container">
           <Reveal className="sec-head">
             <p className="ph-eyebrow">The five threads</p>
-            <h2>One living cultural programme.</h2>
+            <h2>Five ways to think about the experience</h2>
             <p className="ph-lead">
-              Every event at a Palestine House is part of a wider story. Across
-              the year, programming moves through five connected threads —
-              bringing together memory, contemporary creativity, learning,
-              community, and the everyday economy that allows the House to
-              remain open. The programme changes from week to week, but the
-              cultural purpose remains clear.
+              These themes can help a local team develop its own cultural
+              program. They are inspiration, not a required calendar or a
+              centrally assigned set of activities.
             </p>
           </Reveal>
           <Reveal className="exp-pillars">
@@ -155,7 +157,7 @@ export default function ExperiencePage() {
                     ratio="4 / 5"
                     rounded
                     block
-                    sizes="(max-width: 700px) 50vw, 20vw"
+                    sizes="(max-width: 460px) 320px, (max-width: 700px) 50vw, (max-width: 1020px) 33vw, 20vw"
                     objectPosition={p.objectPosition}
                   />
                 </div>
@@ -166,17 +168,22 @@ export default function ExperiencePage() {
           </Reveal>
           <Reveal>
             <p className="exp-pillars-close">
-              Different every week. Familiar every time.
+              Different activities. A familiar welcome.
             </p>
             <p className="exp-pillars-close-sub">
-              A concert one evening, a workshop the next morning, a quiet coffee
-              in between. The programme changes, but the welcome remains.
+              Someone may come for a film and return for a workshop. Another
+              person may discover Palestinian writing for the first time.
+              Someone else may find a connection to home.
+            </p>
+            <p className="exp-pillars-close-sub">
+              The program can change while the welcome stays recognizable: warm,
+              respectful and genuinely interested in the people who arrive.
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* 5 — A home, not a moment. Recomposed 2026-07-17 to match §6 below, so
+      {/* 5 — A permanent ambition. Recomposed 2026-07-17 to match §6 below, so
           the page's two closing beats read as a deliberate pair: eyebrow + mark
           · heading · lead · body · copper rule · triad. (The LH1 dissolve-band
           treatment was tuned for a one-line lead and looked forced once the
@@ -188,15 +195,16 @@ export default function ExperiencePage() {
             <span className="exp-orn exp-orn--eyebrow" aria-hidden="true">
               <span />
             </span>
-            <h2>A home, not a moment.</h2>
+            <h2>A permanent ambition, developed at a realistic pace</h2>
             <p className="ph-lead">
-              Temporary events can create powerful moments. A Palestine House
-              gives those moments somewhere to continue.
+              The purpose is to create a lasting House. You do not need to have
+              everything in place before you join the community and begin
+              planning.
             </p>
             <p className="v3-split-body">
-              It is open throughout the year, at the same address — a place
-              where Palestinian culture can be encountered not occasionally, but
-              as part of the everyday life of a city.
+              Start by understanding the people, space, costs and commitments
+              involved. Build toward a House that your local team can run well
+              over time.
             </p>
             <span className="exp-orn exp-close-rule" aria-hidden="true">
               <span />

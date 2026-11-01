@@ -157,12 +157,14 @@ Verified against [`SECURITY-CHECKLIST.md`](../SECURITY-CHECKLIST.md) §5 and §1
       through server-issued signed URLs to approved users, and no storage path or bucket name reaches the
       client. **The Storage API honours `storage.objects` policies directly** — filtering the read RPCs is
       not sufficient on its own (§15)
-- [ ] 🔴 `programming_sessions` stays default-deny — RLS on, no policies, no rows, no callers. A diff that
-      gives it a policy, a caller or a row needs a very good reason ([`AGENTS.md`](../../AGENTS.md))
+- [ ] 🔴 `programming_sessions` stays default-deny — RLS on, no policies, no rows, no callers. `support_requests`
+      stays unreached — RLS on, no client policy, its rows kept, its two RPCs gated and uncalled. A diff that
+      gives either one a policy, a caller or a row needs a very good reason ([`AGENTS.md`](../../AGENTS.md))
 - [ ] 🔴 No secret, key, connection string or Supabase project ref in the SQL, the PR, or this record.
       Env vars by **name** only
 - [ ] Controlled or cross-user operations go through a granted RPC, not a broad table policy
-- [ ] Public projections expose titles/overviews only — never gated bodies, guide text or template rows
+- [ ] Public projections expose titles and one-line summaries only — never gated bodies, guide text, Overview
+      documents, template rows or other files
 
 ## 8. Applied and verified
 
@@ -192,7 +194,7 @@ so "tests pass" is not a box you can tick today. Prettier / `format:check` is de
 - [ ] Signed in as an approved partner: a focus area opens, a Simple guide reads, one template downloads
       through its signed URL
 - [ ] A **pending** account still sees only the pending state
-- [ ] Proof numbers unchanged unless this change moved them: **4 sections · 22 focus areas · 88 templates**
+- [ ] Proof numbers unchanged unless this change moved them: **4 sections · 22 focus areas · 83 templates and practical tools**
 
 ## 9. Rollback plan
 

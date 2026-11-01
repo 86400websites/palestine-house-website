@@ -1,36 +1,43 @@
 import Link from "next/link";
-import { Clock, Info, Mail, MessageCircle } from "lucide-react";
+import { Clock, Mail, MessageCircle } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
-/* The gated "under review" / "not moving forward" states, in the workspace v2
+/* The gated pending-access / access-not-offered states, in the workspace v2
    shell (PP2 2h).
 
-   Every string here is carried over VERBATIM from the approved copy the legacy
-   workspace rendered (docs/page-copy/03-member-workspace/dashboard.md, via the
-   old dashboard page and components/workspace/pending-state.tsx — both deleted
-   at PP5, which is why this file is now the only home for these words).
-   The revamp restyled these states; it did not rewrite them. There are two
-   approved variants and they differ, so both are preserved:
+   The notice wording is verbatim from the CR1 public copy, section 7.5. The
+   caller's OWN application row (owner-scoped RLS) decides which notice shows,
+   and it is read here so a declined account gets the same truthful answer on
+   the section pages and guide readers, not just /dashboard. A declined account keeps
+   is_approved = false just like a pending one, so status drives the copy; this
+   changes the words only, and no page's access.
 
-     variant="landing"  — the /dashboard wording ("Your application is under
-                          review." / "HQ reads every one by hand…"), plus the
-                          declined branch.
-     variant="page"     — the shared wording every other gated page shows
-                          ("Request received — under review." …), plus the
-                          Support prompt and the optional /contact fallback
+   The variants differ only in what can follow a pending notice:
+
+     variant="landing"  — /dashboard: nothing.
+     variant="page"     — every other gated page: the optional /contact fallback
                           that keeps an approval-gated page from stranding a
                           pending partner (the S7 fix).
 
    A Server Component: no interactivity. */
 
-export function PwPendingState({
+export async function PwPendingState({
   variant = "page",
-  declined = false,
   contactFallback = false,
 }: {
   variant?: "landing" | "page";
-  declined?: boolean;
   contactFallback?: boolean;
 }) {
+  const supabase = await createClient();
+  const { data: app } = await supabase
+    .from("applications")
+    .select("status")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const isDeclined = app?.status === "declined";
+
   return (
     <section className="pw-page">
       <div className="pw-container pw-narrow">
@@ -38,67 +45,52 @@ export function PwPendingState({
 
         <div className="pw-notice">
           <span className="pw-notice-icon">
-            {declined ? (
+            {isDeclined ? (
               <MessageCircle size={22} aria-hidden="true" />
             ) : (
               <Clock size={22} aria-hidden="true" />
             )}
           </span>
           <div>
-            {declined ? (
+            {isDeclined ? (
               <>
-                <h2 className="pw-notice-h">We’re not moving forward right now.</h2>
+                <h2 className="pw-notice-h">
+                  We cannot offer community access at the moment.
+                </h2>
                 <p className="pw-notice-p">
-                  After careful review, HQ isn’t taking your application further at
-                  this time. If you have questions, we’d like to hear from you —{" "}
+                  You can continue exploring the public information about
+                  Palestine House.{" "}
                   <Link className="pw-notice-link" href="/contact">
-                    contact us
-                  </Link>
-                  .
-                </p>
-              </>
-            ) : variant === "landing" ? (
-              <>
-                <h2 className="pw-notice-h">Your application is under review.</h2>
-                <p className="pw-notice-p">
-                  HQ reads every one by hand. The moment yours is approved,
-                  everything here opens up — check back any time.
+                    Contact us
+                  </Link>{" "}
+                  with a question about this access decision.
                 </p>
               </>
             ) : (
               <>
-                <h2 className="pw-notice-h">Request received — under review.</h2>
+                <h2 className="pw-notice-h">
+                  Your community access is being arranged.
+                </h2>
                 <p className="pw-notice-p">
-                  Every application is reviewed by HQ. Everything here unlocks the
-                  moment yours is approved.
+                  Your application has been received. This update is about access
+                  to the community resources, not approval of a venue or business
+                  plan.
                 </p>
               </>
             )}
           </div>
         </div>
 
-        {variant === "page" && !declined && (
-          <>
-            <p className="pw-help">
-              <span className="pw-help-icon">
-                <Info size={17} aria-hidden="true" />
-              </span>
-              <span>
-                Stuck? <strong>Support</strong> is one click away.
-              </span>
-            </p>
-            {contactFallback && (
-              <p className="pw-help">
-                <span className="pw-help-icon">
-                  <Mail size={17} aria-hidden="true" />
-                </span>
-                <span>
-                  Need to reach us before then? Use the{" "}
-                  <Link href="/contact">contact form</Link>.
-                </span>
-              </p>
-            )}
-          </>
+        {variant === "page" && !isDeclined && contactFallback && (
+          <p className="pw-help">
+            <span className="pw-help-icon">
+              <Mail size={17} aria-hidden="true" />
+            </span>
+            <span>
+              Need to reach us? Use the{" "}
+              <Link href="/contact">contact form</Link>.
+            </span>
+          </p>
         )}
       </div>
     </section>

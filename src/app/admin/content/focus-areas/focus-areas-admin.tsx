@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { revealWhenStacked } from "@/components/admin/reveal-when-stacked";
 import {
   saveFocusAreaAction,
   setFocusAreaPublishedAction,
@@ -119,8 +120,11 @@ export function FocusAreasAdmin({
   const [notice, setNotice] = React.useState<AdminContentState>(INITIAL);
   const [busy, startTransition] = React.useTransition();
 
-  const select = (id: string) =>
+  const select = (id: string) => {
     router.push(`/admin/content/focus-areas?id=${id}`, { scroll: false });
+    /* Open already and scrolled past: the form will not mount again to reveal itself. */
+    revealWhenStacked(document.querySelector<HTMLElement>(".adm-detail"));
+  };
 
   /* Reorder is arrows, never a number to fat-finger. The whole ordered list of
      that group's focus areas is sent and positions are assigned from array
@@ -177,60 +181,64 @@ export function FocusAreasAdmin({
                   Nothing here yet. Add the first focus area for {section.label}.
                 </p>
               ) : (
-                <table className="adm-table">
-                  <tbody>
-                    {rows.map((r, i) => (
-                      <tr
-                        key={r.id}
-                        className={
-                          selected?.id === r.id ? "is-selected" : undefined
-                        }
-                      >
-                        <td className="adm-td-strong">{r.title}</td>
-                        <td>
-                          <StatePill live={r.published} />
-                        </td>
-                        <td className="adm-td-muted">
-                          {r.template_count} file
-                          {r.template_count === 1 ? "" : "s"}
-                        </td>
-                        <td style={{ whiteSpace: "nowrap" }}>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            aria-label={`Move ${r.title} up`}
-                            disabled={i === 0 || busy}
-                            onClick={() => move(r, -1)}
-                          >
-                            ↑
-                          </Button>{" "}
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            aria-label={`Move ${r.title} down`}
-                            disabled={i === rows.length - 1 || busy}
-                            onClick={() => move(r, 1)}
-                          >
-                            ↓
-                          </Button>{" "}
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => {
-                              setCreating(false);
-                              select(r.id);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="adm-table-wrap">
+                  <table className="adm-table adm-table--fit">
+                    <tbody>
+                      {rows.map((r, i) => (
+                        <tr
+                          key={r.id}
+                          className={
+                            selected?.id === r.id ? "is-selected" : undefined
+                          }
+                        >
+                          <td className="adm-td-strong">{r.title}</td>
+                          <td>
+                            <StatePill live={r.published} />
+                          </td>
+                          <td className="adm-td-muted adm-td-count">
+                            {r.template_count} file
+                            {r.template_count === 1 ? "" : "s"}
+                          </td>
+                          <td>
+                            <div className="adm-row-actions">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                aria-label={`Move ${r.title} up`}
+                                disabled={i === 0 || busy}
+                                onClick={() => move(r, -1)}
+                              >
+                                ↑
+                              </Button>{" "}
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                aria-label={`Move ${r.title} down`}
+                                disabled={i === rows.length - 1 || busy}
+                                onClick={() => move(r, 1)}
+                              >
+                                ↓
+                              </Button>{" "}
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => {
+                                  setCreating(false);
+                                  select(r.id);
+                                }}
+                              >
+                                Edit
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </section>
           );
@@ -304,19 +312,25 @@ function FocusAreaForm({
      click cannot rewrite a row with what it already said. */
   const [dirty, setDirty] = React.useState(false);
   const touch = () => setDirty(true);
+  /* Held here, not as a defaultValue: React resets a form's uncontrolled fields after
+     every action, so a refused link would vanish before it could be corrected. */
+  const [video, setVideo] = React.useState(topic?.youtube_url ?? "");
+  const panel = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (state.ok) setDirty(false);
-  }, [state.ok]);
+  }, [state]);
+
+  React.useEffect(() => revealWhenStacked(panel.current), []);
 
   const sectionGroups = groups.filter((g) => g.section_slug === section);
 
   return (
-    <div className="adm-detail">
+    <div className="adm-detail" ref={panel}>
       <h2>{topic ? topic.title : "New focus area"}</h2>
       {topic ? (
         <p className="adm-intro">
-          <StatePill live={topic.published} /> · {topic.template_count} template
+          <StatePill live={topic.published} /> · {topic.template_count} file
           {topic.template_count === 1 ? "" : "s"} ·{" "}
           {topic.guide_file_count > 0
             ? "guide file uploaded"
@@ -545,12 +559,18 @@ function FocusAreaForm({
             className="adm-input"
             name="youtubeUrl"
             maxLength={500}
-            defaultValue={topic?.youtube_url ?? ""}
+            value={video}
             placeholder="https://www.youtube.com/watch?v=…"
-            onChange={touch}
+            onChange={(e) => {
+              setVideo(e.target.value);
+              touch();
+            }}
           />
           <span className="adm-field-hint">
-            Optional. Blank is fine — the button says “Video coming soon.”
+            The Watch Video button on this card. Paste a link to one YouTube video
+            and save, and once this focus area is Live the button opens it straight
+            away. Clear the link and save, and the button is greyed out again, and
+            says “Video coming soon.” when pressed.
           </span>
         </label>
 
@@ -622,8 +642,10 @@ function TopicDangerZone({ topic }: { topic: TopicRow }) {
     if (pubState.ok || delState.ok) router.refresh();
     /* router is stable across renders; an inline onDone prop was NOT, so this
        effect re-ran on every render and, once ok stayed true, refreshed in a
-       loop. Found by the PP6a exit-gate review, 2026-08-14. */
-  }, [pubState.ok, delState.ok, router]);
+       loop. Found by the PP6a exit-gate review, 2026-08-14. The state objects
+       are stable too, and a new one arrives with each answer, so a second
+       success in one visit still refreshes, which their .ok would not. */
+  }, [pubState, delState, router]);
 
   return (
     <div style={{ marginTop: "var(--space-8)" }}>
@@ -721,7 +743,7 @@ function NewGroup({ section }: { section: string }) {
 
   React.useEffect(() => {
     if (state.ok) router.refresh();
-  }, [state.ok, router]);
+  }, [state, router]);
 
   if (!open) {
     return (

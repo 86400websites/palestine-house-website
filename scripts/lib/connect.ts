@@ -80,7 +80,14 @@ export function resolveTarget(raw: string | null, requireExplicit = false): Targ
 /** Sign in to the named target as the admin, with every guard applied. */
 export async function connectTarget(target: TargetName): Promise<SupabaseClient> {
   const t = TARGETS[target];
-  process.loadEnvFile(path.join(ROOT, ".env.local"));
+  /* The same tolerance as playwright.config.ts: a runner may carry these in its
+     environment. Every variable is still required by name below, and each target
+     still asserts its own host. */
+  try {
+    process.loadEnvFile(path.join(ROOT, ".env.local"));
+  } catch {
+    /* no .env.local — the checks below report exactly which names are missing */
+  }
 
   const url = process.env[t.urlVar];
   const key = process.env[t.keyVar];

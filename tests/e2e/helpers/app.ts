@@ -1,8 +1,9 @@
-import type { APIRequestContext, Browser, Page } from "@playwright/test";
+import type { APIRequestContext, Browser, Locator, Page } from "@playwright/test";
 
 /* Shared route maps and utilities for the Launch Gate suite. Route lists
-   mirror docs/FEATURE-LIST.md (approved 2026-08-22); if a route is added to
-   the app, it gets a feature-list line first, then joins these lists. */
+   mirror docs/FEATURE-LIST.md (approved 2026-08-22, changed at CR1); if a route
+   is added to the app, it gets a feature-list line first, then joins these
+   lists. /terms left this one at CR1 and has its own line (PG-010). */
 
 export const PUBLIC_ROUTES = [
   "/",
@@ -15,7 +16,6 @@ export const PUBLIC_ROUTES = [
   "/contact",
   "/apply",
   "/privacy",
-  "/terms",
 ] as const;
 
 export const PLATFORM_ROUTES = [
@@ -71,6 +71,12 @@ export const ADMIN_MARKERS = [
   "Admins",
 ] as const;
 
+/* The two notices an unapproved account gets on /dashboard, the four section pages
+   and every guide URL (PwPendingState). Public copy, and the leak-probe guard below
+   needs them as well as the specs. */
+export const PENDING_HEADING = "Your community access is being arranged.";
+export const DECLINED_HEADING = "We cannot offer community access at the moment.";
+
 /* Console capture with exactly one environmental exclusion: Vercel's
    Preview-only toolbar script being CSP-blocked by the site (see
    smoke.spec.ts for the rationale). */
@@ -118,6 +124,32 @@ export async function probe(
     location: response.headers()["location"] ?? "",
     body: await response.text(),
   };
+}
+
+/* Open one focus area by its deep link. The ids are the card's deep-link contract
+   (pw-topic-card.tsx), built from the slug, which the CMS can never change, so this
+   survives a retitled card. It also proves hydration: only the mounted explorer can
+   open the panel from the hash, so a click made after this returns reaches React. */
+export async function openPanel(
+  page: Page,
+  section: string,
+  slug: string,
+): Promise<Locator> {
+  await page.goto(`${section}#topic-${slug}`);
+  const panel = page.locator(`#topic-${slug}-body`);
+  await panel.waitFor({ state: "visible", timeout: 60_000 });
+  return panel;
+}
+
+/* One named group inside a focus-area panel, open or closed: "Overview", "Simple
+   Guide", "Templates" or the shared resources. The heading is matched exactly
+   because a Simple Guide card's own title is a heading too. */
+export function panelGroup(panel: Locator, heading: string): Locator {
+  return panel.locator("section").filter({
+    has: panel
+      .page()
+      .getByRole("heading", { name: heading, exact: true, includeHidden: true }),
+  });
 }
 
 export type PlatformContent = {
@@ -189,13 +221,21 @@ export async function discoverPlatformContent(
     throw new Error(
       `Discovery found ${guideLinks.length} guide links, expected 22. The ` +
         "baseline is not the real platform — refusing to run leak probes " +
-        "against it. Check the approved robot and the Preview first.",
+        "against it. Check the approved robot and the Preview first. A focus " +
+        "area a crashed J5 left in Draft shows here: restore it by hand, the " +
+        "journeys that would restore it will not run.",
     );
   }
+  /* Every heading a denied or failed guide navigation can land on. A guide URL
+     answers these, so a stale list stops recognising a poisoned baseline: the h1 a
+     pending session gets is "Welcome.", the notice under it is one of the two
+     below, and a missing guide 404s inside the platform shell, which has its own
+     wording. */
   const DENIAL_HEADINGS = [
     "This page isn’t here.",
-    "Your application is under review.",
-    "We’re not moving forward right now.",
+    "That page doesn’t exist.",
+    PENDING_HEADING,
+    DECLINED_HEADING,
     "Welcome.",
   ];
   const poisoned = gatedMarkers.filter((m) => DENIAL_HEADINGS.includes(m));

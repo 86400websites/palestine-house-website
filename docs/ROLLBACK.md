@@ -11,6 +11,7 @@ correct `main`, then a fixed root cause. **Never improvise on `main`.**
 > | [`ROLLBACK-RUNBOOK.md`](./ROLLBACK-RUNBOOK.md) | The **one specific case**: undoing the PP7 content cutover (migration `0030`, the 297-file cold archive, `0033`'s contraction). If the break involves the legacy platform's rows or Storage objects, stop reading here and use that file — it is executed, rehearsed and exact. |
 > | [`WORKFLOW.md` §13](./WORKFLOW.md#13-rollback-process) | The three-line summary that sits inside the delivery loop. It is the same rules, compressed. |
 > | [`PRODUCTION-CUTOVER-RUNBOOK.md`](./PRODUCTION-CUTOVER-RUNBOOK.md) | The forward direction of the PP7 cutover, for reference on what was done to production and in what order. |
+> | [`CR1-RELEASE-RUNBOOK.md`](./CR1-RELEASE-RUNBOOK.md) | The **current content release**, forward steps and its own Rollback section. If the break involves this release's rows, files or focus-area words, use that file. |
 > | [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) → *Emergency rollback security notes* | If a **secret was exposed**. Rotate the key first — that section owns this case, not this file. |
 >
 > These do not compete. This file is the decision tree; the runbooks are the executed procedures it
@@ -45,6 +46,7 @@ non-production project. It cannot execute one.
 | Production broken, partners or visitors affected NOW | **Vercel → Deployments → previous good deployment → Promote to Production**, then still correct `main` |
 | A migration shipped with the break | Code rollback alone is NOT enough — see Step 4 |
 | The break involves the legacy content, its rows or its Storage objects | Use [`ROLLBACK-RUNBOOK.md`](./ROLLBACK-RUNBOOK.md), not this tree |
+| The break involves the current content release | Use the Rollback section of [`CR1-RELEASE-RUNBOOK.md`](./CR1-RELEASE-RUNBOOK.md), not this tree |
 | A secret was exposed | **Rotate the key first** — [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) → *Emergency rollback security notes* |
 | Tempted to fix-forward directly on `main` | **Don't.** Branch, fix, and go through the full workflow |
 
@@ -91,7 +93,7 @@ established that `list_migrations` returns `[]` there, because migrations are ap
 **Why this matters:** rolling back the wrong deploy fixes nothing and doubles the confusion.
 
 > **If the "break" is a flood of submissions, this is the wrong file.** The public writes (`/apply`,
-> contact, `/support`) are still **unthrottled** — Upstash rate limiting and Turnstile are not shipped
+> contact) are still **unthrottled** — Upstash rate limiting and Turnstile are not shipped
 > yet; they are sprint **SYS1.5** (`PROJECT-STATUS.md` §7 #1, **D-SYS-9**). There is no rate limiter to
 > turn up. What holds in the meantime is that the writes are zod-validated and fail closed, and the HQ
 > approval gate (`is_approved = false`) keeps abusive signups away from every piece of gated content.

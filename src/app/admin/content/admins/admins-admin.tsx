@@ -60,11 +60,11 @@ export function AdminsAdmin({ rows }: { rows: AdminRow[] }) {
       ) : null}
 
       <div className="adm-table-wrap" style={{ marginTop: "var(--space-6)" }}>
-        <table className="adm-table" style={{ minWidth: 0 }}>
+        <table className="adm-table adm-table--fit">
           <thead>
             <tr>
               <th scope="col">Email</th>
-              <th scope="col">Added</th>
+              <th scope="col" className="adm-td-count">Added</th>
               <th scope="col">
                 <span className="sr-only">Actions</span>
               </th>
@@ -74,7 +74,7 @@ export function AdminsAdmin({ rows }: { rows: AdminRow[] }) {
             {rows.map((r) => (
               <tr key={r.user_id}>
                 <td className="adm-td-strong">{r.email}</td>
-                <td className="adm-td-muted" style={{ whiteSpace: "nowrap" }}>
+                <td className="adm-td-muted adm-td-count" style={{ whiteSpace: "nowrap" }}>
                   {r.added}
                 </td>
                 <td style={{ textAlign: "right" }}>

@@ -48,7 +48,7 @@ The whole gate runs against a **Vercel Preview** deployment, whose Preview and D
 
 Three project-specific traps that must be respected, all of them already documented:
 
-1. **A Preview contact submission sends a real email.** `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` are set in **both** Production and Preview, so `/contact` and the gated Ask HQ form on `/support` deliver to a real inbox from Preview ([`BROWSER-TOOLS.md`](../BROWSER-TOOLS.md) §6). Robot submissions must be unmistakably marked as tests, kept few, and expected by HQ.
+1. **A Preview contact submission sends a real email.** `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` are set in **both** Production and Preview, so `/contact` delivers to a real inbox from Preview ([`BROWSER-TOOLS.md`](../BROWSER-TOOLS.md) §6). Robot submissions must be unmistakably marked as tests, kept few, and expected by HQ.
 2. **On Production, automation is read-only.** Navigate, screenshot, read headers, read console — never submit, never create an account, never trigger a write ([`BROWSER-TOOLS.md`](../BROWSER-TOOLS.md) §6). The rule is channel-independent: it applies to Playwright exactly as it applies to a browser tool.
 3. **The real production submission stays a human task.** [`LAUNCH-CHECKLIST.md`](../LAUNCH-CHECKLIST.md) Phase 3 has the owner perform one real submission by hand on the live domain. That never becomes the robot's job.
 
@@ -59,8 +59,8 @@ This site is two shells behind one gate, and the gate is `profiles.is_approved`.
 | Role | Public shell | Gated platform | `/account` | `/admin/*` |
 |---|---|---|---|---|
 | **Anonymous visitor** | Full access | Redirect to `/login` — and no gated strings in the HTML *or* the RSC payload | Redirect to `/login` | Redirect to `/login` |
-| **Pending partner** (account exists, `is_approved = false`) | Full access | `/dashboard` shows the pending state. No guide body, no topic summary, no template row resolves. Ctrl/⌘+K returns an **empty** index | **Accessible** — the one deliberate exception, so they can set name and password while they wait | Not an admin |
-| **Approved partner** | Full access | Full access: 4 sections · 22 focus areas · 88 templates, downloads via server-issued signed URLs | Accessible | Not an admin |
+| **Pending partner** (account exists, `is_approved = false`) | Full access | `/dashboard` and every other approval-gated page show the pending state. No guide body, no topic summary, no Overview, no template row resolves. Ctrl/⌘+K returns an **empty** index | **Accessible** — the one deliberate exception, so they can set name and password while they wait | Not an admin |
+| **Approved partner** | Full access | Full access: 4 sections · 22 focus areas · 83 templates and practical tools, downloads via server-issued signed URLs | Accessible | Not an admin |
 | **HQ admin** (in the `admins` table) | Full access | Full access | Accessible | Full access |
 
 A signed-in non-admin who reaches an `/admin/*` route gets a **404**. Being approved is never being an admin.
@@ -89,7 +89,7 @@ The result is `docs/FEATURE-LIST.md`: one plain-English line per feature. For ex
 ### Step 3 — Tests written
 Claude Code turns every approved line into one test, at both viewports the repo actually requires: **desktop and 320px** ([`DESIGN.md`](../DESIGN.md) §10, [`QA-CHECKLIST.md`](../QA-CHECKLIST.md)). It always includes the reverse checks — people who shouldn't get in, can't — for all four roles. You do nothing here beyond answering the odd question.
 
-> ⚠️ **Not testable today: abuse controls.** `/apply`, `/contact` and the Ask HQ write are live **without rate limiting and without Turnstile** ([`PROJECT-STATUS.md`](../PROJECT-STATUS.md) §7 issue #1, open since S3c). Hammering a form today gets you through, not blocked. **Do not write a test that expects a 429 or a CAPTCHA challenge, and do not let a report claim one.** Those controls arrive in **SYS1.5** (**D-SYS-9**), which is why SYS1.5 runs before SYS2. Their feature-list lines are written now and marked *pending SYS1.5*.
+> ⚠️ **Not testable today: abuse controls.** `/apply` and `/contact` are live **without rate limiting and without Turnstile** ([`PROJECT-STATUS.md`](../PROJECT-STATUS.md) §7 issue #1, open since S3c). Hammering a form today gets you through, not blocked. **Do not write a test that expects a 429 or a CAPTCHA challenge, and do not let a report claim one.** Those controls arrive in **SYS1.5** (**D-SYS-9**), which is why SYS1.5 runs before SYS2. Their feature-list lines are written now and marked *pending SYS1.5*.
 
 ### Step 4 — Run → report
 One ask: "run the tests." The robot works through everything and writes `docs/test-reports/[date]-test-report.md`: one row per feature, PASS or FAIL, every failure explained in plain words with a severity.
@@ -131,7 +131,7 @@ Either way, the run stays read-only against Production, per [`BROWSER-TOOLS.md`]
 - **The tests stay in the repo forever.** Before any big release or redesign, say "run the launch gate" and get a fresh full report. Per-sprint QA ([`QA-CHECKLIST.md`](../QA-CHECKLIST.md)) continues as normal — the gate is the whole-site pass on top of it.
 - **The feature list is a living document.** New feature shipped → its line gets added → its test exists. Every defect found in production also earns a test here, so the same defect cannot quietly return. The system gets stronger with every incident.
 - **A failing test is a question, not always a bug.** Sometimes the test is wrong, or the feature changed on purpose. Say so — Claude Code will state plainly whether the site or the test needs fixing. Changed lines on the feature list come back to you for re-approval; nothing is silently rewritten.
-- **Content numbers move.** The proof numbers are **4 sections · 22 focus areas · 88 templates** today. When real content is added they change, and the feature-list lines that count things change with them — never the other way round.
+- **Content numbers move.** The proof numbers are **4 sections · 22 focus areas · 83 templates and practical tools** today. When real content is added they change, and the feature-list lines that count things change with them — never the other way round.
 
 ## 8. What you never do
 

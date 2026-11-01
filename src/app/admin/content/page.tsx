@@ -76,7 +76,7 @@ const SECTIONS = [
   {
     href: "/admin/content/admins",
     title: "Admins",
-    desc: "Add or remove the HQ team members who manage this.",
+    desc: "Add or remove the team members who manage this.",
   },
 ];
 
@@ -88,7 +88,7 @@ export default async function ContentAdminPage() {
       <h1 className="adm-h1">Content admin.</h1>
       <p className="adm-intro">
         Everything partners see behind the gate — the pages, the focus areas and
-        their files — and who at HQ can change it.
+        their files — and who can change it.
       </p>
       <div className="adm-hub">
         {SECTIONS.map((s) => (

@@ -1,5 +1,8 @@
 # Production cutover runbook — PP7
 
+> **The PP7 record.** This runbook targets the previous release. The current one is
+> [`CR1-RELEASE-RUNBOOK.md`](./CR1-RELEASE-RUNBOOK.md), which has its own rollback section.
+
 > **Every step here is run by the owner.** This engine writes to production
 > through no channel: every mutating script refuses `--target prod` without a
 > typed confirmation at a real terminal, migrations are applied by hand in the

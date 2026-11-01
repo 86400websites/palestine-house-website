@@ -16,7 +16,7 @@ type PageHeroProps = {
   position?: string;
   eyebrow: string;
   title: string;
-  lead: string;
+  lead: string | string[];
   /** CTA row (Buttons/links), rendered in the shared .v3-hero-ctas grammar. */
   children?: ReactNode;
   support?: string;
@@ -49,7 +49,11 @@ export function PageHero({
         <Stagger className="v3-hero-copy v3-page-hero-copy">
           <p className="ph-eyebrow">{eyebrow}</p>
           <h1>{title}</h1>
-          <p className="v3-hero-sub">{lead}</p>
+          {[lead].flat().map((paragraph) => (
+            <p key={paragraph} className="v3-hero-sub">
+              {paragraph}
+            </p>
+          ))}
           {children ? <div className="v3-hero-ctas">{children}</div> : null}
           {support ? <p className="v3-page-hero-support">{support}</p> : null}
         </Stagger>

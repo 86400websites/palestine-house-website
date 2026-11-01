@@ -3,6 +3,13 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import {
+  fileKindOf,
+  OVERVIEW_CODE,
+  SHARED_RESOURCES,
+  type PwFileKind,
+} from "@/lib/workspace-v2/shared-resources";
+import { checkSvgSafety, isPng } from "./file-safety";
 import type { AdminContentState } from "./content-actions";
 
 /* Admin file lifecycle (PP6a, 6a-g) — the upload path the platform has never
@@ -40,16 +47,31 @@ const GENERIC = "Something went wrong. Please try again.";
 const EXPIRED = "Your session expired — sign in again.";
 const BUCKET = "resources";
 
-/* Word documents and PDFs only. These are working templates a partner fills
-   in, so the editable format is the point (D-PP-l) — but a PDF guide is
-   legitimate, so both are allowed and nothing else is. */
+/* Word documents, plus the two formats CR1's delivery added: the logo PNG and the
+   editable SVG layouts. These are working files a partner adapts, so the editable
+   format is the point (D-PP-l). A PDF was allowed here until CR1, which made a row's
+   code decide its download label: the copy has no label for one, so it would have
+   been offered as a Word file. Nothing else is allowed. */
 const ALLOWED = new Map<string, string>([
   [
     "docx",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ],
-  ["pdf", "application/pdf"],
+  ["png", "image/png"],
+  ["svg", "image/svg+xml"],
 ]);
+
+/* A row's code decides its download label (shared-resources.ts), so a format has to
+   arrive under a code that will describe it truthfully. */
+const KIND_OF_EXT: Record<string, PwFileKind> = {
+  docx: "word",
+  png: "logo",
+  svg: "layout",
+};
+
+const CODE_RE = /^[A-Za-z0-9][A-Za-z0-9-]{0,15}$/;
+const CODE_MISMATCH =
+  "That file doesn’t match its code. A PNG needs the code LOGO, an SVG a code like SVG-1, and a Word file a code like T01.";
 
 /* 4 MB.
    THREE limits have to agree, not two — corrected at the PP6a exit gate after
@@ -67,17 +89,6 @@ const ALLOWED = new Map<string, string>([
    genuinely large file is ever needed, the fix is a direct-to-storage signed
    upload URL, which never passes through a function body at all. */
 const MAX_BYTES = 4 * 1024 * 1024;
-
-function slugify(value: string): string {
-  return value
-    .normalize("NFKD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60)
-    .replace(/-+$/g, "");
-}
 
 function extensionOf(name: string): string {
   const dot = name.lastIndexOf(".");
@@ -104,8 +115,8 @@ function checkFile(file: File | null): Checked {
     return {
       ok: false,
       message: ext
-        ? `That’s a .${ext} file. Please save it as .docx or a PDF and upload it again.`
-        : "That file doesn’t have a file type in its name. Please save it as .docx or a PDF and upload it again.",
+        ? `That’s a .${ext} file. Please save it as .docx, a PNG or an SVG and upload it again.`
+        : "That file doesn’t have a file type in its name. Please save it as .docx, a PNG or an SVG and upload it again.",
     };
   }
   if (file.size > MAX_BYTES) {
@@ -115,6 +126,26 @@ function checkFile(file: File | null): Checked {
     };
   }
   return { ok: true, ext };
+}
+
+/* The checks a file name cannot answer, before any byte is stored. A partner may
+   open a downloaded SVG in a browser, so one carrying anything active or external is
+   refused, within what file-safety.ts says it can catch, and never edited to make it
+   pass. Returns the message to show, or null when the file is fine. */
+async function checkContents(
+  file: File,
+  ext: string,
+  code: string | null,
+): Promise<string | null> {
+  if (KIND_OF_EXT[ext] !== fileKindOf(code)) return CODE_MISMATCH;
+  if (ext === "png" && !isPng(new Uint8Array(await file.arrayBuffer()))) {
+    return "That file isn’t a real PNG. Please export it again.";
+  }
+  if (ext === "svg") {
+    const [problem] = checkSvgSafety(await file.text());
+    if (problem) return `That SVG can’t be stored: it has ${problem}. Please export it again without that.`;
+  }
+  return null;
 }
 
 type Guard =
@@ -144,20 +175,70 @@ async function elementSlugFor(
   return rows.find((r) => r.element_id === elementId)?.element_slug ?? null;
 }
 
-/* A readable stem plus a short unique tail. The tail exists because
-   resources_storage_key is UNIQUE (bucket, path): without it, replacing a file
-   with a same-named one would collide, and a rename would need the object moved
-   to stay tidy. With it, "file already registered" only ever means what it
-   says — a second guide on one focus area. */
-function objectKey(
-  elementSlug: string,
-  prefix: string,
-  title: string,
-  ext: string,
-): string {
-  const stem = slugify(title) || "file";
-  const tail = Date.now().toString(36);
-  return `${elementSlug}/${prefix}-${stem}-${tail}.${ext}`;
+/* A row's code is more than a badge. It decides the row's label, whether it is
+   listed and counted among the templates, and how another focus area finds it
+   (shared-resources.ts), and the database will store any code it is handed. So a new
+   or changed code is checked against the focus area's rows first. `id` is the row
+   being re-badged, or null for an upload. Returns the message to show, or null. */
+async function checkCode(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  elementId: string,
+  id: string | null,
+  code: string,
+): Promise<string | null> {
+  const [{ data: files, error }, { data: topics }] = await Promise.all([
+    supabase.rpc("admin_list_resource_files", { p_element_id: elementId }),
+    supabase.rpc("admin_list_platform_topics"),
+  ]);
+  if (error) return GENERIC;
+  const rows = (files as { id: string; code: string | null }[] | null) ?? [];
+  const current = rows.find((r) => r.id === id);
+  if (id && !current) return "That file is no longer here. Please reload the page.";
+  if (current?.code === code) return null;
+
+  if (current?.code === OVERVIEW_CODE) {
+    return "This file is the focus area’s Overview, so its code stays OV.";
+  }
+  if (rows.some((r) => r.code === code)) {
+    return code === OVERVIEW_CODE
+      ? "This focus area already has its Overview."
+      : `This focus area already has a file with the code ${code}. Please choose another.`;
+  }
+  if (!current) return null;
+  if (fileKindOf(current.code) !== fileKindOf(code)) return CODE_MISMATCH;
+
+  const slug = (
+    (topics as { element_id: string; slug: string }[] | null) ?? []
+  ).find((t) => t.element_id === elementId)?.slug;
+  const borrowed = Object.values(SHARED_RESOURCES).some((refs) =>
+    refs.some((r) => r.topicSlug === slug && r.code === current.code),
+  );
+  return borrowed
+    ? "Other focus areas link to this file by its code, so the code has to stay."
+    : null;
+}
+
+/* <focus area>/<unique folder>/<the uploaded file's own name>.
+
+   The unique folder exists because resources_storage_key is UNIQUE (bucket, path):
+   without it, replacing a file with a same-named one would collide. With it, "file
+   already registered" only ever means what it says — a second guide on one focus
+   area. The LAST segment is what getResourceDownloadUrl names the download, so a
+   partner saves the file under the name the owner gave it (CR1), not under a key
+   with a suffix. The name comes from the browser, so it is reduced to a safe set of
+   characters first; 0029 re-validates the shape anyway. Parentheses are out because a
+   browser saves them as %28 and %29. */
+function objectKey(elementSlug: string, fileName: string, ext: string): string {
+  const stem = fileName
+    .slice(0, fileName.lastIndexOf("."))
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[^A-Za-z0-9 _-]+/g, "-")
+    .replace(/^[\s-]+|[\s-]+$/g, "")
+    .slice(0, 120)
+    .trimEnd();
+  const folder = Date.now().toString(36);
+  return `${elementSlug}/${folder}/${stem || "file"}.${ext}`;
 }
 
 function fileMessage(dbMessage: string | undefined): string {
@@ -196,11 +277,7 @@ const uploadSchema = z.object({
   elementId: z.string().regex(UUID_RE),
   kind: z.enum(["guide", "template"]),
   title: z.string().trim().min(1).max(300),
-  code: z
-    .string()
-    .trim()
-    .regex(/^[A-Za-z0-9][A-Za-z0-9-]{0,15}$/)
-    .optional(),
+  code: z.string().trim().regex(CODE_RE).optional(),
 });
 
 export async function uploadFileAction(
@@ -228,20 +305,20 @@ export async function uploadFileAction(
   const guard = await adminGuard();
   if (!guard.ok) return { ok: false, message: guard.message };
 
+  const code = d.kind === "guide" ? null : (d.code as string).toUpperCase();
+  const refused =
+    (await checkContents(file as File, checked.ext, code)) ??
+    (code ? await checkCode(guard.supabase, d.elementId, null, code) : null);
+  if (refused) return { ok: false, message: refused };
+
   const elementSlug = await elementSlugFor(guard.supabase, d.elementId);
   if (!elementSlug) return { ok: false, message: GENERIC };
 
-  /* slugify the code, exactly as the replace path does. Raw, it is part of a
-     storage key: a code containing "../" would climb out of the focus-area
-     folder, 0029's path check would then reject the registration, and the
-     compensating remove() would use the un-normalised key and match nothing —
-     orphaned bytes with no row. Found by the PP6a exit-gate review. */
-  const path = objectKey(
-    elementSlug,
-    d.kind === "guide" ? "guide" : slugify(d.code as string) || "file",
-    d.title,
-    checked.ext,
-  );
+  /* Built from the file's own name, never from the code: a code containing "../"
+     once climbed out of the focus-area folder here, 0029's path check then rejected
+     the registration, and the compensating remove() matched nothing — orphaned
+     bytes with no row. Found by the PP6a exit-gate review. */
+  const path = objectKey(elementSlug, (file as File).name, checked.ext);
 
   // 1) the object
   const { error: upErr } = await guard.supabase.storage
@@ -304,15 +381,17 @@ export async function replaceFileAction(
   const guard = await adminGuard();
   if (!guard.ok) return { ok: false, message: guard.message };
 
+  const refused = await checkContents(
+    file as File,
+    checked.ext,
+    parsed.data.prefix.toUpperCase(),
+  );
+  if (refused) return { ok: false, message: refused };
+
   const elementSlug = await elementSlugFor(guard.supabase, parsed.data.elementId);
   if (!elementSlug) return { ok: false, message: GENERIC };
 
-  const path = objectKey(
-    elementSlug,
-    slugify(parsed.data.prefix) || "file",
-    parsed.data.title,
-    checked.ext,
-  );
+  const path = objectKey(elementSlug, (file as File).name, checked.ext);
 
   // 1) the new object
   const { error: upErr } = await guard.supabase.storage
@@ -358,8 +437,9 @@ export async function replaceFileAction(
 // ---------------------------------------------------------------------------
 const renameSchema = z.object({
   id: z.string().regex(UUID_RE),
+  elementId: z.string().regex(UUID_RE),
   title: z.string().trim().min(1).max(300),
-  code: z.string().trim().max(16).optional(),
+  code: z.string().trim().regex(CODE_RE).optional(),
 });
 
 export async function renameFileAction(
@@ -368,15 +448,26 @@ export async function renameFileAction(
 ): Promise<AdminContentState> {
   const parsed = renameSchema.safeParse({
     id: formData.get("id"),
+    elementId: formData.get("elementId"),
     title: formData.get("title"),
     code: (formData.get("code") as string | null)?.trim() || undefined,
   });
   if (!parsed.success) {
-    return { ok: false, message: "Please give the file a name." };
+    return {
+      ok: false,
+      message:
+        "Please give the file a name, and a short code of letters, numbers and dashes.",
+    };
   }
 
   const guard = await adminGuard();
   if (!guard.ok) return { ok: false, message: guard.message };
+
+  const code = parsed.data.code?.toUpperCase();
+  const refused = code
+    ? await checkCode(guard.supabase, parsed.data.elementId, parsed.data.id, code)
+    : null;
+  if (refused) return { ok: false, message: refused };
 
   /* Metadata only. The stored object is not moved: renaming a file must never
      change where its bytes live, for the same reason renaming a focus area
@@ -384,7 +475,7 @@ export async function renameFileAction(
   const { error } = await guard.supabase.rpc("admin_update_resource_meta", {
     p_id: parsed.data.id,
     p_title: parsed.data.title,
-    p_code: parsed.data.code ?? null,
+    p_code: code ?? null,
     p_type: null,
     p_version: null,
     p_sort_order: null,

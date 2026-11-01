@@ -35,8 +35,11 @@ test("MORNING-01 @morning: the gate is still shut for a stranger", async ({
         `${path} carries no redirect instruction to the sign-in page`,
       ).toContain("/login?next=");
     }
+    /* "pw-topic", the class every focus-area card and its parts carry. This read
+       "pw-topic-card", the component's file name, which the card does not render,
+       so that half of the check could not fail. */
     expect(
-      body.includes("pw-topic-card") || body.includes('/guide"'),
+      body.includes("pw-topic") || body.includes('/guide"'),
       `${path} served platform content to a stranger`,
     ).toBe(false);
   }

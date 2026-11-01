@@ -2,7 +2,7 @@
 
 The operating manual for building **palestinehouse** — the public face of Palestine House and the private, approval-gated reference platform for its partners — with a disciplined, safe, AI-assisted workflow, in **stages and sprints, never all at once**.
 
-**What we're building (one paragraph):** a thin, premium public shell (Home · The Model · Experience · Bring a House · Our Support, single CTA: **Apply**) in front of a private partner reference platform unlocked by HQ approval (`/apply` = sign-up → pending account → `/admin/approvals` → unlock). The platform is a trusted reference organised into four sections (Setup · Operate · Program · Support) — **not a course** (no quizzes, no certificate) and not an ops tool. Proof numbers: **4 sections · 22 focus areas · 88 templates** (reconciled public-and-private at PP7, owner-signed live 2026-08-20). *(The public Live Programming hub and the stage-based Plan/Build/Operate grouping were both retired in Stage 4 — see `PROJECT-STATUS.md` for the history.)*
+**What we're building (one paragraph):** a thin, premium public shell (Home · The Model · Experience · Bring a House · The Community, single CTA: **Apply to Join**) in front of a private partner reference platform, the UI's Community Platform, unlocked by an HQ admin's approval (`/apply` = sign-up → pending account → `/admin/approvals` → unlock). The platform is a trusted reference organised into four sections (Setup · Operate · Program · Support) — **not a course** (no quizzes, no certificate) and not an ops tool. Proof numbers: **4 sections · 22 focus areas · 83 templates and practical tools** (reconciled public-and-private at PP7, owner-signed live 2026-08-20 at 88; CR1 moved the template figure to 83 with the owner's delivery). *(The public Live Programming hub and the stage-based Plan/Build/Operate grouping were both retired in Stage 4 — see `PROJECT-STATUS.md` for the history.)*
 
 ---
 
@@ -42,12 +42,12 @@ docs/
 │   ├── design-system/           # the bound design system — tokens/ (colors, fonts, typography, spacing), base.css, styles.css, fonts/
 │   ├── assets/art/              # final artwork the mockups reference (PH-*.png)
 │   └── content/                 # flat copy snapshot the mockups read + PH_Sitemap_Architecture_TECH.txt (locked sitemap, routes, access model, data)
-├── source-assets/               # masters: images/ (artwork, textures, empty-state marks) + resources/ (booklets, focus areas, 267 templates, videos → Supabase Storage in S5d/6e)
+├── source-assets/               # masters: images/ (artwork, textures, empty-state marks) + resources/ (booklets, focus areas, 267 templates, videos → Supabase Storage in S5d/6e) + content-refresh-cr1/ (the owner's CR1 delivery, including this release's copy documents)
 ├── sprint-prompts/              # one record per completed sprint (the session memory — see its README; generated via the /sprint-prompt skill)
 └── notes/                       # decisions.md (build decisions) + cleanup-before-launch.md
 ```
 
-> `/docs/page-copy/` is the canonical copy source; the flat `/docs/page-designs/content/` folder is the snapshot the mockup HTML reads. If they ever disagree, `page-copy/` wins — fix the snapshot.
+> This release's copy comes from the owner's supplied documents under `docs/source-assets/content-refresh-cr1/`; `/docs/page-copy/` remains the older canon for anything those did not cover. The flat `/docs/page-designs/content/` folder is the snapshot the mockup HTML reads. If it and `page-copy/` ever disagree, `page-copy/` wins — fix the snapshot.
 
 ## Locked stack (override consciously — `TECH-ARCHITECTURE.md` is canonical)
 
@@ -64,7 +64,7 @@ In-scope integrations (each no-ops when env vars are absent; fail closed in Prod
 5. **Vercel Preview is tested before merge.** Local green is necessary but not sufficient.
 6. **Secrets never touch the repo.** No `.env.local`, no keys in code, no secret behind `NEXT_PUBLIC_*`. Supabase secret keys stay server-only.
 7. **The approval gate is sacred.** Reference content is never public; every gated path checks `is_approved` server-side (blocking invariants: `SECURITY-CHECKLIST.md` §15).
-8. **Copy and design are locked inputs.** Verbatim from `/docs/page-copy/`; designs from `/docs/page-designs/` + its `design-system/` tokens. Gaps become Open decisions in `PROJECT-STATUS.md`, never improvisation.
+8. **Copy and design are locked inputs.** Verbatim from the owner's CR1 documents, and from `/docs/page-copy/` for anything those did not cover; designs from `/docs/page-designs/` + its `design-system/` tokens. Gaps become Open decisions in `PROJECT-STATUS.md`, never improvisation.
 
 ## Correct order to use the docs
 
@@ -95,7 +95,7 @@ The full version with exit gates is `ROADMAP.md`. *(Steps 1–4 and the CI/Verce
 - ❌ Don't commit directly to `main`, force-push, or merge without green CI **and** a tested Preview.
 - ❌ Don't bundle sprints or unrelated changes into one branch.
 - ❌ Don't expose gated content publicly, add a second signup path beside `/apply`, or add quizzes/certificates — the model is locked.
-- ❌ Don't rewrite approved copy, redesign the locked header/footer, or invent proof numbers (**4 sections · 22 focus areas · 88 templates** — reconciled at PP7, owner-signed live 2026-08-20; the retired 11 · 33 · 200+ · 297 · 120-day band names deleted content).
+- ❌ Don't rewrite approved copy, redesign the locked header/footer, or invent proof numbers (**4 sections · 22 focus areas · 83 templates and practical tools** — reconciled at PP7, owner-signed live 2026-08-20 at 88, moved to 83 by CR1 with the owner's delivery; the retired 11 · 33 · 200+ · 297 · 120-day band and the previous release's 88 name content that no longer exists).
 - ❌ Don't add dependencies you don't need, or make unrelated refactors.
 - ❌ Don't skip Git hooks or CI (`--no-verify`) without an explicit, recorded reason.
 

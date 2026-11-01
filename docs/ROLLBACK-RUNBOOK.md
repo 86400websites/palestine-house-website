@@ -1,5 +1,10 @@
 # Rollback runbook — undoing migration `0030`
 
+> **The PP7 record, and not the way back from CR1.** This runbook undoes the PP7 cutover and
+> returns the platform to the pre-PP7 legacy content (33 focus areas, 10 groups, 297 templates).
+> It does **not** return it to the 88-template release. To undo CR1, use the
+> [Rollback section of `CR1-RELEASE-RUNBOOK.md`](./CR1-RELEASE-RUNBOOK.md#rollback).
+
 > **Read this before you need it.** `0030` is the first destructive migration in
 > this project: it deletes 33 focus areas, 10 groups, 33 elements carrying
 > 1,577,163 characters of the owner's prose, and 297 template rows — and a

@@ -50,11 +50,11 @@ reads it, arriving in a named sprint).
 | 3 | **Domain registrar + DNS — GoDaddy** (`palestine-house.com`) | Owns the name and the DNS zone. Carries the Resend sending records on the `send.` subdomain and the mailbox MX on the root. | In use | _owner to complete (private pack)_ | GoDaddy's own registrar transfer flow. **The domain is the client's property — never held by a contractor.** |
 | 4 | **Supabase — PRODUCTION project** | Auth and database for the live site: every partner account, the `profiles.is_approved` approval flag, all focus-area/guide/template rows, and the private Storage bucket the templates are served from. Currently on migration `0034`. | In use | _owner to complete (private pack)_ | Supabase org/project ownership transfer. Move the **organisation**, because billing lives there. |
 | 5 | **Supabase — NON-PRODUCTION (test) project** | The safe copy. Preview deployments and local development point here, so testing never touches partner data. Every migration is applied here first. | In use | _owner to complete (private pack)_ | Same transfer flow. It is a separate org from Production — transfer both. |
-| 6 | **Resend** | Transactional email, four flows: contact → HQ · support → HQ · the application-received pair (applicant + HQ) · approve/decline → applicant. Sending domain verified 2026-07-09. | In use | _owner to complete (private pack)_ | Invite the new owner as admin, then remove the outgoing one. |
+| 6 | **Resend** | Transactional email, three flows: contact → HQ · the application-received pair (applicant + HQ) · approve/decline → applicant. Sending domain verified 2026-07-09. | In use | _owner to complete (private pack)_ | Invite the new owner as admin, then remove the outgoing one. |
 | 7 | **Microsoft 365 mailbox** on the domain | Receives everything Resend sends to HQ. Resend *receiving* is intentionally OFF — this mailbox owns the inbox. | In use | _owner to complete (private pack)_ | Microsoft 365 tenant/admin handover. Separate from Resend and from GoDaddy. |
-| 8 | **YouTube** (video hosting) | Each focus area can carry a video link, set by HQ in `/admin/content/focus-areas`. `next.config.ts` allow-lists the privacy-enhanced embed origin in `frame-src`. | In use | _owner to complete (private pack)_ | Whoever owns the channel owns the videos. Google account / brand-account transfer. |
+| 8 | **YouTube** (video hosting) | Each of the 26 Watch Video buttons takes a link from the CMS, and goes live on save with no code change: the 22 on focus-area cards at `/admin/content/focus-areas`, the 4 on the Overview at `/admin/content/pages`. `next.config.ts` allow-lists the privacy-enhanced embed origin in `frame-src`. | In use | _owner to complete (private pack)_ | Whoever owns the channel owns the videos. Google account / brand-account transfer. |
 | 9 | **Mailchimp** | The apply-tagging integration. **Dormant by owner decision (E1, 2026-07-09)** — no account and no keys are planned; the code is a clean no-op while its env vars are absent. | Configured, not used | _no account exists — nothing to transfer_ | N/A unless the owner later decides to switch it on. |
-| 10 | **Upstash Redis** | Rate limiting for the public writes (`/apply`, contact, `/support`). | **Not wired yet — arrives in sprint SYS1.5** (D-SYS-9) | _owner to create and complete (private pack)_ | Owner creates the account and adds the env vars in Vercel. Nothing to transfer today. |
+| 10 | **Upstash Redis** | Rate limiting for the public writes (`/apply`, contact). | **Not wired yet — arrives in sprint SYS1.5** (D-SYS-9) | _owner to create and complete (private pack)_ | Owner creates the account and adds the env vars in Vercel. Nothing to transfer today. |
 | 11 | **Cloudflare Turnstile** | Bot check on the public forms, fail-closed in Production. | **Not wired yet — arrives in sprint SYS1.5** (D-SYS-9) | _owner to create and complete (private pack)_ | As above. |
 | 12 | **Sentry** | Error tracking, with the Production alert rule. | **Not wired yet — arrives in sprint SYS3** | _owner to create and complete (private pack)_ | As above. SYS3 also adds the ingest origin to the CSP (D-SYS-10). |
 | 13 | **PostHog** | Product analytics. **Name reserved in the docs, never adopted** — no code exists and no sprint schedules it. | Not adopted | _no account exists_ | N/A. |
@@ -82,11 +82,11 @@ One line per service. This is the column that matters at handover.
 | **GitHub** | The shared source of truth, the PR history, branch protection, and CI. The **code** itself survives — every clone is a full copy. | Push an existing clone to a new remote, then re-create branch protection on `main` and re-add `CI` as a required check. Cheap. |
 | **Vercel** | The live site is down and no PR gets a Preview. Worse: Vercel holds the **only** copy of some env-var values, because nothing secret is in the repo. | Re-import the repo into a new Vercel project, re-add each variable **by name** from `.env.example` and `SUPABASE-VERCEL-SETUP.md`, re-issue the values from each provider's own dashboard, re-point DNS, redeploy. |
 | **Domain / DNS (GoDaddy)** | Control of the name, plus email: the Resend SPF/DKIM records and the mailbox MX both live in this zone. | **There is no replacement path.** A lost domain is not recoverable by a developer. This is the single strongest reason the registrar account must be the client's from day one. |
-| **Supabase PRODUCTION** | Total loss of the live service — every partner account, every approval flag, every guide and template row, and the private Storage bucket. | The **schema** is reproducible: apply `supabase/sql/migrations/` in order, `0001` → `0034`. The **template bytes** come back from the cold archive (see §4). **Partner accounts and approvals have no in-repo copy** — they exist only in this project, so its backup posture is the real recovery plan. |
+| **Supabase PRODUCTION** | Total loss of the live service — every partner account, every approval flag, every guide and template row, and the private Storage bucket. | The **schema** is reproducible: apply `supabase/sql/migrations/` in order, `0001` → `0034`. The **current release's 127 files** come back from the owner's CR1 delivery (gitignored, see §4); the older 297 come from the cold archive. **Partner accounts and approvals have no in-repo copy** — they exist only in this project, so its backup posture is the real recovery plan. |
 | **Supabase NON-PRODUCTION** | Preview and local development lose their database. Annoying, not fatal — no live data lives here. | Create a new project, replay the migrations in order, re-point the Preview and Development env vars, redeploy. |
-| **Resend** | The four email flows stop. The public **contact form fails closed in Production** (a submission is refused rather than silently dropped); apply/support/approve/decline degrade gracefully — the data is saved, the email is skipped. | New Resend account → re-verify the sending domain at GoDaddy (SPF, DKIM, DMARC per [`EMAIL-SETUP-CHECKLIST.md`](./EMAIL-SETUP-CHECKLIST.md)) → re-set the three `RESEND_*` names in Vercel → **redeploy** → re-run the live test matrix. |
-| **Microsoft 365 mailbox** | HQ stops receiving contact, support and new-application notifications. The site keeps working and keeps saving the data. | Restore or re-create the mailbox, then point `RESEND_TO_EMAIL` at it and redeploy. |
-| **YouTube** | Every focus-area video link 404s. No other part of the platform is affected — the guides and templates are independent. | Re-upload the videos to a new channel and update each focus area's video link in `/admin/content/focus-areas`. |
+| **Resend** | The three email flows stop. The public **contact form fails closed in Production** (a submission is refused rather than silently dropped); apply/approve/decline degrade gracefully — the data is saved, the email is skipped. | New Resend account → re-verify the sending domain at GoDaddy (SPF, DKIM, DMARC per [`EMAIL-SETUP-CHECKLIST.md`](./EMAIL-SETUP-CHECKLIST.md)) → re-set the three `RESEND_*` names in Vercel → **redeploy** → re-run the live test matrix. |
+| **Microsoft 365 mailbox** | HQ stops receiving contact and new-application notifications. The site keeps working and keeps saving the data. | Restore or re-create the mailbox, then point `RESEND_TO_EMAIL` at it and redeploy. |
+| **YouTube** | Every video link 404s. No other part of the platform is affected — the guides and templates are independent. | Re-upload the videos to a new channel and update each link in the CMS: `/admin/content/focus-areas` for the 22 on focus-area cards, `/admin/content/pages` for the 4 on the Overview. |
 | **Mailchimp / Upstash / Turnstile / Sentry** | Nothing today — none of them is wired. | Create the account when its sprint runs. |
 
 ---
@@ -165,7 +165,11 @@ restoring rows without bytes gives you a platform that looks healthy and hands e
 partner a broken download. The archive's three required copies are listed there in §1;
 **copy 3 is off-machine and is the owner's to place.** Verify any copy read-only with
 `pnpm exec tsx scripts/verify-archive.ts --dir <path>`. Code-level rollback (revert,
-redeploy a previous build) is [`ROLLBACK.md`](./ROLLBACK.md).
+redeploy a previous build) is [`ROLLBACK.md`](./ROLLBACK.md). **The current content release
+is [`CR1-RELEASE-RUNBOOK.md`](./CR1-RELEASE-RUNBOOK.md)**, with its own rollback section. Its
+private folder, the whole of `docs/source-assets/content-refresh-cr1/`, also needs an
+off-machine copy, because a rollback needs the spec beside the snapshot and going forward
+needs the delivery. The 297-file archive is not a backup of this release.
 
 ---
 
@@ -178,9 +182,10 @@ the site.
       run and a tested Preview, and the owner does the merge.
 - [ ] **Applying migrations to Production.** By hand, in the SQL Editor, after the same
       SQL has been applied and verified on the non-production project.
-- [ ] **Holding the off-machine cold-archive copy** (`ROLLBACK-RUNBOOK.md` §1, copy 3),
-      and re-verifying it periodically. *A OneDrive-synced folder is a replica, not a
-      backup policy.*
+- [ ] **Holding the off-machine cold-archive copy** (`ROLLBACK-RUNBOOK.md` §1, copy 3)
+      and the off-machine copy of the whole CR1 private folder (`CR1-RELEASE-RUNBOOK.md`
+      step 2), and re-verifying them periodically. *A OneDrive-synced folder is a replica,
+      not a backup policy.*
 - [ ] **Creating and holding the third-party accounts** the remaining sprints need —
       Upstash and Turnstile for SYS1.5, Sentry for SYS3 — and adding their values in
       Vercel. Agents get the variable **names** only.
@@ -245,9 +250,11 @@ date depend on them.
       template files are served from a **private** Storage bucket by server-issued signed
       URLs to approved users only. The two booklet PDFs are the only public files.
 - [ ] **Locked facts and numbers.** The site's proof numbers are **4 sections · 22 focus
-      areas · 88 templates** (reconciled at PP7, owner-signed on the live site
-      2026-08-20). They move only when real content is added. The retired 11 · 33 · 297
-      figures describe deleted content and must never come back.
+      areas · 83 templates and practical tools**, 127 learner files in all (reconciled at
+      PP7, owner-signed on the live site 2026-08-20 at 88; CR1 moved the template figure to
+      83 with the owner's delivery). They move only when real content is added. The retired
+      11 · 33 · 297 figures and the previous release's 88 describe content that no longer
+      exists and must never come back.
 - [ ] **Known open items at handover.** Read [`PROJECT-STATUS.md`](./PROJECT-STATUS.md)
       §7 before promising anything. The headline one: public writes are still
       **unthrottled** (no rate limiting, no bot check) until sprint SYS1.5 ships.

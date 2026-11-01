@@ -26,10 +26,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: SITE_NAME,
+    default: "Palestine House - Culture, Community and Local Homes",
     template: `%s · ${SITE_NAME}`,
   },
-  description: SITE_TAGLINE,
+  description:
+    "Apply to join the Palestine House community for practical resources and connections as you build your own local cultural House.",
   alternates: {
     /* Resolves to each route's own path against metadataBase. */
     canonical: "./",

@@ -25,9 +25,9 @@ import {
    panels were removed at DR1-8, owner decision 2026-07-02 — the labels link
    directly and explain themselves via the tooltip) · Sign in · Apply. */
 
-/* tipShort = the short sub-label (owner-approved set, 2026-06-12) — used by
-   BOTH the mobile menu and, since the owner fix of 2026-07-06 (DR2), the
-   desktop hover tooltip: one simple line everywhere (the long
+/* tipShort = the short sub-label (owner-approved set, CR1 public copy §1.1) —
+   used by BOTH the mobile menu and, since the owner fix of 2026-07-06 (DR2),
+   the desktop hover tooltip: one simple line everywhere (the long
    navigation-copy.md one-liners were retired from the hover). */
 const NAV_LINKS = [
   {
@@ -45,13 +45,13 @@ const NAV_LINKS = [
   {
     key: "bring",
     label: "Bring a House",
-    tipShort: "What it takes.",
+    tipShort: "Build locally.",
     href: "/bring-ph",
   },
   {
     key: "support",
-    label: "Our Support",
-    tipShort: "Behind every House.",
+    label: "The Community",
+    tipShort: "Resources and connections.",
     href: "/our-support",
   },
 ] as const;
@@ -96,8 +96,8 @@ export function SiteHeader() {
      Apply CTA ↔ My Dashboard) WITHOUT making any page dynamic: a same-origin
      probe (CSP connect-src 'self' allows /api/*, not supabase.co). Re-checked
      on navigation so it updates right after the sign-in / sign-out redirects.
-     Defaults to "Sign in" / "Apply" until known, so anonymous visitors (the
-     common case) never see a swap. */
+     Defaults to "Sign in" / "Apply to Join" until known, so anonymous visitors
+     (the common case) never see a swap. */
   React.useEffect(() => {
     let active = true;
     fetch("/api/auth/session", { cache: "no-store" })
@@ -174,9 +174,9 @@ export function SiteHeader() {
           <Button asChild size="sm">
             <Link
               href={authed ? "/dashboard" : "/apply"}
-              aria-label={authed ? "Go to your dashboard" : "Apply to bring a House"}
+              aria-label={authed ? "Go to your dashboard" : "Apply to Join"}
             >
-              {authed ? "My Dashboard" : "Apply"}
+              {authed ? "My Dashboard" : "Apply to Join"}
             </Link>
           </Button>
 
@@ -241,7 +241,7 @@ export function SiteHeader() {
                         href={authed ? "/dashboard" : "/apply"}
                         onClick={() => setMobileOpen(false)}
                       >
-                        {authed ? "My Dashboard" : "Apply to bring a House"}
+                        {authed ? "My Dashboard" : "Apply to Join"}
                       </Link>
                     </Button>
                   </div>

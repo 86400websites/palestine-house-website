@@ -128,15 +128,10 @@ hidden) and a trailing space in the filename. The second is now absorbed by a `.
 names the extension it actually received, so **the next occurrence diagnoses itself in one attempt**.
 Nothing to build; close it when the owner next uploads by hand and reports what the message says.
 
-**2 · The `/support` success string was never homed (PP3 follow-up #6).**
-Ask HQ sends for real, and the confirmation still reads *"Your question is ready."* — live today at
-`src/components/workspace-v2/pw-ask-hq.tsx` line 63. It is the mockup's own sentence, kept verbatim by an
-owner note dated 2026-08-12 in that file, from a prototype that never sent anything. Named as still
-unhomed in [`pp5-teardown-cutover.md`](./sprint-prompts/pp5-teardown-cutover.md) and carried in
-`PROJECT-STATUS.md` §1's next-action narration ever since — carried, unhomed, since PP3. It is a
-one-string edit — **and it is copy, a locked input, so it needs the owner's word, not an
-engineer's judgement** (`CLAUDE.md` → Locked content). One approved sentence closes it inside any sprint
-that is already editing that file.
+**2 · CLOSED at CR1 — the `/support` success string (PP3 follow-up #6).**
+CR1 replaced Ask HQ with the Community Contacts block, which has no form and so no success state, and
+deleted `pw-ask-hq.tsx`, the file that carried the unhomed *"Your question is ready."* Nothing is left to
+home.
 
 ---
 

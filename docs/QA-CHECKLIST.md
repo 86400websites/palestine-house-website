@@ -62,12 +62,13 @@ This sheet **sequences** the gates; it does not restate them. The binding wordin
 
 ### Forms (if touched)
 
-The write surfaces shipped today: **`/apply`** and **`/contact`** are the public writes; the **Ask HQ** request on the gated support surface (`submit_support_request`) is an approved-partner-only write. **Read that as examples, not as the scope** — [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15 states the public-write rule as a blanket rule (it also names lead-magnet and newsletter writes, neither of which ships here), and a new public write is covered the day it is written. §15's own history is why: an enumeration silently becomes an allowlist.
+The write surfaces shipped today: **`/apply`** and **`/contact`** are the public writes. There is no approved-partner-only write since CR1: **Community Contacts** on `/support` is guidance and a link to `/contact`, and the `submit_support_request` RPC survives in the database with no caller. **Read that as examples, not as the scope** — [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §15 states the public-write rule as a blanket rule (it also names lead-magnet and newsletter writes, neither of which ships here), and a new public write is covered the day it is written. §15's own history is why: an enumeration silently becomes an allowlist.
 
 - [ ] Client validation fires on bad input with a clear message; the string follows the brand-voice rules for new copy ([`CLAUDE.md`](../CLAUDE.md) → Locked content & design inputs).
 - [ ] Valid submit works end to end, or shows an honest unavailable state — **never a fake success** ([`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §8).
 - [ ] Server-side zod validation is present and the handler leaks no stack trace or upstream error body ([`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §8, §9).
 - [ ] ⚠️ **Rate limiting and Turnstile are NOT shipped yet — D-SYS-9.** The public writes are currently unthrottled; this is known issue #1 in [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §7 and is scheduled as sprint **SYS1.5**. Do **not** test for, or report, a `429` or a CAPTCHA challenge before SYS1.5 ships — and do not claim §8's rate-limit/CAPTCHA boxes or §15's public-writes invariant as satisfied. What *is* live and must be verified: zod validation, fail-closed behavior, and the approval gate that keeps abuse out of gated content.
+- [ ] If `src/lib/admin/file-safety.ts` changes, run `pnpm exec tsx scripts/verify-svg-safety.ts`. It must print `THE SVG CHECK HOLDS`: every hostile file refused, every ordinary export accepted, and the largest allowed files read quickly.
 
 ### Accessibility
 
@@ -89,9 +90,9 @@ The standard is [`DESIGN.md`](./DESIGN.md) §11 (WCAG AA minimum) — that secti
 
 ### Content fidelity
 
-- [ ] Every visible string is verbatim from the approved copy source named in [`CLAUDE.md`](../CLAUDE.md) → Locked content & design inputs (`/docs/page-copy/`). **Note:** that folder and `/docs/page-designs/` are **gitignored** (see `.gitignore`) — they live in the owner's working copy, not in a fresh clone. If you cannot read the copy file, you cannot approve new copy; say so rather than paraphrasing.
-- [ ] **Proof numbers: 4 sections · 22 focus areas · 88 templates** ([`WORKFLOW.md`](./WORKFLOW.md) §0.4). The retired bands — 11 · 33 · 200+ · 297 · 120-day — name deleted content and must not reappear.
-- [ ] If the change touches the public focus-area copy or the proof numbers, run the checker: `pnpm exec tsx scripts/verify-public-copy.ts` (it asserts exactly 22 focus areas, 4 sections and an 88 template total, and that each public one-liner is the owner's own Overview sentence — D-PP-s).
+- [ ] Every visible string is verbatim from the approved copy source named in [`CLAUDE.md`](../CLAUDE.md) → Locked content & design inputs (the owner's CR1 documents under `docs/source-assets/content-refresh-cr1/`, then `/docs/page-copy/` for anything those did not cover). **Note:** those folders and `/docs/page-designs/` are **gitignored** (see `.gitignore`) — they live in the owner's working copy, not in a fresh clone. If you cannot read the copy file, you cannot approve new copy; say so rather than paraphrasing.
+- [ ] **Proof numbers: 4 sections · 22 focus areas · 83 templates and practical tools** (127 learner files in all, which are not all templates) ([`WORKFLOW.md`](./WORKFLOW.md) §0.4). The retired bands — 11 · 33 · 200+ · 297 · 120-day, and the previous release's 88 — name content that no longer exists and must not reappear.
+- [ ] If the change touches public copy, the focus-area copy or the proof numbers, run the checker: `pnpm exec tsx scripts/verify-public-copy.ts` (it compares the public files as a whole, word for word, with the strings its parser reads from the owner's supplied public copy, and file by file with a named list of copy under labels the parser skips; it matches `/privacy` to the policy; it requires each public one-liner to be the private card's summary — D-PP-s — asserts 4 · 22 · 83, and fails on a surviving old number, HQ, Terms or Ask HQ). A fresh clone has no delivery: `--without-delivery` runs only the numbers and surviving-string checks, and its verdict says PARTIAL.
 - [ ] No unfilled `[placeholder]` token reaches the DOM.
 
 ### Secrets
@@ -130,10 +131,10 @@ Open the PR's Vercel Preview URL and test **the deployed build**, not your local
 
 Walk the four roles — **anonymous · pending partner · approved partner · HQ admin** — against the surfaces the change could reach:
 
-- [ ] Public shell: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/about`, `/contact`, `/focus-areas`, `/apply`, legal, auth pages.
+- [ ] Public shell: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/about`, `/contact`, `/focus-areas`, `/apply`, `/privacy`, auth pages. `/terms` shows the site's own 404.
 - [ ] Gated platform: `/dashboard`, the four toolkit sections `/setup` · `/operate` · `/program` · `/support`, the guide reader at `/{section}/{topic}/guide`, and `/account`.
 - [ ] HQ: `/admin/approvals` and `/admin/content` (`pages`, `focus-areas`, `files`, `admins`).
-- [ ] 🔴 A **pending** session resolves only its own profile/approval status — never a guide body, a topic summary or a template row — and the global search index is empty for pending and anonymous callers.
+- [ ] 🔴 A **pending** session resolves only its own profile/approval status — never a guide body, a topic summary, an Overview or a template row — and the global search index is empty for pending and anonymous callers.
 - [ ] 🔴 `/account` is the **one** deliberate session-only exception (no approval check), and exposes nothing but the caller's own `profiles` row. Any *other* gated route missing an approval check is a defect.
 - [ ] 🔴 `/admin/*` verifies the `admins` table server-side; `is_approved` alone is not admin. Each admin page gates **itself** before producing JSX.
 - [ ] 🔴 Template downloads are server-issued signed URLs to approved users only; the two public booklet PDFs are the only public files.
@@ -149,12 +150,12 @@ Walk the four roles — **anonymous · pending partner · approved partner · HQ
 
 - [ ] Up-SQL, matching `.down.sql` and RLS policies are all in the PR, applied and tested on the **non-production** Supabase project first — the protocol is [`WORKFLOW.md`](./WORKFLOW.md) §14, and it is applied by hand in the Supabase SQL Editor.
 - [ ] Preview was tested against the non-production project, not production. Production is on migration **`0034`** ([`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §1) and is **read-only from here** — never write to it through any channel, including the MCP ([`SUPABASE-MCP-SAFETY.md`](./SUPABASE-MCP-SAFETY.md)).
-- [ ] A Vercel rollback restores code, not the database — confirm the change is backwards-compatible or that the `.down.sql` is rehearsed ([`WORKFLOW.md`](./WORKFLOW.md) §13, [`ROLLBACK.md`](./ROLLBACK.md), and for undoing the `0030` content cutover specifically, [`ROLLBACK-RUNBOOK.md`](./ROLLBACK-RUNBOOK.md)).
+- [ ] A Vercel rollback restores code, not the database — confirm the change is backwards-compatible or that the `.down.sql` is rehearsed ([`WORKFLOW.md`](./WORKFLOW.md) §13, [`ROLLBACK.md`](./ROLLBACK.md), for undoing the `0030` content cutover specifically, [`ROLLBACK-RUNBOOK.md`](./ROLLBACK-RUNBOOK.md), and for the CR1 content release, the Rollback section of [`CR1-RELEASE-RUNBOOK.md`](./CR1-RELEASE-RUNBOOK.md)).
 
 ### Primary conversion flow
 
 - [ ] Walk **Apply** end to end on the Preview: public page → `/apply` → submit → pending account created → lands on the `/dashboard` pending state. It is the site's single public conversion and its only account-creation door.
-- [ ] The header's Apply CTA behaves per session state (Apply when logged out, My Dashboard when signed in).
+- [ ] The header's Apply CTA behaves per session state (Apply to Join when logged out, My Dashboard when signed in).
 - [ ] Any integration that has no Preview env vars shows its honest unavailable state — never a fake success.
 
 ### Links and images

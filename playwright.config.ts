@@ -43,7 +43,7 @@ if (!baseURL) {
    it. Now: against a production host the config EXPORTS ONLY the two
    read-only morning projects, so the write journeys are not merely refused —
    they do not exist to be run. Provable: `--list` against a production URL
-   returns 34, never 136. */
+   returns only the two morning projects, never the journeys. */
 const PRODUCTION_HOSTS = [
   "palestine-house-website.vercel.app",
   "www.palestine-house.com",

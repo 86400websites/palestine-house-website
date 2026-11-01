@@ -414,6 +414,14 @@ img.phx-brand-mark {
   font-size: clamp(2.05rem, 1.6vw + 1.3rem, 2.9rem);
   line-height: var(--leading-tight);
 }
+/* CR1's longer Experience heading ran across the oud player's face. A narrower
+   measure keeps it to the left of the face; only this photo needs that. */
+@container page (min-width: 861px) {
+  .v3-page-hero:has(img[src*="ph-photo-experience"]) h1 {
+    max-width: 9.5em;
+    text-wrap: wrap;
+  }
+}
 .v3-page-hero-support {
   font: var(--weight-regular) var(--text-xs) / 1.4 var(--font-body);
   color: rgba(255, 255, 255, 0.85);
@@ -617,6 +625,12 @@ img.phx-brand-mark {
   font-size: var(--text-xl);
   line-height: 1;
   color: var(--copper-300);
+}
+@container page (min-width: 861px) {
+  /* CR1: one title now wraps; the card text stays level across the row. */
+  .v3-stage-panel h3 {
+    min-height: 2lh;
+  }
 }
 .v3-stage-panel h3 {
   font-size: var(--text-xl);

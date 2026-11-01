@@ -26,7 +26,7 @@ Read, don't restate — cite file + section in every finding:
 
 ## The surfaces (real routes only — `src/app/`)
 
-- **Public shell:** `/` `/model` `/experience` `/bring-ph` `/our-support` `/focus-areas` `/about` `/contact` `/apply` `/privacy` `/terms`, plus `/login` `/forgot-password` `/update-password`.
+- **Public shell:** `/` `/model` `/experience` `/bring-ph` `/our-support` `/focus-areas` `/about` `/contact` `/apply` `/privacy`, plus `/login` `/forgot-password` `/update-password`.
 - **Gated platform** (`profiles.is_approved`): `/dashboard`, the four toolkit sections `/setup` `/operate` `/program` `/support`, the guide reader `/{section}/{topic}/guide`, `/account`. Global Ctrl/⌘+K search.
 - **HQ admin** (server-checked `admins` table): `/admin` `/admin/approvals` `/admin/content` + `pages` `focus-areas` `files` `admins`.
 - **Retired routes** 307 to `/dashboard` — and so do the children of `/live` `/elements` `/resources` `/academy`, those four only (`next.config.ts`). **Probe the children, not just the parents.**
@@ -52,7 +52,7 @@ The owner works from a fresh clone per sprint and a fresh clone has no `.env.loc
 **B. Form / flow test — Preview only**
 - Confirm you are on a Preview URL first: Preview points at the **non-production** database. Test data only.
 - Verify honest outcomes — real success or the honest unavailable state, never a fake success.
-- ⚠️ A Preview `/contact` or Ask HQ submit **sends a real email**. Mark submissions unmistakably as tests, keep them few, tell the owner they are coming.
+- ⚠️ A Preview `/contact` submit **sends a real email**. Mark submissions unmistakably as tests, keep them few, tell the owner they are coming.
 - Rate limiting and Turnstile are **not shipped yet** (D-SYS-9, sprint SYS1.5): do not test for a `429` or a challenge, do not loop or hammer `/apply` or `/contact`, and never record those controls as verified.
 
 **C. Bug reproduction** — reproduce in-browser **before** any fix, capture the failing state (screenshot + console/network), report steps and evidence. The fix belongs to the sprint loop.

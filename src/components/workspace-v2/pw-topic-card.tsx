@@ -5,7 +5,11 @@ import { useState } from "react";
 import { ArrowLeft, ArrowRight, ChevronDown, ImageOff, PlayCircle } from "lucide-react";
 import { usePwToast } from "@/components/workspace-v2/pw-toast";
 import { PwStartCard } from "@/components/workspace-v2/pw-start-card";
-import { PwTemplateGrid } from "@/components/workspace-v2/pw-template-grid";
+import {
+  PwOverviewFile,
+  PwSharedTemplates,
+  PwTemplateGrid,
+} from "@/components/workspace-v2/pw-template-grid";
 import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
 
 /* One focus-area card inside a toolkit group (PP3).
@@ -15,13 +19,20 @@ import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
    the explorer above — only one topic is open at a time, matching the mockup —
    so this component stays presentational apart from its own toast.
 
-   D-PP-f: the summary is the topic's own description + intro. There is no
-   Overview card, no checklist card, no watch-out card and no extras block.
+   D-PP-f: the summary is the topic's own description + intro, and the Simple Guide
+   is the one card. CR1 adds the Overview document as a download, and no card, no
+   checklist card, no watch-out card and no extras block.
 
    Ids are the deep-link contract: `topic-<slug>` is what /setup#topic-<slug>
    resolves to, and `explore-<slug>` is what focus returns to on Back. */
 
 const VIDEO_SOON = "Video coming soon.";
+
+/* Private copy section 8, "Resource introduction". */
+const RESOURCE_INTRO = [
+  "Use this resource in the way that helps your House. Read the overview, open the simple guide and choose a relevant template. You do not need to complete every document or submit it to the community.",
+  "Working documents remain with your local team unless you choose an appropriate, permission-based way to share them. Local legal, safety, employment, financial and contractual obligations still apply.",
+] as const;
 
 /* The photo is decorative — the h3 beside it carries the meaning — so it is
    aria-hidden with an empty alt. */
@@ -123,7 +134,7 @@ export function PwTopicCard({
                 aria-controls={introId}
                 onClick={() => setMoreOpen((v) => !v)}
               >
-                {moreOpen ? "See less" : "See more"}
+                {moreOpen ? "Show less" : "Read more"}
                 <ChevronDown className="pw-icon" aria-hidden="true" />
               </button>
               <div
@@ -162,9 +173,11 @@ export function PwTopicCard({
               )}
             </button>
 
-            {/* youtube_url is NULL on every topic until PP6's CMS adds one, so
-                today this always toasts. When a URL exists it is already
-                validated http(s) at the data layer. */}
+            {/* youtube_url stays NULL until a finished video is supplied, so today
+                this is always the placeholder the handover asks for: the action
+                disabled, with a clear message. aria-disabled, not disabled, so
+                the message can still be reached by keyboard and by pointer. When
+                a URL exists it is already validated http(s) at the data layer. */}
             {topic.youtubeUrl ? (
               <a
                 className="pw-topic-video"
@@ -179,6 +192,9 @@ export function PwTopicCard({
               <button
                 type="button"
                 className="pw-topic-video"
+                aria-disabled="true"
+                aria-label={`Watch Video. ${VIDEO_SOON}`}
+                title={VIDEO_SOON}
                 onClick={() => showToast(VIDEO_SOON)}
               >
                 Watch Video
@@ -191,15 +207,25 @@ export function PwTopicCard({
 
       <div className="pw-topic-body" id={bodyId} hidden={!open}>
         <div className="pw-topic-content">
-          {/* Always rendered: every topic has a Simple guide body — PP4 4c gave
-              it a page and 4d links to it here, though PP6 has yet to attach a
-              downloadable file. */}
+          <div className="pw-resource-intro">
+            {RESOURCE_INTRO.map((line) => (
+              <p className="pw-subhead-note" key={line}>
+                {line}
+              </p>
+            ))}
+          </div>
+          {topic.overview ? <PwOverviewFile overview={topic.overview} /> : null}
+          {/* Always rendered: every topic has a Simple Guide body — PP4 4c gave
+              it a page and 4d links to it here. */}
           <PwStartCard section={section} topic={topic} />
           {topic.templates.length > 0 ? (
             <PwTemplateGrid
               topicSlug={topic.slug}
               templates={topic.templates}
             />
+          ) : null}
+          {topic.sharedTemplates.length > 0 ? (
+            <PwSharedTemplates templates={topic.sharedTemplates} />
           ) : null}
         </div>
       </div>

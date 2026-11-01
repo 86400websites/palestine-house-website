@@ -59,7 +59,7 @@ These are the real names, taken from the committed `.env.example`. **Names only 
 |---|---|---|
 | `RESEND_API_KEY` | Resend transactional email | Yes — `src/lib/resend/client.ts` |
 | `RESEND_FROM_EMAIL` | The verified sending address | Yes — `src/lib/resend/client.ts` |
-| `RESEND_TO_EMAIL` | The inbox that receives contact + support + application notices | Yes — contact route, `src/lib/auth/actions.ts`, `src/lib/support/actions.ts` |
+| `RESEND_TO_EMAIL` | The inbox that receives contact + application notices | Yes — contact route, `src/lib/auth/actions.ts` |
 | `MAILCHIMP_API_KEY` | Marketing email | Yes — `src/lib/mailchimp/client.ts` (dormant, see below) |
 | `MAILCHIMP_SERVER_PREFIX` | Region suffix on the Mailchimp key | Yes — same file |
 | `MAILCHIMP_AUDIENCE_ID` | Target audience/list | Yes — same file |

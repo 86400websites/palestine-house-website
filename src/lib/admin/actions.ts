@@ -64,12 +64,12 @@ export async function decideApplicationAction(
       const body =
         decision === "approved"
           ? {
-              subject: "You're approved — welcome to Palestine House",
-              text: `Hello ${row.name},\n\nYour application to bring a Palestine House has been approved.\n\nThe full partner platform is now open to you. Sign in with the email and password you used to apply:\n\n${SITE_URL}/login\n\nWe're glad you're here.\n\n— Palestine House HQ`,
+              subject: "Palestine House - Your community access is ready",
+              text: `Hello ${row.name},\n\nYour community access is ready.\n\nWelcome to the Palestine House community. Sign in with your existing account to explore the guides, templates and connections, and choose a next step that is useful for your House.\n\n${SITE_URL}/login\n\n— Palestine House`,
             }
           : {
               subject: "An update on your Palestine House application",
-              text: `Hello ${row.name},\n\nThank you for applying to bring a Palestine House. After careful review, we're not moving forward with your application at this time.\n\nThis isn't the end of the conversation. If you have questions or would like to tell us more, we'd like to hear from you:\n\n${SITE_URL}/contact\n\nWith respect,\nPalestine House HQ`,
+              text: `Hello ${row.name},\n\nWe cannot offer community access at the moment.\n\nYou can continue exploring the public information about Palestine House. Contact us with a question about this access decision.\n\n${SITE_URL}/contact\n\nWith respect,\nPalestine House`,
             };
       await sendEmail({ to: row.email, subject: body.subject, text: body.text });
     }
