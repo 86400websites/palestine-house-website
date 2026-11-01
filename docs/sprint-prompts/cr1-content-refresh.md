@@ -267,7 +267,32 @@ mentions PDFs; it is history, in a file this sprint does not touch.
 - Forward to the end: `upload` 127; `switch` created 29, repointed 98, 22 focus areas, 5 sections; `verify`; `retire` 12;
   `verify`; `cleanup` 110; `verify`: bucket 127, ALL CHECKS PASSED, no step retried. Elements, groups, objects, sections
   and topics are identical to the previous run's fingerprints, and resources differs only by the 29 new rows' new ids.
-  TEST stays in this state.
+- A card saved from a stale form, simulated on the released state (its title, summary and guide changed, and a link
+  added): `verify` named only that card's fields and noted the link; `switch` rewrote that one card, left the other 127
+  files alone and kept the link; `verify` passed; and with the link cleared, all six fingerprints were back exactly.
+
+**A second review, of those fixes, found more, and one was a regression of mine.** With the form no longer reset, a
+new focus area left a filled form with no id behind it, so each further Save created another: it now opens as its real
+row, and AD-003 proves it. A blank photo or focal point on Pages showed blank though the page kept its value. A Save now
+writes the guide only if it was edited, so a tab opened earlier cannot put old text back. AD-006's clean-up could not run
+after a timeout, and it trusted the screen rather than reading the row back. AC-002 could not see a leaked admin heading
+on five routes, because the real headings end in a full stop. The runbook sent the owner to the live Focus areas screen
+before step 6, where these same bugs are still live, so video links now wait until the release closes. Its step 7 named
+no partner account, so an admin could have "checked a partner's view" through a different Storage policy. All fixed. That
+review's own challengers and its completeness pass stopped at a usage limit part-way, so its findings on the tool, the
+docs and the gates were judged here rather than challenged independently.
+
+**The guards, watched failing, on a scratch build with the faults put in on purpose.**
+
+- The Files page's admin gate removed: AC-002 went red, naming the leaked heading.
+- React's fix taken out: CT-012 went red at once on the shipped-React check. Its clicks alone, 12 runs across both
+  viewports: 7 lost a click, 1 ran out of time on a slow load, 4 passed. That is what a race allows, and why the first
+  check exists. Before the review's changes to the test, the same clicks caught it in 5 of 12.
+
+**Production's rules, compared read-only.** 8 row and Storage policies, 100 columns, 37 constraints, 2 buckets, and 46
+functions with their grants equal TEST's, whitespace and comments aside. The one function that differs,
+`admin_cutover_focus_areas`, is a one-off from an earlier sprint that this release does not call. Production holds no
+video links today, and has 9 approved partner accounts and 2 approved admins.
 
 **The decisions.** D-CR1-1…6 are recorded in `PROJECT-STATUS` §5 as the engine's calls, not the owner's signature, for
 the owner to overrule. One stays with the owner because nothing here can reach it: the hosted Supabase email templates.

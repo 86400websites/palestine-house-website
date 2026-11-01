@@ -569,9 +569,10 @@ test.describe("as the approved partner", () => {
         ),
         "utf8",
       );
-      expect(shipped, "React's fix is missing: see patches/README.md").not.toContain(
-        "0 === (executionContext & 2) && prepareFreshStack(root, 0)",
-      );
+      expect(
+        shipped.includes("0 === (executionContext & 2) && prepareFreshStack(root, 0)"),
+        "React's fix is missing: see patches/README.md",
+      ).toBe(false);
 
       /* The header's tabs on a desktop; on a phone the closed menu's links exist but cannot
          be pressed, so the footer's. Half the clicks are section to guide, the route that

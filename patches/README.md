@@ -32,4 +32,7 @@ that reads `0 === (executionContext & 2) && prepareFreshStack(root, 0)`), then
 `pnpm patch-commit <folder>`, and delete the old file.
 
 **When to delete it.** At Next 16.3 or later, when that function already records the signal.
-Test CT-012 (`tests/e2e/access-allowed.spec.ts`) goes red if this is removed too early.
+Test CT-012 (`tests/e2e/access-allowed.spec.ts`) goes red if this is removed too early: it reads
+the copy of React a checkout ships for the buggy line, which is certain. Its clicks test the
+behaviour as well, and because the bug is a race they catch it only some of the time: with the
+fix taken out, 7 of 12 runs lost a click.

@@ -191,7 +191,9 @@ confirmation and changes nothing. If that run passes, carry on. On the second ru
 - Lines naming only a focus area's own fields (`N: title`, `summary`, `expanded copy`, `guide
   body`, `photograph changed`, `card order changed`, `video link changed`): do not roll back. The
   tool writes back what it reads for most of these, so someone has saved that card in the CMS
-  during the release. Stop and ask: re-running `switch` usually repairs just that card.
+  during the release. Stop and ask: re-running `switch` rewrites just that card's words and keeps
+  its link, which was seen on the non-production project. It writes back a changed photograph or
+  card order as it finds them, so those need putting right by hand.
 - Only other lines in the `FAILED` list (a file's bytes or title, counts, a wrong object): stop,
   and go to Rollback.
 

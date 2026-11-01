@@ -363,6 +363,36 @@ test("CT-007/AD-003 (J5): Draft hides a focus area everywhere; Live restores it;
     await makeItLive();
     restored = true;
     await expect.poll(countAll, { timeout: 120_000 }).toBe(22);
+
+    // AD-003 create: a new focus area opens as its real row once saved. Left in the blank
+    // form, which has no id, every further Save would create another one.
+    const NEW_TITLE = "Robot Test Focus Area";
+    const newRow = () => m.locator("tbody tr").filter({ hasText: NEW_TITLE });
+    const deleteNew = async () => {
+      await m.goto("/admin/content/focus-areas");
+      await expect(m.locator("tbody tr").first()).toBeVisible({ timeout: 30_000 });
+      if ((await newRow().count()) === 0) return;
+      await newRow().getByRole("button", { name: "Edit" }).click();
+      await m.getByRole("button", { name: "Delete…" }).click();
+      await m.locator('input[name="confirm"]').fill(NEW_TITLE);
+      await m.getByRole("button", { name: "Delete for good" }).click();
+      await expect(newRow()).toHaveCount(0, { timeout: 30_000 });
+    };
+    try {
+      await m.goto("/admin/content/focus-areas");
+      await m.getByRole("button", { name: "+ New focus area" }).click();
+      await m.locator('input[name="title"]').fill(NEW_TITLE);
+      await m.locator('input[name="code"]').fill("9.9");
+      await m.getByRole("button", { name: /^Save/ }).first().click();
+      await expect(m).toHaveURL(/[?&]id=/, { timeout: 30_000 });
+      await expect(m.getByRole("heading", { name: NEW_TITLE })).toBeVisible({ timeout: 30_000 });
+      await expect(m.getByRole("button", { name: "Saved" })).toBeDisabled();
+      await expect(newRow()).toHaveCount(1);
+    } finally {
+      // NEVER leave a robot focus area behind, for the same reason.
+      await deleteNew().catch(() => {});
+    }
+    await expect(newRow()).toHaveCount(0);
   } finally {
     // NEVER leave the store drafted — a mid-test crash once poisoned a later
     // run. Best-effort self-heal before handing the worker back.
