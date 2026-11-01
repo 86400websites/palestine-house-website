@@ -111,7 +111,7 @@ privacy placeholder.
   change; a redesign; a major Next upgrade.
 - **Database state:** no migration ships. **Production is on `0034` and still serves the previous
   release.** TEST holds the CR1 content, released and rehearsed.
-- **Preview state:** the full suite ran at `3d63c9a` against that commit's Preview, at desktop and 320px, on
+- **Preview state:** the full suite ran at `9c28bfb` against that commit's Preview, at desktop and 320px, on
   2026-11-02: 157 of 157. Only documents changed after it. The earlier red run at `a3ba14e` is explained in the
   sprint record.
 
@@ -182,18 +182,19 @@ Measured against TEST, apart from the Preview run named below. The full record i
 - **In a simulator only** (the real tool on a fake backend): an interrupted rollback, a failed retake, a
   file replaced in the CMS after `switch`, and injected download faults. The sprint record lists them.
 
-**Commands at the pushed head `3d63c9a`:** CI green; `pnpm run typecheck`, `lint` and `build` exit 0; the
+**Commands at the pushed head `9c28bfb`:** CI green; `pnpm run typecheck`, `lint` and `build` exit 0; the
 extractor exit 0; the copy checker exit 0 with 74 checks; `verify-svg-safety` exit 0; `pnpm run test:e2e` on that
 commit's Preview, with the owner's robots, **157 of 157 with no flake**, all ten journeys included. Only documents
 changed after that head. The sprint record's "Checks & results" has the full table.
 
-**The guards, watched failing, on a scratch build with the faults put in on purpose.** AC-002 went red with one admin
-page's gate removed. CT-012 went red at once with React's fix taken out, on its check of the shipped copy; its clicks
+**The guards, watched failing, on a scratch build with the faults put in on purpose.** AC-002 and AC-006 went red with
+one admin page's gate removed. CT-012 went red at once with React's fix taken out, on its check of the shipped copy; its clicks
 alone lost a click in 7 of 12 runs.
 
 **Production's rules, compared read-only with TEST's.** Policies, columns, constraints, buckets, and all 46 functions
 with their grants match, whitespace and comments aside, except `admin_cutover_focus_areas`, an earlier sprint's
-one-off that this release does not call.
+one-off that this release does not call. Its 110 private files match the 110 the rehearsal started from, by checksum and
+size.
 
 **Actual state.** TEST holds the released CR1 content, rehearsed forward and back. **Production is on
 `0034` and serves the previous 88-template release, untouched by this sprint: it was only read, through

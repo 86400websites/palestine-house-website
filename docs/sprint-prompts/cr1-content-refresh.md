@@ -69,13 +69,13 @@ production results before they happen; do not commit or push.
 
 ## Checks & results
 
-**At the pushed head `3d63c9a`, 2026-11-02.** Only documents changed after it.
+**At the pushed head `9c28bfb`, 2026-11-02.** Only documents changed after it.
 
 | Check | Result |
 |---|---|
 | CI (`Install · Typecheck · Lint · Build`, secret scan, critical audit) | Green |
-| `pnpm run test:e2e` on the Preview at that head, with the owner's robots | **157 of 157 in 27.4 minutes, no failure and no flake:** 3 setup, 56 + 56 viewport, all 10 journeys, 16 + 16 morning |
-| The same run's effect on TEST | Elements, topics, resources, groups and objects fingerprints unchanged. Sections changed, by design: a Save with a blank link box leaves the "no video" marker on Setup |
+| `pnpm run test:e2e` on the Preview at that head, with the owner's robots | **157 of 157 in 24.7 minutes, no failure and no flake:** 3 setup, 56 + 56 viewport, all 10 journeys, 16 + 16 morning. The same 157 had passed at `3d63c9a` in 27.4 minutes, before the last fix |
+| The same run's effect on TEST | Elements, topics, resources, groups and objects fingerprints unchanged, though journeys edited a guide and created a focus area and put both back. Sections changed, by design: a Save with a blank link box leaves the "no video" marker on Setup |
 | Public pages, one at a time, nothing else running | `load` in 1 to 14 seconds on a Preview nothing had touched, and 1 to 3 seconds warm |
 | `pnpm run typecheck`, `lint`, `build` | exit 0 |
 | `scripts/verify-public-copy.ts` | exit 0: 74 checks. `--without-delivery`: exit 0, 45 checks, `PARTIAL` as designed |
