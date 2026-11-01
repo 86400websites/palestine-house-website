@@ -63,12 +63,20 @@ export const RETIRED_CHILD_SAMPLES = [
 ] as const;
 
 /* Admin page-owned labels (public knowledge — they appear in CLAUDE.md).
-   Used to assert a denied response carries none of the page's own strings. */
+   Used to assert a denied response carries none of the page's own strings. Each page's
+   heading ends in a full stop, so the bare word alone never matches a leaked heading:
+   these are the words as they render. */
 export const ADMIN_MARKERS = [
   "Approvals",
+  "Approvals.",
+  "Content admin.",
+  "Pages.",
   "Focus areas",
+  "Focus areas.",
   "Files",
+  "Files.",
   "Admins",
+  "Admins.",
 ] as const;
 
 /* The two notices an unapproved account gets on /dashboard, the four section pages

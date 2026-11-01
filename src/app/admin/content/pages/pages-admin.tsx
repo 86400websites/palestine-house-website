@@ -128,8 +128,14 @@ function PageForm({ page }: { page: PageRow }) {
   const [title, setTitle] = React.useState(page.title);
   const [lead, setLead] = React.useState(page.lead ?? "");
   const panel = React.useRef<HTMLDivElement>(null);
+  const form = React.useRef<HTMLFormElement>(null);
 
   React.useEffect(() => revealWhenStacked(panel.current), []);
+
+  /* A blank photo or focal point keeps what the page has, so after a save, show what it has. */
+  React.useEffect(() => {
+    if (state.ok) form.current?.reset();
+  }, [state]);
 
   return (
     <div className="adm-detail" ref={panel}>
@@ -143,6 +149,7 @@ function PageForm({ page }: { page: PageRow }) {
       </p>
 
       <form
+        ref={form}
         action={formAction}
         onSubmit={(e) => {
           /* Not the form action's own submit: React resets a form after that, whatever

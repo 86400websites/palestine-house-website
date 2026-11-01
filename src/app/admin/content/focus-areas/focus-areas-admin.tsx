@@ -120,11 +120,24 @@ export function FocusAreasAdmin({
   const [notice, setNotice] = React.useState<AdminContentState>(INITIAL);
   const [busy, startTransition] = React.useTransition();
 
-  const select = (id: string) => {
-    router.push(`/admin/content/focus-areas?id=${id}`, { scroll: false });
-    /* Open already and scrolled past: the form will not mount again to reveal itself. */
-    revealWhenStacked(document.querySelector<HTMLElement>(".adm-detail"));
-  };
+  const select = React.useCallback(
+    (id: string) => {
+      router.push(`/admin/content/focus-areas?id=${id}`, { scroll: false });
+      /* Open already and scrolled past: the form will not mount again to reveal itself. */
+      revealWhenStacked(document.querySelector<HTMLElement>(".adm-detail"));
+    },
+    [router],
+  );
+
+  /* A new focus area opens as its real row the moment it exists. Left in this form, with
+     no id and every field still filled in, each further Save would create another one. */
+  const openCreated = React.useCallback(
+    (id: string) => {
+      setCreating(false);
+      select(id);
+    },
+    [select],
+  );
 
   /* Reorder is arrows, never a number to fat-finger. The whole ordered list of
      that group's focus areas is sent and positions are assigned from array
@@ -246,7 +259,13 @@ export function FocusAreasAdmin({
       </div>
 
       {creating ? (
-        <FocusAreaForm key="new" groups={groups} topic={null} guide={null} />
+        <FocusAreaForm
+          key="new"
+          groups={groups}
+          topic={null}
+          guide={null}
+          onCreated={openCreated}
+        />
       ) : selected ? (
         <FocusAreaForm
           key={selected.id}
@@ -267,10 +286,12 @@ function FocusAreaForm({
   groups,
   topic,
   guide,
+  onCreated,
 }: {
   groups: GroupRow[];
   topic: TopicRow | null;
   guide: GuideBody | null;
+  onCreated?: (id: string) => void;
 }) {
   /* No useRouter here: the two children below refresh themselves. Passing an
      inline `onDone={() => router.refresh()}` from this component is what caused
@@ -315,8 +336,10 @@ function FocusAreaForm({
   const panel = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (state.ok) setDirty(false);
-  }, [state]);
+    if (!state.ok) return;
+    setDirty(false);
+    if (state.id && onCreated) onCreated(state.id);
+  }, [state, onCreated]);
 
   React.useEffect(() => revealWhenStacked(panel.current), []);
 
@@ -348,6 +371,12 @@ function FocusAreaForm({
              wrote the wrong photograph. */
           e.preventDefault();
           const data = new FormData(e.currentTarget);
+          /* The guide is written only if it was edited. A Save that only adds a video
+             link, from a tab opened before someone else's edit, cannot put old text back. */
+          const box = e.currentTarget.elements.namedItem("simpleGuideMd");
+          if (box instanceof HTMLTextAreaElement && box.value === box.defaultValue) {
+            data.delete("simpleGuideMd");
+          }
           React.startTransition(() => formAction(data));
         }}
         className="adm-form"

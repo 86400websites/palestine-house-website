@@ -46,7 +46,7 @@ Walls 1–3 are standing. **Wall 4a closed on 2026-08-22**: the site had been li
 3. **Formatted** — **waived here (D‑SYS‑3)**, see the status table. Formatting stays a matter of matching the surrounding file.
 4. **It builds** — `pnpm run build` must succeed. "Works in dev" counts for nothing.
 5. **Tests pass** — `pnpm run test:e2e` (Playwright, since SYS2) against a **deployed Preview**; deliberately not part of CI's `verify`, because the suite needs a Preview URL and credentials that a PR-time job does not have. The whole-site Launch Gate is operated by `/activate-testing`; a daily read-only subset runs against production.
-6. **No known-critical vulnerabilities** — `pnpm audit` runs on every PR since **SYS1 1h**: blocking at `critical`, reporting `high`/`moderate` without blocking. Dependabot's weekly PRs remain the update channel. **The advisories are real and, until SEC1 (#103) merges, outstanding** — production runs `next@15.5.23`, with critical and high advisories patched by `next@15.5.28` (`PROJECT-STATUS.md` §7 #6).
+6. **No known-critical vulnerabilities** — `pnpm audit` runs on every PR since **SYS1 1h**: blocking at `critical`, reporting `high`/`moderate` without blocking. Dependabot's weekly PRs remain the update channel. **The advisories are real** — production ran `next@15.5.23`, with critical and high advisories, until SEC1 (#103) moved it to `next@15.5.28`. Two high remain, in the `postcss` that Next pins and runs at build time (`PROJECT-STATUS.md` §7 #6).
 7. **No secrets in history** — every PR is scanned by gitleaks over the branch's full history. This is Palestine House's own addition; it backs [`WORKFLOW.md`](./WORKFLOW.md) §15 and the env rules in [`ENV-VARS-SAFETY.md`](./ENV-VARS-SAFETY.md).
 
 **Line-level rule for the build agent:** no `any`, no `@ts-ignore`, no `eslint-disable` without a written reason. As of 2026‑08‑21 this repo satisfies it outright — `src/` contains **zero** `any` annotations, **zero** `@ts-ignore` / `@ts-expect-error` / `@ts-nocheck`, and all **11** `eslint-disable-next-line` comments are the same benign `@next/next/no-img-element`, each carrying its reason inline (ten as a trailing `--` note, one as a comment block directly above). Keep it that way: a new suppression without a reason is a review finding.
@@ -95,7 +95,7 @@ The reason it matters is mechanical, and it is a foot-gun worth stating plainly:
 - the rule still requires the **old** name, no check ever reports under it, and the merge button stays permanently locked; or
 - the rule is loosened to clear the block, and the gate is now **silently absent** — PRs merge green-looking with nothing enforcing anything.
 
-So: this repo's required check is the CI **`verify`** job, displayed as `Install · Typecheck · Lint · Build`. If the workflow is ever renamed, the GitHub branch-protection rule must be re-pointed in the same sitting, and one PR must be watched to confirm the merge button locks until the new check reports.
+So: this repo's required check is the CI **`verify`** job, displayed as `Install · Typecheck · Lint · Build` (GitHub does not list it yet: `PROJECT-STATUS.md` §7 #17). If the workflow is ever renamed, the GitHub branch-protection rule must be re-pointed in the same sitting, and one PR must be watched to confirm the merge button locks until the new check reports.
 
 ---
 

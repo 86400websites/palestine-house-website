@@ -1,4 +1,5 @@
-import { statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import {
   ADMIN_ROUTES,
@@ -557,12 +558,24 @@ test.describe("as the approved partner", () => {
     }, testInfo) => {
       /* React could drop the wake-up for a navigation whose data had already arrived, so
          the click did nothing and only a second one worked. patches/next@15.5.28.patch
-         carries React's own fix; patches/README.md has the rates and what this test can
-         promise, which is likely detection and not certain, because the bug is a race.
-         The header's tabs on a desktop; on a phone the closed menu's links exist but
-         cannot be pressed, so the footer's. Mostly the section-to-guide click, the route
-         that lost the most before the fix. */
-      test.setTimeout(240_000);
+         carries React's own fix. Two checks, because the bug is a race. Reading the copy
+         of React this checkout ships is certain, and the clicks prove the behaviour:
+         patches/README.md has what they caught with the fix taken out. */
+      test.setTimeout(480_000);
+      const shipped = readFileSync(
+        join(
+          process.cwd(),
+          "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+        ),
+        "utf8",
+      );
+      expect(shipped, "React's fix is missing: see patches/README.md").not.toContain(
+        "0 === (executionContext & 2) && prepareFreshStack(root, 0)",
+      );
+
+      /* The header's tabs on a desktop; on a phone the closed menu's links exist but cannot
+         be pressed, so the footer's. Half the clicks are section to guide, the route that
+         lost the most before the fix. */
       const tabs = testInfo.project.name.startsWith("mobile") ? "footer.pw-footer" : "header nav";
       const toGuide = [
         "/setup#topic-get-ready-to-open",
@@ -578,13 +591,34 @@ test.describe("as the approved partner", () => {
       ];
       for (let round = 0; round < 3; round += 1) {
         for (const [from, selector] of clicks) {
-          await page.goto(from);
           const link = page.locator(selector).filter({ visible: true }).first();
-          await expect(link, `${from} offers ${selector}`).toBeVisible({ timeout: 60_000 });
+          // A slow load may be tried again. The click never is.
+          await expect(async () => {
+            await page.goto(from);
+            await expect(link, `${from} offers ${selector}`).toBeVisible({ timeout: 45_000 });
+          }).toPass({ timeout: 120_000 });
+          // Hydrated, so the router takes this click: before that, the browser would simply
+          // follow the link and this would prove nothing.
+          await expect
+            .poll(
+              () =>
+                link.evaluate((a) => Object.keys(a).some((key) => key.startsWith("__reactProps$"))),
+              { timeout: 45_000 },
+            )
+            .toBe(true);
+          // A deep link's highlight ends in a React update, which would rescue a lost click.
+          await expect(page.locator(".pw-topic.is-flash")).toHaveCount(0, { timeout: 10_000 });
+          await page.evaluate(() => {
+            (window as unknown as { ct012?: boolean }).ct012 = true;
+          });
           await link.click();
           await page.waitForURL(`**${selector.match(/href="([^"]+)"/)![1]}`, {
-            timeout: 30_000,
+            timeout: 45_000,
           });
+          expect(
+            await page.evaluate(() => (window as unknown as { ct012?: boolean }).ct012),
+            `${from}: the click reloaded the page instead of using the router`,
+          ).toBe(true);
         }
       }
     });

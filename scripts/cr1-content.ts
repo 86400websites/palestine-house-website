@@ -38,7 +38,8 @@
  * upload that succeeds here proves the storage policies admit it, and production
  * demands a typed confirmation at a real terminal, per step.
  *
- * Output is counts. Ids, keys, titles and bodies stay in the private folder.
+ * Output is counts, apart from a failure line, which can name the private file at fault.
+ * Ids, keys, titles and bodies otherwise stay in the private folder.
  */
 
 import { createHash } from "node:crypto";

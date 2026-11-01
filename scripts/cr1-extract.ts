@@ -25,7 +25,8 @@
  *  - each stored guide body has the same words in the same order as its document,
  *    apart from the cover block, once rendered.
  *
- * Printed output is counts only. Titles, bodies and keys stay in the private file.
+ * Printed output is counts, apart from a failure line, which can quote what failed.
+ * Titles, bodies and keys otherwise stay in the private file.
  */
 
 import { createHash } from "node:crypto";

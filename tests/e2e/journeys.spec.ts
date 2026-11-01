@@ -659,7 +659,7 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
   browser,
   baseURL,
 }) => {
-  test.setTimeout(240_000);
+  test.setTimeout(360_000);
   /* The owner adds finished videos without a sprint, so this is the promise: paste a
      link, save, and the partner's button works; clear it, and the placeholder is back.
      Both kinds of placement: the four on /dashboard (Pages screen) and the 22 on the
@@ -667,6 +667,9 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
   const LINK = "https://www.youtube.com/watch?v=aaaaaaaaaaa";
   const admin = await roleContext(browser, baseURL!, "admin");
   const m = await admin.newPage();
+  // Every step is bounded, so a stuck one fails here while the page is still alive for the
+  // clean-up below. A test that times out closes the browser before its finally can work.
+  m.setDefaultTimeout(60_000);
   const approved = await roleContext(browser, baseURL!, "approved");
   const p = await approved.newPage();
 
@@ -698,7 +701,11 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     await field.fill(value);
     await pressSave();
   };
-  let cardLinkTried = false;
+  const guideText = m.locator('textarea[name="simpleGuideMd"]');
+  const saved = () => expect(m.getByText("Saved.").first()).toBeVisible({ timeout: 30_000 });
+  // Set just before the first Save on the card: that Save is meant to be refused, and if a
+  // bug lets it through, the link and the edited guide are what the clean-up must put back.
+  let guideBefore: string | null = null;
   const dashboardVideos = () => p.getByRole("link", { name: "Watch Video" });
   const cardVideos = () =>
     p.locator("#topic-get-ready-to-open").getByRole("link", { name: "Watch Video" });
@@ -723,33 +730,43 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     // A refusal loses nothing, and writes nothing: what was typed stays for correcting, and
     // the photo does not drop to the select's first option, which a second Save would write.
     const field = await editFocusArea();
-    const guideText = m.locator('textarea[name="simpleGuideMd"]');
     const photo = m.locator('select[name="imagePath"]');
     const photoBefore = await photo.inputValue();
     expect(photoBefore, "this card needs a photo to lose").not.toBe("");
-    const edited = `${await guideText.inputValue()}\nNever saved: this Save is refused.`;
+    const guideNow = await guideText.inputValue();
+    const edited = `${guideNow}\nNever saved: this Save is refused.`;
     await guideText.fill(edited);
     await field.fill("https://example.com/a-video");
+    guideBefore = guideNow;
     await pressSave();
     await expect(m.getByText(/doesn’t look like a YouTube link/)).toBeVisible({ timeout: 30_000 });
     await expect(field).toHaveValue("https://example.com/a-video");
     await expect(guideText).toHaveValue(edited);
     await expect(photo).toHaveValue(photoBefore);
+    // And the store says so, read back from the server.
+    await expect(await editFocusArea()).toHaveValue("");
+    await expect(guideText).toHaveValue(guideNow);
 
     // A focus-area card, the same way.
-    cardLinkTried = true;
     await saveFocusArea(LINK);
-    await expect(m.getByText("Saved.").first()).toBeVisible({ timeout: 30_000 });
+    await saved();
     await p.goto("/setup");
     await expect(cardVideos()).toHaveAttribute("href", LINK, { timeout: 60_000 });
     await expect(p.getByRole("link", { name: "Watch Video" })).toHaveCount(1);
   } finally {
-    // NEVER leave a link behind: CT-009 expects all 26 back on the placeholder.
-    await savePage("").catch(() => {});
-    await expect(m.getByText("Saved.")).toBeVisible({ timeout: 30_000 }).catch(() => {});
-    if (cardLinkTried) {
-      await saveFocusArea("").catch(() => {});
-      await expect(m.getByText("Saved.").first()).toBeVisible({ timeout: 30_000 }).catch(() => {});
+    // NEVER leave a link behind: CT-009 expects all 26 back on the placeholder. Each wait
+    // for "Saved." follows a press that worked, so a Save with nothing to do costs no more.
+    await savePage("").then(saved).catch(() => {});
+    if (guideBefore !== null) {
+      const original = guideBefore;
+      await editFocusArea()
+        .then(async (field) => {
+          if ((await guideText.inputValue()) !== original) await guideText.fill(original);
+          await field.fill("");
+          await pressSave();
+          await saved();
+        })
+        .catch(() => {});
     }
   }
 

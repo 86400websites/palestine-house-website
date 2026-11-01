@@ -10,7 +10,7 @@ nothing: the page's data and code all arrive, but the page and the URL never cha
 second click works. An admin form can also sit on "Deleting…" or "Uploading…" after the server
 has finished. Measured on production builds of `main`'s code against the test project: 12 clicks
 lost in 100 across five routes, and up to 7 in 20 on the worst of them, from a section's Read Now
-to its guide. Nothing was measured on the live site itself, though it runs the same code.
+to its guide. Nothing was measured on the live site itself.
 
 **Why.** Next.js vendors its own copy of React. In that copy, `pingSuspendedRoot` ignores a
 "your data has arrived" signal that fires during a render which has already decided to suspend

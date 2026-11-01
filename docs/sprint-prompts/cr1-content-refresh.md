@@ -124,7 +124,7 @@ EXACTLY. Three later runs are under "After the first report", the last of them w
 
 | Rolled back from | Result |
 |---|---|
-| The released state, three times (`retire` and `cleanup` had run), the last with the final tool | The first time, `rollback` refused because the old objects were gone. `restore-objects` 110; `rollback` removed 29, repointed 98, restored 63 metadata changes, 22 focus areas, 5 sections; the retired rows' SQL restored 12; `remove-new-objects` 127 |
+| The released state, three times (`retire` and `cleanup` had run) | The first time, `rollback` refused because the old objects were gone. `restore-objects` 110; `rollback` removed 29, repointed 98, restored 63 metadata changes, 22 focus areas, 5 sections; the retired rows' SQL restored 12; `remove-new-objects` 127 |
 | Straight after `switch`, where a failed step 5 leads, with the 12 `OLD-` rows still present | `rollback` removed 29, repointed 98, restored 75 metadata changes, 22 focus areas, 5 sections; 0 rows left to restore; the SQL changed nothing; `remove-new-objects` 127 |
 
 **Forward again, on the tool as it then stood.** `upload` 127; `switch` created 29, repointed 98, 22 focus areas
@@ -166,7 +166,7 @@ sanitizer, and its header says so.
 
 **The CMS in a real browser.** Journey AD-004, three times, in its first version: a refused type, size, PNG
 code and script, then a PDF, a real PNG and a clean SVG uploaded, each downloaded by a partner under the name
-it was uploaded with, and all removed again. A PDF has been refused since §7 #15, so the test now uploads a
+it was uploaded with, and all removed again. A PDF has been refused since D-CR1-5, so the test now uploads a
 Word file there and asserts the refusal; its result is under "After the first report".
 
 **A real browser, local production build against TEST, as a real approved partner.** 140 downloads (127
@@ -253,8 +253,9 @@ no leak. These were real:
 - *GitHub.* `main` lists no required status check (`PROJECT-STATUS` §7 #17). It is a repo-wide setting, so it is logged
   for the owner and not changed here.
 
-Checked and left alone: all 22 summaries fit the form's limit (the longest is 929 of 1,000 characters), so every card
-can be saved. A comment in `next.config.ts` still mentions PDFs; it is history, in a file this sprint does not touch.
+Checked and left alone: every card's stored text fits the form's limits (expanded copy 929 of 1,000 characters, summary
+100 of 500, title 46 of 200, guide 5,736 of 100,000), so every card can be saved. A comment in `next.config.ts` still
+mentions PDFs; it is history, in a file this sprint does not touch.
 
 **Rehearsed again, with the final tool on the final packages.**
 

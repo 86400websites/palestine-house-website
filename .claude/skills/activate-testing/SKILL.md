@@ -68,7 +68,7 @@ Scan the **actual codebase end to end** — code is the source of truth; docs ma
 
 - Propose the 5–7 most critical **safe-to-repeat** specs (public pages render clean, login with the dedicated test account, approved partner allowed / anonymous denied). Nothing that writes: no signups, no applications, no emails. Tag approved specs `@morning`.
 - Enable `.github/workflows/morning-check.yml` from `docs/testing-setup/templates/MORNING-CHECK-TEMPLATE.md` — daily cron against the production URL, notify on failure only. **This is the only run that touches Production, and it is read-only plus a test-account login; every other run in this skill targets Preview.** Confirm with the owner that the failure-notification address is verified. He may defer this phase entirely — its production-login question is his decision.
-- ⚠️ Adding that workflow must not touch `.github/workflows/ci.yml`. Its job — id `verify`, **display name `Install · Typecheck · Lint · Build`, which is the string branch protection requires** — must never be renamed (`docs/TECHNICAL-INTEGRITY.md`).
+- ⚠️ Adding that workflow must not touch `.github/workflows/ci.yml`. Its job — id `verify`, **display name `Install · Typecheck · Lint · Build`, which is the string branch protection is meant to require (`PROJECT-STATUS.md` §7 #17)** — must never be renamed (`docs/TECHNICAL-INTEGRITY.md`).
 
 ## Later re-runs
 

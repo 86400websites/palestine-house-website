@@ -105,9 +105,11 @@ test("AC-002: anonymous — every /admin route denies with no admin strings in t
          leak is the marker as rendered element text or an exact flight
          children string. */
       for (const marker of ADMIN_MARKERS) {
+        // A flight payload is escaped inside the HTML and raw on an RSC request.
         const rendered =
           body.includes(`>${marker}<`) ||
-          body.includes(`\\"children\\":\\"${marker}\\"`);
+          body.includes(`\\"children\\":\\"${marker}\\"`) ||
+          body.includes(`"children":"${marker}"`);
         expect(
           rendered,
           `admin string "${marker}" rendered in anonymous ${path}`,

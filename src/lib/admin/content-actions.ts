@@ -38,7 +38,7 @@ const UUID_RE =
    globals.css, where the guards for docs/ and supabase/ live.) */
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/i;
 
-export type AdminContentState = { ok: boolean; message: string | null };
+export type AdminContentState = { ok: boolean; message: string | null; id?: string };
 
 const GENERIC = "Something went wrong. Please try again.";
 const EXPIRED = "Your session expired — sign in again.";
@@ -314,7 +314,7 @@ export async function saveFocusAreaAction(
   const guard = await adminGuard();
   if (!guard.ok) return { ok: false, message: guard.message };
 
-  const { error } = await guard.supabase.rpc("admin_upsert_platform_topic", {
+  const { data: savedId, error } = await guard.supabase.rpc("admin_upsert_platform_topic", {
     p_id: d.id ?? null,
     p_group_id: d.groupId,
     p_slug: slug ?? null,
@@ -346,7 +346,8 @@ export async function saveFocusAreaAction(
   if (error) return { ok: false, message: focusAreaMessage(error.message) };
 
   revalidatePlatform();
-  return { ok: true, message: "Saved." };
+  /* The id lets a brand-new row open for editing as itself: see FocusAreasAdmin. */
+  return { ok: true, message: "Saved.", id: typeof savedId === "string" ? savedId : undefined };
 }
 
 const publishSchema = z.object({

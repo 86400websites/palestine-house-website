@@ -47,14 +47,22 @@ CR1 replaced was replaced again, it names it and lets you stop and download it f
 the rollback will leave that file attached to nothing. And any words edited after step 2 go
 back to their step 2 version on a rollback, without a message.
 
-Video links are the one thing that can go in during the hold, but it is simplest to wait:
+**Video links: wait until the release closes,** then add any of the 26 with no code change.
+Production holds none today, so nothing is lost by waiting.
 
-- **Before step 2:** the 22 focus-area links, if you want them in now. The 4 `/dashboard`
-  links cannot go in yet, because the live Pages screen has no video field until step 6.
-- **Between steps 2 and 4:** don't. `switch` refuses until the snapshot is retaken.
-- **From step 4 until the release closes:** a new link stops nothing, and `verify` only notes
-  it, but a rollback takes it off again.
-- **After the release closes:** any of the 26, with no code change.
+- **Before step 6: don't.** The live Focus areas screen stays the old one until #104 deploys, and
+  a refused link there can blank that card's photo on the next Save. Nothing later would catch
+  that, because the snapshot would record the blank as the original. The 4 `/dashboard` links have
+  no field yet at all, and a link added between steps 2 and 4 makes `switch` refuse.
+- **From step 6 until the release closes:** a new link stops nothing and `verify` only notes it,
+  but a rollback takes it off again. Reload the page first: a form left open from before still
+  holds the old words, and its Save would write them back.
+
+**6. An approved account that is not an admin, for step 7.** Your admin login downloads through a
+different Storage policy, so it cannot show a partner's view. If you do not have one, apply at
+`/apply` with a second address of yours and approve it at `/admin/approvals`, any time before
+step 4. Without it, the partner's download path on production rests on the rehearsal and on the
+read-only comparison under "What the rehearsal proved", and you should say so when you close.
 
 ---
 
@@ -180,14 +188,18 @@ confirmation and changes nothing. If that run passes, carry on. On the second ru
   or mixed with other lines: stop and ask, and do not roll back. Usually that is the
   connection, Storage or the credentials, and a rollback needs the same services. It can
   also be a missing file, so it does need someone to look.
-- A line reading `video link changed`, alone: do not roll back. A link the snapshot held has
-  been changed or removed. If you or another admin did that, put the old link back in the CMS,
-  run this again, and make the change after the release closes. If nobody did, stop and ask.
-- Only other lines in the `FAILED` list (bytes, titles, counts, a wrong object): stop, and go
-  to Rollback.
+- Lines naming only a focus area's own fields (`N: title`, `summary`, `expanded copy`, `guide
+  body`, `photograph changed`, `card order changed`, `video link changed`): do not roll back. The
+  tool writes back what it reads for most of these, so someone has saved that card in the CMS
+  during the release. Stop and ask: re-running `switch` usually repairs just that card.
+- Only other lines in the `FAILED` list (a file's bytes or title, counts, a wrong object): stop,
+  and go to Rollback.
 
 A `note:` line is not a failure. `video link added since the snapshot` means a finished video
 went in through the CMS, which is fine.
+
+**Failure lines can name private files.** Paste them only into this private session with Claude,
+never into a pull request or a tracked document. The repository is public.
 
 ### 6. Merge the PR
 
@@ -196,7 +208,7 @@ build fails or never reaches Ready, do not go on to step 7: stop and ask.
 
 ### 7. Smoke, as a partner
 
-Signed in on the live site, desktop and phone:
+Signed in on the live site as the approved non-admin account (item 6 above), desktop and phone:
 
 - `/dashboard` says "Practical resources for your own Palestine House."
 - `/setup`: open Get Legally Ready. Overview, Simple Guide card, Templates (the logo, plus
@@ -205,8 +217,7 @@ Signed in on the live site, desktop and phone:
 - Read Now on any guide. Press Ctrl+K and search "Master Opening": one template result.
 - `/support#community-contacts` lands on the contact block; its button opens `/contact`.
 - `/terms` shows the site's 404. `/privacy` shows the new policy.
-- Watch Video is greyed out on any card with no link yet, and pressing it says "Video coming
-  soon." A card you gave a link before step 2 opens that video.
+- Watch Video is greyed out on every card, and pressing it says "Video coming soon."
 - Every menu link answers the first click.
 
 Anything wrong here: stop before step 8 and ask. Steps 8 to 12 check the database and Storage
@@ -316,7 +327,9 @@ pnpm exec tsx scripts/cr1-content.ts --step remove-new-objects --target prod
 
 Every step can be repeated if it stops part-way. To go forward again after a rollback,
 start from step 3, and if you promoted an older deployment on Vercel, promote the CR1 one
-again at step 6.
+again at step 6. If you reverted #104's merge, promoting is not enough, because `main` no longer
+holds the code: at step 6, revert that revert through a PR and wait for its Production deployment
+to reach Ready.
 
 ---
 
@@ -342,17 +355,24 @@ record, [`sprint-prompts/cr1-content-refresh.md`](./sprint-prompts/cr1-content-r
   read-only fingerprints of the rows, focus areas, guide bodies, sections, groups and Storage
   objects all equalled the pre-CR1 baseline. From straight after `switch`, where the restore and
   the SQL have nothing to do, all six matched on an earlier tool, and the four compared matched
-  again with the rollback code as it is now. Two small things "exact" leaves out: on production
-  the 12 restored rows take today's date as `created_at`, which nothing reads, and a section
-  link taken off stores a "no video" marker where there was nothing, which every reader,
-  `verify-rollback` included, treats as no link.
+  again with the rollback code as it is now. "Exact" leaves out bookkeeping: rows' `updated_at`
+  and restored objects' dates are new. On production the 12 restored rows also take today's date
+  as `created_at`, which nothing reads. And a section saved with a blank link box holds a "no
+  video" marker where there was nothing, which every reader, `verify-rollback` included, treats
+  as no link.
 - **The fingerprints earned their place.** One rollback wrote that marker onto all five
   sections, `verify-rollback` said it matched, and only the fingerprints caught it. It was fixed
   before the run above.
-- **Video links are left alone.** With a link already on a focus area and on a section, `switch`
-  kept both, `verify` passed, and a rollback put both back exactly. A link added after the
-  snapshot came off on rollback, on those rows only. `verify` notes such a link and passes, and
-  it fails when a link the snapshot held has gone: both seen on the non-production project.
+- **Video links are left alone.** On an earlier version of the tool, with a link already on a
+  focus area and on a section, `switch` kept both, `verify` passed, and a rollback put both back
+  exactly. A link added after the snapshot came off on rollback, on those rows only. With this
+  version, `verify` notes such a link and passes, and it fails when a link the snapshot held has
+  gone: both seen on the non-production project.
+- **Production's rules match, read-only, on 2026-11-01.** Its 8 row and Storage policies, 100
+  columns, 37 constraints, 2 buckets, and 46 functions with their grants equal the non-production
+  project's, whitespace and comments aside. One function differs, `admin_cutover_focus_areas`, a
+  one-off from an earlier sprint that nothing here calls. Ask Claude to repeat this before step 2
+  if time has passed.
 - **The refusals work.** No target, a misspelled target, missing credentials, a rollback before
   the old objects are restored, a `switch` or `snapshot` after someone edited content, and a
   `switch`, `snapshot` or `rollback` with a file added in the CMS were all refused, and the
@@ -364,8 +384,9 @@ failed retake of the snapshot, a file replaced in the CMS after step 4, and the 
 for a `429`, a `404`, a stalled download and a deleted object.
 
 **What it could not prove, because it has not happened.** This has never run on production.
-The production path differs in three ways: the credentials, the typed confirmation, and the
-download proof, which the approved admin carries there rather than a plain partner, because
+The production path differs in four ways: the credentials, the typed confirmation, the rollback
+SQL's `created_at` noted above, and the download proof, which the approved admin carries there
+rather than a plain partner, because
 production has no disposable accounts, and the tool ignores any test-account names it finds. So
 on production `verify` prints `as the approved admin` and `denied checks: anonymous`; step 7 is
 where a real partner's view gets checked.
