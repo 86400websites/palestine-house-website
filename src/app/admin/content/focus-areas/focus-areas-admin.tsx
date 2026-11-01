@@ -332,7 +332,12 @@ function FocusAreaForm({
   /* Rule 7: Save stays off until something actually changes, so an accidental
      click cannot rewrite a row with what it already said. */
   const [dirty, setDirty] = React.useState(false);
-  const touch = () => setDirty(true);
+  const edits = React.useRef(0);
+  const editsSent = React.useRef(0);
+  const touch = () => {
+    edits.current += 1;
+    setDirty(true);
+  };
   const panel = React.useRef<HTMLDivElement>(null);
   /* The guide is written only if it was edited here, so a Save that only adds a video
      link, from a tab opened before someone else's edit, cannot put old text back.
@@ -342,8 +347,12 @@ function FocusAreaForm({
 
   React.useEffect(() => {
     if (!state.ok) return;
-    setDirty(false);
-    guideEdited.current = false;
+    /* The fields stay editable while a Save is under way. Anything typed since it was
+       sent is not stored yet, so Save stays on and the guide is still sent next time. */
+    if (edits.current === editsSent.current) {
+      setDirty(false);
+      guideEdited.current = false;
+    }
     if (state.id && onCreated) onCreated(state.id);
   }, [state, onCreated]);
 
@@ -378,6 +387,7 @@ function FocusAreaForm({
           e.preventDefault();
           const data = new FormData(e.currentTarget);
           if (!guideEdited.current) data.delete("simpleGuideMd");
+          editsSent.current = edits.current;
           React.startTransition(() => formAction(data));
         }}
         className="adm-form"

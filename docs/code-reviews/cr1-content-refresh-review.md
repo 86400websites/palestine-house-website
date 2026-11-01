@@ -298,4 +298,27 @@ exactly one verdict:
 
 # Reviewer's record
 
-*(None yet.)*
+## Round 1: Codex, 2026-11-02
+
+**Confirmed range:** `89ffe71c0904386bb7d5008c49545a4d6fd667c3..723bd44af609b35a88ef37ca54bc9e05422378c4`.
+**Scope match:** YES, 153 changed files. No migrations, and no change to `next.config.ts`, middleware or `.gitignore`.
+
+**Finding (Medium, Should-fix, high confidence from source tracing):** a successful save could discard tracking of newer
+guide edits. `focus-areas-admin.tsx` cleared `guideEdited` and `dirty` on every success, though the guide stays editable
+during the request. Edit the guide while a Save is pending, and the button then reads "Saved" over text that is not stored;
+a later Save omits it, and the interface reports success.
+
+**No other serious finding** in identity mapping, replacement and re-runs, rollback states, the production boundary,
+download handling or access gates. The patch changes only the expression matching react#36134. Runbook commands, expected
+results and triage agree with the script on static inspection.
+
+**Its checks:** the copy checker `--without-delivery` passed 45, the SVG checker passed, and CI at the pinned head succeeded.
+ESLint could not run in its environment. It opened no private delivery, ran no content step and no authenticated journey,
+and treated the Preview results as recorded evidence.
+
+**Verdict: REQUEST CHANGES** — fix the CMS guide-edit save race. Reviewed by Codex on 2026-11-02.
+
+**Builder's response:** fixed by counting edits and clearing the flags only when nothing changed since the submitted
+revision. AD-006 now holds a Save's answer back, types meanwhile, and proves that text survives. That test was run against
+the old code at `9c28bfb` and went red at the step the finding predicts. One limit: on a brand-new focus area, text typed
+during its first Save is dropped when the real row opens, which shows on screen and is not reported as saved.

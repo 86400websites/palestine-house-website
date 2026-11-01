@@ -312,6 +312,10 @@ the live site until Undo Rollback (read from Vercel's documentation on 2026-11-0
 triage sent a section's words to Rollback; and #104's trackers would have arrived on `main` already out of date at step 6, so
 they now say so, and step 12 asks for the PR that flips them. A hint now says a blank intro keeps what the page has.
 
+**The independent review, 2026-11-02: REQUEST CHANGES, one Medium finding.** Text typed in the guide during a Save could be
+dropped by the next Save, while the screen said Saved. Fixed, with a test that went red on the old code. The record is in
+the review brief. No other serious finding across the rest of the range.
+
 **The guards, watched failing, on a scratch build with the faults put in on purpose.**
 
 - The Files page's admin gate removed: AC-002 went red, naming the leaked heading, and so did AC-006 for a signed-in

@@ -699,7 +699,9 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
      focus-area cards (Focus areas screen). The link is a well-formed id that is no video. */
   const LINK = "https://www.youtube.com/watch?v=aaaaaaaaaaa";
   const GUIDE_LINE = "Robot test line, saved and then taken out again.";
+  const LATE_LINE = "Robot test line typed while the Save was under way.";
   const GUIDE_PAGE = "/setup/get-ready-to-open/guide";
+  const FORM_ROUTE = "**/admin/content/focus-areas**";
   const admin = await roleContext(browser, baseURL!, "admin");
   const m = await admin.newPage();
   // Every step is bounded, so a stuck one fails here while the page is still alive for the
@@ -793,10 +795,25 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     // sent, and the partner reads it. The clean-up below puts the text back.
     await editFocusArea();
     await guideText.fill(`${guideNow}\n${GUIDE_LINE}`);
+    // The form stays editable during a Save, so hold its answer back and type meanwhile.
+    // That later text is not stored yet: Save must stay on, and the next Save must send it.
+    await m.route(FORM_ROUTE, async (route) => {
+      if (route.request().method() === "POST") {
+        await new Promise((resolve) => setTimeout(resolve, 3_000));
+      }
+      await route.continue();
+    });
     await pressSave();
+    await expect(m.getByRole("button", { name: "Saving…" })).toBeVisible();
+    await guideText.fill(`${guideNow}\n${GUIDE_LINE}\n${LATE_LINE}`);
     await saved();
+    await m.unroute(FORM_ROUTE);
+    await expect(m.getByRole("button", { name: "Save", exact: true })).toBeEnabled();
+    await pressSave();
+    await expect(m.getByRole("button", { name: "Saved", exact: true })).toBeDisabled();
     await p.goto(GUIDE_PAGE);
     await expect(p.getByText(GUIDE_LINE)).toBeVisible({ timeout: 60_000 });
+    await expect(p.getByText(LATE_LINE)).toBeVisible();
   } finally {
     // NEVER leave a link behind: CT-009 expects all 26 back on the placeholder. Each wait
     // for "Saved." follows a press that worked, so a Save with nothing to do costs no more.
