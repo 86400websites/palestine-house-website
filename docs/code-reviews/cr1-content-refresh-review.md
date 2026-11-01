@@ -111,7 +111,9 @@ privacy placeholder.
   change; a redesign; a major Next upgrade.
 - **Database state:** no migration ships. **Production is on `0034` and still serves the previous
   release.** TEST holds the CR1 content, released and rehearsed.
-- **Preview state:** **[PENDING: URL, head, what was exercised at desktop and 320px]**
+- **Preview state:** the full suite ran at `3d63c9a` against that commit's Preview, at desktop and 320px, on
+  2026-11-02: 157 of 157. Only documents changed after it. The earlier red run at `a3ba14e` is explained in the
+  sprint record.
 
 ## Standing repo facts — already decided, not new findings
 
@@ -153,8 +155,8 @@ privacy placeholder.
 
 ## Evidence
 
-Measured before commit, on the working tree, against TEST. The full record is in the sprint record's
-"Checks & results" and "Evidence". **None of this is a Preview, CI or production result.**
+Measured against TEST, apart from the Preview run named below. The full record is in the sprint record's
+"Checks & results", "Evidence" and "After the first report". **None of this is a production result.**
 
 - **Inventory.** 156 of 156 delivered files verified against their hashes after the move. 127 learner
   files (22 Overviews, 22 Simple Guides, 83 practical resources: 80 DOCX, 1 PNG, 2 SVG), 26 video scripts
@@ -180,10 +182,18 @@ Measured before commit, on the working tree, against TEST. The full record is in
 - **In a simulator only** (the real tool on a fake backend): an interrupted rollback, a failed retake, a
   file replaced in the CMS after `switch`, and injected download faults. The sprint record lists them.
 
-**Commands at the final working tree, before commit:** `pnpm run typecheck`, `lint` and `build` exit 0; the
-extractor exit 0; the copy checker exit 0 with 74 checks; `verify-svg-safety` exit 0; the read-only Playwright
-projects 108 of 108 locally, with CT-005's 2 runs left out; journeys J3, J5, J6, J7 4 of 4 locally. The sprint
-record's "Checks & results" has the full table. **[PENDING: the same at the pushed head.]**
+**Commands at the pushed head `3d63c9a`:** CI green; `pnpm run typecheck`, `lint` and `build` exit 0; the
+extractor exit 0; the copy checker exit 0 with 74 checks; `verify-svg-safety` exit 0; `pnpm run test:e2e` on that
+commit's Preview, with the owner's robots, **157 of 157 with no flake**, all ten journeys included. Only documents
+changed after that head. The sprint record's "Checks & results" has the full table.
+
+**The guards, watched failing, on a scratch build with the faults put in on purpose.** AC-002 went red with one admin
+page's gate removed. CT-012 went red at once with React's fix taken out, on its check of the shipped copy; its clicks
+alone lost a click in 7 of 12 runs.
+
+**Production's rules, compared read-only with TEST's.** Policies, columns, constraints, buckets, and all 46 functions
+with their grants match, whitespace and comments aside, except `admin_cutover_focus_areas`, an earlier sprint's
+one-off that this release does not call.
 
 **Actual state.** TEST holds the released CR1 content, rehearsed forward and back. **Production is on
 `0034` and serves the previous 88-template release, untouched by this sprint: it was only read, through
@@ -191,16 +201,15 @@ the read-only MCP.** `--target prod` has only ever reached its refusals and a dr
 
 **Known gaps, all still owed:**
 
-- **[PENDING]** CI on the pushed head and the Vercel Preview at desktop and 320px.
-- **[PENDING]** `pnpm run test:e2e` against the Preview with the owner's robots. Locally, against a
-  production build and TEST, the read-only projects ran with disposable accounts. CT-005 needs the
-  owner's robot password. J1 and J2 send real TEST-marked email to the operational inbox, so they run only
-  on the owner's Preview run. J4, J8 and J9 need the owner's robots too.
-- **[PENDING]** One permitted contact-delivery test (D-CR1-4).
+- J1 sent its marked email from the Preview and the form reported success. Whether it arrived is for the owner's
+  inbox to show (D-CR1-4), and the hosted Supabase email templates are out of reach here.
 - D-CR1-1…6 are decided as the engine's recorded calls (`PROJECT-STATUS` §5), for the owner to overrule, so
-  they are not a merge condition. Only the hosted email templates remain the owner's, because nothing here
-  can reach them.
-- **[PENDING]** Every production step in the runbook. The production path has never run.
+  they are not a merge condition.
+- `main` lists no required status check (`PROJECT-STATUS` §7 #17), which is the owner's to set.
+- Every production step in the runbook. The production path has never run.
+- Rehearsal limits: the final tool's rollback ran from the released state; from straight after `switch` it ran on the
+  same rollback code, with four stores compared. Partner downloads on production rest on the rehearsal, the read-only
+  comparison above, and the non-admin account step 7 asks for.
 
 ## Hunt list
 

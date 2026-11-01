@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Date merged** | Not merged. Built and proven locally and on TEST; commit, push, PR, Preview, independent review and the production release are all still to come. |
-| **Branch / PR** | `claude/sprint-cr1-content-refresh` / PR not opened |
+| **Date merged** | Not merged. Pushed, CI green, the full suite green on its Preview. The independent review and the production release are still to come. |
+| **Branch / PR** | `claude/sprint-cr1-content-refresh` / [#104](https://github.com/86400websites/palestine-house-website/pull/104), on top of SEC1, [#103](https://github.com/86400websites/palestine-house-website/pull/103) |
 | **Goal** | Replace the private learner content with the owner's new delivery and align the website copy with it, without rebuilding the site. |
-| **Status** | 🔵 **Ready to commit.** Not Done, and production is not updated. See "What is still owed". |
+| **Status** | 🔵 **Awaiting the independent review.** Not Done, and production is not updated. See "What is still owed". |
 
 Owner-requested on 2026-10-30, ahead of the planned next sprint (SYS1.5), with an explicit
 continuous-execution override: no sub-step gates, no commits or pushes until the owner says so.
@@ -69,8 +69,26 @@ production results before they happen; do not commit or push.
 
 ## Checks & results
 
-At the final working tree, on base `89ffe71`, before any commit, each exit code read. **None of this is a
-Preview, CI or production result; those are still owed.**
+**At the pushed head `3d63c9a`, 2026-11-02.** Only documents changed after it.
+
+| Check | Result |
+|---|---|
+| CI (`Install · Typecheck · Lint · Build`, secret scan, critical audit) | Green |
+| `pnpm run test:e2e` on the Preview at that head, with the owner's robots | **157 of 157 in 27.4 minutes, no failure and no flake:** 3 setup, 56 + 56 viewport, all 10 journeys, 16 + 16 morning |
+| The same run's effect on TEST | Elements, topics, resources, groups and objects fingerprints unchanged. Sections changed, by design: a Save with a blank link box leaves the "no video" marker on Setup |
+| Public pages, one at a time, nothing else running | `load` in 1 to 14 seconds on a Preview nothing had touched, and 1 to 3 seconds warm |
+| `pnpm run typecheck`, `lint`, `build` | exit 0 |
+| `scripts/verify-public-copy.ts` | exit 0: 74 checks. `--without-delivery`: exit 0, 45 checks, `PARTIAL` as designed |
+| `scripts/verify-svg-safety.ts`, `scripts/cr1-extract.ts` | exit 0: 58 refused, 22 pass; 22 of 22 guides word for word |
+
+**The first full run was red, at `a3ba14e`, under load:** 137 passed, 5 failed, 5 flaky, 10 did not run, with three workers
+beside a multi-agent review on a machine with little free memory. Two kinds of failure. CT-012 at 320px could not pass:
+its selector found the closed menu's link, a real test bug, now fixed. The rest were pages not firing `load` inside 60 to
+120 seconds. The clean measurement above shows no page comes close when the machine is idle, and the next run had no
+such failure, so that was this machine, not the site. Nothing was re-run to green: both were explained first.
+
+**Earlier, on the working tree of 2026-10-31, on base `89ffe71`, before any commit.** This predates CT-012, AD-006 and the
+current AD-004, and was never a Preview, CI or production result.
 
 | Check | Result |
 |---|---|
@@ -92,9 +110,9 @@ Preview, CI or production result; those are still owed.**
 
 ## Evidence
 
-Everything here was measured on the uncommitted working tree on base `89ffe71` (also `origin/main`
-at the time), against the non-production project. **Nothing here is a Preview, CI or production
-result.**
+Unless "After the first report" says otherwise, everything here was measured on the uncommitted working tree
+of 2026-10-31 on base `89ffe71` (also `origin/main` at the time), against the non-production project. **None of
+this section is a Preview, CI or production result.**
 
 **Delivery.** 156 of 156 files verified against their hash manifest after the move: 127 learner files
 (22 Overviews, 22 Simple Guides, 80 DOCX, 1 PNG, 2 SVG), 26 video scripts, 3 copy documents. Nothing
@@ -206,12 +224,14 @@ stays the owner's: the brief's boundary was not lifted, and the tool refuses an 
 **Lost clicks and stuck admin forms: root cause and fix, in SEC1 (#103), which this branch is built on.** A React
 bug, read line by line and matching the measured state. Measured on the committed code against TEST, with and without
 the fix: clicks lost 12 of 100 to 0 of 100, Files-screen changes stuck 4 of 28 to 0 of 28. Record:
-[`sec1-dependencies.md`](./sec1-dependencies.md). CT-012 now guards it.
+[`sec1-dependencies.md`](./sec1-dependencies.md). CT-012 now guards it, and was watched going red with the fix taken
+out; see below.
 
 **Videos.** The 22 focus-area links always came from the CMS. The 4 on `/dashboard` could not: their card never read
-the column, and the Pages screen had no field. Now all 26 can, with no code change, proven both ways by journey
-AD-006. The section RPC reads a blank as "keep", and it is applied, so taking a link off stores `NO_VIDEO_LINK`, which
-is not a URL and which `safeHttpUrl` turns back into nothing. No schema or RPC change.
+the column, and the Pages screen had no field. Now all 26 can, with no code change. Journey AD-006 proves one of each
+kind both ways, and it passed on the Preview. The section RPC reads a blank as "keep", and it is applied, so a Save with
+a blank link box stores `NO_VIDEO_LINK`, which is not a URL and which `safeHttpUrl` turns back into nothing. No schema or
+RPC change.
 
 **The release tool had to change with that, and a rehearsal found a bug in the change.** `switch` passed a blank link
 and `verify` failed on any link it found, so a video added in the CMS before the release would have been erased, or
@@ -304,13 +324,14 @@ What is left of #13 is listed there, with why.
 
 **The other open PRs.** #96, #101 and #102 went into SEC1 at today's versions and were closed as superseded.
 
-**Exercised locally only,** against a production build and TEST, with disposable accounts rather than
-the owner's robots: the read-only Playwright projects, and journeys J3, J5, J6 and J7.
+**Not exercised anywhere yet:** the independent review and every production step. J1 and J2 sent their marked emails
+from the Preview and the form reported success; whether they arrived is something only the owner's inbox can show, and
+the hosted Supabase email templates are out of reach here. J8 must not be run locally with a disposable admin session:
+its self-row names the owner's admin robot.
 
-**Not exercised anywhere yet:** a deployed Preview, CI on a pushed head, the independent review, journeys
-J1 and J2 (they send real TEST-marked email), J4, J8 and J9, CT-005 (it signs in with the owner's robot
-password), a real contact delivery, and every production step. J8 must not be run locally with a disposable
-admin session: its self-row names the owner's admin robot.
+**Left as it is, on purpose.** #103's own copy of `patches/README.md` still says "up to 9 clicks in 20" and "the live
+site had it too", until #104 merges and corrects it. Pushing to #103 for that would change its head and its review for
+a sentence, and #104 follows it. A comment in `next.config.ts` still mentions PDFs, in a file this sprint does not touch.
 
 ## Deviations & learnings
 
@@ -370,7 +391,8 @@ admin session: its self-row names the owner's admin robot.
 ## What is still owed
 
 1. Independent review (D-SYS-1): [`code-reviews/cr1-content-refresh-review.md`](../code-reviews/cr1-content-refresh-review.md).
-2. The owner merges SEC1 (#103), which fixes the live site on its own.
+2. The owner merges SEC1 (#103) with a merge commit, which fixes the live site on its own.
 3. The owner runs [`CR1-RELEASE-RUNBOOK.md`](../CR1-RELEASE-RUNBOOK.md) on production, which merges this PR.
-4. A look at the hosted Supabase email templates, which nothing here can reach.
-5. Trackers flipped to Done only after that.
+4. One look at the hosted Supabase email templates, and at the inbox for the marked emails from the Preview run.
+5. The required status check on `main` (`PROJECT-STATUS` §7 #17).
+6. Trackers flipped to Done only after the release closes.
