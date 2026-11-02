@@ -27,9 +27,8 @@ export type PwSharedTemplate = PwTemplate & {
   homeTitle: string;
 };
 
-/* The single doc_key='guide' file behind the Simple Guide card's download, and the
-   topic's one Overview file (CR1). The title names the file on hover, as the
-   mockup's download controls do. */
+/* The single doc_key='guide' file behind the Simple Guide card's download. The title
+   names the file on hover, as the mockup's download controls do. */
 export type PwGuideFile = {
   id: string;
   title: string;
@@ -59,9 +58,6 @@ export type PwTopic = {
   /* Validated http(s) only — see safeHttpUrl. NULL until a finished video exists;
      the card then says so rather than linking anywhere. */
   youtubeUrl: string | null;
-  /* The Overview document, as a download (CR1). Not a card: the handover needs all
-     22 reachable and the 83 practical resources kept distinct from them. */
-  overview: PwGuideFile | null;
   guide: PwGuideFile | null;
   templates: PwTemplate[];
   sharedTemplates: PwSharedTemplate[];
@@ -86,7 +82,7 @@ export type PwGroup = {
    no bucket name. A hit navigates to a page — the reader for a guide, the
    focus-area card for a topic or a template — and the download still happens
    only through the existing signed-URL server action, from the card. */
-export type PwSearchKind = "TOPIC" | "OVERVIEW" | "GUIDE" | "TEMPLATE";
+export type PwSearchKind = "TOPIC" | "GUIDE" | "TEMPLATE";
 
 export type PwSearchItem = {
   kind: PwSearchKind;

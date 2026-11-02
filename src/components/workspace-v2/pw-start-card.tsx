@@ -25,9 +25,14 @@ const GUIDE = RESOURCE_KINDS[0];
 
 const COPY = {
   subhead: "Simple Guide",
-  note: "One simple guide explains this focus area from beginning to end.",
   read: "Read Now",
 } as const;
+
+/* Private copy section 8, "Resource introduction". */
+const RESOURCE_INTRO = [
+  "Use this resource in the way that helps your House. Read the overview, open the simple guide and choose a relevant template. You do not need to complete every document or submit it to the community.",
+  "Working documents remain with your local team unless you choose an appropriate, permission-based way to share them. Local legal, safety, employment, financial and contractual obligations still apply.",
+] as const;
 
 /* The mockup's own `i-guide` symbol, inline rather than approximated with a
    lucide lookalike — it is one path, and RESOURCE_KINDS names this icon
@@ -52,7 +57,13 @@ export function PwStartCard({
       <div className="pw-subhead">
         <div>
           <h4 className="pw-subhead-title">{COPY.subhead}</h4>
-          <p className="pw-subhead-note">{COPY.note}</p>
+          <div className="pw-resource-intro">
+            {RESOURCE_INTRO.map((line) => (
+              <p className="pw-subhead-note" key={line}>
+                {line}
+              </p>
+            ))}
+          </div>
         </div>
       </div>
 

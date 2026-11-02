@@ -7,7 +7,7 @@ It is **two shells behind one gate**. The **public shell** is a calm, editorial 
 single conversion is the **Apply to Join** button. The **private shell** is an approval-gated partner
 reference platform, the UI's Community Platform: applying creates a pending account, an HQ admin
 approves it, and the partner unlocks four toolkit sections (Setup · Operate · Program · Support) with
-their focus areas, Overviews, guides and templates.
+their focus areas, guides and templates.
 It is a **reference, not a course** — no quizzes, no certificate, no daily-ops tooling, and no saved
 per-user state beyond the partner's own account details.
 

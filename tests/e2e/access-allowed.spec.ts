@@ -156,7 +156,7 @@ test.describe("as the approved partner", () => {
       expect(unique.size, `${section} focus-area count`).toBe(expected);
       total += unique.size;
       // The proof number, counted behind the gate: each focus area's pill counts
-      // its own templates, so an Overview or a shared row can never inflate this.
+      // its own templates, so a shared row or a hidden Overview can never inflate this.
       const pills = await page.$$eval(".pw-meta-pill", (els) =>
         els.map((el) => parseInt(el.textContent ?? "", 10)),
       );
@@ -193,24 +193,21 @@ test.describe("as the approved partner", () => {
     await closed.getByRole("button", { name: "Show less" }).click();
     await expect(more).toBeHidden();
 
-    // The open panel: two resource-introduction lines, then the groups, each its
-    // own distinct thing. CR1 put its new layout in here, so it has to fit at 320px.
+    // The open panel: the groups, each its own distinct thing. CR1 put its new layout
+    // in here, so it has to fit at 320px.
     expect(await hasHorizontalScroll(page), "open panel scrolls sideways").toBe(false);
-    await expect(panel.locator(".pw-resource-intro p")).toHaveCount(2);
 
-    // Overview: one download row, badged OV. A row, deliberately not a card.
-    const overview = panelGroup(panel, "Overview");
-    await expect(overview.locator(".pw-template-row")).toHaveCount(1);
-    await expect(overview.locator(".pw-template-code")).toHaveText("OV");
-    const overviewDownload = overview.getByRole("button", {
-      name: /^Download Word File: /,
-    });
-    await expect(overviewDownload).toBeVisible();
+    // The Overview documents are hidden: no group, and no row badged OV.
+    await expect(panel.locator(".pw-template-code").filter({ hasText: /^OV$/ })).toHaveCount(0);
 
     // Simple Guide: the ONE card on the panel (D-PP-f). It carries the document's
     // own title, so only its presence is asserted, and that it is not the generic
     // name the card falls back to when the guide row is missing.
     const guide = panelGroup(panel, "Simple Guide");
+    // The two resource-introduction lines sit under this group's heading.
+    await expect(guide.locator(".pw-resource-intro p")).toHaveCount(2);
+    await expect(panel.locator(".pw-resource-intro p")).toHaveCount(2);
+    await expect(guide).not.toContainText("from beginning to end");
     await expect(panel.locator(".pw-start-card")).toHaveCount(1);
     await expect(guide.locator(".pw-start-card")).toHaveCount(1);
     await expect(guide.locator(".pw-start-title")).not.toBeEmpty();
@@ -224,24 +221,19 @@ test.describe("as the approved partner", () => {
     ).toBeVisible();
     await expect(guide.locator(".pw-template-row")).toHaveCount(0);
 
-    // Templates: this focus area's own files, each labelled by what it is. The
-    // Overview is not among them, and the pill does not count the shared row.
+    // Templates: this focus area's own files, each labelled by what it is. The pill
+    // does not count the shared row.
     const templates = panelGroup(panel, "Templates");
     await expect(templates.locator(".pw-template-code")).toHaveText(["LOGO"]);
     await expect(templates.locator(".pw-template-kind")).toHaveText(["Download Logo"]);
     await expect(
       templates.getByRole("button", { name: /^Download Logo: / }),
     ).toBeVisible();
-    const overviewName = await overviewDownload.getAttribute("aria-label");
-    await expect(
-      templates.getByRole("button", { name: overviewName!, exact: true }),
-    ).toHaveCount(0);
     await expect(panelGroup(panel, SHARED_HEADING).locator(".pw-template-row")).toHaveCount(1);
     await expect(templates.locator(".pw-meta-pill")).toHaveText(/^1 file/);
 
-    // And none of the retired card types exist in this model. ("Overview" left
-    // this list at CR1: it is a group now, and still not a card.)
-    for (const retired of ["Checklist", "Watch out for"]) {
+    // And none of the retired card types exist in this model.
+    for (const retired of ["Overview", "Checklist", "Watch out for"]) {
       expect(
         await page.getByRole("heading", { name: retired }).count(),
         `retired "${retired}" card rendered`,
@@ -274,7 +266,7 @@ test.describe("as the approved partner", () => {
     }
   });
 
-  test("CT-004: a template, the guide and the Overview download through a signed URL and the bytes arrive", async ({
+  test("CT-004: a template and the guide download through a signed URL and the bytes arrive", async ({
     page,
   }) => {
     test.setTimeout(120_000);
@@ -295,14 +287,6 @@ test.describe("as the approved partner", () => {
       "the Simple Guide",
     );
     expect(guide, "the guide's file name").toMatch(/\.docx$/i);
-    const overview = await downloadVia(
-      page,
-      panelGroup(panel, "Overview").getByRole("button", {
-        name: /^Download Word File: /,
-      }),
-      "the Overview",
-    );
-    expect(overview, "the Overview's file name").toMatch(/\.docx$/i);
   });
 
   test("CT-006: Ctrl/⌘+K search finds real content and navigates", async ({
@@ -336,19 +320,21 @@ test.describe("as the approved partner", () => {
       { timeout: 30_000 },
     );
 
-    // A focus area's full title reaches all four kinds of entry. Only the kinds
-    // are asserted; the file titles beside them stay out of this repo.
+    // A focus area's full title reaches all three kinds of entry, and a hidden Overview
+    // is not one of them. Only the kinds are asserted; the file titles beside them stay out of this repo.
     await input.fill(content.gatedMarkers[0]);
     const results = dialog.locator(".pw-search-results a[href]");
     const kind = (label: string) =>
       dialog.locator(".pw-result-kind").filter({ hasText: new RegExp(`^${label}$`) });
-    for (const label of ["FOCUS AREA", "OVERVIEW", "GUIDE", "TEMPLATE"]) {
+    for (const label of ["FOCUS AREA", "GUIDE", "TEMPLATE"]) {
       await expect(kind(label).first(), `no ${label} result`).toBeVisible({
         timeout: 30_000,
       });
     }
 
-    // Four chips still; an Overview narrows under Guides, never under Templates.
+    await expect(kind("OVERVIEW")).toHaveCount(0);
+
+    // Four chips still.
     await expect(dialog.locator(".pw-filter-chip")).toHaveText([
       "All",
       "Focus Areas",
@@ -356,7 +342,6 @@ test.describe("as the approved partner", () => {
       "Templates",
     ]);
     await dialog.getByRole("button", { name: "Guides", exact: true }).click();
-    await expect(kind("OVERVIEW").first()).toBeVisible();
     await expect(kind("GUIDE").first()).toBeVisible();
     await expect(kind("TEMPLATE")).toHaveCount(0);
     await expect(kind("FOCUS AREA")).toHaveCount(0);

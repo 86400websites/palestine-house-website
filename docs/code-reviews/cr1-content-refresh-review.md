@@ -1,8 +1,7 @@
 # Codex Review Brief — CR1 — content-refresh
 
-> **Status: ready to commission.** One run covers two PRs: SEC1 (#103, dependencies and the React
-> patch) and CR1, which is built on it, so CR1's range contains both while SEC1 is unmerged. The exact
-> range is in the prompt that commissions this. The reviewer's returned record is appended here afterwards.
+> **Status: done. Round 1 requested one change, and round 2 approved at `5b38575`.** One run covered two PRs: SEC1
+> (#103, dependencies and the React patch) and CR1, which is built on it. The returned records are at the end.
 
 ## Is this review required? (D-SYS-1)
 
@@ -325,5 +324,18 @@ during its first Save is dropped when the real row opens, which shows on screen 
 
 The next full run, at `041bde5`, was red for two test reasons: the new assertion's five-second wait was too short (the
 failure snapshot shows Saving…, the screenshot a moment later shows Saved), and `openPanel` met the hidden copy a streaming
-page briefly holds. Both were corrected in tests only. At `1872ab8`: 157 of 157, no flakes. Round 2 is owed over
-`723bd44..` the final head.
+page briefly holds. Both were corrected in tests only. At `1872ab8`: 157 of 157, no flakes.
+
+## Round 2: Codex, 2026-11-02
+
+**Range:** `723bd44af609b35a88ef37ca54bc9e05422378c4..5b38575956b30d14e5d0f63a50f7d459713ef5f1`, seven files.
+
+No serious findings. The form now clears its flags only when no newer edits exist, and later guide edits stay dirty and
+reach the next Save. AD-006 exercises the race, and `openPanel` waits for the visible panel. No new regression or gating
+change identified. The first-save handoff for a new focus area remains as documented. CI passed at that head. The 157 of 157
+was taken as recorded evidence, not re-run. No edits and no env-file reads.
+
+**Verdict: APPROVE.** Reviewed by Codex on 2026-11-02.
+
+#105 came after this, at the owner's request. It is UI only, with no gate, data, schema, env or header change, so
+D-SYS-1 does not require a review of it.

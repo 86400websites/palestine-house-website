@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Date merged** | Not merged. Pushed, CI green, the full suite green on its Preview. The independent review and the production release are still to come. |
+| **Date merged** | 2026-11-02: #103, then #104 at runbook step 6, then #105. Released on production the same day. |
 | **Branch / PR** | `claude/sprint-cr1-content-refresh` / [#104](https://github.com/86400websites/palestine-house-website/pull/104), on top of SEC1, [#103](https://github.com/86400websites/palestine-house-website/pull/103) |
 | **Goal** | Replace the private learner content with the owner's new delivery and align the website copy with it, without rebuilding the site. |
-| **Status** | 🔵 **Awaiting the independent review.** Not Done, and production is not updated. See "What is still owed". *(Written before the release. If you read this on `main`, #104 has merged at runbook step 6 and the release is under way or done.)* |
+| **Status** | ✅ **Done.** Production serves the new content and copy, and verified. See "The release" at the end. |
 
 Owner-requested on 2026-10-30, ahead of the planned next sprint (SYS1.5), with an explicit
 continuous-execution override: no sub-step gates, no commits or pushes until the owner says so.
@@ -404,11 +404,28 @@ a sentence, and #104 follows it. A comment in `next.config.ts` still mentions PD
   way, because it needs a non-empty body, but a false alarm on an access test teaches people to ignore it. It
   now reads the body inside the page, and its checks are unchanged. 8 of 8 under parallel load.
 
-## What is still owed
+## The release, 2026-11-02
 
-1. Independent review (D-SYS-1): [`code-reviews/cr1-content-refresh-review.md`](../code-reviews/cr1-content-refresh-review.md).
-2. The owner merges SEC1 (#103) with a merge commit, which fixes the live site on its own.
-3. The owner runs [`CR1-RELEASE-RUNBOOK.md`](../CR1-RELEASE-RUNBOOK.md) on production, which merges this PR.
-4. One look at the hosted Supabase email templates, and at the inbox for the marked emails from the Preview run.
-5. The required status check on `main` (`PROJECT-STATUS` §7 #17).
-6. Trackers flipped to Done only after the release closes.
+Codex's round 2 approved `723bd44..5b38575`. The owner then ran it from this folder:
+
+| Step | Result on production |
+|---|---|
+| `snapshot` | 22 focus areas, 110 private rows, 5 sections; 110 objects verified on disk. Interrupted twice by Ctrl+C while it ran silently, with no harm: it only reads production, and the re-run kept what it had |
+| Backup | To `cr1-backup` beside the project, inside OneDrive, and refreshed after `cleanup`: all 392 files, including the archive of 110 |
+| `upload` | 127 uploaded and read back |
+| `switch` | Created 29, repointed 98, 22 focus areas and 5 sections rewritten |
+| `verify --phase switched` | ALL CHECKS PASSED: 127 downloads byte-checked as the approved admin, anonymous refused |
+| Read-only check, then the merge of #104 | Rows, files, guides and words matched TEST. The owner checked the live site and reported that everything works |
+| `retire` | 12 rows removed |
+| `verify --phase retired` | ALL CHECKS PASSED, bucket 237 |
+| `cleanup` | 110 superseded objects removed, bucket 127, none outside the CR1 set |
+| `verify --phase retired` | ALL CHECKS PASSED, bucket 127 |
+| Read-only check | Guides, focus-area words, section words, 127 rows and 127 objects identical to TEST's. 83 templates, 22 Overviews, 22 guides, 2 public booklets, no `OLD-` row, no row without its object, no video links |
+
+**Two departures from the runbook, both the owner's.** The 48-hour hold was skipped, so `cleanup` ran the same day; a rollback now needs `restore-objects` as well, which was rehearsed. And looking at the live panel, the owner hid the Overview downloads and moved the resource introduction under the Simple Guide heading (#105).
+
+**Not independently seen here:** the live-site check at step 7 is the owner's report, and whether it used a non-admin account was not stated, so the partner's download path on production rests on that report, the rehearsal, and the read-only match of production's rules with TEST's.
+
+**A small correction to the runbook's prediction:** a `baseline-rows.json` exists for production, so a rollback's restored rows would keep their original `created_at`, not today's date as it says.
+
+**Still the owner's, none blocking:** the required status check on `main` (`PROJECT-STATUS` §7 #17); one look at the hosted Supabase email templates and at the inbox for the marked test emails; finished video links, in the CMS whenever they are ready. Keep this folder and `cr1-backup` for now, because a rollback needs them.

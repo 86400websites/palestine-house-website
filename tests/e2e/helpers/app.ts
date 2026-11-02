@@ -150,8 +150,8 @@ export async function openPanel(
   return panel;
 }
 
-/* One named group inside a focus-area panel, open or closed: "Overview", "Simple
-   Guide", "Templates" or the shared resources. The heading is matched exactly
+/* One named group inside a focus-area panel, open or closed: "Simple Guide",
+   "Templates" or the shared resources. The heading is matched exactly
    because a Simple Guide card's own title is a heading too. */
 export function panelGroup(panel: Locator, heading: string): Locator {
   return panel.locator("section").filter({
