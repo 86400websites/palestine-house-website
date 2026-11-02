@@ -28,12 +28,6 @@ import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
 
 const VIDEO_SOON = "Video coming soon.";
 
-/* Private copy section 8, "Resource introduction". */
-const RESOURCE_INTRO = [
-  "Use this resource in the way that helps your House. Read the overview, open the simple guide and choose a relevant template. You do not need to complete every document or submit it to the community.",
-  "Working documents remain with your local team unless you choose an appropriate, permission-based way to share them. Local legal, safety, employment, financial and contractual obligations still apply.",
-] as const;
-
 /* The photo is decorative — the h3 beside it carries the meaning — so it is
    aria-hidden with an empty alt. */
 function TopicImage({ topic }: { topic: PwTopic }) {
@@ -207,13 +201,6 @@ export function PwTopicCard({
 
       <div className="pw-topic-body" id={bodyId} hidden={!open}>
         <div className="pw-topic-content">
-          <div className="pw-resource-intro">
-            {RESOURCE_INTRO.map((line) => (
-              <p className="pw-subhead-note" key={line}>
-                {line}
-              </p>
-            ))}
-          </div>
           {/* Always rendered: every topic has a Simple Guide body — PP4 4c gave
               it a page and 4d links to it here. */}
           <PwStartCard section={section} topic={topic} />

@@ -1994,12 +1994,11 @@
 
 /* --- Templates grid ------------------------------------------------------ */
 
-/* CR1: what opens a focus-area panel, above the one Simple Guide card. */
+/* CR1: how to use a focus area's resources, under the Simple Guide heading. */
 .pw-root .pw-resource-intro {
   display: grid;
   gap: 6px;
   max-width: 640px;
-  margin-bottom: 25px;
 }
 
 .pw-root .pw-templates {

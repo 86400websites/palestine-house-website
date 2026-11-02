@@ -193,10 +193,9 @@ test.describe("as the approved partner", () => {
     await closed.getByRole("button", { name: "Show less" }).click();
     await expect(more).toBeHidden();
 
-    // The open panel: two resource-introduction lines, then the groups, each its
-    // own distinct thing. CR1 put its new layout in here, so it has to fit at 320px.
+    // The open panel: the groups, each its own distinct thing. CR1 put its new layout
+    // in here, so it has to fit at 320px.
     expect(await hasHorizontalScroll(page), "open panel scrolls sideways").toBe(false);
-    await expect(panel.locator(".pw-resource-intro p")).toHaveCount(2);
 
     // The Overview documents are hidden: no group, and no row badged OV.
     await expect(panel.locator(".pw-template-code").filter({ hasText: /^OV$/ })).toHaveCount(0);
@@ -205,6 +204,10 @@ test.describe("as the approved partner", () => {
     // own title, so only its presence is asserted, and that it is not the generic
     // name the card falls back to when the guide row is missing.
     const guide = panelGroup(panel, "Simple Guide");
+    // The two resource-introduction lines sit under this group's heading.
+    await expect(guide.locator(".pw-resource-intro p")).toHaveCount(2);
+    await expect(panel.locator(".pw-resource-intro p")).toHaveCount(2);
+    await expect(guide).not.toContainText("from beginning to end");
     await expect(panel.locator(".pw-start-card")).toHaveCount(1);
     await expect(guide.locator(".pw-start-card")).toHaveCount(1);
     await expect(guide.locator(".pw-start-title")).not.toBeEmpty();
