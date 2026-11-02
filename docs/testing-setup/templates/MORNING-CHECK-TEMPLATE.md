@@ -51,9 +51,9 @@ Also legitimate. SYS2's exit gate in [`ROADMAP.md`](../../ROADMAP.md) accepts th
 
 > **On Production the browser tools are READ-ONLY** — navigate, screenshot, read headers, read console. Never submit a form, never create an account, never trigger a write, never exercise a destructive path on Production.
 
-So the morning check **navigates and reads**. It never applies, never contacts, never asks HQ, never approves, never edits content. Two Palestine House specifics make that concrete:
+So the morning check **navigates and reads**. It never applies, never contacts, never approves, never edits content. Two Palestine House specifics make that concrete:
 
-- `/contact` and the Ask HQ form on `/support` send **real email through Resend**. A robot must never submit either, on any environment it does not own.
+- `/contact` sends **real email through Resend**. A robot must never submit it, on any environment it does not own.
 - `/apply` is sign-up. A robot submission creates a real pending account in the production approvals queue. Never.
 
 The one real production submission stays a human task, by hand, per [`LAUNCH-CHECKLIST.md`](../../LAUNCH-CHECKLIST.md) Phase 3.

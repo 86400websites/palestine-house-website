@@ -8,32 +8,32 @@ import { ApplyForm } from "@/components/sections/apply-form";
 import { createClient } from "@/lib/supabase/server";
 
 /* Apply (/apply) — the single application; apply = sign-up. Copy verbatim
-   from docs/page-copy/01-public-pages/apply-partner.md; layout from
+   from the CR1 public copy, section 7; layout from
    docs/page-designs/public/Apply.app.jsx (approved mockup). An already-signed-in
    visitor is sent to their dashboard rather than the application form (their
    account already exists) — S7 fix. */
 
 export const metadata: Metadata = {
-  title: "Apply to bring a House",
+  title: { absolute: "Apply to Join - Palestine House" },
   description:
-    "The one step. Submitting this form creates your account and sends your application to HQ — there’s no separate sign-up.",
+    "Request access to the Palestine House community’s private resources and connections.",
 };
 
 const APPLY_STEPS = [
   {
     n: "01",
-    title: "You apply",
-    text: "Complete one form to create your account and send your application directly to HQ.",
+    title: "Send your application",
+    text: "Use the form below to create your account and request community access in one step.",
   },
   {
     n: "02",
-    title: "HQ reviews your application",
-    text: "While your application is being reviewed, your account will remain pending. When you sign in, you will see a simple update confirming that the review is in progress.",
+    title: "Receive an access update",
+    text: "While your community access is being arranged, your account remains pending. Sign in to see the current access update.",
   },
   {
     n: "03",
-    title: "The full platform opens",
-    text: "Once approved, you will receive access to the complete platform, including the playbook, toolkit, and Academy. There is no additional registration or second sign-up process.",
+    title: "Explore the resources",
+    text: "Once community access is confirmed, use the same account to explore the guides, templates and connections. No second registration is needed.",
   },
 ] as const;
 
@@ -67,13 +67,17 @@ export default async function ApplyPage() {
         <Reveal className="apply-hero-copy">
           <p className="ph-eyebrow">Apply</p>
           <h1 className="apply-hero-h1 v3-rule-head">
-            Bring a Palestine House to your city.
+            Apply to join the Palestine House community.
           </h1>
           <p className="apply-hero-lead">
-            Complete one application to introduce your vision, create your
-            account, and send your proposal directly to HQ. There is no separate
-            sign-up process — your application and account are created together
-            in one simple step.
+            Tell us a little about yourself, your city and your interest in
+            developing a Palestine House. Your idea can still be at an early
+            stage.
+          </p>
+          <p className="apply-hero-lead">
+            This application is for access to the community’s guides, templates
+            and connections. It is not an application for permission to open or
+            operate a local House.
           </p>
         </Reveal>
         <div className="apply-hero-photo">
@@ -91,27 +95,21 @@ export default async function ApplyPage() {
         <div className="ph-container apply-grid">
           <Reveal className="apply-context">
             <div className="apply-context-block">
-              <p className="ph-eyebrow">Who brings what</p>
+              <p className="ph-eyebrow">What you are joining</p>
               <p>
-                You bring the venue, the team, the local relationships, and the
-                daily commitment required to run a successful cultural business.
-                We bring the Palestine House identity, shared standards,
-                complete toolkit, and ongoing support to help you build and
-                operate it well. Every House works under a clear licence that
-                protects the quality, integrity, and meaning of the Palestine
-                House name.
+                A community for people developing their own Palestine Houses,
+                with practical resources and opportunities to learn from others.
+                You build and run your House locally; the community does not
+                operate it for you.
               </p>
             </div>
 
             <div className="apply-context-block">
-              <p className="ph-eyebrow">Before you apply</p>
+              <p className="ph-eyebrow">Your idea can still be developing</p>
               <p>
-                Every Palestine House shares three core commitments:{" "}
-                <strong>cultural independence</strong>,{" "}
-                <strong>responsible use of the brand</strong>, and{" "}
-                <strong>honest, transparent reporting</strong>. If these
-                principles reflect how you want to work, we would be glad to
-                hear from you.
+                You do not need a secured venue, complete team, finished
+                business plan or supporting documents to request community
+                access. A short introduction is enough to explain your interest.
               </p>
             </div>
 
@@ -126,22 +124,22 @@ export default async function ApplyPage() {
                           h1 → h3 → h2 breaks the outline (DR1-10 design QA).
                           Styled identically via the widened .apply-steps
                           selector in pages.css. */}
-                      <p className="apply-step-title">{s.title}.</p>
+                      <p className="apply-step-title">{s.title}</p>
                       <p>{s.text}</p>
                     </div>
                   </li>
                 ))}
               </ol>
               <p className="apply-questions">
-                Have a question before applying?{" "}
-                <Link href="/contact">Contact us</Link>. You do not need to
-                submit an application to get in touch.
+                A question about joining?{" "}
+                <Link href="/contact">Contact us</Link> before applying if you
+                need clarification.
               </p>
             </div>
           </Reveal>
 
           <Reveal className="ph-card apply-form-card">
-            <h2 className="apply-form-title">The application.</h2>
+            <h2 className="apply-form-title">Your community application</h2>
             <div className="apply-form-divider">
               <TatreezDivider width="120px" opacity={0.7} palette="v3" />
             </div>

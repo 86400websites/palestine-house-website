@@ -654,7 +654,7 @@
 }
 .phx-footer-cta-content {
   align-self: center;
-  max-width: 44rem;
+  max-width: 50rem;
   padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 4rem);
 }
 .phx-footer-cta-content h2 {
@@ -837,6 +837,14 @@
   width: 100%;
   font-family: var(--font-display);
   color: rgba(255, 255, 255, 0.85);
+  text-wrap: balance;
+}
+/* Below this the line would run under the sprig, so it takes two lines rather than one. */
+@container page (max-width: 430px) {
+  .phx-footer-tagline {
+    width: min(100%, 18rem);
+    margin-inline: auto;
+  }
 }
 .phx-footer-tagline::before,
 .phx-footer-tagline::after {
@@ -985,7 +993,15 @@
 .adm-topbar-right form {
   margin: 0;
 }
+.adm-topbar-right a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target);
+}
 .adm-signout {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target);
   appearance: none;
   border: none;
   background: none;
@@ -1066,6 +1082,7 @@
 }
 
 .adm-table-wrap {
+  position: relative; /* or a screen-reader-only label in a cell escapes the scroll and widens the page */
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--background);
@@ -1121,6 +1138,30 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* A short table in a narrow column: it fits by wrapping its titles, so the buttons at
+   the end of each row stay in reach. */
+.adm-table.adm-table--fit {
+  min-width: 0;
+}
+.adm-table.adm-table--fit .adm-td-strong {
+  white-space: normal;
+}
+.adm-table.adm-table--fit :is(.adm-td-strong, .adm-td-muted) {
+  overflow-wrap: anywhere; /* an email address has nowhere else to break */
+}
+.adm-row-actions {
+  white-space: nowrap;
+}
+/* A file's name is on this button, and a long one has to wrap on a phone. */
+.adm-detail-actions .adm-btn-long {
+  height: auto;
+  min-height: 2rem;
+  flex-shrink: 1;
+  padding-block: 0.3rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
 
 .adm-split {
   display: grid;
@@ -1132,6 +1173,7 @@
 .adm-detail {
   position: sticky;
   top: 76px;
+  scroll-margin-top: 76px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -1154,7 +1196,7 @@
   font: var(--weight-medium) var(--text-xs)/1.3 var(--font-body);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--subtle-foreground);
+  color: var(--muted-foreground);
 }
 .adm-field-value {
   font: var(--weight-regular) var(--text-sm)/1.55 var(--font-body);
@@ -1209,7 +1251,7 @@
 }
 .adm-field-hint {
   font: var(--weight-regular) var(--text-sm)/1.45 var(--font-body);
-  color: var(--subtle-foreground);
+  color: var(--muted-foreground);
 }
 .adm-add-form {
   display: flex;
@@ -1291,7 +1333,8 @@
 
 @media (max-width: 980px) {
   .adm-split {
-    grid-template-columns: 1fr;
+    /* minmax, because a plain 1fr track grows to fit its widest child */
+    grid-template-columns: minmax(0, 1fr);
   }
   .adm-detail,
   .adm-detail-empty {
@@ -1299,6 +1342,45 @@
   }
   .adm-content {
     padding: var(--space-6) var(--space-4) var(--space-12);
+  }
+}
+
+/* The bar's three groups no longer fit on one line, and at its wrapped height it
+   would hold too much of a phone's screen to stay stuck there. */
+@media (max-width: 680px) {
+  .adm-topbar {
+    position: static;
+    flex-wrap: wrap;
+    height: auto;
+    padding: var(--space-2) var(--space-4);
+    gap: var(--space-1) var(--space-4);
+  }
+  .adm-topbar-right {
+    margin-left: auto;
+  }
+  .adm-nav {
+    order: 1;
+    flex-basis: 100%;
+  }
+}
+
+/* A phone: the arrows stay together with Edit beneath them, and a count gives way, so
+   that every button on a row stays in view. */
+@media (max-width: 620px) {
+  .adm-table.adm-table--fit td {
+    padding-inline: var(--space-2);
+  }
+  .adm-row-actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    gap: var(--space-1);
+  }
+  .adm-row-actions > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .adm-table .adm-td-count {
+    display: none;
   }
 }
 

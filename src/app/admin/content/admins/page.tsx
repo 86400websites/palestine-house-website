@@ -41,7 +41,7 @@ export default async function AdminsAdminPage() {
     <div>
       <h1 className="adm-h1">Admins.</h1>
       <p className="adm-intro">
-        The HQ team members who can manage applications and content. Add someone
+        The team members who can manage applications and content. Add someone
         by the email they signed up with.
       </p>
       <AdminsAdmin rows={rows} />

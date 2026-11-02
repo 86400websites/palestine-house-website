@@ -9,8 +9,6 @@ import { PHOTO_SOURCES, type PhotoId } from "@/components/shared/photo";
    prop. */
 export type StageCopy = {
   name: string;
-  /** optional bold lead line above the description (/bring-ph) */
-  lead?: string;
   text: string;
   photo: PhotoId;
   alt: string;
@@ -37,7 +35,6 @@ export function StageCards({ sizes, stages }: StageCardsProps) {
                 {String(i + 1).padStart(2, "0")}
               </span>
               <h3>{s.name}</h3>
-              {s.lead ? <p className="v3-stage-lead">{s.lead}</p> : null}
               <p>{s.text}</p>
             </div>
           </article>

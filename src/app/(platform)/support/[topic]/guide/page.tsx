@@ -7,8 +7,8 @@ import {
 /* /support/[topic]/guide — the Simple guide reader for a Support focus area
    (PP4). One of four thin wrappers; the gate lives in the shared reader.
 
-   /support also carries the Ask HQ panel, but that is the section page: this
-   dynamic segment sits beneath it and never shadows it. */
+   /support also carries the Community Contacts panel, but that is the section
+   page: this dynamic segment sits beneath it and never shadows it. */
 
 type Params = { params: Promise<{ topic: string }> };
 

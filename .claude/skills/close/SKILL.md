@@ -43,13 +43,13 @@ Run top to bottom. For each item give **PASS / FAIL / N/A** + the evidence (comm
 - If either is stale, quote the exact edit needed and **offer to make it on the task branch**.
 
 ### 4. Copy & design — only if UI / strings changed
-- Any new or changed user-facing string is verbatim from `docs/page-copy/` or follows `docs/page-copy/00-global/brand-voice.md`.
-- Proof numbers intact (**4 sections · 22 focus areas · 88 templates** — reconciled public-and-private at PP7, owner-signed live 2026-08-20, D-PP-s; a copy checker enforces them). The retired band (11 · 33 · 200+ · 297 · 120-day) names deleted content — finding it in a diff is a defect. Never a certificate. Locked header/footer chrome unchanged.
+- Any new or changed user-facing string is verbatim from the owner's CR1 documents (`docs/source-assets/content-refresh-cr1/`) or `docs/page-copy/`, or follows `docs/page-copy/00-global/brand-voice.md`.
+- Proof numbers intact (**4 sections · 22 focus areas · 83 templates and practical tools** — reconciled public-and-private at PP7, owner-signed live 2026-08-20 at 88, D-PP-s; moved to 83 by CR1 with the owner's delivery; a copy checker enforces them). The retired band (11 · 33 · 200+ · 297 · 120-day, plus the previous release's 88) names content that no longer exists — finding it in a diff is a defect. Never a certificate. Locked header/footer chrome unchanged.
 
 ### 5. Security invariants — only those the diff touches (SECURITY-CHECKLIST §15)
 For each invariant the change could affect, confirm it holds and cite the file:
 - Approval enforced server-side; reference content never public; **Apply = the only sign-up door**; templates/booklets only via server-issued signed URLs; admin via server-checked `admins` table; CSP allow-list tight.
-- **Public writes: zod — yes; rate limit + Turnstile — NOT SHIPPED YET.** `/apply`, contact and `/support` are live and unthrottled (`PROJECT-STATUS.md` §7 #1); the Upstash + Turnstile + fail-closed half of this invariant arrives in **SYS1.5** (D-SYS-9). Until then, check zod validation only and do **not** record the full §15 public-writes invariant as passing — a gate that reports a control the site does not have is worse than no gate.
+- **Public writes: zod — yes; rate limit + Turnstile — NOT SHIPPED YET.** `/apply` and contact are live and unthrottled (`PROJECT-STATUS.md` §7 #1); the Upstash + Turnstile + fail-closed half of this invariant arrives in **SYS1.5** (D-SYS-9). Until then, check zod validation only and do **not** record the full §15 public-writes invariant as passing — a gate that reports a control the site does not have is worse than no gate.
 - **CSP note:** the allow-list is YouTube-embed-only *today*. **SYS3** adds the Sentry ingest origin to `connect-src` (D-SYS-10) — when that lands, a widened `connect-src` is expected, not a finding.
 
 ### 6. Database — only if `supabase/sql/**` changed (WORKFLOW §14)

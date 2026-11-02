@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ArrowRight, Search, X } from "lucide-react";
 import { fetchSearchIndex } from "@/lib/workspace-v2/search";
 import {
@@ -31,7 +32,7 @@ import type { PwSearchItem } from "@/lib/workspace-v2/types";
       it is built from React text nodes and <mark> elements — no
       dangerouslySetInnerHTML anywhere near a user-typed query.
 
-   3. Results are <Link>s, not buttons. The mockup had no URLs to point at; this
+   3. Results are links, not buttons. The mockup had no URLs to point at; this
       platform does, so a partner can middle-click a result, copy its address,
       and use the back button afterwards.
 
@@ -42,9 +43,10 @@ import type { PwSearchItem } from "@/lib/workspace-v2/types";
    knowing nothing yet and the empty state would be a claim. */
 
 const COPY = {
-  /* Every string here is the mockup's, verbatim. */
-  dialogTitle: "Search all knowledge resources",
-  inputLabel: "Search all resources",
+  /* The mockup's strings, with the handover's "Search Resources" naming the feature
+     (Private copy section 1.1). */
+  dialogTitle: "Search Resources",
+  inputLabel: "Search Resources",
   placeholder: "Search focus areas, guides and templates",
   close: "Close search",
   filtersLabel: "Search filters",
@@ -65,12 +67,14 @@ const CHIPS = [
 
 /* The mockup's four shortcuts, by the section and topic TITLE it names. It
    resolves them with a bare .find() and would throw a TypeError if a title ever
-   drifted; here an unresolved shortcut is simply left out. */
+   drifted; here an unresolved shortcut is simply left out, which is what all four
+   had quietly become once the 22 focus areas replaced the old titles. CR1 points
+   them at the nearest current focus area in each section. */
 const SHORTCUTS = [
-  { section: "Setup", title: "Launching a New House" },
-  { section: "Operate", title: "Facility Operations" },
-  { section: "Program", title: "Programming Model & Pillars" },
-  { section: "Support", title: "Crisis Management" },
+  { section: "Setup", title: "Get Ready to Open" },
+  { section: "Operate", title: "Manage Daily House Operations" },
+  { section: "Program", title: "Plan the Programming Calendar" },
+  { section: "Support", title: "Ask the Community for Help" },
 ] as const;
 
 type SearchContextValue = { openSearch: () => void };
@@ -103,6 +107,21 @@ function Highlighted({ text, query }: { text: string; query: string }) {
   return <>{parts}</>;
 }
 
+/* A hit on the page you are already on is a plain anchor. Link changes a fragment
+   with pushState, which fires no hashchange, so the explorer would scroll to the
+   card and never open it. */
+function HitLink({
+  href,
+  ...rest
+}: React.ComponentPropsWithoutRef<"a"> & { href: string }) {
+  const pathname = usePathname();
+  return href.startsWith(`${pathname}#`) ? (
+    <a href={href} {...rest} />
+  ) : (
+    <Link href={href} {...rest} />
+  );
+}
+
 function ResultRow({
   item,
   query,
@@ -113,7 +132,7 @@ function ResultRow({
   onNavigate: () => void;
 }) {
   return (
-    <Link className="pw-search-result" href={item.href} onClick={onNavigate}>
+    <HitLink className="pw-search-result" href={item.href} onClick={onNavigate}>
       <span className="pw-result-kind">
         {item.kind === "TOPIC" ? COPY.focusAreaKind : item.kind}
       </span>
@@ -124,7 +143,7 @@ function ResultRow({
         <span className="pw-result-path">{item.path}</span>
       </span>
       <ArrowRight className="pw-icon" aria-hidden="true" />
-    </Link>
+    </HitLink>
   );
 }
 
@@ -330,7 +349,7 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
                 <h3>{COPY.startHeading}</h3>
                 <div className="pw-search-shortcuts">
                   {shortcuts.map((item, position) => (
-                    <Link
+                    <HitLink
                       key={position}
                       className="pw-search-shortcut"
                       href={item.href}
@@ -344,7 +363,7 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
                         <span className="pw-result-path">{item.path}</span>
                       </span>
                       <ArrowRight className="pw-icon" aria-hidden="true" />
-                    </Link>
+                    </HitLink>
                   ))}
                 </div>
               </div>

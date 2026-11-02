@@ -9,6 +9,7 @@ import {
 import { renderMarkdown } from "@/lib/workspace/markdown";
 import { PLATFORM_PAGES, RESOURCE_KINDS, type PlatformPageKey } from "./spec";
 import { stripGuideCover } from "./guide-cover";
+import { fileKindOf, OVERVIEW_CODE, SHARED_RESOURCES } from "./shared-resources";
 import type { ResourceRow } from "@/lib/workspace/types";
 import type {
   PwGroup,
@@ -16,6 +17,7 @@ import type {
   PwGuideFile,
   PwSearchItem,
   PwSectionSlug,
+  PwSharedTemplate,
   PwTemplate,
 } from "./types";
 
@@ -104,6 +106,8 @@ export type PwPageMeta = {
   lead: string;
   heroImage: string;
   heroPosition: string;
+  /* The section's video, for its Watch Video button on the Overview. */
+  videoUrl?: string | null;
 };
 
 type PlatformSectionRow = {
@@ -114,6 +118,7 @@ type PlatformSectionRow = {
   lead: string | null;
   hero_image_path: string | null;
   hero_position: string | null;
+  youtube_url: string | null;
 };
 
 function isPlatformPageKey(slug: string): slug is PlatformPageKey {
@@ -147,6 +152,7 @@ export const getPlatformPages = cache(
         lead: firm(row.lead) ?? base.lead,
         heroImage: firm(row.hero_image_path) ?? base.heroImage,
         heroPosition: firm(row.hero_position) ?? base.heroPosition,
+        videoUrl: safeHttpUrl(row.youtube_url),
       };
     }
     return pages;
@@ -173,13 +179,19 @@ export const getPlatformPages = cache(
    storage_bucket today (admin_update_resource cannot touch code/doc_key/
    storage_path — 0023/0026), so no wrong-bucket row can exist until PP6 ships
    the upload path, and production is verified at 297 private / 0 public-in-grid
-   / 0 wrong-bucket. PP6 must close it in the same sprint that opens it. */
+   / 0 wrong-bucket. PP6 must close it in the same sprint that opens it.
+
+   CR1 adds a fifth condition: not the Overview. The handover makes all 22 Overview
+   documents downloadable, while doc_key may only ever be 'guide' and no column may
+   be added, so an Overview is an ordinary private row with the reserved code `OV`.
+   It would otherwise pass this predicate and be counted as a template. */
 function isTemplateRow(row: ResourceRow): boolean {
   return (
     row.element_id !== null &&
     row.is_public === false &&
     row.doc_key === null &&
-    row.code !== null
+    row.code !== null &&
+    row.code !== OVERVIEW_CODE
   );
 }
 
@@ -192,14 +204,25 @@ function isGuideRow(row: ResourceRow): boolean {
   );
 }
 
+function isOverviewRow(row: ResourceRow): boolean {
+  return (
+    row.element_id !== null &&
+    row.is_public === false &&
+    row.doc_key === null &&
+    row.code === OVERVIEW_CODE
+  );
+}
+
 type FilesByElement = {
   templates: Map<string, PwTemplate[]>;
   guides: Map<string, PwGuideFile>;
+  overviews: Map<string, PwGuideFile>;
 };
 
 function indexFilesByElement(rows: ResourceRow[]): FilesByElement {
   const templates = new Map<string, PwTemplate[]>();
   const guides = new Map<string, PwGuideFile>();
+  const overviews = new Map<string, PwGuideFile>();
 
   /* Order once, up front, so bucket insertion order is already grid order and
      no per-topic re-sort is needed. sort_order is the owner's ordering — today
@@ -217,8 +240,9 @@ function indexFilesByElement(rows: ResourceRow[]): FilesByElement {
     if (!row.element_id) continue;
 
     if (isTemplateRow(row)) {
+      const code = row.code as string;
       const list = templates.get(row.element_id) ?? [];
-      list.push({ id: row.id, title: row.title, code: row.code as string });
+      list.push({ id: row.id, title: row.title, code, kind: fileKindOf(code) });
       templates.set(row.element_id, list);
       continue;
     }
@@ -228,10 +252,35 @@ function indexFilesByElement(rows: ResourceRow[]): FilesByElement {
        silently changing which file the card offers. */
     if (isGuideRow(row) && !guides.has(row.element_id)) {
       guides.set(row.element_id, { id: row.id, title: row.title });
+      continue;
+    }
+
+    if (isOverviewRow(row) && !overviews.has(row.element_id)) {
+      overviews.set(row.element_id, { id: row.id, title: row.title });
     }
   }
 
-  return { templates, guides };
+  return { templates, guides, overviews };
+}
+
+/* The handover's "shared resources from other focus areas": the home card's own row,
+   offered here as well. Resolved from the same gated read, so a resource whose home
+   is unpublished or has no such row simply does not appear. */
+function sharedTemplatesFor(
+  slug: string,
+  topicsBySlug: Map<string, PlatformTopicRow>,
+  templates: Map<string, PwTemplate[]>,
+): PwSharedTemplate[] {
+  if (!Object.hasOwn(SHARED_RESOURCES, slug)) return [];
+  return SHARED_RESOURCES[slug].flatMap((ref) => {
+    const home = topicsBySlug.get(ref.topicSlug);
+    const hit = home
+      ? templates.get(home.element_id)?.find((t) => t.code === ref.code)
+      : undefined;
+    return home && hit
+      ? [{ ...hit, homeNumber: home.element_code, homeTitle: home.title }]
+      : [];
+  });
 }
 
 /* The whole content payload for one toolkit page: its groups in mockup order,
@@ -246,7 +295,8 @@ export const getSectionContent = cache(
 
     if (topicRows.length === 0) return [];
 
-    const { templates, guides } = indexFilesByElement(resourceRows);
+    const { templates, guides, overviews } = indexFilesByElement(resourceRows);
+    const topicsBySlug = new Map(topicRows.map((r) => [r.slug, r]));
     const groups: PwGroup[] = [];
     const byGroupId = new Map<string, PwGroup>();
 
@@ -288,8 +338,10 @@ export const getSectionContent = cache(
         imagePath: row.image_path,
         imagePosition: row.image_position,
         youtubeUrl: safeHttpUrl(row.youtube_url),
+        overview: overviews.get(row.element_id) ?? null,
         guide: guides.get(row.element_id) ?? null,
         templates: templates.get(row.element_id) ?? [],
+        sharedTemplates: sharedTemplatesFor(row.slug, topicsBySlug, templates),
       });
     }
 
@@ -327,7 +379,7 @@ export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
      to the spec exactly as the heroes do. Cached, so this is not a round-trip
      per search. */
   const pages = await getPlatformPages();
-  const { templates } = indexFilesByElement(resourceRows);
+  const { templates, overviews } = indexFilesByElement(resourceRows);
   const items: PwSearchItem[] = [];
 
   for (const row of topicRows) {
@@ -353,6 +405,16 @@ export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
       summary: [row.description, row.intro].filter(Boolean).join(" ") || undefined,
     });
 
+    const overview = overviews.get(row.element_id);
+    if (overview) {
+      items.push({
+        kind: "OVERVIEW",
+        title: overview.title,
+        path: filePath,
+        href: topicHref,
+      });
+    }
+
     items.push({
       kind: "GUIDE",
       title: RESOURCE_KINDS[0].title,
@@ -360,6 +422,8 @@ export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
       href: `/${section}/${encodeURIComponent(row.slug)}/guide`,
     });
 
+    /* Own templates only: a shared resource is indexed once, at its home, so a search
+       for it never returns the same file several times. */
     for (const template of templates.get(row.element_id) ?? []) {
       items.push({
         kind: "TEMPLATE",

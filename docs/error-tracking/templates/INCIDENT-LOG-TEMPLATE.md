@@ -21,7 +21,7 @@ Never put a real person's identity in this file: no email addresses, no names, n
 **Status:** Investigating → Fixing → Verifying → Closed
 **Severity:** Blocker / High / Medium / Low — definitions in [`../ERROR-TRACKING-GUIDE.md`](../ERROR-TRACKING-GUIDE.md) §4
 **Door:** Sentry *(from SYS3)* / User report / Morning check *(from SYS2)*
-**Surface:** the real one — `/apply` · sign-in or password reset · approval unlock · template download · Ask HQ · a guide page · admin · public page
+**Surface:** the real one — `/apply` · sign-in or password reset · approval unlock · template download · the contact form · a guide page · admin · public page
 
 | # | Date | Door | Surface | What broke — plain words | Who was affected | Severity | Bug or not | Fix (PR / backlog ref) | Regression test | User informed | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|

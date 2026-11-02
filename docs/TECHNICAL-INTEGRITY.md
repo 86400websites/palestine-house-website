@@ -22,7 +22,7 @@ Verified 2026-08-21 against `.github/workflows/ci.yml`, `package.json`, `tsconfi
 | Check 5 | Tests run when present | **Present — SYS2**, outside `verify` by design. `test:e2e` needs a **deployed Preview URL** and role credentials, which the PR-time `verify` job does not have (the Vercel deploy races CI) — so the suite runs as the operator-driven launch gate against Previews and as the `morning-check.yml` workflow, never as a `verify` step. `ci.yml` deliberately untouched (D-SYS-4) |
 | Check 6 | No known-critical vulnerabilities (`pnpm audit`) | **Present — added at SYS1 1h.** Blocking at `--audit-level critical`, plus a non-blocking step reporting high/moderate on every run. The threshold is deliberate: on 2026-08-21 the repo had 0 critical, 14 high, 8 moderate, so gating at `high` would have shipped permanently-red CI. Raise it once §7 #6 is cleared |
 | Extra | Secret scan over full history (gitleaks) | **Present — and the SOP does not ask for it.** A genuine addition on this repo's side |
-| Owner | Branch protection on `main`, verified once | **Owner action — SYS1.** The setting lives in GitHub, not on disk, and cannot be confirmed from this machine (no `gh` CLI). An unverified gate is the same as no gate |
+| Owner | Branch protection on `main`, verified once | **Owner action — SYS1, still open.** The setting lives in GitHub, not on disk. Read from GitHub's API on 2026-11-01: it requires a pull request and names no required check (`PROJECT-STATUS.md` §7 #17). An unverified gate is the same as no gate |
 
 ---
 
@@ -46,7 +46,7 @@ Walls 1–3 are standing. **Wall 4a closed on 2026-08-22**: the site had been li
 3. **Formatted** — **waived here (D‑SYS‑3)**, see the status table. Formatting stays a matter of matching the surrounding file.
 4. **It builds** — `pnpm run build` must succeed. "Works in dev" counts for nothing.
 5. **Tests pass** — `pnpm run test:e2e` (Playwright, since SYS2) against a **deployed Preview**; deliberately not part of CI's `verify`, because the suite needs a Preview URL and credentials that a PR-time job does not have. The whole-site Launch Gate is operated by `/activate-testing`; a daily read-only subset runs against production.
-6. **No known-critical vulnerabilities** — `pnpm audit` runs on every PR since **SYS1 1h**: blocking at `critical`, reporting `high`/`moderate` without blocking. Dependabot's weekly PRs remain the update channel. **The high advisories are real and outstanding** — production runs `next@15.5.20` with SSRF advisories patched in `>=15.5.21` (`PROJECT-STATUS.md` §7 #6).
+6. **No known-critical vulnerabilities** — `pnpm audit` runs on every PR since **SYS1 1h**: blocking at `critical`, reporting `high`/`moderate` without blocking. Dependabot's weekly PRs remain the update channel. **The advisories are real** — production ran `next@15.5.23`, with critical and high advisories, until SEC1 (#103) moved it to `next@15.5.28`. Two high remain, in the `postcss` that Next pins and runs at build time (`PROJECT-STATUS.md` §7 #6).
 7. **No secrets in history** — every PR is scanned by gitleaks over the branch's full history. This is Palestine House's own addition; it backs [`WORKFLOW.md`](./WORKFLOW.md) §15 and the env rules in [`ENV-VARS-SAFETY.md`](./ENV-VARS-SAFETY.md).
 
 **Line-level rule for the build agent:** no `any`, no `@ts-ignore`, no `eslint-disable` without a written reason. As of 2026‑08‑21 this repo satisfies it outright — `src/` contains **zero** `any` annotations, **zero** `@ts-ignore` / `@ts-expect-error` / `@ts-nocheck`, and all **11** `eslint-disable-next-line` comments are the same benign `@next/next/no-img-element`, each carrying its reason inline (ten as a trailing `--` note, one as a comment block directly above). Keep it that way: a new suppression without a reason is a review finding.
@@ -95,7 +95,7 @@ The reason it matters is mechanical, and it is a foot-gun worth stating plainly:
 - the rule still requires the **old** name, no check ever reports under it, and the merge button stays permanently locked; or
 - the rule is loosened to clear the block, and the gate is now **silently absent** — PRs merge green-looking with nothing enforcing anything.
 
-So: this repo's required check is the CI **`verify`** job, displayed as `Install · Typecheck · Lint · Build`. If the workflow is ever renamed, the GitHub branch-protection rule must be re-pointed in the same sitting, and one PR must be watched to confirm the merge button locks until the new check reports.
+So: this repo's required check is the CI **`verify`** job, displayed as `Install · Typecheck · Lint · Build` (GitHub does not list it yet: `PROJECT-STATUS.md` §7 #17). If the workflow is ever renamed, the GitHub branch-protection rule must be re-pointed in the same sitting, and one PR must be watched to confirm the merge button locks until the new check reports.
 
 ---
 
@@ -103,7 +103,7 @@ So: this repo's required check is the CI **`verify`** job, displayed as `Install
 
 - [x] **Strict `tsconfig`, ESLint config, the scripts, the workflow file** — all shipped; the workflow file (with gitleaks and Dependabot) at **Stage 1.1**, 2026‑06‑12, PR #5 — see [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §2. Nothing to do.
 - [ ] **Owner, once, ~2 minutes:** GitHub → the repo → **Settings → Branches → `main`** → confirm **"Require a pull request before merging"** and **"Require status checks to pass before merging"** are on, and that the required-check list names the check `ci.yml` actually emits (the `verify` job — **not** "Code Check"). See [`WORKFLOW.md`](./WORKFLOW.md) §3.
-- [ ] **Owner + agent, verify once:** watch one PR — the check appears, goes green, and the merge button stays locked until it does. **An unverified gate is the same as no gate.** This cannot be checked from the repo: the setting lives in GitHub and the `gh` CLI is not installed on the build machine.
+- [ ] **Owner + agent, verify once:** watch one PR — the check appears, goes green, and the merge button stays locked until it does. **An unverified gate is the same as no gate.** ⚠️ **Read from GitHub's API on 2026-11-01, and the check is NOT set:** `main`'s protection requires a pull request but lists no required status check, and the repo has no rulesets. So GitHub would merge a PR with a red CI, a failed secret scan or a critical audit, and today "CI green" rests on someone looking. The owner adds `Install · Typecheck · Lint · Build` to the required checks at the setting above.
 
 ## Day to day
 
@@ -146,9 +146,9 @@ Until both land, the substitute is human: [`QA-CHECKLIST.md`](./QA-CHECKLIST.md)
 Green CI is necessary and nowhere near sufficient. It does not know about:
 
 - **Access control.** The approval gate, the admin gate and RLS are proved by [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §5 (RLS), §6 (auth / session) and §15 (this project's blocking invariants) and by review — never by `tsc`.
-- **Public-write abuse controls.** Rate limiting and Turnstile on `/apply`, contact and `/support` are **not shipped** (D‑SYS‑9; [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §7 issue #1) — the invariant they owe is [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §8, §13 and §15. Those writes are unthrottled on Production right now. Sprint **SYS1.5** ships them, fail-closed.
+- **Public-write abuse controls.** Rate limiting and Turnstile on `/apply` and contact are **not shipped** (D‑SYS‑9; [`PROJECT-STATUS.md`](./PROJECT-STATUS.md) §7 issue #1) — the invariant they owe is [`SECURITY-CHECKLIST.md`](./SECURITY-CHECKLIST.md) §8, §13 and §15. Those writes are unthrottled on Production right now. Sprint **SYS1.5** ships them, fail-closed.
 - **The database.** Migrations are applied by hand in the Supabase SQL Editor, non-production project first — [`WORKFLOW.md`](./WORKFLOW.md) §14 and [`SUPABASE-MCP-SAFETY.md`](./SUPABASE-MCP-SAFETY.md). Production is on migration `0034`. CI never touches a database, and a Vercel rollback never rolls one back — see [`ROLLBACK.md`](./ROLLBACK.md).
-- **Copy and design.** Verbatim copy and locked chrome are a human check against `/docs/page-copy/` and `/docs/page-designs/` — both **gitignored** (see `.gitignore`), so they live in the owner's working copy, not in a fresh clone.
+- **Copy and design.** Verbatim copy and locked chrome are a human check against the owner's CR1 documents (`docs/source-assets/content-refresh-cr1/`), `/docs/page-copy/` and `/docs/page-designs/` — all **gitignored** (see `.gitignore`), so they live in the owner's working copy, not in a fresh clone. `scripts/verify-public-copy.ts` automates the public-copy half where those documents are on disk; it is not a CI step.
 - **Whether it behaves.** See Wall 4.
 
 ## The boundary, one line

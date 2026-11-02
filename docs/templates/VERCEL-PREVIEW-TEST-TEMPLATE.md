@@ -79,7 +79,7 @@ One row per page this PR touches. Both viewports every time: **desktop** and **3
 | Check | Desktop | 320px | Result | Notes |
 |---|---|---|---|---|
 | Public shell loads: `/`, `/model`, `/experience`, `/bring-ph`, `/our-support`, `/focus-areas`, `/about`, `/contact`, `/apply` | [ ] | [ ] | | |
-| Legal + auth pages load: `/privacy`, `/terms`, `/login`, `/forgot-password`, `/update-password` | [ ] | [ ] | | |
+| Legal + auth pages load: `/privacy`, `/login`, `/forgot-password`, `/update-password` | [ ] | [ ] | | `/terms` shows the site's own 404 |
 | Gated routes redirect to `/login`: `/dashboard`, `/setup`, `/operate`, `/program`, `/support`, `/{section}/{topic}/guide`, `/account` | [ ] | [ ] | | |
 | `/admin/*` redirects to `/login`: `/admin`, `/admin/approvals`, `/admin/content` (+ `pages`, `focus-areas`, `files`, `admins`) | [ ] | [ ] | | |
 | 🔴 **Gate probe:** none of those pages' own strings appear in the HTML **or the RSC payload** | [ ] | — | | View source *and* the flight data, not just the rendered result |
@@ -91,8 +91,8 @@ One row per page this PR touches. Both viewports every time: **desktop** and **3
 
 | Check | Desktop | 320px | Result | Notes |
 |---|---|---|---|---|
-| `/dashboard` renders the **pending state** | [ ] | [ ] | | |
-| Toolkit sections resolve no content — no topic summary, no guide body, no template row | [ ] | [ ] | | |
+| `/dashboard` renders the **pending state** | [ ] | [ ] | | A declined account gets the declined notice here and on the toolkit sections |
+| Toolkit sections show the pending state and resolve no content — no topic summary, no guide body, no Overview, no template row | [ ] | [ ] | | |
 | Guide reader `/{section}/{topic}/guide` resolves nothing | [ ] | [ ] | | |
 | 🔴 Ctrl/⌘+K search index is **empty** (D-PP-j) — and carries no resource ids, storage paths or bucket names | [ ] | — | | |
 | `/account` **is accessible** — the one deliberate session-only exception; name + password can be set | [ ] | [ ] | | Exposes nothing but the caller's own `profiles` row |
@@ -102,13 +102,13 @@ One row per page this PR touches. Both viewports every time: **desktop** and **3
 
 | Check | Desktop | 320px | Result | Notes |
 |---|---|---|---|---|
-| `/dashboard` renders the About landing | [ ] | [ ] | | |
-| All four toolkit sections render: `/setup`, `/operate`, `/program`, `/support` | [ ] | [ ] | | 4 sections · 22 focus areas · 88 templates |
-| A focus area shows summary → one Simple guide card → Watch Video → templates grid | [ ] | [ ] | | No Overview card, no per-topic checklist card, no watch-out card |
+| `/dashboard` renders the Overview landing | [ ] | [ ] | | |
+| All four toolkit sections render: `/setup`, `/operate`, `/program`, `/support` | [ ] | [ ] | | 4 sections · 22 focus areas · 83 templates and practical tools |
+| A focus area shows summary and Watch Video; Explore opens the Overview download → one Simple Guide card → templates grid → shared resources where it has them | [ ] | [ ] | | The Overview is a row, not a card; no per-topic checklist card, no watch-out card; Watch Video says "Video coming soon." |
 | Guide reader opens (Read Now) at `/{section}/{topic}/guide` | [ ] | [ ] | | |
-| 🔴 Template download works via a **server-issued signed URL** (Download Now) | [ ] | — | | ⚠️ Downloads land in `.playwright-mcp/` — **gated partner content, never commit it** |
-| Ctrl/⌘+K search spans focus areas, guides and templates | [ ] | — | | |
-| Ask HQ submits (emails HQ — no ticket is opened) | [ ] | [ ] | | See §6 before submitting: Preview sends **real** email |
+| 🔴 A file download works via a **server-issued signed URL** (Download Word File; Download Logo or Download Editable Layout on the PNG and SVGs) | [ ] | — | | ⚠️ Downloads land in `.playwright-mcp/` — **gated partner content, never commit it** |
+| Ctrl/⌘+K search spans focus areas, Overviews, guides and templates | [ ] | — | | |
+| Community Contacts on `/support` (`#community-contacts`) links to `/contact` | [ ] | [ ] | | No form, nothing written, no email from the block |
 | `/account` accessible | [ ] | [ ] | | |
 | `/admin/*` → **404** (`is_approved` alone is never admin) | [ ] | — | | |
 
@@ -128,8 +128,8 @@ One row per page this PR touches. Both viewports every time: **desktop** and **3
 The site's single public conversion and its **only** account-creation door.
 
 - [ ] Public page → `/apply` → submit → pending account + application created → lands on the `/dashboard` pending state. Desktop [ ] · 320px [ ]
-- [ ] The header's Apply CTA behaves per session state (Apply when logged out, My Dashboard when signed in).
-- [ ] The green Apply button and its supporting line are the approved copy, unaltered.
+- [ ] The header's Apply CTA behaves per session state (Apply to Join when logged out, My Dashboard when signed in).
+- [ ] The Apply to Join button and its supporting line are the approved copy, unaltered.
 
 Outcome: [PASS / FAIL — what broke]
 
@@ -144,7 +144,6 @@ Only the ones this PR touches. Preview points at the **non-production** Supabase
 | `/apply` (apply = sign-up) | [ ] | [ ] | | Invalid input + empty required fields give friendly errors, nothing silently dropped |
 | `/contact` | [ ] | [ ] | | ⚠️ see the email warning below |
 | `/login` · `/forgot-password` · `/update-password` | [ ] | [ ] | | Only if auth changed |
-| Gated Ask HQ | [ ] | [ ] | | ⚠️ see the email warning below |
 | `/account` (name, password) | [ ] | [ ] | | |
 | `/admin/*` writes | [ ] | [ ] | | |
 

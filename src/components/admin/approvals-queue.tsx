@@ -3,6 +3,7 @@
 import * as React from "react";
 import { CheckCircle2, Clock, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { revealWhenStacked } from "@/components/admin/reveal-when-stacked";
 import { decideApplicationAction, type DecideState } from "@/lib/admin/actions";
 
 /* The HQ approval queue (docs/page-copy/04-admin/admin-approvals.md +
@@ -51,6 +52,12 @@ export function ApprovalsQueue({ rows }: { rows: ApplicationRow[] }) {
   const [selectedId, setSelectedId] = React.useState<string | null>(
     rows[0]?.id ?? null,
   );
+  const detail = React.useRef<HTMLElement>(null);
+  /* Only on a choice: the first row is selected on arrival, and that must not scroll. */
+  const choose = (id: string) => {
+    setSelectedId(id);
+    revealWhenStacked(detail.current);
+  };
   const [toast, setToast] = React.useState<{
     tone: "success" | "error";
     text: string;
@@ -89,7 +96,7 @@ export function ApprovalsQueue({ rows }: { rows: ApplicationRow[] }) {
 
       <div className="adm-split">
         <div className="adm-table-wrap">
-          <table className="adm-table">
+          <table className="adm-table adm-table--fit">
             <thead>
               <tr>
                 <th scope="col">Name</th>
@@ -107,11 +114,11 @@ export function ApprovalsQueue({ rows }: { rows: ApplicationRow[] }) {
                   className={r.id === selectedId ? "is-selected" : undefined}
                   tabIndex={0}
                   aria-selected={r.id === selectedId}
-                  onClick={() => setSelectedId(r.id)}
+                  onClick={() => choose(r.id)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setSelectedId(r.id);
+                      choose(r.id);
                     }
                   }}
                 >
@@ -139,7 +146,7 @@ export function ApprovalsQueue({ rows }: { rows: ApplicationRow[] }) {
         </div>
 
         {selected ? (
-          <aside className="adm-detail" aria-label="Application detail">
+          <aside className="adm-detail" aria-label="Application detail" ref={detail}>
             <div
               style={{
                 display: "flex",

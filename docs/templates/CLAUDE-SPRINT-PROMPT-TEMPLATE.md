@@ -93,8 +93,10 @@ sub-step, so the owner reviews live in the open PR. That authorization covers th
 never push to main or any other branch, never merge, never force-push, never `--no-verify`.
 
 ## Locked inputs (never invent, never paraphrase)
-- Copy, verbatim: docs/page-copy/[exact file(s)] — the approved copy set is owner-held and NOT
-  tracked in git, so name the exact files and confirm they are on disk before coding; if they are
+- Copy, verbatim: [exact file(s)] — the owner's CR1 documents under
+  docs/source-assets/content-refresh-cr1/, or docs/page-copy/ for anything those did not cover. The
+  approved copy sets are owner-held and NOT tracked in git, so name the exact files and confirm they
+  are on disk before coding; if they are
   missing, stop and ask the owner rather than writing the string yourself. Brand voice governs any
   NEW string (errors, aria labels, empty states): warm, short, concrete — never charity tone,
   franchise hype, political slogans or startup filler.
@@ -102,9 +104,9 @@ never push to main or any other branch, never merge, never force-push, never `--
   recorded in docs/DESIGN.md §3 (color), §4 (typography), §8 (motion), §10 (responsive),
   §11 (accessibility) — DESIGN.md is in the repo and is authoritative for token values.
 - [Schema / architecture / spec: exact path(s).]
-- Proof numbers: 4 sections · 22 focus areas · 88 templates. The retired band — 11 · 33 · 297 ·
-  "200+ checklist items" · "120-day launch" — names content that no longer exists; never carry it
-  into new copy. Header and footer chrome is locked and identical on every page.
+- Proof numbers: 4 sections · 22 focus areas · 83 templates and practical tools. The retired band —
+  11 · 33 · 297 · "200+ checklist items" · "120-day launch", plus the previous release's 88 — names
+  content that no longer exists; never carry it into new copy. Header and footer chrome is locked and identical on every page.
 
 If two locked inputs conflict, stop and record an open decision in docs/PROJECT-STATUS.md §5 — only
 when that file is in the allowed list. Do not choose silently.

@@ -1,21 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { WORKSPACE_CHROME } from "@/lib/workspace-v2/spec";
-import { PwSearchCta, PwAskHqCta, PwFooterAction } from "@/components/workspace-v2/pw-footer-actions";
+import { PwSearchCta, PwCommunityContactsCta, PwFooterAction } from "@/components/workspace-v2/pw-footer-actions";
 
 /* Workspace v2 footer (PP2 2d) — the mockup's closing band, rebuilt.
 
-   Copy is the generated WORKSPACE_CHROME, which is the mockup verbatim plus the
-   two owner-approved edits recorded in the generator: the blurb no longer names
-   the removed checklist surface, and the Help column's prototype scaffolding
-   line is gone.
+   Copy is WORKSPACE_CHROME, maintained by hand in the spec since CR1 replaced
+   the mockup's wording from the owner's private copy document.
 
    A Server Component; only the two CTAs that need a toast are client islands.
    The global search overlay ships in PP4, so the Search CTA honestly toasts
    until then rather than pretending to open something. */
 
 const PAGE_HREF: Record<string, string> = {
-  About: "/dashboard",
+  Overview: "/dashboard",
   Setup: "/setup",
   Operate: "/operate",
   Program: "/program",
@@ -45,7 +43,7 @@ export function PwFooter() {
             <p>{CHROME.footer.cta.lead}</p>
             <div className="pw-footer-buttons">
               <PwSearchCta label={CHROME.footer.cta.searchAction} />
-              <PwAskHqCta label={CHROME.footer.cta.askAction} />
+              <PwCommunityContactsCta label={CHROME.footer.cta.askAction} />
             </div>
           </div>
         </div>
@@ -89,14 +87,14 @@ export function PwFooter() {
                   </Link>
                 );
               }
-              if (label === "Partner Platform") {
+              if (label === "Community Platform") {
                 return (
                   <Link key={label} href="/account" className="pw-footer-link">
                     {label}
                   </Link>
                 );
               }
-              // "Search everything" and "Ask HQ" have no destination until PP4.
+              // "Search Resources" and "Community Contacts" resolve in the client island.
               return <PwFooterAction key={label} label={label} />;
             })}
             {column.context.map((line) => (

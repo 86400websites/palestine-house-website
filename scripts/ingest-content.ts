@@ -1,6 +1,10 @@
 /**
  * scripts/ingest-content.ts — PP6b EXTRACTOR.
  *
+ * ⚠️ HISTORICAL since CR1. This reads the PREVIOUS release's delivery. The current
+ * extractor is scripts/cr1-extract.ts, whose handover replaces the Overview-to-summary
+ * split below. Kept as the record of the proven mechanisms.
+ *
  * Reads the owner's delivered content off disk and turns it into ONE reviewable
  * JSON file, `docs/content-v2-spec.json`. It touches no database, needs no
  * secret, and writes nothing else. Loading is a separate step with a separate

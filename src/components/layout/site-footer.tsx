@@ -25,18 +25,17 @@ export function SiteFooter() {
             className="phx-footer-cta-photo"
           />
           <div className="phx-footer-cta-content">
-            <h2>Ready to bring Palestine House to your city?</h2>
+            <h2>Build your own Palestine House. Start with the community.</h2>
             <span className="phx-footer-cta-rule" aria-hidden="true" />
             <div className="phx-footer-cta-row">
               <p className="phx-footer-cta-lead">
-                Explore the model, understand what it takes, and apply when
-                you’re ready to build a permanent home for Palestinian culture
-                in your community.
+                Explore the idea, learn what a local House involves and apply to
+                join the community for practical resources and connections.
               </p>
               <div className="phx-footer-cta-buttons">
                 <Button asChild size="lg" className="v3-cta phx-footer-cta-apply">
                   <Link href="/apply">
-                    Apply to bring a House
+                    Apply to Join
                     <ArrowRight aria-hidden="true" />
                   </Link>
                 </Button>
@@ -47,7 +46,7 @@ export function SiteFooter() {
                   className="v3-cta phx-footer-cta-support"
                 >
                   <Link href="/our-support">
-                    See our support
+                    Explore the Community
                     <ArrowRight aria-hidden="true" />
                   </Link>
                 </Button>
@@ -71,7 +70,10 @@ export function SiteFooter() {
           {/* DR2.1-2: the white-text lockup PNG — taller than the old 30px
               mark+word row because the lockup stacks arch/word/tagline. */}
           <BrandLogo height={30} lockupHeight={64} />
-          <p>A fixed address for Palestinian culture, in every city.</p>
+          <p>
+            A lasting home for Palestinian culture, shaped locally and connected
+            through community.
+          </p>
           <p className="phx-footer-arabic" lang="ar" dir="rtl">
             بيت فلسطين في كل مدينة
           </p>
@@ -86,16 +88,15 @@ export function SiteFooter() {
         </div>
         <div className="phx-footer-col">
           <span className="phx-footer-col-title">Bring a House</span>
-          <Link href="/our-support">Our Support</Link>
-          <Link href="/bring-ph">Why bring one.</Link>
+          <Link href="/bring-ph">Bring a House</Link>
+          <Link href="/our-support">The Community</Link>
         </div>
         <div className="phx-footer-col">
           <span className="phx-footer-col-title">Account</span>
-          <Link href="/login">Sign In</Link>
+          <Link href="/login">Sign in</Link>
         </div>
         <div className="phx-footer-col">
-          <span className="phx-footer-col-title">Legal</span>
-          <Link href="/terms">Terms of Use</Link>
+          <span className="phx-footer-col-title">Information</span>
           <Link href="/privacy">Privacy Policy</Link>
           <Link href="/contact">Contact</Link>
         </div>

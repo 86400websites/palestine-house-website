@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { parseYouTubeId } from "@/lib/live/youtube";
+import { NO_VIDEO_LINK } from "@/lib/workspace-v2/shared-resources";
 
 /* Admin content-management write path (S11 11-5). Every action re-checks the
    session + is_admin() server-side (defence in depth — file location and the
@@ -37,7 +38,7 @@ const UUID_RE =
    globals.css, where the guards for docs/ and supabase/ live.) */
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/i;
 
-export type AdminContentState = { ok: boolean; message: string | null };
+export type AdminContentState = { ok: boolean; message: string | null; id?: string };
 
 const GENERIC = "Something went wrong. Please try again.";
 const EXPIRED = "Your session expired — sign in again.";
@@ -145,16 +146,21 @@ export async function savePlatformSectionAction(
     p_lead: d.lead ?? null,
     p_hero_image_path: d.heroImagePath ?? null,
     p_hero_position: d.heroPosition ?? null,
-    p_youtube_url: d.youtubeUrl ?? null,
+    /* Only the four section pages have a video, so only their form sends the field. */
+    p_youtube_url: formData.has("youtubeUrl")
+      ? (d.youtubeUrl ?? NO_VIDEO_LINK)
+      : null,
   });
   if (error) return { ok: false, message: GENERIC };
 
   /* The page itself, plus the reader, whose breadcrumb carries the page name.
      `about` is served at /dashboard — revalidating "/about" would be a silent
-     no-op, which is the failure PP5 found in this very file. */
+     no-op, which is the failure PP5 found in this very file. /dashboard every
+     time, because a section's video button is on its card there. */
   revalidatePath("/admin/content/pages");
-  revalidatePath(d.slug === "about" ? "/dashboard" : `/${d.slug}`);
+  revalidatePath("/dashboard");
   if (d.slug !== "about") {
+    revalidatePath(`/${d.slug}`);
     revalidatePath(`/${d.slug}/[topic]/guide`, "page");
   }
   return { ok: true, message: "Saved." };
@@ -308,7 +314,7 @@ export async function saveFocusAreaAction(
   const guard = await adminGuard();
   if (!guard.ok) return { ok: false, message: guard.message };
 
-  const { error } = await guard.supabase.rpc("admin_upsert_platform_topic", {
+  const { data: savedId, error } = await guard.supabase.rpc("admin_upsert_platform_topic", {
     p_id: d.id ?? null,
     p_group_id: d.groupId,
     p_slug: slug ?? null,
@@ -340,7 +346,8 @@ export async function saveFocusAreaAction(
   if (error) return { ok: false, message: focusAreaMessage(error.message) };
 
   revalidatePlatform();
-  return { ok: true, message: "Saved." };
+  /* The id lets a brand-new row open for editing as itself: see FocusAreasAdmin. */
+  return { ok: true, message: "Saved.", id: typeof savedId === "string" ? savedId : undefined };
 }
 
 const publishSchema = z.object({

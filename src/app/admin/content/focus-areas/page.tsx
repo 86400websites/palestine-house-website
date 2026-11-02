@@ -54,16 +54,21 @@ export default async function FocusAreasAdminPage({
   const topics = (topicData as TopicRow[] | null) ?? [];
   const selected = sel ? (topics.find((t) => t.id === sel) ?? null) : null;
 
+  /* Stays null when the read fails, which is not the same as an empty guide: the form
+     then leaves the guide's field out, so a Save, even one only adding a video link,
+     cannot write an empty box over the owner's text. */
   let guide: GuideBody | null = null;
   if (selected) {
     const { data } = await supabase.rpc("admin_get_element", {
       p_slug: selected.element_slug,
     });
     const row = ((data as { simple_guide_md: string | null }[] | null) ?? [])[0];
-    guide = {
-      element_id: selected.element_id,
-      simple_guide_md: row?.simple_guide_md ?? null,
-    };
+    if (row) {
+      guide = {
+        element_id: selected.element_id,
+        simple_guide_md: row.simple_guide_md,
+      };
+    }
   }
 
   return (

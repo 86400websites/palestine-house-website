@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/auth/profile";
+import { safeHttpUrl } from "@/lib/workspace/content";
 import { PagesAdmin, type PageRow } from "./pages-admin";
 
 /* /admin/content/pages (PP6a) — the hero copy for the About landing and the
@@ -39,7 +40,12 @@ export default async function PagesAdminPage({
 
   const supabase = await createClient();
   const { data } = await supabase.rpc("admin_list_platform_sections");
-  const rows = (data as PageRow[] | null) ?? [];
+  /* safeHttpUrl: a section with no video stores a non-URL (NO_VIDEO_LINK), which the
+     form shows as the blank it means. */
+  const rows = ((data as PageRow[] | null) ?? []).map((r) => ({
+    ...r,
+    youtube_url: safeHttpUrl(r.youtube_url),
+  }));
   const selected = sel ? (rows.find((r) => r.slug === sel) ?? null) : null;
 
   return (

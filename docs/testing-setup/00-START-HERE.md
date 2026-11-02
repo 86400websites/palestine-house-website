@@ -32,7 +32,7 @@ The core invariant here is the **approval gate** (`profiles.is_approved`). Four 
 |---|---|
 | **Anonymous visitor** | No session. Public shell only. |
 | **Pending partner** | Account exists, `is_approved = false`. Waiting for HQ. |
-| **Approved partner** | Full access to the gated platform — 4 sections · 22 focus areas · 88 templates. |
+| **Approved partner** | Full access to the gated platform — 4 sections · 22 focus areas · 83 templates and practical tools. |
 | **HQ admin** | Additionally in the `admins` table, server-checked. |
 
 "People who shouldn't get in, can't" is not one line on the feature list. It is **the** line. Half of every test in the gate is a denied-state assertion, and the pending-partner tests matter as much as the approved-partner ones. See [`SECURITY-CHECKLIST.md`](../SECURITY-CHECKLIST.md) §15 for the invariants themselves — read them, do not paraphrase them.

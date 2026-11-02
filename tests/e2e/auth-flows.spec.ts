@@ -31,11 +31,21 @@ test("AC-012: a wrong password fails safely", async ({ page }) => {
   await page.getByLabel("Email").fill(ROLES.approved.email);
   await page.getByLabel("Password").fill("definitely-not-the-password");
   await page.getByRole("button", { name: "Sign in" }).click();
-  // A clear message inside the form, still on /login, no session created.
+  // A clear message inside the form, still on /login, no session created. The refusal
+  // itself, because the form's own "Password" label would satisfy any text check.
+  await expect(page.locator(".auth-note")).toBeVisible({ timeout: 30_000 });
   await expect(page).toHaveURL(/\/login/);
-  await expect(
-    page.locator("form").filter({ has: page.getByLabel("Email") }),
-  ).toContainText(/password|match|try|couldn|didn/i, { timeout: 30_000 });
+  const known = (await page.locator(".auth-note").innerText()).trim();
+  // An address with no account gets the same words, so the message reveals nothing.
+  await page.goto("/login");
+  await page.getByLabel("Email").fill("nobody-here@robot-test.invalid");
+  await page.getByLabel("Password").fill("definitely-not-the-password");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.locator(".auth-note")).toBeVisible({ timeout: 30_000 });
+  expect(
+    (await page.locator(".auth-note").innerText()).trim(),
+    "the message differs by account existence",
+  ).toBe(known);
   // No session was created: a gated URL still lands on the sign-in page.
   await page.goto("/dashboard");
   await page.waitForURL(/\/login/, { timeout: 30_000 });
@@ -49,11 +59,14 @@ test("AC-013: password-reset is safe in both directions", async ({
   await page.goto("/forgot-password");
   await page.getByLabel("Email").fill(ROLES.pending.email);
   await page.getByRole("button", { name: "Send reset link" }).click();
+  // The answer itself: read straight after the click, both reads would be the form.
+  await expect(page.locator(".auth-note")).toBeVisible({ timeout: 30_000 });
   const known = (await page.locator("main").innerText()).trim();
 
   await page.goto("/forgot-password");
   await page.getByLabel("Email").fill("nobody-here@robot-test.invalid");
   await page.getByRole("button", { name: "Send reset link" }).click();
+  await expect(page.locator(".auth-note")).toBeVisible({ timeout: 30_000 });
   const unknown = (await page.locator("main").innerText()).trim();
   expect(unknown, "responses differ by account existence").toBe(known);
 
@@ -74,9 +87,13 @@ test("FM-001: the contact form rejects bad input, client and server", async ({
   page,
 }) => {
   await page.goto("/contact");
-  // Client side: an empty submit does not produce a success state.
-  await page.getByRole("button", { name: /send/i }).click();
-  await expect(page.getByLabel("Name")).toBeVisible();
+  // Client side: an empty submit is stopped at the first field, and produces no
+  // success state.
+  await page.getByRole("button", { name: "Send Message" }).click();
+  await expect(page.locator("#c-name")).toBeFocused();
+  await expect(
+    page.getByText("Thank you. Your enquiry has been submitted."),
+  ).toHaveCount(0);
 
   // Server side: a request around the form is refused too.
   const bad = await page.request.post("/api/resend/contact", {
@@ -91,14 +108,54 @@ test("FM-003: the apply form rejects bad input with clear messages", async ({
 }) => {
   await page.goto("/apply");
   await page.getByLabel("Your name").fill("ROBOT TEST invalid-input probe");
-  await page.getByLabel("Email").fill("not-an-email");
+  await page.getByLabel("Email address").fill("not-an-email");
   await page.getByLabel(/^Password/).fill("short");
   await page.getByLabel("City", { exact: true }).fill("Robot Test City");
-  await page.getByLabel(/Tell us about your city/).fill("ROBOT TEST — invalid input probe.");
-  await page.getByRole("button", { name: /submit|apply|send/i }).click();
+  await page
+    .getByLabel("What interests you about Palestine House?")
+    .fill("ROBOT TEST — invalid input probe.");
+  await page.getByRole("button", { name: "Send Application" }).click();
+  // A refusal from either layer first: the browser focuses the bad field, or the
+  // server's message renders. A submission that went through shows neither.
+  await expect(page.locator("#a-email:focus, .auth-error").first()).toBeVisible({
+    timeout: 30_000,
+  });
   // Still on the form — no confirmation view, no account created.
   await expect(page).toHaveURL(/\/apply/);
   await expect(
-    page.getByText("Thank you — your application is in, and your account is created."),
+    page.getByText("Thank you. Your application has been received."),
   ).toHaveCount(0);
+
+  /* The server's own check, the only one on this public write until SYS1.5. With the
+     browser's taken away, each bad field gets its own message and nothing is created.
+     React resets the form when its action finishes, so each case fills it again. */
+  await page.locator("form.apply-form").evaluate((form: HTMLFormElement) => {
+    form.noValidate = true;
+  });
+  for (const [email, password, city, message] of [
+    ["not-an-email", "long-enough-password", "Robot Test City", "Please enter a valid email."],
+    ["e2e-applicant-refused@robot-test.invalid", "short", "Robot Test City", "Choose a password with at least 8 characters."],
+    ["e2e-applicant-refused@robot-test.invalid", "long-enough-password", "", "Please fill in all the required fields."],
+  ]) {
+    await page.getByLabel("Your name").fill("ROBOT TEST invalid-input probe");
+    await page.getByLabel("Email address").fill(email);
+    await page.getByLabel(/^Password/).fill(password);
+    await page.getByLabel("City", { exact: true }).fill(city);
+    await page
+      .getByLabel("What interests you about Palestine House?")
+      .fill("ROBOT TEST — invalid input probe.");
+    await page.getByRole("button", { name: "Send Application" }).click();
+    await expect(page.locator(".auth-error")).toHaveText(message, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\/apply/);
+  }
+});
+
+test("PG-008 (noindex): the sign-in page says noindex", async ({ page }) => {
+  // The gated and admin halves are in access-allowed.spec.ts, under their own roles.
+  await page.goto("/login");
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
+    "content",
+    /noindex/,
+    { timeout: 30_000 },
+  );
 });

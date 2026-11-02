@@ -7,7 +7,8 @@ import { type PlatformPageKey } from "@/lib/workspace-v2/spec";
    an honest "content arriving" state where PP3 will build the accordion of
    focus areas.
 
-   The hero copy is the mockup verbatim (generated spec). The waiting state is
+   The hero copy comes from getPlatformPages(): the database row where a field
+   is set, the hand-maintained spec everywhere else. The waiting state is
    NEW copy — the mockup has no such state because its content was hardcoded —
    written to the brand-voice rules: warm, short, concrete, no hype and no
    promise of a date we do not control.

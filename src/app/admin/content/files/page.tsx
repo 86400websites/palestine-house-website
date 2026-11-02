@@ -61,7 +61,8 @@ export default async function FilesAdminPage({
       <h1 className="adm-h1">Files.</h1>
       <p className="adm-intro">
         The guide and the templates people download. One guide per focus area,
-        as many templates as you need. Word files and PDFs, up to 4 MB each.
+        as many templates as you need. Word files, a PNG logo or SVG layouts, up
+        to 4 MB each.
       </p>
       <FilesAdmin topics={topics} selected={selected} files={files} />
     </div>

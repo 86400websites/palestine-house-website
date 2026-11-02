@@ -68,7 +68,7 @@ Either way you get back **one plain paragraph**: what actually happened, who was
    | Severity | Means, on this site | You respond |
    |---|---|---|
    | **Blocker** | The site is down · nobody can sign in · the **approval gate** is wrong in either direction (gated content reachable without approval, or an approved partner locked out) · applications are not being saved | Fix **today**. If gated content is exposed or the site is truly down, revert first and fix second — [`../ROLLBACK.md`](../ROLLBACK.md) (and [`../ROLLBACK-RUNBOOK.md`](../ROLLBACK-RUNBOOK.md) if a migration is involved) |
-   | **High** | A real feature broken for some people — template downloads failing, a guide page erroring, Ask HQ not reaching HQ, approval emails not sending | Fix sprint **this week** |
+   | **High** | A real feature broken for some people — template downloads failing, a guide page erroring, a contact-form enquiry not arriving, approval emails not sending | Fix sprint **this week** |
    | **Medium** | Annoying, but everything works | [`../POST-LAUNCH-BACKLOG.md`](../POST-LAUNCH-BACKLOG.md), next sprint |
    | **Low** | Cosmetic | Backlog |
 
@@ -80,7 +80,7 @@ Either way you get back **one plain paragraph**: what actually happened, who was
 
    ✅ **Available since SYS2 (2026-08-22).** The suite is `tests/e2e/`, run with `pnpm run test:e2e` against a deployed Preview. Write the regression spec there, add its line to `docs/FEATURE-LIST.md` for owner approval, and only then mark the incident Closed. (CI still runs typecheck, lint, build, gitleaks and `pnpm audit` with no test step — the suite runs against Previews, not in CI.)
 
-5. **Tell the person, close the log.** Sentry shows exactly who was hit, so you message exactly those people — [`templates/USER-UPDATE-TEMPLATE.md`](./templates/USER-UPDATE-TEMPLATE.md). A row in `docs/INCIDENT-LOG.md` cannot be marked Closed until **user informed** is ticked, or *"n/a — caught before anyone was affected"* is recorded. The loop always ends with a human hearing from you. That is how a bug becomes a trust moment instead of a churn moment — and on a site whose whole conversion is an application reviewed by HQ, trust is the product.
+5. **Tell the person, close the log.** Sentry shows exactly who was hit, so you message exactly those people — [`templates/USER-UPDATE-TEMPLATE.md`](./templates/USER-UPDATE-TEMPLATE.md). A row in `docs/INCIDENT-LOG.md` cannot be marked Closed until **user informed** is ticked, or *"n/a — caught before anyone was affected"* is recorded. The loop always ends with a human hearing from you. That is how a bug becomes a trust moment instead of a churn moment — and on a site whose whole conversion is an application for community access, trust is the product.
 
 ## 5. What Sentry cannot see — and who covers it
 
@@ -94,8 +94,7 @@ The real silent-failure surfaces here, verified in the code:
 | **`/apply` → Mailchimp tag** | The `applicant` tag is best-effort under the same rule. Failure is invisible. | Vercel logs · Mailchimp |
 | **Approval at `/admin/approvals`** | `is_approved` flips correctly and the platform unlocks, but the approval or decline **email** is best-effort too. The partner is approved and never told. | The Resend delivery log · the `profiles` row |
 | **Password reset (`/forgot-password`)** | The page **always** shows the same neutral confirmation, on purpose, so it never reveals whether an address is registered. It looks identical whether Supabase Auth sent the mail or not. | Supabase Auth logs · the person's spam folder |
-| **Ask HQ on `/support`** | The question is validated and written through the approved-only RPC, then emailed to HQ via Resend with the sender's account address as reply-to. The write can succeed while the email does not arrive. | The Resend delivery log · the support request row |
-| **Contact form** | Server-side Route Handler → Resend. Same shape. | The Resend delivery log |
+| **Contact form** | Server-side Route Handler → Resend, with the sender's address as reply-to. No row is stored, so the email is the only record. In Production a failed send shows the sender the error rather than dropping silently; a sent message can still land in spam. *(Community Contacts on `/support` only links here: it writes nothing and sends nothing.)* | The Resend delivery log |
 | **Template download** | Templates live in a **private** Storage bucket and are handed out as short-lived server-issued signed URLs to approved partners only. A download can fail from an expired link, a missing object, or a caller who is not approved — the last of which is the gate **working**. | Vercel logs · Storage · the caller's approval status |
 | **A guide page** (`/{section}/{topic}/guide`) | This one usually *does* crash, so Sentry will catch it once SYS3 ships. | Sentry |
 

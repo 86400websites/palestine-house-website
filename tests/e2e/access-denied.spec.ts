@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   ADMIN_MARKERS,
   ADMIN_ROUTES,
+  PENDING_HEADING,
   PLATFORM_ROUTES,
   attachConsoleCapture,
   discoverPlatformContent,
@@ -10,6 +11,13 @@ import {
 } from "./helpers/app";
 import { createClient } from "@supabase/supabase-js";
 import { ROLES, rolePassword } from "./helpers/roles";
+
+/* A marker as rendered element text. A flight payload is escaped inside the HTML and raw
+   on an RSC request. */
+const rendersMarker = (body: string, marker: string) =>
+  body.includes(`>${marker}<`) ||
+  body.includes(`\\"children\\":\\"${marker}\\"`) ||
+  body.includes(`"children":"${marker}"`);
 
 /* Section B of docs/FEATURE-LIST.md — the DENIED half of the four-role grid.
    The most important file in this suite: every check here is "people who
@@ -104,11 +112,8 @@ test("AC-002: anonymous — every /admin route denies with no admin strings in t
          leak is the marker as rendered element text or an exact flight
          children string. */
       for (const marker of ADMIN_MARKERS) {
-        const rendered =
-          body.includes(`>${marker}<`) ||
-          body.includes(`\\"children\\":\\"${marker}\\"`);
         expect(
-          rendered,
+          rendersMarker(body, marker),
           `admin string "${marker}" rendered in anonymous ${path}`,
         ).toBe(false);
       }
@@ -128,15 +133,18 @@ test.describe("as the pending partner", () => {
     test.setTimeout(180_000);
     const errors = attachConsoleCapture(page);
     await page.goto("/dashboard");
-    await expect(
-      page.getByRole("heading", { name: "Your application is under review." }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: PENDING_HEADING })).toBeVisible();
 
-    // Sections and guides: whatever each route answers (redirect back to the
-    // pending dashboard or an empty shell), it must resolve no focus-area
-    // title, no guide body, no template row, no download control.
+    // Sections and guides: each route answers with the pending notice (CR1: each of
+    // them says it itself), and it must resolve no focus-area title, no
+    // guide body, no template row, no download control. Waiting for the notice
+    // also means the checks below read the finished page, not a loading shell.
     for (const path of ["/setup", "/operate", "/program", "/support", ...content.guideLinks]) {
       await page.goto(path);
+      await expect(
+        page.getByRole("heading", { name: PENDING_HEADING }),
+        `no pending notice on ${path}`,
+      ).toBeVisible({ timeout: 30_000 });
       const body = (await page.content()) ?? "";
       for (const marker of content.gatedMarkers) {
         expect(
@@ -189,20 +197,28 @@ test.describe("as the pending partner", () => {
   test("AC-004: the pending partner's search is empty and leaks nothing", async ({
     page,
   }) => {
-    // Capture the index server-action response body the moment it arrives —
-    // reading it later can fail once anything else moves.
-    let payload = "";
-    page.on("response", (response) => {
-      const request = response.request();
-      if (request.method() === "POST" && request.headers()["next-action"]) {
-        void response
-          .text()
-          .then((text) => {
-            payload += text;
-          })
-          .catch(() => {});
-      }
+    // Capture the index server-action response body inside the page. Asking the
+    // browser for it from out here can fail after the response has arrived, which
+    // left this empty on a slow machine with the action answered and nothing checked.
+    await page.addInitScript(() => {
+      const captured: string[] = [];
+      Object.assign(window, { __actionBodies: captured });
+      const original = window.fetch;
+      window.fetch = async (...args) => {
+        const response = await original(...args);
+        if (new Headers(args[1]?.headers).has("next-action")) {
+          void response
+            .clone()
+            .text()
+            .then((text) => captured.push(text));
+        }
+        return response;
+      };
     });
+    const readPayload = () =>
+      page.evaluate(() =>
+        (window as unknown as { __actionBodies: string[] }).__actionBodies.join(""),
+      );
 
     await page.goto("/dashboard");
     // Opening via keyboard can race hydration — press again if needed.
@@ -213,10 +229,13 @@ test.describe("as the pending partner", () => {
     } catch {
       // A second Ctrl+K would TOGGLE a just-opened dialog shut — fall back to
       // the footer's real entry point instead.
-      await page.getByRole("button", { name: "Search all resources" }).first().click();
+      await page.getByRole("button", { name: "Search Resources" }).first().click();
       await expect(input).toBeVisible({ timeout: 15_000 });
     }
-    await expect.poll(() => payload.length, { timeout: 30_000 }).toBeGreaterThan(0);
+    await expect
+      .poll(async () => (await readPayload()).length, { timeout: 30_000 })
+      .toBeGreaterThan(0);
+    const payload = await readPayload();
     // The index for a pending caller is EMPTY: no titles, no resource ids,
     // no storage paths, no bucket names (D-PP-j).
     for (const marker of content.gatedMarkers) {
@@ -294,6 +313,13 @@ test.describe("as the pending partner", () => {
     expect(rows.length, "approved robot listed no templates").toBeGreaterThan(0);
     const realId = rows[0].id;
 
+    // AC-003's "the gated reads return nothing", asked of the read itself. The pages
+    // stop before they reach it, so no page check would see it lose its approval test.
+    expect(
+      await listAs("pending"),
+      "🔴 get_resources returned rows to a PENDING partner",
+    ).toHaveLength(0);
+
     // Same id, approved caller: the issuer WORKS.
     const allowed = await downloadAs("approved", realId);
     expect(
@@ -315,6 +341,15 @@ test.describe("as the pending partner", () => {
       false,
     );
 
+    // Same id, a caller who never signed in: nothing either.
+    const stranger = await createClient(url!, key!, {
+      auth: { persistSession: false },
+    }).rpc("get_resource_download", { p_id: realId });
+    expect(
+      ((stranger.data ?? []) as unknown[]).length,
+      "🔴 the download issuer returned a row to an ANONYMOUS caller",
+    ).toBe(0);
+
     // And the passive check stays: nothing in the UI even asks for a file.
     const storageRequests: string[] = [];
     page.on("request", (r) => {
@@ -332,7 +367,9 @@ test.describe("as the approved partner", () => {
 
   test("AC-006: approved is never admin — every /admin route answers with the 404 page", async ({
     page,
+    request,
   }, testInfo) => {
+    test.setTimeout(180_000);
     for (const path of ADMIN_ROUTES) {
       const response = await page.goto(path);
       /* The substance: the branded 404 page, zero admin content. The HTTP
@@ -353,6 +390,17 @@ test.describe("as the approved partner", () => {
           body.includes(`${marker}</h1>`) || body.includes(`${marker}</h2>`),
           `admin heading "${marker}" rendered for a non-admin on ${path}`,
         ).toBe(false);
+      }
+      /* The finished page cannot show a heading that streamed and was then replaced, and
+         a session-only gate would stop nothing for this role, so read what was sent too. */
+      for (const headers of [undefined, { RSC: "1" }] as const) {
+        const { body: raw } = await probe(request, path, headers);
+        for (const marker of ADMIN_MARKERS) {
+          expect(
+            rendersMarker(raw, marker),
+            `admin string "${marker}" sent to a non-admin on ${path}${headers ? " (RSC)" : ""}`,
+          ).toBe(false);
+        }
       }
     }
   });

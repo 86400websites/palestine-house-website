@@ -3,10 +3,11 @@
 The website for **Palestine House**, a global network of Palestinian cultural spaces.
 
 It is **two shells behind one gate**. The **public shell** is a calm, editorial marketing site
-(Home · The Model · Experience · Bring a House · Our Support · About · Contact · Focus Areas) whose
-single conversion is the green **Apply** button. The **private shell** is an approval-gated partner
-reference platform: applying creates a pending account, HQ approves it, and the partner unlocks four
-toolkit sections (Setup · Operate · Program · Support) with their focus areas, guides and templates.
+(Home · The Model · Experience · Bring a House · The Community · About · Contact · Focus Areas) whose
+single conversion is the **Apply to Join** button. The **private shell** is an approval-gated partner
+reference platform, the UI's Community Platform: applying creates a pending account, an HQ admin
+approves it, and the partner unlocks four toolkit sections (Setup · Operate · Program · Support) with
+their focus areas, Overviews, guides and templates.
 It is a **reference, not a course** — no quizzes, no certificate, no daily-ops tooling, and no saved
 per-user state beyond the partner's own account details.
 
@@ -99,14 +100,15 @@ history.
 | [`docs/QA-CHECKLIST.md`](./docs/QA-CHECKLIST.md) | What gets tested before a release. |
 | [`docs/ENV-VARS-SAFETY.md`](./docs/ENV-VARS-SAFETY.md) | Public vs server-only env vars; redeploy-after-change. |
 | [`docs/ROLLBACK.md`](./docs/ROLLBACK.md) · [`docs/ROLLBACK-RUNBOOK.md`](./docs/ROLLBACK-RUNBOOK.md) | Production broke — what now. |
+| [`docs/CR1-RELEASE-RUNBOOK.md`](./docs/CR1-RELEASE-RUNBOOK.md) | The current content release and its rollback; every production step is the owner's. |
 | [`docs/BROWSER-TOOLS.md`](./docs/BROWSER-TOOLS.md) | Driving the site in a real browser for verification. |
 | [`docs/SUPABASE-MCP-SAFETY.md`](./docs/SUPABASE-MCP-SAFETY.md) | Rules for the Supabase MCP: test is read/write, production is read-only. |
 | [`docs/sprint-prompts/`](./docs/sprint-prompts/) · [`docs/code-reviews/`](./docs/code-reviews/) | Per-sprint records and independent review verdicts. |
 | [`docs/LAUNCH-CHECKLIST.md`](./docs/LAUNCH-CHECKLIST.md) | The launch gate — retro-filled, since this site launched 2026-06-19. Now the standing gate for the parked domain relaunch. |
 | [`docs/HANDOFF.md`](./docs/HANDOFF.md) | Every account the site depends on, and who must own it at handover. |
 | [`docs/templates/`](./docs/templates/) | Per-PR and per-sprint skeletons — the fill-in forms behind the gates above. |
-| `docs/FEATURE-LIST.md` · `tests/e2e/` | *Arriving in SYS2 (testing launch gate).* |
-| `docs/INCIDENT-LOG.md` · `docs/error-tracking/` | *Arriving in SYS3 (error tracking).* |
+| [`docs/FEATURE-LIST.md`](./docs/FEATURE-LIST.md) · [`tests/e2e/`](./tests/e2e/) | What the site does, line by line, and the Playwright suite that tests it (the launch gate, since SYS2). |
+| [`docs/error-tracking/`](./docs/error-tracking/) | The incident lane and its templates, installed at SYS1. Sentry and `docs/INCIDENT-LOG.md` are *arriving in SYS3 (error tracking).* |
 
 The approved copy and design inputs (`docs/page-copy/`, `docs/page-designs/`, `docs/source-assets/`)
 are deliberately **kept out of this repository** — see `.gitignore`. They are supplied locally by the

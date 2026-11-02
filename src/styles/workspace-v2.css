@@ -184,7 +184,10 @@
     color 0.32s var(--pw-ease);
 }
 
-.pw-root .pw-header.is-solid {
+/* Transparent only over a hero photo. Solid once scrolled (.is-solid), and from the
+   start wherever .pw-main does not open with a hero: the guide reader, /account and
+   the pending notice, where cream text would sit on a light page. */
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) {
   background: rgba(250, 246, 238, 0.94);
   border-bottom-color: var(--pw-line);
   box-shadow: 0 5px 20px rgba(42, 36, 30, 0.05);
@@ -218,11 +221,11 @@
   display: none;
 }
 
-.pw-root .pw-header.is-solid .pw-brand-logo--overlay {
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-brand-logo--overlay {
   display: none;
 }
 
-.pw-root .pw-header.is-solid .pw-brand-logo--solid {
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-brand-logo--solid {
   display: block;
 }
 
@@ -274,17 +277,17 @@
   background: var(--pw-olive-300);
 }
 
-.pw-root .pw-header.is-solid .pw-nav-link:hover {
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-nav-link:hover {
   background: var(--pw-olive-100);
   color: var(--pw-olive-800);
 }
 
-.pw-root .pw-header.is-solid .pw-nav-link.is-active {
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-nav-link.is-active {
   background: transparent;
   color: var(--pw-olive-700);
 }
 
-.pw-root .pw-header.is-solid .pw-nav-link.is-active::after {
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-nav-link.is-active::after {
   background: var(--pw-olive-700);
 }
 
@@ -318,6 +321,7 @@
 /* --- Header actions ------------------------------------------------------ */
 
 .pw-root .pw-header-actions {
+  grid-column: 3; /* below 1080px the nav is gone, and this would take its column */
   display: flex;
   align-items: center;
   justify-self: end;
@@ -360,19 +364,19 @@
   display: none;
 }
 
-.pw-root .pw-header.is-solid .pw-header-action {
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-header-action {
   border-color: var(--pw-line);
   background: #fff;
   color: var(--pw-char-900);
 }
 
-.pw-root .pw-header.is-solid .pw-header-action:hover {
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-header-action:hover {
   border-color: var(--pw-olive-600);
   background: var(--pw-olive-50);
 }
 
-.pw-root .pw-header.is-solid .pw-header-action--account,
-.pw-root .pw-header.is-solid .pw-header-action--account:hover {
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-header-action--account,
+.pw-root .pw-header:is(.is-solid, .pw-root:not(:has(.pw-main > .pw-hero:first-child)) *) .pw-header-action--account:hover {
   border-color: var(--pw-olive-600);
   background: var(--pw-olive-600);
   color: #fff;
@@ -565,6 +569,14 @@
       rgba(20, 18, 15, 0.03) 45%,
       rgba(20, 18, 15, 0.55)
     );
+}
+
+/* At these widths the text reaches where the gradient has faded, so a colour sits under
+   both layers. It has to follow the rule above, whose shorthand would reset it. */
+@media (min-width: 621px) and (max-width: 1240px) {
+  .pw-root .pw-hero::before {
+    background-color: rgba(25, 22, 17, 0.45);
+  }
 }
 
 .pw-root .pw-hero::after {
@@ -892,6 +904,17 @@
     min-height: 455px;
   }
 
+  /* The desktop scrim fades towards the right, where the text stops. Here the text runs
+     the full width, so it covers the width. */
+  .pw-root .pw-hero::before {
+    background: linear-gradient(
+      180deg,
+      rgba(25, 22, 17, 0.6),
+      rgba(25, 22, 17, 0.6) 30%,
+      rgba(25, 22, 17, 0.66)
+    );
+  }
+
   .pw-root .pw-hero--internal {
     min-height: 280px;
   }
@@ -1142,10 +1165,11 @@
 
 .pw-root .pw-footer-bottom-inner {
   display: flex;
+  flex-direction: column; /* the copyright sits under the tagline, clear of both pieces of art */
   align-items: center;
   justify-content: center;
   min-height: 76px;
-  gap: 26px;
+  gap: 4px;
 }
 
 .pw-root .pw-footer-tagline {
@@ -1156,8 +1180,6 @@
 }
 
 .pw-root .pw-footer-copy {
-  position: absolute;
-  right: 26px;
   color: rgba(255, 255, 255, 0.5);
   font-size: 10.5px;
 }
@@ -1202,6 +1224,14 @@
 .pw-root .pw-toast.is-visible {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+/* CR1: "Request Community Contacts" needs about 255px. Across this band a narrower
+   photo gives the button that room, so its label keeps to one line. */
+@media (min-width: 981px) and (max-width: 1240px) {
+  .pw-root .pw-footer-cta {
+    grid-template-columns: minmax(300px, 0.6fr) minmax(0, 1.4fr);
+  }
 }
 
 @media (max-width: 980px) {
@@ -1254,10 +1284,6 @@
     min-height: 90px;
     padding-top: 20px;
     gap: 5px;
-  }
-
-  .pw-root .pw-footer-copy {
-    position: static;
   }
 
   .pw-root .pw-footer-sprig {
@@ -1429,6 +1455,9 @@
   background: var(--pw-white);
   box-shadow: 0 6px 22px rgba(42, 36, 30, 0.045);
   overflow: hidden;
+  /* A #topic- link scrolls the card to the top; this keeps it clear of the fixed
+     header. CR1's guide cross-links and search shortcuts all arrive this way. */
+  scroll-margin-top: calc(var(--pw-header-h) + 12px);
   transition:
     border-color 0.18s,
     box-shadow 0.18s;
@@ -1563,6 +1592,13 @@
   line-height: 1.3;
 }
 
+/* Focus lands on the title by script when a #topic- link opens the card, which
+   CR1's guide cross-links now do often. Nothing here can be clicked, so a ring
+   reads as a selected text box; the card's flash is the visual cue. */
+.pw-root .pw-topic-title:focus-visible {
+  outline: none;
+}
+
 .pw-root .pw-topic-desc {
   margin-top: 7px;
   max-width: 62ch;
@@ -1649,6 +1685,26 @@
 
 .pw-root .pw-topic-summary li {
   margin-bottom: 3px;
+}
+
+/* CR1's expanded copy gives every card a list and some of them links to other focus
+   areas, so these read as they do in the guide reader. */
+.pw-root .pw-topic-summary ul {
+  list-style: disc;
+}
+
+.pw-root .pw-topic-summary ol {
+  list-style: decimal;
+}
+
+.pw-root .pw-topic-summary li::marker {
+  color: var(--pw-olive-600);
+}
+
+.pw-root .pw-topic-summary a {
+  color: var(--pw-olive-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .pw-root .pw-topic-summary strong {
@@ -1928,7 +1984,26 @@
   transform: none;
 }
 
+/* A Watch Video placeholder keeps its resting colours under the pointer, or the
+   hover reads as an action that is about to happen. */
+.pw-root .pw-topic-video[aria-disabled="true"]:hover,
+.pw-root .pw-journey-card:hover .pw-journey-video[aria-disabled="true"]:hover {
+  border-color: var(--pw-line-strong);
+  background: var(--pw-white);
+}
+
 /* --- Templates grid ------------------------------------------------------ */
+
+/* CR1: what opens a focus-area panel, above the one Simple Guide card. */
+.pw-root .pw-resource-intro {
+  display: grid;
+  gap: 6px;
+  max-width: 640px;
+}
+
+.pw-root .pw-overview-file {
+  margin-block: 23px 27px;
+}
 
 .pw-root .pw-templates {
   margin-top: 27px;
@@ -1962,7 +2037,7 @@
 .pw-root .pw-template-code {
   display: grid;
   place-items: center;
-  min-width: 42px;
+  min-width: 48px;
   height: 34px;
   padding: 0 7px;
   border-radius: 8px;
@@ -1979,6 +2054,21 @@
   font-size: 11.75px;
   font-weight: 700;
   line-height: 1.4;
+}
+
+/* CR1: the handover names each download by what it is. Beside a small icon button
+   in a narrow row the words sit under the title, and the button carries them too. */
+.pw-root .pw-template-kind {
+  display: block;
+  margin-top: 2px;
+  color: var(--pw-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.pw-root .pw-template-title,
+.pw-root .pw-template-kind {
+  text-wrap: balance;
 }
 
 .pw-root .pw-template-download {
@@ -2120,13 +2210,6 @@
     padding-top: 11px;
   }
 
-  .pw-root .pw-topic-desc {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-    overflow: hidden;
-  }
-
   .pw-root .pw-subhead {
     align-items: flex-start;
     flex-direction: column;
@@ -2181,14 +2264,20 @@
   }
 }
 
-/* --- Ask HQ (PP3) -------------------------------------------------------- */
-/* The moss panel on /support: copy on the left, form on the right. It posts to
-   the Ask HQ action that has been live since S6, so the mockup's success state
-   ships with it — see pw-ask-hq.tsx for why D-PP-h no longer applies. */
+/* --- Community Contacts (PP3 as Ask HQ; CR1) ------------------------------ */
+/* The moss panel on /support: copy on the left, guidance and a link on the right
+   (pw-community-contacts.tsx). It keeps the place and the look Ask HQ had. The
+   scroll margin lets /support#community-contacts land clear of the fixed header. */
 
 .pw-root .pw-ask {
   padding: 0 0 96px;
   background: var(--pw-cream-50);
+  scroll-margin-top: calc(var(--pw-header-h) + 16px);
+}
+
+/* Focus lands on the whole panel by arrival, so a ring would draw round all of it. */
+.pw-root .pw-ask:focus-visible {
+  outline: none;
 }
 
 .pw-root .pw-ask-wrap {
@@ -2283,6 +2372,39 @@
   background: var(--pw-white);
   color: var(--pw-char-900);
   box-shadow: 0 13px 32px rgba(0, 0, 0, 0.11);
+}
+
+/* CR1: the panel keeps its place and its look; it now holds guidance and one link. */
+.pw-root .pw-contact-panel {
+  display: grid;
+  gap: 14px;
+  align-content: center;
+  justify-items: start;
+  font-size: 13.5px;
+}
+
+.pw-root .pw-contact-panel .pw-form-note {
+  max-width: none;
+}
+
+.pw-root .pw-contact-panel p > a {
+  color: var(--pw-olive-800);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* CR1: tight enough to keep the longer label on one line in the 216px pill at
+   320; from 621px up it is a button, sized as .pw-reader-download .pw-action is. */
+.pw-root .pw-contact-panel .pw-action {
+  gap: 6px;
+  padding-inline: 8px;
+}
+
+@media (min-width: 621px) {
+  .pw-root .pw-contact-panel .pw-action {
+    width: auto;
+    padding-inline: 18px;
+  }
 }
 
 .pw-root .pw-form-grid {
@@ -2568,6 +2690,17 @@
   + p:has(> strong:only-child)
   > strong:only-child {
   margin-top: 0.3em;
+}
+
+/* CR1: a bold-only line straight after an h3 is the question under its "Simple
+   question" label, not a second heading, so it reads as bold body text. Across
+   the 22 guides that label is the only h3 ever followed by such a line. */
+.pw-root .pw-reader-body h3 + p > strong:only-child {
+  margin-top: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: normal;
 }
 
 /* The three bodies that DO use Markdown headings, plus every `#` demoted to h2

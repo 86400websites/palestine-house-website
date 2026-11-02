@@ -100,8 +100,9 @@ changed path and confirm each one is on the allowed list.
 - Accessibility (docs/DESIGN.md §11, WCAG AA): keyboard order and visible focus unchanged, contrast
   retained, headings still in order, images keep meaningful alt text, interactive controls keep
   their accessible names.
-- Proof numbers, if any appear: 4 sections · 22 focus areas · 88 templates. The retired band
-  (11 · 33 · 297 · "200+ checklist items" · "120-day launch") must never reappear.
+- Proof numbers, if any appear: 4 sections · 22 focus areas · 83 templates and practical tools. The
+  retired band (11 · 33 · 297 · "200+ checklist items" · "120-day launch", plus the previous
+  release's 88) must never reappear.
 - If mockup, copy and DESIGN.md disagree, stop and record an open decision in
   docs/PROJECT-STATUS.md §5 — only when that file is allowed. Do not pick silently.
 

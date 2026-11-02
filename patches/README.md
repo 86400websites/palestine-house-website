@@ -8,8 +8,9 @@ that no longer matches an installed version stops the install, so one cannot go 
 **What goes wrong without it.** A click on a link between two private pages can silently do
 nothing: the page's data and code all arrive, but the page and the URL never change, and only a
 second click works. An admin form can also sit on "Deleting…" or "Uploading…" after the server
-has finished. Measured on a production build against the test project: up to 9 clicks lost in
-20 on the worst private tab. The live site had it too.
+has finished. Measured on production builds of `main`'s code against the test project: 12 clicks
+lost in 100 across five routes, and up to 7 in 20 on the worst of them, from a section's Read Now
+to its guide. Nothing was measured on the live site itself.
 
 **Why.** Next.js vendors its own copy of React. In that copy, `pingSuspendedRoot` ignores a
 "your data has arrived" signal that fires during a render which has already decided to suspend
@@ -31,4 +32,7 @@ that reads `0 === (executionContext & 2) && prepareFreshStack(root, 0)`), then
 `pnpm patch-commit <folder>`, and delete the old file.
 
 **When to delete it.** At Next 16.3 or later, when that function already records the signal.
-Test CT-012 (`tests/e2e/access-allowed.spec.ts`) goes red if this is removed too early.
+Test CT-012 (`tests/e2e/access-allowed.spec.ts`) goes red if this is removed too early: it reads
+the copy of React a checkout ships for the buggy line, which is certain. Its clicks test the
+behaviour as well, and because the bug is a race they catch it only some of the time: with the
+fix taken out, 7 of 12 runs lost a click.

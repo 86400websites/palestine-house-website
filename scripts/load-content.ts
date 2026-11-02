@@ -1,6 +1,10 @@
 /**
  * scripts/load-content.ts — PP6b LOADER.
  *
+ * ⚠️ HISTORICAL since CR1. This loads the PREVIOUS release (docs/content-v2-spec.json)
+ * and re-running it would put superseded content back. The current content is
+ * loaded by scripts/cr1-content.ts. Kept as the record of the proven mechanisms.
+ *
  * Takes what `scripts/ingest-content.ts` extracted into `docs/content-v2-spec.json`
  * and creates it in the database as DRAFT, plus its template files in the private
  * Storage bucket. This is the pipeline PP6c reruns over all 22 focus areas; PP6b

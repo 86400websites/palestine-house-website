@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { applyAction, type ApplyState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-/* The application form (apply-partner.md) — Apply = sign-up. Live as of
+/* The application form (CR1 copy, section 7.4) — Apply = sign-up. Live as of
    Sprint 3 (3c): a Server Action creates a pending account (signUp, instant
    session) + the application record, then shows the approved confirmation.
    Single "Your name" field (resolved decision D5); the Password field was
@@ -39,10 +40,10 @@ export function ApplyForm() {
             />
           </svg>
         </span>
-        <h3>Thank you — your application is in, and your account is created.</h3>
+        <h3>Thank you. Your application has been received.</h3>
         <p>
-          We’ll review it and be in touch. Sign in any time to check your
-          status.
+          Your account has been created and your community access is pending.
+          Use the same account to sign in for your access update.
         </p>
       </div>
     );
@@ -61,7 +62,7 @@ export function ApplyForm() {
         />
       </div>
       <div className="apply-field">
-        <Label htmlFor="a-email">Email</Label>
+        <Label htmlFor="a-email">Email address</Label>
         <Input
           id="a-email"
           name="email"
@@ -86,26 +87,33 @@ export function ApplyForm() {
         />
       </div>
       <div className="apply-form-row">
-        <div className="apply-field">
+        {/* justify-end keeps the two inputs level when the longer label beside
+            this one wraps. */}
+        <div className="apply-field justify-end">
           <Label htmlFor="a-city">City</Label>
           <Input id="a-city" name="city" required className="bg-white" />
         </div>
         <div className="apply-field">
           <Label htmlFor="a-org">
-            Organisation <span className="apply-field-hint">Optional</span>
+            <span>
+              Organization or group name{" "}
+              <span className="apply-field-hint">(optional)</span>
+            </span>
           </Label>
           <Input id="a-org" name="organisation" className="bg-white" />
         </div>
       </div>
       <div className="apply-field">
-        <Label htmlFor="a-why">
-          Tell us about your city, and why a House
-        </Label>
+        <Label htmlFor="a-why">What interests you about Palestine House?</Label>
+        <p className="apply-micro" id="a-why-hint">
+          A few sentences about yourself, your city and your idea are enough.
+        </p>
         <Textarea
           id="a-why"
           name="why"
           rows={6}
           required
+          aria-describedby="a-why-hint"
           className="bg-white"
         />
       </div>
@@ -115,12 +123,16 @@ export function ApplyForm() {
         </p>
       ) : null}
       <Button size="lg" type="submit" disabled={pending}>
-        Apply to bring a House
+        {pending ? "Sending your application..." : "Send Application"}
         <ArrowRight aria-hidden="true" />
       </Button>
       <p className="apply-micro">
-        Submitting creates your account and sends your application to HQ. We’ll
-        only use your details to follow up.
+        Submitting creates your account and requests community access. Your
+        details will be used to handle your application and account. Please do
+        not include sensitive personal information.{" "}
+        <Link href="/privacy" className="underline underline-offset-2">
+          Privacy Policy
+        </Link>
       </p>
     </form>
   );

@@ -12,14 +12,14 @@ This repo's own docs are the operating playbook — never restate them from memo
 - `docs/PROJECT-STATUS.md` §1–§2 — active sprint, board, open decisions
 - `docs/ROADMAP.md` — the active sprint's scope + exit gate
 - `docs/WORKFLOW.md` — branch → PR → Preview → merge loop and checklists
-- `docs/DESIGN.md` + `docs/page-designs/` + `docs/page-copy/` — locked design + verbatim copy inputs
+- `docs/DESIGN.md` + `docs/page-designs/` + the owner's CR1 documents (`docs/source-assets/content-refresh-cr1/`) + `docs/page-copy/` for anything those did not cover — locked design + verbatim copy inputs
 - `docs/sprint-prompts/` — records of every previous sprint (read recent ones for context)
 
 ## Mode A — Plan a sprint (default)
 
 When the user gives a rough dump, a sprint ID (e.g. "0.1", "S3a"), or says "plan the next sprint":
 
-1. **Read first:** `docs/PROJECT-STATUS.md` (active sprint + notes), the matching sprint row in `docs/ROADMAP.md`, the most recent record(s) in `docs/sprint-prompts/`, and the specific `docs/page-copy/` + `docs/page-designs/` files the sprint touches.
+1. **Read first:** `docs/PROJECT-STATUS.md` (active sprint + notes), the matching sprint row in `docs/ROADMAP.md`, the most recent record(s) in `docs/sprint-prompts/`, and the specific copy documents (CR1's, then `docs/page-copy/`) + `docs/page-designs/` files the sprint touches.
 2. **Guard scope:** one sprint/phase only. If the request is outside the active sprint, say so and propose where it belongs in the roadmap — don't plan it anyway.
 3. **Clarify sparingly:** ask at most 3 questions, and only if the answer would significantly change the plan (e.g. an unresolved item in PROJECT-STATUS §5). If the user says "use your best judgment", ask nothing.
 4. **Output, in this order:**
@@ -70,10 +70,10 @@ Owner remote commands: "proceed" = next step · "pause" = hold · "status" = whe
 "fix <thing>" = fix before continuing · "skip to <n>" = jump (record the skip in PROJECT-STATUS.md).
 
 Locked inputs (never invent, never paraphrase):
-- Copy, verbatim: docs/page-copy/[exact file(s)]
+- Copy, verbatim: [exact file(s)] — the owner's CR1 documents under docs/source-assets/content-refresh-cr1/, or docs/page-copy/ for anything those did not cover
 - Design: docs/page-designs/[exact mockup file(s)] + design-system tokens (values recorded in docs/DESIGN.md §3)
 - [If artwork: copy the needed PH-* files from docs/page-designs/assets/art/ into /public/assets/]
-- Proof numbers: 4 sections · 22 focus areas · 88 templates (reconciled public-and-private at PP7; owner-signed live 2026-08-20, D-PP-s; a copy checker enforces them). The old band — 11 · 33 · 200+ · 297 · 120-day — names content deleted by `0030`; never carry it into a new prompt. Header/footer chrome is locked — never redesign per page.
+- Proof numbers: 4 sections · 22 focus areas · 83 templates and practical tools (reconciled public-and-private at PP7; owner-signed live 2026-08-20 at 88, D-PP-s; moved to 83 by CR1 with the owner's delivery; a copy checker enforces them). The old band — 11 · 33 · 200+ · 297 · 120-day, plus the previous release's 88 — names content that no longer exists; never carry it into a new prompt. Header/footer chrome is locked — never redesign per page.
 
 Before editing:
 1. Inspect the repo (package.json, next.config.ts, src/app/) and read every locked input above.

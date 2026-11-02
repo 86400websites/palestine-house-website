@@ -9,8 +9,8 @@ import { WORKSPACE_CHROME } from "@/lib/workspace-v2/spec";
 
 /* Workspace v2 header (PP2 2c) — the owner's final mockup, rebuilt.
 
-   Copy comes from the generated WORKSPACE_CHROME (extracted verbatim from the
-   mockup, never hand-typed). Behaviour matches the prototype: transparent over
+   Copy comes from WORKSPACE_CHROME (maintained by hand in the spec since CR1).
+   Behaviour matches the prototype: transparent over
    the hero photo, solid once scrolled past 28px or while the mobile panel is
    open; five nav links with hover/focus tooltips; a mobile panel below 1080px.
 
@@ -20,7 +20,7 @@ import { WORKSPACE_CHROME } from "@/lib/workspace-v2/spec";
    mockup's brand-logo--overlay / --solid pair.
 
    The account button is a real link to /account (the mockup could only toast).
-   Its label is the mockup's own "Partner Platform" wording, kept verbatim. */
+   Its label is the CR1 "Community Platform" wording, kept verbatim. */
 
 const LOCKUP_RATIO = 900 / 422;
 const LOCKUP_H = 46;

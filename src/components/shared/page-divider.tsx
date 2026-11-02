@@ -7,7 +7,7 @@ import { TatreezDivider } from "@/components/shared/tatreez-divider";
 export function PageDivider() {
   return (
     <div className="page-divider">
-      <TatreezDivider width="160px" opacity={0.7} palette="v3" />
+      <TatreezDivider width="180px" opacity={0.7} palette="v3" />
     </div>
   );
 }

@@ -8,7 +8,7 @@
 
 ## Who you are writing to
 
-**Partners and applicants** — people who have applied to bring a Palestine House, or who are already approved and using the platform. Not customers, not donors, not subscribers. **This site takes no payments**, so no message here ever concerns money, cards or refunds.
+**Partners and applicants** — people who have applied for community access, or who are already approved and using the platform. Not customers, not donors, not subscribers. **This site takes no payments**, so no message here ever concerns money, cards or refunds.
 
 **Voice.** These are new strings, so the brand-voice rules govern them: **warm, short, concrete**. Never charity tone, never franchise hype, never political slogans, never startup filler. The canonical rules live in `docs/page-copy/00-global/brand-voice.md` — ⚠️ that path is **gitignored and owner-held** (the copy canon lives on the owner's drive, not in this public repo), so check it there before inventing a new phrasing. When in doubt, match the tone the site already uses: *"Something broke on our side, not yours."*
 
@@ -54,9 +54,9 @@ For the most common report on this site: someone cannot reach the platform, and 
 >
 > Hi [NAME],
 >
-> I checked on our side. Nothing is broken — [THEIR ACTUAL STATUS IN ONE PLAIN SENTENCE, e.g. "your application is still with HQ, so the partner platform hasn't opened for you yet"].
+> I checked on our side. Nothing is broken — [THEIR ACTUAL STATUS IN ONE PLAIN SENTENCE, e.g. "your community access is still being arranged, so the Community Platform hasn't opened for you yet"].
 >
-> [WHAT HAPPENS NEXT AND ROUGHLY WHEN, e.g. "Every application is reviewed by HQ. We'll email you the moment there's a decision."]
+> [WHAT HAPPENS NEXT AND ROUGHLY WHEN, e.g. "We'll email you the moment there's a decision."]
 >
 > In the meantime you can still sign in and update your name or password on your account page.
 >
@@ -72,9 +72,9 @@ For *"I applied and never heard anything."* Usually the application is safely sa
 >
 > Hi [NAME],
 >
-> Your application reached us on [DATE] — it's with HQ. [IF TRUE: "The confirmation email didn't reach you, which is on us, and we've fixed that."]
+> Your application reached us on [DATE], and your community access is being arranged. [IF TRUE: "The confirmation email didn't reach you, which is on us, and we've fixed that."]
 >
-> Every application is reviewed by HQ. We'll email you as soon as there's a decision.
+> We'll email you as soon as there's a decision.
 >
 > Sorry for the silence, and thank you for the nudge.
 >
@@ -95,8 +95,8 @@ One line each, for the `[ONE PLAIN SENTENCE]` slot above. Fill in what actually 
 | Sign-in or password reset failed | *"The reset link wasn't reaching you."* |
 | Approval didn't unlock the platform | *"Your account was approved, but the platform didn't open for you."* |
 | A template download failed | *"The download link was expiring before it could open."* |
-| An Ask HQ message didn't reach HQ | *"Your question didn't get through to the team."* |
-| A guide page errored | *"That page was failing to load for some partners."* |
+| A contact-form enquiry didn't arrive | *"Your message didn't get through to the team."* |
+| A guide page errored | *"That page was failing to load for some members."* |
 
 ## Rules
 

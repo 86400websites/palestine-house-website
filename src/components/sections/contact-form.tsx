@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-/* Contact form (contact.md). Posts to the server-side Resend route (S12 12-5) —
-   the provider is never called from the browser. On success the approved
-   confirmation ("Thanks — your message is on its way."); on failure the standard
-   retry line; never a faked send. */
+/* Contact form (Public Website Copy §9.2, CR1). Posts to the server-side Resend
+   route (S12 12-5) — the provider is never called from the browser. On success
+   the approved confirmation ("Thank you. Your enquiry has been submitted."); on
+   failure the approved retry line; never a faked send. */
 export function ContactForm() {
   const [status, setStatus] = React.useState<
     "idle" | "sending" | "sent" | "error"
@@ -44,7 +44,7 @@ export function ContactForm() {
     <form onSubmit={onSubmit}>
       <div className="contact-row">
         <div className="contact-field">
-          <Label htmlFor="c-name">Name</Label>
+          <Label htmlFor="c-name">Your name</Label>
           <Input
             id="c-name"
             name="name"
@@ -56,7 +56,7 @@ export function ContactForm() {
           />
         </div>
         <div className="contact-field">
-          <Label htmlFor="c-email">Email</Label>
+          <Label htmlFor="c-email">Email address</Label>
           <Input
             id="c-email"
             name="email"
@@ -81,7 +81,7 @@ export function ContactForm() {
         />
       </div>
       <div className="contact-field">
-        <Label htmlFor="c-message">Message</Label>
+        <Label htmlFor="c-message">Your message</Label>
         <Textarea
           id="c-message"
           name="message"
@@ -89,25 +89,27 @@ export function ContactForm() {
           placeholder="Tell us a little more."
           required
           disabled={status === "sent"}
-          className="bg-white"
+          className="bg-white field-sizing-fixed"
         />
       </div>
       <div className="contact-actions">
         <Button size="lg" type="submit" disabled={busy}>
-          Send message
+          Send Message
           <ArrowRight aria-hidden="true" />
         </Button>
         {/* Approved micro-copy stays static; the live region fills on submit. */}
         {status === "sent" ? (
           <span className="contact-help" role="status">
-            Thanks — your message is on its way.
+            Thank you. Your enquiry has been submitted.
           </span>
         ) : status === "error" ? (
           <span className="contact-help" role="status">
-            Something went wrong. Please try again.
+            We could not submit your enquiry. Please try again.
           </span>
         ) : (
-          <span className="contact-help">We’ll get back to you.</span>
+          <span className="contact-help">
+            Include only the details needed to explain your request.
+          </span>
         )}
       </div>
     </form>

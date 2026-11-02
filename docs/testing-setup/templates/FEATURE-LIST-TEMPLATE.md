@@ -7,7 +7,7 @@
 Everything the site does, one plain-English line each. **Everything on this list gets tested; nothing off this list does.** Drafted by Claude Code from a full scan of the code (`src/app/`, Route Handlers, Supabase RPCs and RLS policies, email triggers) cross-checked against the docs; approved by the owner before any test is written.
 
 - Source scan date: **[DATE]** · Repo head: **[SHA]** · Preview tested: **[PREVIEW_URL]**
-- Content numbers asserted by this list: **[N] sections · [N] focus areas · [N] templates** *(as of [DATE] — today's truth is 4 · 22 · 88; these move only when real content is added, never invented)*
+- Content numbers asserted by this list: **[N] sections · [N] focus areas · [N] templates** *(as of [DATE] — today's truth is 4 · 22 · 83 templates and practical tools; these move only when real content is added, never invented)*
 - Test users — **non-production Supabase project only, obviously fake, passwords never recorded anywhere**:
   - pending partner: `[pending-robot@example.invalid]`
   - approved partner: `[approved-robot@example.invalid]`
@@ -27,7 +27,7 @@ Everything the site does, one plain-English line each. **Everything on this list
 
 ## A. Public shell — pages and content
 
-Routes: `/` · `/model` · `/experience` · `/bring-ph` · `/our-support` · `/focus-areas` · `/about` · `/contact` · `/apply` · `/privacy` · `/terms`
+Routes: `/` · `/model` · `/experience` · `/bring-ph` · `/our-support` · `/focus-areas` · `/about` · `/contact` · `/apply` · `/privacy` *(`/terms` was removed at CR1 and shows the site's own 404)*
 
 | ID | Feature | Proof of PASS |
 |---|---|---|
@@ -66,17 +66,17 @@ HQ admin: `/admin` · `/admin/approvals` · `/admin/content` · `/admin/content/
 | ID | Feature | Proof of PASS |
 |---|---|---|
 | CT-001 | Each section lists its focus areas | `[Counts match the numbers asserted at the top of this file]` |
-| CT-002 | A focus area shows summary → one guide card → Watch Video → templates grid | `[No Overview card, no per-topic checklist card, no watch-out card — those do not exist in this model]` |
+| CT-002 | A focus area shows summary and Watch Video; Explore opens the Overview download → one guide card → templates grid → shared resources where it has them | `[The Overview is a row, not a card; no per-topic checklist card, no watch-out card — those do not exist in this model]` |
 | CT-003 | The guide reader renders every topic | `[All topics open; content renders; deep links to #topic-slug land correctly]` |
 | CT-004 | A template downloads for an approved partner | Server-issued **signed URL**; the file arrives; `[TTL behaviour]` |
 | CT-005 | 🔴 A template does **not** download for a pending or anonymous caller | Denied. No signed URL is ever issued, no storage path or bucket name leaks |
-| CT-006 | Ctrl/⌘+K search spans focus areas, guides and templates for an approved partner | `[Results resolve and navigate]` |
+| CT-006 | Ctrl/⌘+K search spans focus areas, Overviews, guides and templates for an approved partner | `[Results resolve and navigate]` |
 | CT-007 | Unpublished / draft content is invisible | 🔴 Invisible **for rows and for bytes** — not in the list, not fetchable by id |
 | CT-0xx | `[Other gated-content promise]` | `[Observable proof]` |
 
 ## D. Forms and email
 
-Public writes: `/apply`, `/contact` (Route Handler `src/app/api/resend/contact`). Gated write: the Ask HQ form on `/support` (approved partners only).
+Public writes: `/apply`, `/contact` (Route Handler `src/app/api/resend/contact`). There is no approved-partner-only write: Community Contacts on `/support` is guidance and a link to `/contact`.
 
 | ID | Feature | Proof of PASS |
 |---|---|---|
@@ -85,7 +85,7 @@ Public writes: `/apply`, `/contact` (Route Handler `src/app/api/resend/contact`)
 | FM-003 | `[Triggered email]` is sent with the right content and links | `[Capture method]` |
 | FM-004 | A double-submit does not create two records | One record `[how asserted]` |
 
-> ⚠️ **Preview sends REAL email.** `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` are configured in **both** Production and Preview, so a Preview `/contact` or Ask HQ submission lands in a real inbox ([`BROWSER-TOOLS.md`](../../BROWSER-TOOLS.md) §6). Mark robot submissions unmistakably as tests, keep them few, and tell the owner before the run. Never submit anything on Production.
+> ⚠️ **Preview sends REAL email.** `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` are configured in **both** Production and Preview, so a Preview `/contact` submission lands in a real inbox ([`BROWSER-TOOLS.md`](../../BROWSER-TOOLS.md) §6). Mark robot submissions unmistakably as tests, keep them few, and tell the owner before the run. Never submit anything on Production.
 
 ## E. HQ admin
 
@@ -98,7 +98,7 @@ Public writes: `/apply`, `/contact` (Route Handler `src/app/api/resend/contact`)
 
 ## F. Protection and abuse controls — ⛔ **NOT TESTABLE UNTIL SYS1.5**
 
-> 🔴 **Read this before writing a single line here.** `/apply`, `/contact` and the Ask HQ write are live **today without rate limiting (Upstash) and without Turnstile** — [`PROJECT-STATUS.md`](../../PROJECT-STATUS.md) §7 issue **#1**, open since S3c, the oldest debt in the project. **Hammering a form today gets you through, not blocked.**
+> 🔴 **Read this before writing a single line here.** `/apply` and `/contact` are live **today without rate limiting (Upstash) and without Turnstile** — [`PROJECT-STATUS.md`](../../PROJECT-STATUS.md) §7 issue **#1**, open since S3c, the oldest debt in the project. **Hammering a form today gets you through, not blocked.**
 >
 > **Do not write a test that expects a 429 or a CAPTCHA challenge, and do not let any report claim one.** A test asserting a control that does not exist either fails forever or, far worse, is quietly rewritten until it passes and then reports safety that is not there.
 >

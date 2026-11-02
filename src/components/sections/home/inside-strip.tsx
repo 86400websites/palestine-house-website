@@ -1,7 +1,7 @@
 import { Photo, type PhotoId } from "@/components/shared/photo";
 import { Reveal } from "@/components/motion/reveal";
 
-/* "Inside a Palestine House" (DR1-5, auto-marquee at DR1-8) — six photography
+/* Home gallery (DR1-5, auto-marquee at DR1-8; heading CR1) — six photography
    cards drifting in a continuous CSS marquee (owner decision 2026-07-02,
    recorded §4 D-DR1: a sanctioned exception to the no-auto-carousel motion
    rule for this one section). Pure CSS: the track holds the card list twice
@@ -79,14 +79,14 @@ export function InsideStrip() {
     <section className="ph-section-lg">
       <div className="ph-container">
         <Reveal>
-          <h2 className="v3-rule-head">Inside a Palestine House</h2>
+          <h2 className="v3-rule-head">What could happen in your House?</h2>
         </Reveal>
       </div>
       <Reveal delay={0.08}>
         <div
           className="v3-marquee"
           role="region"
-          aria-label="Scenes from inside a Palestine House"
+          aria-label="What could happen in your House?"
           /* focusable so the reduced-motion scroller works by keyboard;
              harmless in the animated state (DR1-10) */
           tabIndex={0}

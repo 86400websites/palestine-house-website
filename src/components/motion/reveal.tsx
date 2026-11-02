@@ -14,10 +14,17 @@ type RevealProps = {
   /** Stagger offset in seconds (≈0.06–0.1 between siblings). */
   delay?: number;
   className?: string;
+  /** How far past the viewport's edge the reveal starts. */
+  margin?: string;
 };
 
 /** Fade + translate-up when scrolled into view. */
-export function Reveal({ children, delay = 0, className }: RevealProps) {
+export function Reveal({
+  children,
+  delay = 0,
+  className,
+  margin = "-10% 0px",
+}: RevealProps) {
   const reduced = useReducedMotion();
   if (reduced) return <div className={className}>{children}</div>;
   return (
@@ -25,7 +32,7 @@ export function Reveal({ children, delay = 0, className }: RevealProps) {
       className={className}
       initial={{ opacity: 0, y: TRAVEL }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10% 0px" }}
+      viewport={{ once: true, margin: margin as `${number}px` }}
       transition={{ duration: 0.56, ease: EASE_OUT, delay }}
     >
       {children}
@@ -50,7 +57,9 @@ export function FadeIn({ children, delay = 0, className }: RevealProps) {
   );
 }
 
-/** Reveal a list of children ~80ms apart. Wraps each child in <Reveal>. */
+/** Reveal a list of children ~80ms apart. Wraps each child in <Reveal>. Only heroes use
+    this, so its margin reaches past the bottom edge by the travel: a call to action at
+    the foot of a phone's first screen is showing on arrival, not waiting for a scroll. */
 export function Stagger({
   children,
   className,
@@ -65,7 +74,11 @@ export function Stagger({
   return (
     <div className={className}>
       {items.map((child, i) => (
-        <Reveal key={(child as { key?: string }).key ?? i} delay={i * gap}>
+        <Reveal
+          key={(child as { key?: string }).key ?? i}
+          delay={i * gap}
+          margin={`0px 0px ${TRAVEL}px 0px`}
+        >
           {child}
         </Reveal>
       ))}

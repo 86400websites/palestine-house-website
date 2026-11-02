@@ -98,14 +98,14 @@ Tick each invariant this diff touches and say in one line **how it still holds**
 - [ ] **`/account`** — the one deliberate session-only exception, caller's own row: [how / not touched]
 - [ ] **Admin routes** — `/admin/*` verify the `admins` table server-side: [how / not touched]
 - [ ] **Apply = sign-up** — `/apply` is still the only account-creation door: [how / not touched]
-- [ ] **Reference content never public** — public projections expose titles/overviews only:
-      [how / not touched]
+- [ ] **Reference content never public** — public projections expose titles and one-line summaries
+      only, never gated bodies, Overview documents, templates or other files: [how / not touched]
 - [ ] **Templates** — private Storage bucket, server-issued signed URLs to approved users, no
       storage path or bucket name reaching the client: [how / not touched]
 - [ ] **Public writes** — zod-validated and fail closed in Production (rate limiting + Turnstile are
       sprint SYS1.5, `PROJECT-STATUS.md` §7 #1): [how / not touched]
-- [ ] **Dormant tables** — `programming_sessions` stays default-deny; no new caller, policy or row:
-      [how / not touched]
+- [ ] **Dormant tables** — `programming_sessions` and `support_requests` stay default-deny; no new
+      caller, policy or row: [how / not touched]
 - [ ] **Security headers / CSP** (headers checklist: §10 — the allow-list clause is the one inside
       §15) — not weakened; the allow-list gained nothing beyond the YouTube embed origin, the single
       planned exception being the Sentry ingest origin in sprint SYS3 (D-SYS-10): [how / not touched]
@@ -149,6 +149,6 @@ decision — keep the (backwards-compatible) schema, or apply the down migration
 - [ ] Nothing in this PR body carries partner or applicant identities, account email addresses,
       gated content, Storage paths or project refs — **this repository is public**
 - [ ] Copy is verbatim from the approved source; any new string follows the brand-voice rules; the
-      proof numbers are **4 sections · 22 focus areas · 88 templates**
+      proof numbers are **4 sections · 22 focus areas · 83 templates and practical tools**
 - [ ] [`docs/WORKFLOW.md`](../WORKFLOW.md) §10 worked through in full
 - [ ] Merge is the owner's — not the engine's, and not while a Blocking finding stands

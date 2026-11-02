@@ -60,7 +60,7 @@ export function BrandLogo({ href, height = 34, lockupHeight = 54 }: BrandLogoPro
         width={Math.round(height * MARK_RATIO)}
         height={height}
       />
-      {!href && <span className="sr-only">Palestine House — Our Culture Embassy</span>}
+      {!href && <span className="sr-only">Palestine House - Our Culture Embassy</span>}
     </>
   );
 

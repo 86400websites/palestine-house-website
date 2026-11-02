@@ -42,6 +42,7 @@ const SECTION_ICON: Record<PwSectionSlug, LucideIcon> = {
 };
 
 const TOPIC_HASH = "#topic-";
+const COMMUNITY_CONTACTS_ID = "community-contacts";
 const FLASH_MS = 1200;
 
 /* An explicit `behavior: "smooth"` overrides the CSS scroll-behavior rule, so
@@ -70,7 +71,7 @@ export function PwSectionExplorer({
      the new state — a card cannot be scrolled to or focused while its panel is
      still hidden. */
   const pendingScroll = React.useRef<{
-    slug: string;
+    id: string;
     block: ScrollLogicalPosition;
   } | null>(null);
   const pendingFocus = React.useRef<{ id: string } | null>(null);
@@ -117,7 +118,7 @@ export function PwSectionExplorer({
            to say it too, or a keyboard user lands at the top of the page. */
         pendingFocus.current = { id: `topic-${slug}-title` };
       }
-      pendingScroll.current = { slug, block: "start" };
+      pendingScroll.current = { id: `topic-${slug}`, block: "start" };
       writeHash(slug);
     },
     [groupIdByTopic, writeHash],
@@ -128,9 +129,10 @@ export function PwSectionExplorer({
       if (openTopic === slug) {
         setOpenTopic(null);
         /* Closing collapses a tall panel, so the card can end up off-screen and
-           the control that was just pressed would be lost. Bring it back to the
-           middle and hand focus to it. */
-        pendingScroll.current = { slug, block: "center" };
+           the control that was just pressed would be lost. Bring that control back
+           to the middle and hand focus to it. The control, not the card: a card with
+           Read more open can be taller than a phone's screen. */
+        pendingScroll.current = { id: `explore-${slug}`, block: "center" };
         pendingFocus.current = { id: `explore-${slug}` };
         writeHash(null);
         return;
@@ -145,7 +147,7 @@ export function PwSectionExplorer({
     if (scroll) {
       pendingScroll.current = null;
       document
-        .getElementById(`topic-${scroll.slug}`)
+        .getElementById(scroll.id)
         ?.scrollIntoView({ behavior: scrollBehavior(), block: scroll.block });
     }
 
@@ -162,7 +164,19 @@ export function PwSectionExplorer({
   React.useEffect(() => {
     const applyHash = () => {
       const hash = window.location.hash;
-      if (!hash.startsWith(TOPIC_HASH)) return;
+      if (!hash.startsWith(TOPIC_HASH)) {
+        /* /support#community-contacts: arriving from another page is a full load, and
+           the gated page streams, so the target did not exist yet when the browser
+           looked for it. Focus goes with the scroll, or a keyboard user arrives at the
+           top of the page. Looked up by id, never by selector: the fragment is
+           user-controlled. */
+        if (hash === `#${COMMUNITY_CONTACTS_ID}`) {
+          const block = document.getElementById(COMMUNITY_CONTACTS_ID);
+          block?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+          block?.focus({ preventScroll: true });
+        }
+        return;
+      }
       /* The fragment is user-controlled and decodeURIComponent throws on a
          malformed one — /setup#topic-% would take the whole explorer down with
          a URIError during mount (found by review, 2026-08-12). A fragment we

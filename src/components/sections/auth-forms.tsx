@@ -14,8 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-/* Auth UI (login.md / forgot-password.md / update-password.md). Fields,
-   labels, links, confirmations, and error copy are approved copy, verbatim.
+/* Auth UI (forgot-password.md / update-password.md; sign-in per the CR1 public
+   copy, section 8). Fields, labels, links, confirmations, and error copy are
+   approved copy, verbatim.
    All three flows are live via Server Actions (Sprint 3): login (3a-ii),
    forgot + update password (3b). */
 
@@ -59,12 +60,15 @@ export function LoginForm({ next }: { next?: string }) {
   return (
     <>
       <h1>Welcome back.</h1>
+      <p className="auth-sub">
+        Sign in to the Palestine House community platform.
+      </p>
       <form className="auth-form" action={formAction} noValidate>
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <AuthField
           id="l-email"
           name="email"
-          label="Email"
+          label="Email address"
           type="email"
           autoComplete="email"
           required
@@ -93,7 +97,7 @@ export function LoginForm({ next }: { next?: string }) {
         </Button>
       </form>
       <p className="auth-foot">
-        New here? <Link href="/apply">Apply to bring a House</Link>
+        New here? <Link href="/apply">Apply to Join</Link>
       </p>
     </>
   );

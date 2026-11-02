@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { revealWhenStacked } from "@/components/admin/reveal-when-stacked";
 import {
   savePlatformSectionAction,
   type AdminContentState,
@@ -20,13 +21,13 @@ import {
    uses, shown with an example, because these five photos are shipped assets
    rather than uploads. Uploading arrives with the Files screen.
 
-   DELIBERATELY ABSENT: the eyebrow and the section video link. Both columns
-   exist and both are editable by the RPC, but NOTHING RENDERS THEM — the hero
-   shows title and lead only, and no section-level video button exists. Shipping
-   a control that reports "Saved" and changes nothing a partner can see is the
-   same failure this screen was built to avoid (get_platform_sections had zero
-   call sites until PP6a wrapped it). They return when a consumer does. Removed
-   after the independent review, 2026-08-14. */
+   DELIBERATELY ABSENT: the eyebrow. The column exists and the RPC can edit it, but
+   NOTHING RENDERS IT — the hero shows title and lead only. Shipping a control that
+   reports "Saved" and changes nothing a partner can see is the same failure this
+   screen was built to avoid (get_platform_sections had zero call sites until PP6a
+   wrapped it). It returns when a consumer does. Removed after the independent
+   review, 2026-08-14. The section video link returned that way at CR1, when the
+   Overview cards began to read it, so a finished video needs no code change. */
 
 export type PageRow = {
   slug: string;
@@ -66,55 +67,50 @@ export function PagesAdmin({
   selected: PageRow | null;
 }) {
   const router = useRouter();
-  const [state, formAction, pending] = React.useActionState(
-    savePlatformSectionAction,
-    INITIAL,
-  );
 
-  const select = (slug: string) =>
+  const select = (slug: string) => {
     router.push(`/admin/content/pages?page=${slug}`, { scroll: false });
+    /* Open already and scrolled past: the form will not mount again to reveal itself. */
+    revealWhenStacked(document.querySelector<HTMLElement>(".adm-detail"));
+  };
 
   return (
     <div className="adm-split">
-      <table className="adm-table">
-        <thead>
-          <tr>
-            <th>Page</th>
-            <th>Heading</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr
-              key={r.slug}
-              className={selected?.slug === r.slug ? "is-selected" : undefined}
-            >
-              <td className="adm-td-strong">{r.label}</td>
-              <td className="adm-td-muted">{r.title}</td>
-              <td>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => select(r.slug)}
-                >
-                  Edit
-                </Button>
-              </td>
+      <div className="adm-table-wrap">
+        <table className="adm-table adm-table--fit">
+          <thead>
+            <tr>
+              <th>Page</th>
+              <th>Heading</th>
+              <th />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr
+                key={r.slug}
+                className={selected?.slug === r.slug ? "is-selected" : undefined}
+              >
+                <td className="adm-td-strong">{r.label}</td>
+                <td className="adm-td-muted">{r.title}</td>
+                <td>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => select(r.slug)}
+                  >
+                    Edit
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {selected ? (
-        <PageForm
-          key={selected.slug}
-          page={selected}
-          state={state}
-          formAction={formAction}
-          pending={pending}
-        />
+        <PageForm key={selected.slug} page={selected} />
       ) : (
         <p className="adm-intro">Choose a page to edit its heading and photo.</p>
       )}
@@ -122,22 +118,27 @@ export function PagesAdmin({
   );
 }
 
-function PageForm({
-  page,
-  state,
-  formAction,
-  pending,
-}: {
-  page: PageRow;
-  state: AdminContentState;
-  formAction: (formData: FormData) => void;
-  pending: boolean;
-}) {
+function PageForm({ page }: { page: PageRow }) {
+  /* Here, not in the list above: this form is keyed by page, so one page's "Saved."
+     cannot show on the next. */
+  const [state, formAction, pending] = React.useActionState(
+    savePlatformSectionAction,
+    INITIAL,
+  );
   const [title, setTitle] = React.useState(page.title);
   const [lead, setLead] = React.useState(page.lead ?? "");
+  const panel = React.useRef<HTMLDivElement>(null);
+  const form = React.useRef<HTMLFormElement>(null);
+
+  React.useEffect(() => revealWhenStacked(panel.current), []);
+
+  /* A blank photo or focal point keeps what the page has, so after a save, show what it has. */
+  React.useEffect(() => {
+    if (state.ok) form.current?.reset();
+  }, [state]);
 
   return (
-    <div className="adm-detail">
+    <div className="adm-detail" ref={panel}>
       {/* Bare <h2>, as the other admin detail panels do — `.adm-detail h2` is
           the existing rule and this screen adds no CSS of its own. */}
       <h2>{page.label}</h2>
@@ -147,7 +148,18 @@ function PageForm({
           : `The top of the ${page.label} page, above its focus areas.`}
       </p>
 
-      <form action={formAction} className="adm-form">
+      <form
+        ref={form}
+        action={formAction}
+        onSubmit={(e) => {
+          /* Not the form action's own submit: React resets a form after that, whatever
+             the answer, and a refused link would vanish before it could be corrected. */
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          React.startTransition(() => formAction(data));
+        }}
+        className="adm-form"
+      >
         {/* The slug is the identity of the page and is frozen in the database.
             It is round-tripped, never edited. */}
         <input type="hidden" name="slug" value={page.slug} />
@@ -190,6 +202,9 @@ function PageForm({
             onChange={(e) => setLead(e.target.value)}
           />
           <Counter value={lead} max={180} />
+          <span className="adm-field-hint">
+            Leave blank to keep the intro this page has.
+          </span>
         </label>
 
         <label className="adm-form-field">
@@ -220,6 +235,25 @@ function PageForm({
             then top to bottom — “50% 50%” is the centre.
           </span>
         </label>
+
+        {page.slug === "about" ? null : (
+          <label className="adm-form-field">
+            <span className="adm-field-label">Video link</span>
+            <input
+              className="adm-input"
+              name="youtubeUrl"
+              maxLength={500}
+              defaultValue={page.youtube_url ?? ""}
+              placeholder="https://www.youtube.com/watch?v=…"
+            />
+            <span className="adm-field-hint">
+              The Watch Video button on this page’s card on the Overview. Paste a
+              link to one YouTube video and save, and the button opens it straight
+              away. Clear the link and save, and the button is greyed out again,
+              and says “Video coming soon.” when pressed.
+            </span>
+          </label>
+        )}
 
         {state.message ? (
           <p

@@ -1,6 +1,9 @@
 /**
  * scripts/extract-mockup-spec.ts — PP1 spec/seed/asset extraction (Private Platform Revamp).
  *
+ * DO NOT RE-RUN (CR1): src/lib/workspace-v2/spec.ts is now maintained by hand, and this
+ * script would overwrite it with the retired mockup wording. Kept as the historical record.
+ *
  * The owner's final private-pages prototype ("PH - Palestine House Final Mockup.html",
  * kept in the gitignored docs/page-designs/ — OneDrive is canon, never committed) embeds
  * the entire new workspace IA as JSON (#appData) plus base64 image assets (__ASSETS__).

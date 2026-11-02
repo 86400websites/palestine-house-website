@@ -21,11 +21,11 @@ export function AdminShell({
       <header className="adm-topbar">
         <div className="adm-brand">
           <Logo href="/dashboard" size={20} />
-          <span className="adm-badge">HQ Admin</span>
+          <span className="adm-badge">Admin</span>
         </div>
         <AdminNav />
         <div className="adm-topbar-right">
-          <Link href="/dashboard">Partner workspace</Link>
+          <Link href="/dashboard">Community Platform</Link>
           <form action={signOutAction}>
             <button type="submit" className="adm-signout">
               Sign out

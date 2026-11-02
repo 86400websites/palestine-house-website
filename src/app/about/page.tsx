@@ -5,13 +5,15 @@ import { ApplyCta } from "@/components/sections/apply-cta";
 import { Reveal } from "@/components/motion/reveal";
 
 /* About (/about) — short, human manifesto. Copy verbatim from
-   docs/page-copy/01-public-pages/about.md; layout from
-   docs/page-designs/public/About.app.jsx (approved mockup). */
+   docs/page-copy/01-public-pages/about.md, except the last "Why this exists"
+   paragraph and the description, which reuse the owner's Public Website Copy §3.1
+   and §1.3 (CR1); layout from docs/page-designs/public/About.app.jsx (approved
+   mockup). */
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Most people meet Palestine in a headline. We’d rather they meet it at the table — a permanent home for Palestinian food, art, music, and community.",
+    "A lasting home for Palestinian culture, shaped locally and connected through community.",
 };
 
 export default function AboutPage() {
@@ -57,9 +59,10 @@ export default function AboutPage() {
               that keeps existing, proudly and in public.
             </p>
             <p>
-              We’re building that, one House at a time: a permanent home for
-              Palestinian food, art, music, and community, in cities around the
-              world.
+              Every Palestine House is shaped by the people who build and run it
+              locally. The community connects those people through practical
+              resources, shared learning and a commitment to Palestinian culture,
+              hospitality and belonging.
             </p>
           </div>
         </Reveal>
@@ -83,7 +86,7 @@ export default function AboutPage() {
       {/* 4 — Tagline statement band */}
       <section className="ph-section-lg bg-muted about-tagline">
         <Reveal className="ph-container about-tagline-inner">
-          <TatreezDivider width="200px" opacity={0.7} palette="v3" />
+          <TatreezDivider width="180px" opacity={0.7} palette="v3" />
           <p className="about-tagline-line">
             Passion inspires.
             <br />
