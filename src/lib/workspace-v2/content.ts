@@ -181,10 +181,10 @@ export const getPlatformPages = cache(
    the upload path, and production is verified at 297 private / 0 public-in-grid
    / 0 wrong-bucket. PP6 must close it in the same sprint that opens it.
 
-   CR1 adds a fifth condition: not the Overview. The handover makes all 22 Overview
-   documents downloadable, while doc_key may only ever be 'guide' and no column may
-   be added, so an Overview is an ordinary private row with the reserved code `OV`.
-   It would otherwise pass this predicate and be counted as a template. */
+   CR1 adds a fifth condition: not the Overview. An Overview is an ordinary private row
+   with the reserved code `OV`, because doc_key may only ever be 'guide' and no column
+   may be added. It would otherwise pass this predicate and be counted as a template.
+   The owner hid the Overviews after CR1, so nothing below offers those rows. */
 function isTemplateRow(row: ResourceRow): boolean {
   return (
     row.element_id !== null &&
@@ -204,25 +204,14 @@ function isGuideRow(row: ResourceRow): boolean {
   );
 }
 
-function isOverviewRow(row: ResourceRow): boolean {
-  return (
-    row.element_id !== null &&
-    row.is_public === false &&
-    row.doc_key === null &&
-    row.code === OVERVIEW_CODE
-  );
-}
-
 type FilesByElement = {
   templates: Map<string, PwTemplate[]>;
   guides: Map<string, PwGuideFile>;
-  overviews: Map<string, PwGuideFile>;
 };
 
 function indexFilesByElement(rows: ResourceRow[]): FilesByElement {
   const templates = new Map<string, PwTemplate[]>();
   const guides = new Map<string, PwGuideFile>();
-  const overviews = new Map<string, PwGuideFile>();
 
   /* Order once, up front, so bucket insertion order is already grid order and
      no per-topic re-sort is needed. sort_order is the owner's ordering — today
@@ -252,15 +241,10 @@ function indexFilesByElement(rows: ResourceRow[]): FilesByElement {
        silently changing which file the card offers. */
     if (isGuideRow(row) && !guides.has(row.element_id)) {
       guides.set(row.element_id, { id: row.id, title: row.title });
-      continue;
-    }
-
-    if (isOverviewRow(row) && !overviews.has(row.element_id)) {
-      overviews.set(row.element_id, { id: row.id, title: row.title });
     }
   }
 
-  return { templates, guides, overviews };
+  return { templates, guides };
 }
 
 /* The handover's "shared resources from other focus areas": the home card's own row,
@@ -295,7 +279,7 @@ export const getSectionContent = cache(
 
     if (topicRows.length === 0) return [];
 
-    const { templates, guides, overviews } = indexFilesByElement(resourceRows);
+    const { templates, guides } = indexFilesByElement(resourceRows);
     const topicsBySlug = new Map(topicRows.map((r) => [r.slug, r]));
     const groups: PwGroup[] = [];
     const byGroupId = new Map<string, PwGroup>();
@@ -338,7 +322,6 @@ export const getSectionContent = cache(
         imagePath: row.image_path,
         imagePosition: row.image_position,
         youtubeUrl: safeHttpUrl(row.youtube_url),
-        overview: overviews.get(row.element_id) ?? null,
         guide: guides.get(row.element_id) ?? null,
         templates: templates.get(row.element_id) ?? [],
         sharedTemplates: sharedTemplatesFor(row.slug, topicsBySlug, templates),
@@ -379,7 +362,7 @@ export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
      to the spec exactly as the heroes do. Cached, so this is not a round-trip
      per search. */
   const pages = await getPlatformPages();
-  const { templates, overviews } = indexFilesByElement(resourceRows);
+  const { templates } = indexFilesByElement(resourceRows);
   const items: PwSearchItem[] = [];
 
   for (const row of topicRows) {
@@ -404,16 +387,6 @@ export const getSearchIndex = cache(async (): Promise<PwSearchItem[]> => {
       /* D-PP-j: the focus area's own summary joins its match text. */
       summary: [row.description, row.intro].filter(Boolean).join(" ") || undefined,
     });
-
-    const overview = overviews.get(row.element_id);
-    if (overview) {
-      items.push({
-        kind: "OVERVIEW",
-        title: overview.title,
-        path: filePath,
-        href: topicHref,
-      });
-    }
 
     items.push({
       kind: "GUIDE",

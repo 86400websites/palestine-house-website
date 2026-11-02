@@ -26,7 +26,6 @@ const COPY = {
   title: "Templates",
   note: "Download the working files your team needs.",
   showFewer: "Show fewer templates",
-  overview: "Overview",
   shared: "Shared resources from other focus areas",
 } as const;
 
@@ -83,30 +82,6 @@ function PwResourceRow({
         <Download className="pw-icon" aria-hidden="true" />
       </button>
     </article>
-  );
-}
-
-/* The focus area's Overview document. A download, deliberately not a card: D-PP-f's
-   single Simple Guide card stays the one card on the panel. */
-export function PwOverviewFile({
-  overview,
-}: {
-  overview: { id: string; title: string };
-}) {
-  return (
-    <section className="pw-overview-file">
-      <div className="pw-subhead">
-        <h4 className="pw-subhead-title">{COPY.overview}</h4>
-      </div>
-      <div className="pw-template-grid">
-        <PwResourceRow
-          id={overview.id}
-          badge="OV"
-          title={overview.title}
-          kind="word"
-        />
-      </div>
-    </section>
   );
 }
 

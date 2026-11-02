@@ -6,7 +6,6 @@ import { ArrowLeft, ArrowRight, ChevronDown, ImageOff, PlayCircle } from "lucide
 import { usePwToast } from "@/components/workspace-v2/pw-toast";
 import { PwStartCard } from "@/components/workspace-v2/pw-start-card";
 import {
-  PwOverviewFile,
   PwSharedTemplates,
   PwTemplateGrid,
 } from "@/components/workspace-v2/pw-template-grid";
@@ -20,8 +19,9 @@ import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
    so this component stays presentational apart from its own toast.
 
    D-PP-f: the summary is the topic's own description + intro, and the Simple Guide
-   is the one card. CR1 adds the Overview document as a download, and no card, no
-   checklist card, no watch-out card and no extras block.
+   is the one card. No checklist card, no watch-out card and no extras block. The
+   Overview documents stay in private storage but are not offered: the owner hid them
+   after CR1, because the summary and Read more carry the same ground.
 
    Ids are the deep-link contract: `topic-<slug>` is what /setup#topic-<slug>
    resolves to, and `explore-<slug>` is what focus returns to on Back. */
@@ -214,7 +214,6 @@ export function PwTopicCard({
               </p>
             ))}
           </div>
-          {topic.overview ? <PwOverviewFile overview={topic.overview} /> : null}
           {/* Always rendered: every topic has a Simple Guide body — PP4 4c gave
               it a page and 4d links to it here. */}
           <PwStartCard section={section} topic={topic} />

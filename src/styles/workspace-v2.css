@@ -1999,10 +1999,7 @@
   display: grid;
   gap: 6px;
   max-width: 640px;
-}
-
-.pw-root .pw-overview-file {
-  margin-block: 23px 27px;
+  margin-bottom: 25px;
 }
 
 .pw-root .pw-templates {
