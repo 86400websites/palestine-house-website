@@ -1,5 +1,8 @@
 # CR1 release runbook: production content replacement
 
+> **Run and closed, 2026-11-02.** The owner skipped the 48-hour hold at step 10, so `cleanup` has run. This stays as
+> the rollback reference: any rollback now starts with `restore-objects`, and needs this folder or `cr1-backup`.
+
 > **Every production step here is run by the owner.** This engine writes to production
 > through no channel: `scripts/cr1-content.ts` demands a typed confirmation of the
 > production project ref at a real terminal for every mutating step, refuses outright
