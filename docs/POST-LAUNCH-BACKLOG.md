@@ -109,7 +109,7 @@ have since been scheduled — per the 2026-08-21 annotations in §A:
 |---|---|
 | **Hardening (ex-S14 · required before scale)** — Upstash + Turnstile on the public writes, fail-closed verification in real Production, CSP/headers re-verified live, secret-path threat model, full `SECURITY-CHECKLIST.md` §1–§15 pass | **SCHEDULED → SYS1.5.** No longer backlog. Brief: [`s14-final-hardening-relaunch.md`](./sprint-prompts/s14-final-hardening-relaunch.md) |
 | **Full-site test-and-fix pass (ex-S13)** — multi-hat end-to-end walk (copy → UX → feature → a11y → security), fix everything found, re-verify to zero known bugs | **SUPERSEDED → SYS2**, the automated launch gate: the same walk as a repeatable Playwright suite instead of a one-off manual pass. Original brief kept: [`s13-full-testing-fix-all.md`](./sprint-prompts/s13-full-testing-fix-all.md) |
-| **Domain/SEO relaunch verification (ex-S14)** — after the owner's domain switch-on, re-verify canonical / OG / sitemap / robots / JSON-LD plus an auth email link on the custom domain | **STILL PARKED.** No sprint owns it. See `PROJECT-STATUS.md` §4 for what the owner has already done |
+| **Domain/SEO relaunch verification (ex-S14)** — after the owner's domain switch-on, re-verify canonical / OG / sitemap / robots / JSON-LD plus an auth email link on the custom domain | **SCHEDULED → sprint L1** (2026-11-17), with its own runbook, [`DOMAIN-LAUNCH-RUNBOOK.md`](./DOMAIN-LAUNCH-RUNBOOK.md), and a read-only checker, `scripts/verify-domain-launch.ts`. L1 found production already describing itself as `www` (the Vercel variable had been switched at an unrecorded date); what remained was the Supabase allow-list, the morning check's address, Search Console and the real-visitor walk |
 
 ---
 
