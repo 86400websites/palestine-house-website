@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
 import {
   PUBLIC_ROUTES,
   RETIRED_CHILD_SAMPLES,
@@ -267,4 +267,54 @@ test("PG-011: /privacy shows the owner's policy and no placeholder notice", asyn
   ]) {
     expect(text, `/privacy still says "${retired}"`).not.toContain(retired);
   }
+});
+
+/* PG-012 — L1, 2026-11-17. A visitor who asks their device for less motion (iOS,
+   Android, Windows and macOS all have the setting) must still see every page. The
+   reveal wrapper used to swap itself for a plain <div> in the browser while the server
+   had sent it at opacity 0; React does not repair attributes while hydrating, so the
+   headings and the sign-in, reset, apply and contact forms stayed invisible on most
+   loads, silently. Playwright counts an element at opacity 0 as visible, so this reads
+   the opacity a person sees: the element's own, times every ancestor's. Below-the-fold
+   content waits for a scroll, as it does for everyone, so each form is scrolled to first. */
+const FORM_BUTTONS: Record<string, string> = {
+  "/apply": "Send Application",
+  "/contact": "Send Message",
+  "/login": "Sign in",
+  "/forgot-password": "Send reset link",
+};
+
+const seenOpacity = (locator: Locator) =>
+  locator.evaluate((el) => {
+    let opacity = 1;
+    for (let node: Element | null = el; node; node = node.parentElement) {
+      opacity *= Number(getComputedStyle(node).opacity);
+    }
+    return opacity;
+  });
+
+test.describe("with Reduce Motion on", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("PG-012: every public heading, and the sign-in, reset, apply and contact forms, can be seen", async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    for (const route of [...PUBLIC_ROUTES, "/login", "/forgot-password"]) {
+      await page.goto(route);
+      const heading = page.locator("h1").first();
+      await expect(heading).toBeVisible();
+      await expect
+        .poll(() => seenOpacity(heading), { message: `${route}: heading hidden`, timeout: 15_000 })
+        .toBeGreaterThan(0.5);
+      const label = FORM_BUTTONS[route];
+      if (label) {
+        const button = page.getByRole("button", { name: label, exact: true });
+        await button.scrollIntoViewIfNeeded();
+        await expect
+          .poll(() => seenOpacity(button), { message: `${route}: form hidden`, timeout: 15_000 })
+          .toBeGreaterThan(0.5);
+      }
+    }
+  });
 });
