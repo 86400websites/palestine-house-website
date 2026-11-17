@@ -10,7 +10,10 @@
 export const WORKSPACE_CHROME = {
   "skipLink": "Skip to content",
   "brand": {
-    "href": "https://www.palestine-house.com/",
+    /* The mockup's absolute https://www.palestine-house.com/ sent every other
+       host (the Vercel address, each Preview) to production; "/" is the same
+       public home page on whichever host the partner is on (L1). */
+    "href": "/",
     "ariaLabel": "Palestine House — public home page",
     "logoAlt": "Palestine House — Our Culture Embassy"
   },

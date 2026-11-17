@@ -64,7 +64,9 @@ const jsonLd = {
       name: SITE_NAME,
       url: SITE_URL,
       description: SITE_TAGLINE,
-      logo: `${SITE_URL}/icon.svg`,
+      /* The full brand mark (289x303 PNG), not the 64x64 favicon simplification:
+         Google asks for an Organization logo of at least 112x112 (L1). */
+      logo: `${SITE_URL}/assets/logo/ph-logo-mark.png`,
     },
     {
       "@type": "WebSite",
