@@ -2,20 +2,19 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, PlayCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PLATFORM_JOURNEY } from "@/lib/workspace-v2/spec";
-import { usePwToast } from "@/components/workspace-v2/pw-toast";
+import { PwWatchVideo } from "@/components/workspace-v2/pw-video-player";
 
 /* The Overview landing's four navigation cards (PP2 2h) — the mockup's final
    compact treatment: a square photo beside the copy, with Explore and Watch
    Video actions.
 
    Copy, images and focal points come from the spec (maintained by hand since CR1).
-   Explore is a real link into the section. Watch Video opens the section's video
-   once the owner has pasted its link at /admin/content/pages. Until then it is the
-   placeholder the handover asks for, the action disabled with a clear message:
-   "Video coming soon." is the mockup's own string. aria-disabled, not disabled, so
-   the message can still be reached by keyboard and by pointer. */
+   Explore is a real link into the section. Watch Video plays the section's video
+   on the page once the owner has pasted its link at /admin/content/pages (L1);
+   until then it is the placeholder the handover asks for, "Video coming soon."
+   Both states live in pw-video-player.tsx. */
 
 const SECTION_HREF: Record<string, string> = {
   setup: "/setup",
@@ -24,16 +23,12 @@ const SECTION_HREF: Record<string, string> = {
   support: "/support",
 };
 
-const VIDEO_SOON = "Video coming soon.";
-
 export function PwJourneyCards({
   videoUrls,
 }: {
   /* Already through safeHttpUrl at the data layer. */
   videoUrls: Record<string, string | null | undefined>;
 }) {
-  const { showToast } = usePwToast();
-
   return (
     <div className="pw-journey-grid">
       {PLATFORM_JOURNEY.map((item) => (
@@ -55,29 +50,11 @@ export function PwJourneyCards({
                 {item.action}
                 <ArrowRight className="pw-icon" aria-hidden="true" />
               </Link>
-              {videoUrls[item.page] ? (
-                <a
-                  className="pw-journey-link pw-journey-video"
-                  href={videoUrls[item.page] as string}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Watch Video
-                  <PlayCircle className="pw-icon" aria-hidden="true" />
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  className="pw-journey-link pw-journey-video"
-                  aria-disabled="true"
-                  aria-label={`Watch Video. ${VIDEO_SOON}`}
-                  title={VIDEO_SOON}
-                  onClick={() => showToast(VIDEO_SOON)}
-                >
-                  Watch Video
-                  <PlayCircle className="pw-icon" aria-hidden="true" />
-                </button>
-              )}
+              <PwWatchVideo
+                url={videoUrls[item.page]}
+                title={item.title}
+                className="pw-journey-link pw-journey-video"
+              />
             </div>
           </div>
         </article>

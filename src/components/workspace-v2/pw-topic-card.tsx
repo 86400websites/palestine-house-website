@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, ChevronDown, ImageOff, PlayCircle } from "lucide-react";
-import { usePwToast } from "@/components/workspace-v2/pw-toast";
+import { ArrowLeft, ArrowRight, ChevronDown, ImageOff } from "lucide-react";
 import { PwStartCard } from "@/components/workspace-v2/pw-start-card";
+import { PwWatchVideo } from "@/components/workspace-v2/pw-video-player";
 import {
   PwSharedTemplates,
   PwTemplateGrid,
@@ -16,7 +16,8 @@ import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
    The mockup's image-led card: a square photo beside the copy, with Explore and
    Watch Video beneath it, and a body that expands in place. Open state lives in
    the explorer above — only one topic is open at a time, matching the mockup —
-   so this component stays presentational apart from its own toast.
+   so this component stays presentational; Watch Video carries its own player
+   and toast (pw-video-player.tsx).
 
    D-PP-f: the summary is the topic's own description + intro, and the Simple Guide
    is the one card. No checklist card, no watch-out card and no extras block. The
@@ -25,8 +26,6 @@ import type { PwSectionSlug, PwTopic } from "@/lib/workspace-v2/types";
 
    Ids are the deep-link contract: `topic-<slug>` is what /setup#topic-<slug>
    resolves to, and `explore-<slug>` is what focus returns to on Back. */
-
-const VIDEO_SOON = "Video coming soon.";
 
 /* The photo is decorative — the h3 beside it carries the meaning — so it is
    aria-hidden with an empty alt. */
@@ -79,7 +78,6 @@ export function PwTopicCard({
   flash: boolean;
   onToggle: (slug: string) => void;
 }) {
-  const { showToast } = usePwToast();
   /* Local, and deliberately independent of the card's Explore state — See More
      discloses a few sentences of summary; Explore opens the guide and templates
      below it. */
@@ -167,34 +165,15 @@ export function PwTopicCard({
               )}
             </button>
 
-            {/* youtube_url stays NULL until a finished video is supplied, so today
-                this is always the placeholder the handover asks for: the action
-                disabled, with a clear message. aria-disabled, not disabled, so
-                the message can still be reached by keyboard and by pointer. When
-                a URL exists it is already validated http(s) at the data layer. */}
-            {topic.youtubeUrl ? (
-              <a
-                className="pw-topic-video"
-                href={topic.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Watch Video
-                <PlayCircle className="pw-icon" aria-hidden="true" />
-              </a>
-            ) : (
-              <button
-                type="button"
-                className="pw-topic-video"
-                aria-disabled="true"
-                aria-label={`Watch Video. ${VIDEO_SOON}`}
-                title={VIDEO_SOON}
-                onClick={() => showToast(VIDEO_SOON)}
-              >
-                Watch Video
-                <PlayCircle className="pw-icon" aria-hidden="true" />
-              </button>
-            )}
+            {/* Plays on the page when the owner has pasted a YouTube link at
+                /admin/content/focus-areas; "Video coming soon." until then. The
+                link is already validated http(s) at the data layer; the player
+                rebuilds the frame address from the video id (pw-video-player). */}
+            <PwWatchVideo
+              url={topic.youtubeUrl}
+              title={topic.title}
+              className="pw-topic-video"
+            />
           </div>
         </div>
       </div>
