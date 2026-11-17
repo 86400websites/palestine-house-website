@@ -212,8 +212,10 @@ version of the test report was written as a private, shareable Claude Doc and is
   trips their CORS preflights; a visual check of an embed must add the header for the Preview's origin only.
 - **A robot counts an opacity-0 element as visible.** `toBeVisible()` passed on a blank page for months; PG-012 reads
   the effective opacity instead.
-- **A docs-only push builds no Preview here** (Vercel skips it), so the gate ran on the last site-code Preview, with
-  the site code byte-identical to the head.
+- **One push built no Preview at all.** `ae3e081` (docs only) never got a Vercel deployment, while `d8dd47a`, also docs
+  only, did; no cause was found, so it is not a rule. The gate does not depend on it: it ran on the Preview of the
+  last site-code head, `07d08ed`, and every later commit is docs only. Check `gh api …/deployments?sha=` rather than
+  assume.
 - **Memory:** a local `next build` crashed natively at 1.3 GB free and passed with `--no-lint` and a 2 GB heap cap;
   the suite ran on one worker at about 450 MB free.
 - **Playwright prints request headers in a network-error call log**, the Preview bypass header included. It happened
