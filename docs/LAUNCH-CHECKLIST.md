@@ -35,6 +35,8 @@ Stated first so nobody has to find them.
 
 ### ✅ The Launch Gate — SATISFIED 2026-08-22, for the first time in this project's life
 
+**Re-run for the domain launch, 2026-11-17 (sprint L1):** a FULL run on the release candidate, `07d08ed`, **159/159** at both viewports and all four roles (158 at the first attempt, 1 on retry after a dropped connection that returned no response), with the D-SYS-1 review approved. GO recommended by the engine; the owner signs it on [`test-reports/2026-11-17-test-report.md`](./test-reports/2026-11-17-test-report.md).
+
 **A full automated run now gates releases here.** SYS2 installed the Playwright suite and ran it: **98/98 green** on a deployed Preview across both viewports and all four roles, against an owner-approved 54-line `docs/FEATURE-LIST.md`, with the **GO signed by the owner on 2026-08-22** — report: [`test-reports/2026-08-22-test-report.md`](./test-reports/2026-08-22-test-report.md). A daily **morning check** (Option A — logged-out, read-only, zero standing credentials) now watches the live site and emails only on failure. The honest edge, carried openly: **MN-003's final step** (typing a new password on the reset screen and signing in with it) is not yet robot-proven — the request, the link acceptance and the fail-closed behaviour are; see the report and `PROJECT-STATUS.md` §7 #7.
 
 *(The pre-SYS2 history is kept below, because a satisfied gate should still show what it replaced.)*

@@ -174,13 +174,37 @@ list and report format followed, verbatim from the repo's sprint-prompt template
 
 ## Checks & results
 
-PENDING: filled in from the Launch Gate run and the independent review.
+| Check | Result |
+|---|---|
+| `pnpm run typecheck`, `pnpm run lint` | exit 0 after every change |
+| Local `next build` as `www` against TEST | passed (`--no-lint`, 2 GB heap cap; the first attempt crashed natively at 1.3 GB free memory) |
+| CI `Install · Typecheck · Lint · Build` | green on every pushed head |
+| Local SEO audit, as a browser and as Googlebot | 10 public pages clean apart from `og:url` (fixed); then the independent audit, 8 confirmed and 3 refuted |
+| `scripts/verify-domain-launch.ts` | against the local `www` build: only `og:url` failed before the fix; against the live site before the merge: only `og:url` (10) and the Search Console file fail, as expected |
+| The 26 production videos | 26 valid, distinct ids; YouTube oEmbed 26 × 200; every title matches its card |
+| Player, seen in a real browser on the Preview | 1440: a 960×540 frame; 320: a 320×180 bottom sheet; the production video playing; focus on Close video, scroll locked; after Escape the frame is gone and focus is back; no console error or CSP violation from the site's pages |
+| PG-012 on the unfixed Preview (`db7421d`) | **red** at both viewports, as it must be (a heading stuck at opacity 0) |
+| PG-012, CT-009, AD-006 on `bb38c0c` | 5 / 5 |
+| Full suite on `bb38c0c` | 158 passed, 1 flaky (CT-010, a scroll race, §7 #22), 38.9 minutes, one worker |
+| **Full suite on `07d08ed` (the GO run)** | **159 / 159**: 158 at the first attempt, 1 on retry (AC-001, a dropped connection, no response), 34.3 minutes, one worker |
+| D-SYS-1 review of `4d1352c..ae3e081` | approve · approve · request changes; 4 non-blocking findings, all fixed |
+| Re-review of `ae3e081..07d08ed` | approve; 2 Low points fixed |
+| TEST state after all of it | exactly as found (no video links; the setup section's "none" marker; 22 of 22 published) |
+
+The test report is [`test-reports/2026-11-17-test-report.md`](../test-reports/2026-11-17-test-report.md) and the review
+record is [`code-reviews/l1-domain-launch-review.md`](../code-reviews/l1-domain-launch-review.md). A client-facing
+version of the test report was written as a private, shareable Claude Doc and is not committed.
 
 ## Deviations & learnings
 
 - **Outside the planned file list, each named here:** `src/components/motion/reveal.tsx` (the Reduce Motion fix),
-  `src/lib/workspace-v2/spec.ts` (the header logo link), `tests/e2e/public.spec.ts` (PG-012). The plan said to stop
-  and say why before touching a file outside the list; the owner had waived the stops, so the why is recorded instead.
+  `src/lib/workspace-v2/spec.ts` (the header logo link), `tests/e2e/public.spec.ts` (PG-012),
+  `docs/POST-LAUNCH-BACKLOG.md` (its parked domain line now points at L1), and in `docs/HANDOFF.md` the YouTube row
+  as well as the domain lines (the embedding note). The plan said to stop and say why before touching a file outside
+  the list; the owner had waived the stops, so the why is recorded instead.
+- **The approved prompt said a manual Morning Check run "also proves the alarm".** It does not: a green run sends no
+  email. The review caught it; the runbook now proves the alarm with a deliberately failing run against a reserved
+  `.invalid` address.
 - **The plan assumed a switch-on that had already half happened.** Read the live site before writing a launch plan.
 - **`--grep` does not filter a project's dependencies in Playwright 1.64.** `--project=journeys --grep X` ran the whole
   desktop suite first. Run the setup project on its own, then the targets with `--no-deps`.
@@ -192,9 +216,17 @@ PENDING: filled in from the Launch Gate run and the independent review.
   the site code byte-identical to the head.
 - **Memory:** a local `next build` crashed natively at 1.3 GB free and passed with `--no-lint` and a 2 GB heap cap;
   the suite ran on one worker at about 450 MB free.
+- **Playwright prints request headers in a network-error call log**, the Preview bypass header included. It happened
+  once (AC-001's dropped connection). The scratch logs were scrubbed and the local `test-results/` and
+  `playwright-report/` deleted; nothing reached the repo. Rotating the value is the owner's option.
+- **A flaky is explained before it is accepted.** Both of today's were read from their error first: one was a
+  transport reset with no response, the other a real, pre-existing scroll race, now §7 #22.
 
 ## Follow-ups
 
 - The owner: sign the GO, merge, run `DOMAIN-LAUNCH-RUNBOOK.md`.
 - SYS1.5 next (D-L1-a), carrying §7 #19 (`htmlLimitedBots`).
 - ROADMAP §A: redirect the Vercel address once Search Console shows `www` indexed; the favicon check; §7 #20 and #21.
+- §7 #22 (the Community Contacts scroll race, if it recurs) and §7 #23 (the search overlay's Safari focus return,
+  the same fallback as the player's).
+- Optional for the owner: rotate the Preview protection bypass value.
