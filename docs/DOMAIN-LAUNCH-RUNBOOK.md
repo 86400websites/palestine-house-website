@@ -113,21 +113,29 @@ that link must come back to the Vercel address and work the same.
 
 **Undo:** put back what the screenshot shows. Extra redirect entries are harmless.
 
-### 3. Point the morning check at www (GitHub), and prove its alarm
+### 3. Point the morning check at www (GitHub), and switch its alarm on
 
 GitHub → the repository → **Settings** → **Secrets and variables** → **Actions** → the
 **Variables** tab → `PRODUCTION_URL` → the pencil → value `https://www.palestine-house.com`
 (not the apex) → **Update variable**.
 
-Then, so a failure would actually reach you (`PROJECT-STATUS.md` §7 #10):
+Then switch the alarm on, so a failure would reach you: your avatar (top right) →
+**Settings** → **Notifications** → under **Actions**, choose **Only notify for failed
+workflows**, with email on.
 
-1. Your avatar (top right) → **Settings** → **Notifications** → under **Actions**, choose
-   **Only notify for failed workflows**, with email on.
-2. The repository → **Actions** → **Morning Check** → **Run workflow** → **Run workflow**.
-   It should turn green in a few minutes.
+Then run it by hand: the repository → **Actions** → **Morning Check** → **Run workflow** →
+**Run workflow**. It should turn green in a few minutes. **A green run sends no email**, so it
+proves the address, not the alarm.
 
-**Claude checks:** reads that run's log with you; it names the address it ran against, which
-must be `https://www.palestine-house.com`.
+**Optional, ten minutes: prove the alarm** (`PROJECT-STATUS.md` §7 #10, open until one
+failure email has been seen). Set `PRODUCTION_URL` to `https://alarm-test.invalid` (a reserved
+address that can never resolve, so nothing anywhere is touched), run **Morning Check** by
+hand, and wait for it to fail and for the failure email to arrive. Then set the variable back
+to `https://www.palestine-house.com` and run it once more, until green. The workflow only ever
+runs the read-only morning tests, whatever the address.
+
+**Claude checks:** reads the green run's log with you; it names the address it ran against,
+which must be `https://www.palestine-house.com`.
 
 **Undo:** set the variable back to `https://palestine-house-website.vercel.app`.
 
@@ -177,7 +185,7 @@ the Production URL in `PROJECT-STATUS.md` §1, and opens a small docs pull reque
 | What you see | What to do |
 |---|---|
 | A P3 check fails | Send Claude the output. Nothing is lost: both addresses keep working. |
-| The site itself is broken after the merge | Vercel → **Deployments** → the previous Production deployment → **⋯** → **Promote to Production** (instant). Then [`ROLLBACK.md`](./ROLLBACK.md). |
+| The site itself is broken after the merge | Vercel → the project page → **Instant Rollback** on the **Production Deployment** tile → the previous good deployment → confirm. (Not **Promote to Production**: that is for Preview rows and rebuilds that branch's code.) **New merges then stay off the live site** until you press **Undo Rollback** on the same tile. Then [`ROLLBACK.md`](./ROLLBACK.md) Steps 2 and 3. |
 | A P3 check says the canonical is the Vercel address | Someone changed `NEXT_PUBLIC_SITE_URL` back. Set it to `https://www.palestine-house.com` (Production only), then **Deployments** → the top Production deployment → **⋯** → **Redeploy** with "Use existing Build Cache" **unticked**. |
 | Reset emails open the wrong address, or fail | Compare step 2's entries character for character, and open the email in the same browser that asked for it. |
 | Search Console will not verify | Open `https://www.palestine-house.com/google777f049a86d5990c.html` yourself: it must show one line beginning `google-site-verification:`. Then compare the file name with the one Search Console asks for. |
@@ -185,7 +193,7 @@ the Production URL in `PROJECT-STATUS.md` §1, and opens a small docs pull reque
 **Do not**, during the launch: remove the Vercel address from Supabase's redirect list,
 delete the verification file, or redirect the Vercel address to `www`. That redirect is a
 sensible later step, once Search Console shows `www` indexed; it is tracked in
-[`POST-LAUNCH-BACKLOG.md`](./POST-LAUNCH-BACKLOG.md) as its own decision.
+[`ROADMAP.md`](./ROADMAP.md) §A, "After the domain launch", as its own decision.
 
 ---
 
