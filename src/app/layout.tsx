@@ -39,6 +39,10 @@ export const metadata: Metadata = {
     type: "website",
     siteName: SITE_NAME,
     locale: "en_US",
+    /* og:url, resolved per route exactly like the canonical above (Next's
+       resolveAbsoluteUrlWithPathname reads "./" against each page's own path),
+       so a share of any address consolidates on the canonical one (L1). */
+    url: "./",
   },
   twitter: {
     card: "summary_large_image",
