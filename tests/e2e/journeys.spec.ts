@@ -835,6 +835,31 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     await expect(p.getByRole("link", { name: "Watch Video" })).toHaveCount(0);
     await playsOnThePage(cardVideos(), "Get Ready to Open", "Close video");
 
+    /* The L1 review (Codex, round 1): the search opened over the player, then Back, left
+       the page unscrollable once both had closed, because each layer restored the page's
+       scroll from its own saved copy. Both now share one lock (pw-scroll-lock.ts): locked
+       while either is open, released when the last one closes, in any order. */
+    const pageOverflow = () => p.evaluate(() => document.documentElement.style.overflow);
+    const search = p.getByRole("dialog", { name: "Search Resources" });
+    const cardPlayer = p.getByRole("dialog", { name: "Get Ready to Open", exact: true });
+    await expect(async () => {
+      if (!(await cardPlayer.isVisible())) await cardVideos().click({ timeout: 2_000 });
+      await expect(cardPlayer).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    await p.keyboard.press("Control+k");
+    await expect(search).toBeVisible({ timeout: 30_000 });
+    expect(await pageOverflow(), "locked with both layers open").toBe("hidden");
+    await p.goBack();
+    await expect(p).toHaveURL(/\/dashboard$/, { timeout: 60_000 });
+    await expect(cardPlayer).toHaveCount(0);
+    await expect(search).toBeVisible();
+    expect(await pageOverflow(), "still locked while the search is open").toBe("hidden");
+    await p.keyboard.press("Escape");
+    await expect(search).toBeHidden();
+    await expect
+      .poll(pageOverflow, { message: "the page scrolls again once both have closed" })
+      .toBe("");
+
     // That Save did not send the guide, because nobody touched it. One that was edited is
     // sent, and the partner reads it. The clean-up below puts the text back.
     await editFocusArea();

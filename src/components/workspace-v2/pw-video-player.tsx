@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { PlayCircle, X } from "lucide-react";
+import { lockPageScroll } from "@/components/workspace-v2/pw-scroll-lock";
 import { usePwToast } from "@/components/workspace-v2/pw-toast";
 import { youTubeEmbedUrl } from "@/lib/live/youtube";
 
@@ -137,15 +138,11 @@ function PlayerButton({
   }, [open]);
 
   /* showModal() makes the page inert but does not stop a wheel or a trackpad
-     from scrolling it; same lock as the search overlay, previous value restored. */
+     from scrolling it. The lock is the one the search overlay uses, so the two
+     can be open together and close in any order (pw-scroll-lock.ts). */
   React.useEffect(() => {
     if (!open) return;
-    const root = document.documentElement;
-    const previous = root.style.overflow;
-    root.style.overflow = "hidden";
-    return () => {
-      root.style.overflow = previous;
-    };
+    return lockPageScroll();
   }, [open]);
 
   const close = () => dialogRef.current?.close();
