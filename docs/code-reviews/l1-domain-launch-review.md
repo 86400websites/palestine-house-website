@@ -93,3 +93,38 @@ both **Undo Rollback** and **Manage** by Vercel, so the runbook now names both a
 the **fixed** deployment; and the sprint record now lists every file the sprint changed beyond its
 plan. Two follow-ups outside the range were taken up: `PROJECT-STATUS.md` §7 #10 no longer claims a
 green run proves the alert, and the search overlay's matching Safari focus gap is logged as §7 #23.
+
+---
+
+## Codex review — round 1: `4d1352c..e2e2060` → **REQUEST CHANGES** (one Should-fix)
+
+Commissioned by the owner with the filled brief from `docs/templates/CODEX-REVIEW-PROMPT-TEMPLATE.md`,
+over the whole range `4d1352c9884a53ca37effda9a400fc8a1b1f2e81..e2e206076903cd1ed6cb802ff8d50b307042e369`.
+The returned record, as received:
+
+> - **Confirmed range:** `4d1352c9884a53ca37effda9a400fc8a1b1f2e81..e2e206076903cd1ed6cb802ff8d50b307042e369` — both SHAs resolve.
+> - **Scope match:** YES. Exactly the expected 21 paths changed. PR #110's base/head and local HEAD match the supplied SHAs.
+> - **Files and context inspected:** all 21 changed files; `AGENTS.md`; the relevant `PROJECT-STATUS` sections and the ROADMAP L1 scope; `SECURITY-CHECKLIST` §§5/6/8/13/15; `TECH-ARCHITECTURE`; `WORKFLOW` §14; `SUPABASE-MCP-SAFETY`; supporting code (YouTube parsing, URL sanitization, the gated content loaders, the dashboard/setup pages and platform layout, profile checks, the search provider and shell, middleware/session refresh, auth actions and callback, safe redirects, site identity, Next metadata resolution, the Playwright configuration, the CI and Morning Check workflows, the existing gated RPC definitions). The gitignored owner copy documents were not revalidated; no approved-copy rewrite appears in this diff.
+> - **Commands and evidence:** SHA resolution, merge-base, PR metadata and changed-path checks passed. `git diff --check` passed. `git diff --stat 07d08ed e2e2060 -- src public tests scripts next.config.ts package.json pnpm-lock.yaml` was empty. `pnpm run typecheck` / `lint` could not start (pnpm `fetch failed`); the installed `tsc --noEmit` passed; the installed ESLint could not complete (a missing local plugin); no dependencies were installed. `pnpm run build` not run (pnpm unavailable, and Next would load `.env.local`). GitHub confirms CI run 44114648704 succeeded for the reviewed head (gitleaks, typecheck, lint, build). The test report's 159/159 on `07d08ed` was inspected, its site code identical to the head. Isolated Chromium checks of the real player and search components (external requests blocked): opening, Escape, Close, focus return, iframe removal, scroll restoration and StrictMode behaviour passed; layouts fit 1440×900, 320×568 and 800×320; WebKit not installed. Offline checks passed for hostile-URL rejection, the fixed-origin embed rebuild, the non-YouTube fallback, Next's per-route `"./"` resolution, the 53-byte verification file and the 289×303 logo. A recognizable-secret scan across all 13 commits found no matches; `.env.local` was never opened.
+>
+> **Finding 1**
+> - **Severity:** Medium · **Merge call:** Should-fix
+> - **Location:** `src/components/workspace-v2/pw-video-player.tsx:144` — platform video → global search → browser Back.
+> - **Issue:** The player and search independently save and restore `document.documentElement.style.overflow`. Ctrl/⌘+K can open search above the player; navigating Back can then unmount the player while the shared-layout search remains open, causing their cleanup order to restore a stale `"hidden"` value.
+> - **Why it matters:** After both dialogs disappear, ordinary scrolling remains disabled, preventing access to content below the viewport until a full reload.
+> - **Failure scenario:** `/dashboard` → `/setup` → open Watch Video → Ctrl/⌘+K → browser Back → Escape. Observed: both open, overflow `"hidden"`; Back removes the player, search open, overflow `""`; search closes, nothing open, overflow `"hidden"`.
+> - **Suggested fix:** a shared scroll-lock counter that restores the original overflow only after the last lock is released, plus a regression check covering navigation while both overlays are open.
+> - **Confidence:** High for the cleanup defect, reproduced with the source components; the deployed Preview flow was not rerun.
+>
+> No additional serious findings. The range introduces no route, RPC, schema, storage-download, signup or approval-gate change. Video URLs retain their existing gated reads and sanitization. CSP, headers, auth and dependencies are unchanged. The checker is GET-only. The runbook retains the old auth redirect address and correctly uses Vercel Instant Rollback.
+>
+> **Verdict: REQUEST CHANGES** — one reproduced modal-lifecycle defect can leave platform scrolling locked; no approval-gate or data-safety regression found.
+> Reviewed range: `4d1352c9884a53ca37effda9a400fc8a1b1f2e81..e2e206076903cd1ed6cb802ff8d50b307042e369` · Reviewed by Codex on 2026-11-17.
+
+**Disposition: FIXED in `5825a0d`, with the regression check the reviewer asked for.** Both overlays
+now take the page-scroll lock from one module, `src/components/workspace-v2/pw-scroll-lock.ts`: the
+first lock saves the page's own value, only the last release restores it, and a double release is
+harmless (StrictMode). AD-006 now drives the reviewer's exact path (player open → Ctrl/⌘+K → Back →
+Escape) and asserts the page stays locked while the search is open and scrolls again once both have
+closed. The fix changes site code, so the Launch Gate was run again in full on the new head, and
+Codex reviews the new head in round 2.

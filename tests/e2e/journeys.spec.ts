@@ -842,6 +842,20 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     const pageOverflow = () => p.evaluate(() => document.documentElement.style.overflow);
     const search = p.getByRole("dialog", { name: "Search Resources" });
     const cardPlayer = p.getByRole("dialog", { name: "Get Ready to Open", exact: true });
+    // The reviewer's exact path. /setup is reached by the header link, not a page load, so
+    // Back stays inside the app and the shared layout (and its search) survives it; after a
+    // page load, Back reloads the whole document and takes the search with it.
+    await p.goto("/dashboard");
+    const setupLink = p
+      .locator("#pw-header")
+      .getByRole("link", { name: "Setup", exact: true })
+      .filter({ visible: true })
+      .first();
+    await expect(async () => {
+      if (!/\/setup$/.test(p.url())) await setupLink.click({ timeout: 2_000 });
+      await expect(p).toHaveURL(/\/setup$/, { timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
+    await expect(cardVideos()).toHaveCount(1, { timeout: 60_000 });
     await expect(async () => {
       if (!(await cardPlayer.isVisible())) await cardVideos().click({ timeout: 2_000 });
       await expect(cardPlayer).toBeVisible({ timeout: 2_000 });
