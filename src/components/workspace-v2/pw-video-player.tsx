@@ -29,9 +29,9 @@ import { youTubeEmbedUrl } from "@/lib/live/youtube";
       behaviour: a link that opens in a new tab.
 
    The dialog copies pw-search.tsx: a real <dialog> opened with showModal(), so
-   the browser owns the focus trap, Escape, the inert page and the top layer,
-   and gives focus back to Watch Video on close; the page behind is scroll-locked
-   while it is open. The overlay fills the viewport, so a click that lands on it
+   the browser owns the focus trap, Escape, the inert page and the top layer;
+   focus goes back to Watch Video on close (see the effect below for WebKit);
+   the page behind is scroll-locked while it is open. The overlay fills the viewport, so a click that lands on it
    rather than on the panel is a click on the backdrop, and closes the player.
    Escape works while focus is in this document (it starts on Close video); once
    a partner clicks into the player, keys go to YouTube's own frame, as with any
@@ -113,17 +113,23 @@ function PlayerButton({
 
   /* The dialog is mounted only while open, so showModal() runs once it exists.
      Escape, Close video and the backdrop all end in the dialog's own `close`
-     event, so state follows the element rather than predicting it. The browser
-     restores focus to whatever opened the dialog before that event fires; a
-     browser that never focused the button on click (Safari) leaves it on the
-     page, so it is put back on Watch Video by hand. */
+     event, so state follows the element rather than predicting it.
+
+     Focus goes back to Watch Video. Chromium does that itself: a click focuses
+     the button, showModal() remembers it and close() restores it. WebKit (Safari,
+     and every browser on an iPhone or iPad) does not focus a button on a click
+     or tap, so there is nothing to restore, and at this moment focus is still on
+     the dialog or on something inside it, which is about to be unmounted. So
+     whenever focus is nowhere, or still in the dialog, it is put back by hand. */
   React.useEffect(() => {
     const dialog = dialogRef.current;
     if (!open || !dialog) return;
     const onClose = () => {
       setOpen(false);
       const active = document.activeElement;
-      if (!active || active === document.body) triggerRef.current?.focus();
+      if (!active || active === document.body || dialog.contains(active)) {
+        triggerRef.current?.focus({ preventScroll: true });
+      }
     };
     dialog.addEventListener("close", onClose);
     if (!dialog.open) dialog.showModal();
