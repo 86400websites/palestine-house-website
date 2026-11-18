@@ -166,17 +166,17 @@ manual line evidenced or scheduled; no test skipped, disabled, weakened or edite
 feature-list change being re-approved and logged; and no line sitting at "pending" for a sprint that
 has already merged.
 
-Three hold now, and the fourth holds when the owner signs. This is a FULL run on the final head's site
+**All four hold as of the owner's sign-off on 2026-11-18**, which re-approved both feature-list changes. This is a FULL run on the final head's site
 code (`5825a0d`; later commits change only test code and docs); every automated line passed at the
 first attempt; and PR-001 to PR-003 wait on SYS1.5, which has not merged. No test was skipped,
 disabled or weakened, but two feature-list changes are flagged rather than yet re-approved (AD-006's
 added clause and the new PG-012), so the third condition is met when the owner re-approves them with
-the GO signature. The in-session independent review approved; **Codex round 1 asked for one change, which is
-fixed and proven here, and Codex round 2 on the fix is the remaining merge gate**
+the GO signature (given). The in-session independent review approved; **Codex round 1 asked for one change, which is
+fixed and proven here, and Codex round 2 approved the fix on 2026-11-18**
 ([`l1-domain-launch-review.md`](../code-reviews/l1-domain-launch-review.md)).
 
-- **Verdict:** **GO**, recommended by the engine · **Date:** 2026-11-17 · **Signed:** _awaiting the
-  owner's signature_ · Full-run report: this file.
+- **Verdict:** **GO** · **Date:** 2026-11-18 · **Signed:** the owner, in session ("GO, approved both
+  test lines"), re-approving FEATURE-LIST's PG-012 and AD-006's added clause · Full-run report: this file.
 - **On the owner's GO:** the Launch Gate line in [`LAUNCH-CHECKLIST.md`](../LAUNCH-CHECKLIST.md)
   records this run, and the launch proceeds by [`DOMAIN-LAUNCH-RUNBOOK.md`](../DOMAIN-LAUNCH-RUNBOOK.md).
 
