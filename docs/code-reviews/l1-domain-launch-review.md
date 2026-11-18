@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | **Date** | 2026-11-17 |
-| **Range** | In session: `4d1352c..ae3e081` (immutable), then the fix delta `ae3e081..07d08ed` re-reviewed on its own. **Codex round 1:** `4d1352c..e2e2060`; its fix is `5825a0d`, and `307b6ff` refines the check's path and adds this record. **Codex round 2:** pending, over the fix delta |
+| **Range** | In session: `4d1352c..ae3e081` (immutable), then the fix delta `ae3e081..07d08ed` re-reviewed on its own. **Codex round 1:** `4d1352c..e2e2060`; its fix is `5825a0d`, and `307b6ff` refines the check's path and adds this record. **Codex round 2:** `e2e2060..17ff133` → APPROVE |
 | **Branch / PR** | `claude/sprint-l1-domain-launch` / [#110](https://github.com/86400websites/palestine-house-website/pull/110) |
 | **Scope** | The Search Console file, `og:url` and the JSON-LD logo, the in-site video player on all 26 Watch Video placements, the Reduce Motion fix, the private header logo link, the AD-006 and PG-012 tests, the launch runbook and its read-only checker, and the tracker changes. No route, gate, RPC, migration, middleware, env var, header or CSP change. |
-| **Verdict** | **APPROVE** from the security and code-correctness lenses; **request changes** from the docs lens. Four findings confirmed, **none blocking**, all four fixed in `2100741` (code) and `07d08ed` (docs). **Codex round 1: REQUEST CHANGES** (one Should-fix, the shared scroll lock), fixed in `5825a0d` and proven red-then-green. **Codex round 2 pending: the remaining merge gate.** |
+| **Verdict** | **APPROVE** from the security and code-correctness lenses; **request changes** from the docs lens. Four findings confirmed, **none blocking**, all four fixed in `2100741` (code) and `07d08ed` (docs). **Codex round 1: REQUEST CHANGES** (one Should-fix, the shared scroll lock), fixed in `5825a0d` and proven red-then-green. **Codex round 2: APPROVE** over `e2e2060..17ff133` (2026-11-18): Finding 1 resolved, no new findings. |
 
 ## Why this review was mandatory
 
@@ -130,3 +130,26 @@ closed. Proven both ways: against the Preview of `07d08ed` the new check went re
 lock check (expected `hidden`, received empty), and against the fixed Preview it passed. The fix
 changes site code, so the Launch Gate ran again in full on it: **159/159, all at the first attempt**
 (`docs/test-reports/2026-11-17-test-report.md`). Codex reviews the new head in round 2.
+
+---
+
+## Codex review — round 2: `e2e2060..17ff133` → **APPROVE**
+
+Commissioned by the owner over the fix delta only,
+`e2e206076903cd1ed6cb802ff8d50b307042e369..17ff133404680f2f76ed91b2e9821ecdebb8d34d`. The returned record, as received:
+
+> - **Confirmed range:** `e2e206076903cd1ed6cb802ff8d50b307042e369..17ff133404680f2f76ed91b2e9821ecdebb8d34d` — both SHAs resolve.
+> - **Scope match:** YES. Exactly the expected 10 paths changed. PR #110's head and local HEAD match `17ff133`; GitHub confirms its base remains `4d1352c`.
+> - **Files and context inspected:** `pw-scroll-lock.ts`, `pw-search.tsx`, `pw-video-player.tsx` and the supporting `pw-shell.tsx`; `tests/e2e/journeys.spec.ts` (AD-006's setup, assertions and clean-up); all six changed documents; `AGENTS.md`, `package.json`, the round-1 finding, commit boundaries and GitHub CI metadata.
+> - **Commands and evidence:** SHA, PR, history and changed-path checks passed; `git diff --check` passed; `git diff --stat 5825a0d 17ff133 -- src public next.config.ts package.json pnpm-lock.yaml` empty, so the tested Preview's site code matches this head. `pnpm run typecheck` / `lint` could not start (pnpm `fetch failed`); the installed `tsc --noEmit` passed; the installed ESLint could not complete (a missing local plugin); no dependencies installed. `pnpm run build` skipped (Next would load `.env.local`). GitHub confirms CI run 44253600899 succeeded for `17ff133` (gitleaks, frozen install, typecheck, lint, build). The recorded Preview evidence (159/159, all at the first attempt, on `5825a0d`, with the earlier network failures and the incomplete targeted clean-up disclosed) was inspected; the deployed suite was not rerun. Independent checks of the lock passed 450 acquisition/release interleavings, five initial overflow values, repeated releases, later lock cycles and 100 StrictMode-style replay cycles; importing the module without `document` also succeeded. Isolated Chromium checks of the real components (routing/data stubbed, external requests blocked): Back/Forward, overlapping overlays, releasing the lower overlay first and unmounting both passed under StrictMode; original overflow values `""`, `"scroll"` and `"auto"` were restored. A recognizable-secret scan across the three delta commits found no matches. The untracked `output/` folder was ignored and untouched; `.env.local` was never opened.
+>
+> **Round-1 Finding 1: RESOLVED.** `pw-scroll-lock.ts` saves the original overflow only when the first lock is acquired; each release acts once, and only the final release restores the original value. Both components take the same module's lock from their open effects and return its release as cleanup, which removes the stale-value restoration. The independent Chromium reproduction now stays locked after Back while the search survives, then restores the original overflow once the search closes. AD-006 is not vacuous: it reaches `/setup` through the header's in-app link, opens both dialogs, goes Back, confirms the search survived and overflow stays `"hidden"`, then closes the search and polls for the restored overflow; its existing clean-up is unchanged. The records document the check failing on the old Preview and passing on the fix.
+>
+> **No findings.** Verified within the delta: search opening, closing, Escape, focus and index loading otherwise unchanged; video URL rebuilding, conditional iframe mounting and the WebKit focus fallback unchanged (WebKit not independently rerun); no gate, route, RPC, auth, schema, storage-download, environment, dependency, header or CSP change; the records consistently identify `5825a0d` as the tested site code and leave the owner's re-approval, GO signature and launch steps pending.
+>
+> **Verdict: APPROVE** — round-1 Finding 1 is resolved; no new serious issues found in the fix delta.
+> Reviewed range: `e2e206076903cd1ed6cb802ff8d50b307042e369..17ff133404680f2f76ed91b2e9821ecdebb8d34d` · Reviewed by Codex on 2026-11-18.
+
+**Disposition:** approved at `17ff133`. The commit that appends this record changes only this file, the
+documented exemption (`docs/CODEX-REVIEW-PROMPT.md` §4 rule 4), so the approval stands for the head
+that carries it. The trackers record the approval in the post-launch docs PR.
