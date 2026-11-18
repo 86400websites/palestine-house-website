@@ -10,13 +10,14 @@ result in plain words. The newest report is the current truth: this one supersed
 
 ## Run header
 
-- **Run type:** **FULL**. All 159 tests ran, on one worker, in 34.3 minutes (14:16–14:50 UTC):
-  158 passed at the first attempt and 1 on its automatic retry (AC-001 on desktop, after a dropped
-  network connection that returned no response at all; see Observations). None failed, none was
-  skipped.
-- **Environment:** the deployed Vercel **Preview** of `07d08ed`, the head of
-  `claude/sprint-l1-domain-launch`, reached through the sanctioned protection bypass. Preview URL
-  recorded in the session log.
+- **Run type:** **FULL**. All 159 tests ran, on one worker, in 41.2 minutes (17:34–18:15 UTC):
+  **all 159 passed at the first attempt**, with no retry, no flake and nothing skipped. This is the run
+  the GO stands on. The runs before it are recorded under "The work behind this run".
+- **Environment:** the deployed Vercel **Preview** of `5825a0d`, the commit that fixed the Codex
+  review's finding, reached through the sanctioned protection bypass. `5825a0d` is the last commit
+  with site code; `307b6ff` is the last with test code (AD-006's refined path, plus the review record),
+  and every later commit is docs only, so the site code under test is the final head's, byte for byte.
+  Preview URL recorded in the session log.
 - **Data separation confirmed:** the three robot accounts exist **only** in the non-production
   Supabase project and signed in through the real `/login` form; a Preview wired to production
   could not have let them in.
@@ -25,16 +26,18 @@ result in plain words. The newest report is the current truth: this one supersed
   the two disposable robot applicants of the apply journeys.
 - **Feature list version:** approved by the owner 2026-08-22, CR1's changes accepted under the
   owner's hand-over (D-CR1-3), and two L1 changes: **AD-006** reworded (the video plays on the page),
-  approved by the owner with the L1 plan; **PG-012** added (Reduce Motion), flagged for the owner's
+  approved by the owner with the L1 plan, then given one added clause for the Codex review's
+  regression check; **PG-012** added (Reduce Motion). Both changes are flagged for the owner's
   re-approval in the list's change log.
 - **Totals:** 159 automated tests (3 robot sign-ins · 57 desktop · 57 at 320px · 16 + 16 morning ·
-  10 journeys) → **159 PASS** (158 at the first attempt, 1 on retry) · **0 FAIL** · manual lines:
+  10 journeys) → **159 PASS, all at the first attempt** · **0 FAIL** · manual lines:
   MN-001 PASS (standing), MN-002 and MN-003's last step due at launch · PR-001 to PR-003 **pending
   SYS1.5** (the controls do not exist yet, so they are not tested, not passed).
 - **Real emails sent during this run:** 3 to the HQ inbox, all marked as robot tests (1 contact
   message and 2 new-application notifications), plus the applicant-side emails to the robots'
-  undeliverable `.invalid` addresses, which arrive nowhere. Today had two full runs, so **6 robot
-  emails** reached the HQ inbox in all; the targeted runs send none.
+  undeliverable `.invalid` addresses, which arrive nowhere. Three complete runs reached the journeys
+  on 2026-11-17 (`bb38c0c`, `07d08ed` and this one), so **9 robot emails** reached the HQ inbox in all;
+  the targeted runs and the network-failed attempt sent none.
 
 ## Results
 
@@ -78,7 +81,8 @@ plays on the page.** On a dashboard card and on a focus-area card: nothing is fr
 press; the press opens a player named for its card, framing exactly the privacy-enhanced embed
 rebuilt from the pasted id; Escape on one and Close video on the other remove the frame and return
 focus to Watch Video; the page never changes; nothing links out to YouTube; and clearing the link
-brings the placeholder back.
+brings the placeholder back. It also drives the Codex review's path (the search opened over the
+player, then Back): the page stays locked while the search is open and scrolls again once both close.
 
 **F — protection.** PR-004 PASS: the six headers, the CSP shaped as shipped, its only third-party
 allowance still the YouTube embed origin. PR-001 to PR-003: **N/A, pending SYS1.5**. The rate limit
@@ -109,20 +113,34 @@ had the old reveal wrapper, it went red at both viewports: a heading stuck at op
 full 15 seconds, and the screenshot showed the home page as a photo with no heading, no text and no
 buttons. Against the fixed Preview it passed at both.
 
-**An earlier full run, on the site code of `bb38c0c`** (before the review's focus fix), finished
-158 passed and 1 flaky. The flaky line is explained below.
+**The Codex review's defect was reproduced in the real app before it was called fixed.** The
+regression added to AD-006 was run against the Preview of `07d08ed` (separate scroll locks): it went
+red exactly at its lock check (expected `hidden`, received empty). Against the fixed Preview it passed.
+
+**The full runs of 2026-11-17, in order:**
+
+| Site code | Result | What happened |
+|---|---|---|
+| `bb38c0c` | 158 passed · 1 flaky | CT-010's first attempt (see Observations) |
+| `07d08ed` | 159 / 159 | 158 at the first attempt; AC-001 passed on retry after a dropped connection. Superseded: the Codex fix changed the site code |
+| `5825a0d` | 146 passed · 1 failed (AC-003 raw, both attempts) · 2 flaky (PG-006, PG-009) · 10 did not run | **Network failure, not a site result.** AC-003 (raw) timed out with its requests hanging, then its retry hit `ECONNRESET`; PG-006 and PG-009 hit `ERR_CONNECTION_TIMED_OUT` and passed on retry. No gate assertion ever received a response to judge. The desktop project failed, so the journeys that depend on it did not run. The connection was checked healthy and the whole suite re-run |
+| **`5825a0d`** | **159 / 159, all at the first attempt** | **This run: the one the GO stands on** |
+
+One targeted run of AD-006, between those, also went red at its very end: its clean-up could not
+restore the focus area (a save did not confirm in time, and the clean-up swallows its own errors), so
+the test's final check correctly found the robot's video link and guide lines still in place. TEST
+was put back by hand and proven byte-identical to production (the guide's checksum matches); the
+next run of AD-006 passed whole.
 
 ## Observations (none is a failure of this run)
 
-0. **AC-001's first attempt in this run never received a response.** One of its requests, for a
-   guide URL as an anonymous visitor, ended in `read ECONNRESET`: the network connection was
-   dropped before any answer came back, so no assertion about the gate ran and nothing could have
-   leaked. The automatic retry ran the whole test (all 28 gated routes refused, the browser landing
-   on `/login`, nothing gated in any response) and passed. The suite allows one retry for exactly
-   this, a single transient hop on a cold Preview, because a real defect fails twice. *(Playwright's
-   error log printed that request's headers, including the Preview bypass header; the value went
-   into a local log on the test machine only and was scrubbed. It is not in this report or the repo.)*
-1. **CT-010 stumbled once in the earlier run** (§7 #22, Low). Its first attempt on desktop clicked
+0. **Two kinds of credential appeared in local error logs during the earlier runs**, both printed by
+   Playwright in a network-error call log: the Preview protection-bypass header, and a session
+   cookie of the pending test robot (a non-production account that can see nothing private). Both
+   were scrubbed from every local log, the local test artifacts were deleted, and the last run
+   redacted them as it wrote. Neither is in this report or the repo. Rotating the bypass value is
+   the owner's option.
+1. **CT-010 stumbled once, in the `bb38c0c` run** (§7 #22, Low). Its first attempt on desktop clicked
    the footer's Community Contacts link and landed on `/support#community-contacts` with the block
    rendered, but the page did not scroll down to it within 15 seconds; the automatic retry passed in
    10 seconds. The links are full page loads and the explorer scrolls to the block once, when it
@@ -130,15 +148,16 @@ buttons. Against the fixed Preview it passed at both.
    machine was at about 450 MB free memory. Logged, with a fix ready if it recurs.
 2. **`/apply` offers Google no canonical** (§7 #19, Low): Next 15 streams its metadata into the body
    for Googlebot. Its title still counts and the private pages' noindex is honoured. Fixed in SYS1.5.
-3. **Memory.** This machine had 450 to 760 MB free throughout, below the level at which page loads
-   have timed out before, so both full runs used one worker. Slower, and no red came from it.
+3. **Memory and network.** This machine had 450 to 760 MB free throughout, below the level at which
+   page loads have timed out before, so every full run used one worker. One attempt still lost to a
+   failing network connection (the table above); the run after it was clean.
 
 ## Failures, grouped
 
-**None open.** Two first-attempt reds across today's full runs, each passing on its automatic retry
-and each explained: AC-001 in this run (a dropped connection, no response received), and CT-010 in
-the earlier run (a scroll race, logged as §7 #22). PG-012's red against the unfixed Preview was the
-new test proving itself on the old code, not a failure of this release.
+**None open, and none in this run.** Every red of the day is explained above: transport failures
+with no response received (AC-001, AC-003, PG-006, PG-009), a pre-existing scroll race logged as
+§7 #22 (CT-010), and one test clean-up that did not finish (AD-006, TEST restored and proven). PG-012's
+and AD-006's reds against the unfixed Previews were the new checks proving themselves on the old code.
 
 ## Verdict
 
@@ -147,11 +166,13 @@ manual line evidenced or scheduled; no test skipped, disabled, weakened or edite
 feature-list change being re-approved and logged; and no line sitting at "pending" for a sprint that
 has already merged.
 
-All four hold: this is a FULL run on the head, `07d08ed`; every automated line passes, the one
-first-attempt red explained; no test was skipped, disabled or weakened (AD-006 changed with its
-owner-approved wording, PG-012 was added and is flagged for re-approval); and PR-001 to PR-003 wait
-on SYS1.5, which has not merged. The independent review (D-SYS-1) approved, with its four
-non-blocking findings fixed and the fix delta re-reviewed and approved
+Three hold now, and the fourth holds when the owner signs. This is a FULL run on the final head's site
+code (`5825a0d`; later commits change only test code and docs); every automated line passed at the
+first attempt; and PR-001 to PR-003 wait on SYS1.5, which has not merged. No test was skipped,
+disabled or weakened, but two feature-list changes are flagged rather than yet re-approved (AD-006's
+added clause and the new PG-012), so the third condition is met when the owner re-approves them with
+the GO signature. The in-session independent review approved; **Codex round 1 asked for one change, which is
+fixed and proven here, and Codex round 2 on the fix is the remaining merge gate**
 ([`l1-domain-launch-review.md`](../code-reviews/l1-domain-launch-review.md)).
 
 - **Verdict:** **GO**, recommended by the engine · **Date:** 2026-11-17 · **Signed:** _awaiting the

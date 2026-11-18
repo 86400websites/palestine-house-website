@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | **Date** | 2026-11-17 |
-| **Range** | `4d1352c..ae3e081` (immutable), then the fix delta `ae3e081..07d08ed` re-reviewed on its own |
+| **Range** | In session: `4d1352c..ae3e081` (immutable), then the fix delta `ae3e081..07d08ed` re-reviewed on its own. **Codex round 1:** `4d1352c..e2e2060`; its fix is `5825a0d`, and `307b6ff` refines the check's path and adds this record. **Codex round 2:** pending, over the fix delta |
 | **Branch / PR** | `claude/sprint-l1-domain-launch` / [#110](https://github.com/86400websites/palestine-house-website/pull/110) |
 | **Scope** | The Search Console file, `og:url` and the JSON-LD logo, the in-site video player on all 26 Watch Video placements, the Reduce Motion fix, the private header logo link, the AD-006 and PG-012 tests, the launch runbook and its read-only checker, and the tracker changes. No route, gate, RPC, migration, middleware, env var, header or CSP change. |
-| **Verdict** | **APPROVE** from the security and code-correctness lenses; **request changes** from the docs lens. Four findings confirmed, **none blocking**, all four fixed in `2100741` (code) and `07d08ed` (docs). |
+| **Verdict** | **APPROVE** from the security and code-correctness lenses; **request changes** from the docs lens. Four findings confirmed, **none blocking**, all four fixed in `2100741` (code) and `07d08ed` (docs). **Codex round 1: REQUEST CHANGES** (one Should-fix, the shared scroll lock), fixed in `5825a0d` and proven red-then-green. **Codex round 2 pending: the remaining merge gate.** |
 
 ## Why this review was mandatory
 
@@ -126,5 +126,7 @@ now take the page-scroll lock from one module, `src/components/workspace-v2/pw-s
 first lock saves the page's own value, only the last release restores it, and a double release is
 harmless (StrictMode). AD-006 now drives the reviewer's exact path (player open → Ctrl/⌘+K → Back →
 Escape) and asserts the page stays locked while the search is open and scrolls again once both have
-closed. The fix changes site code, so the Launch Gate was run again in full on the new head, and
-Codex reviews the new head in round 2.
+closed. Proven both ways: against the Preview of `07d08ed` the new check went red exactly at its
+lock check (expected `hidden`, received empty), and against the fixed Preview it passed. The fix
+changes site code, so the Launch Gate ran again in full on it: **159/159, all at the first attempt**
+(`docs/test-reports/2026-11-17-test-report.md`). Codex reviews the new head in round 2.

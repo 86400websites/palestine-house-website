@@ -5,7 +5,7 @@
 | **Date** | Built 2026-11-17. Merge and switch-on: the owner's (see "The launch" at the end once it has run). |
 | **Branch / PR** | `claude/sprint-l1-domain-launch` / [#110](https://github.com/86400websites/palestine-house-website/pull/110), from `main` = `4d1352c` |
 | **Goal** | Make, prove and hand over the release that launches the site on `https://www.palestine-house.com`. |
-| **Status** | 🔵 Built; awaiting the owner's GO signature, merge and the runbook. |
+| **Status** | 🔵 Built; Codex round 1's change made and proven; awaiting Codex round 2, the owner's GO signature, merge and the runbook. |
 
 Owner-requested on 2026-11-17, planned with `/sprint-prompt` the same day and approved with "ok approved - please
 proceed". Mid-way the owner waived the per-step gates ("You dont need to ask after each sub step to proceed - you can
@@ -55,6 +55,11 @@ verified; 14 agents, 8 confirmed, 3 refuted):
 - The Community Platform header logo linked to the absolute production address; it is now `/`.
 - `/apply`'s canonical sits in `<body>` for Googlebot (§7 #19, Low → SYS1.5); the checker reports it as a NOTE.
 - Logged for later: the root loading fallback on public pages (§7 #20) and the nav links' names (§7 #21).
+
+**From the Codex review, round 1:** one page-scroll lock shared by the search overlay and the video player
+(`src/components/workspace-v2/pw-scroll-lock.ts`), so the two can be open together and close in any order
+without leaving the page unscrollable; AD-006 now drives the reviewer's exact path (search over player, then
+Back). `pw-search.tsx` is outside the planned file list, changed because the fix needs both overlays to share it.
 
 ## Prompt used
 
@@ -186,9 +191,14 @@ list and report format followed, verbatim from the repo's sprint-prompt template
 | PG-012 on the unfixed Preview (`db7421d`) | **red** at both viewports, as it must be (a heading stuck at opacity 0) |
 | PG-012, CT-009, AD-006 on `bb38c0c` | 5 / 5 |
 | Full suite on `bb38c0c` | 158 passed, 1 flaky (CT-010, a scroll race, §7 #22), 38.9 minutes, one worker |
-| **Full suite on `07d08ed` (the GO run)** | **159 / 159**: 158 at the first attempt, 1 on retry (AC-001, a dropped connection, no response), 34.3 minutes, one worker |
+| Full suite on `07d08ed` | 159 / 159: 158 at the first attempt, 1 on retry (AC-001, a dropped connection, no response), 34.3 minutes. Superseded by the Codex fix |
 | D-SYS-1 review of `4d1352c..ae3e081` | approve · approve · request changes; 4 non-blocking findings, all fixed |
 | Re-review of `ae3e081..07d08ed` | approve; 2 Low points fixed |
+| **Codex round 1, `4d1352c..e2e2060`** | **REQUEST CHANGES**: one Should-fix (Medium), the search and the player each saving and restoring the page's scroll, so search-over-player then Back could leave the page unscrollable. Fixed in `5825a0d` with a shared lock |
+| AD-006's new scroll-lock check | red on `07d08ed` exactly at its lock check (expected `hidden`, received empty); green on `5825a0d` |
+| Full suite on `5825a0d`, first attempt | lost to the network (AC-003 raw hung then `ECONNRESET`; PG-006/PG-009 connection timeouts; journeys not reached); connection checked and the suite re-run whole |
+| **Full suite on `5825a0d` (the GO run)** | **159 / 159, all at the first attempt**, 41.2 minutes, one worker |
+| Codex round 2 | pending, over the fix delta |
 | TEST state after all of it | exactly as found (no video links; the setup section's "none" marker; 22 of 22 published) |
 
 The test report is [`test-reports/2026-11-17-test-report.md`](../test-reports/2026-11-17-test-report.md) and the review
@@ -199,9 +209,11 @@ version of the test report was written as a private, shareable Claude Doc and is
 
 - **Outside the planned file list, each named here:** `src/components/motion/reveal.tsx` (the Reduce Motion fix),
   `src/lib/workspace-v2/spec.ts` (the header logo link), `tests/e2e/public.spec.ts` (PG-012),
-  `docs/POST-LAUNCH-BACKLOG.md` (its parked domain line now points at L1), and in `docs/HANDOFF.md` the YouTube row
-  as well as the domain lines (the embedding note). The plan said to stop and say why before touching a file outside
-  the list; the owner had waived the stops, so the why is recorded instead.
+  `docs/POST-LAUNCH-BACKLOG.md` (its parked domain line now points at L1), in `docs/HANDOFF.md` the YouTube row
+  as well as the domain lines (the embedding note), and, for Codex round 1's shared scroll lock,
+  `src/components/workspace-v2/pw-scroll-lock.ts` (new) and `src/components/workspace-v2/pw-search.tsx`. The plan said
+  to stop and say why before touching a file outside the list; the owner had waived the stops, so the why is recorded
+  instead. The whole range is 23 paths.
 - **The approved prompt said a manual Morning Check run "also proves the alarm".** It does not: a green run sends no
   email. The review caught it; the runbook now proves the alarm with a deliberately failing run against a reserved
   `.invalid` address.
@@ -213,20 +225,31 @@ version of the test report was written as a private, shareable Claude Doc and is
 - **A robot counts an opacity-0 element as visible.** `toBeVisible()` passed on a blank page for months; PG-012 reads
   the effective opacity instead.
 - **One push built no Preview at all.** `ae3e081` (docs only) never got a Vercel deployment, while `d8dd47a`, also docs
-  only, did; no cause was found, so it is not a rule. The gate does not depend on it: it ran on the Preview of the
-  last site-code head, `07d08ed`, and every later commit is docs only. Check `gh api …/deployments?sha=` rather than
-  assume.
+  only, did; no cause was found, so it is not a rule. The gate does not depend on it: the GO run used the Preview of
+  `5825a0d`, the last site-code commit; `307b6ff` adds only AD-006's refined path and the review record, and every
+  commit after it is docs only. Check `gh api …/deployments?sha=` rather than assume.
 - **Memory:** a local `next build` crashed natively at 1.3 GB free and passed with `--no-lint` and a 2 GB heap cap;
   the suite ran on one worker at about 450 MB free.
-- **Playwright prints request headers in a network-error call log**, the Preview bypass header included. It happened
-  once (AC-001's dropped connection). The scratch logs were scrubbed and the local `test-results/` and
-  `playwright-report/` deleted; nothing reached the repo. Rotating the value is the owner's option.
-- **A flaky is explained before it is accepted.** Both of today's were read from their error first: one was a
-  transport reset with no response, the other a real, pre-existing scroll race, now §7 #22.
+- **Playwright prints request headers in a network-error call log**, the Preview bypass header included. It printed
+  in two runs: after AC-001's dropped connection (`07d08ed`), where it reached a scratch log that was then scrubbed,
+  and in AC-003's network failure (the first `5825a0d` attempt), where a filter removed it as the log was written. Both
+  runs' local `test-results/` and `playwright-report/` (whose traces hold headers) were deleted; nothing reached the
+  repo. Rotating the value is the owner's option.
+- **A flaky is explained before it is accepted.** Every red of the day was read from its error first: transport
+  resets and timeouts with no response, a real pre-existing scroll race (§7 #22), and one test clean-up that did not
+  finish (TEST restored by hand and proven byte-identical to production by checksum).
+- **Codex found what three in-session lenses missed:** two overlays each owning the page's scroll. Shared state
+  owned by two components belongs in one place; `pw-scroll-lock.ts` is now that place.
+- **A Back after `page.goto` leaves the app.** Two `page.goto` entries are separate documents, so Back reloads and
+  takes the shared layout with it. To test anything that relies on in-app history, reach the page by an in-app link.
+- **Playwright's network-error call logs print request cookies too**, not only the bypass header: the pending robot's
+  (non-production) session cookie appeared once. Pipe the reporter through a redacting `sed` whenever a run might
+  fail, and delete `test-results/` and `playwright-report/` after reading them.
 
 ## Follow-ups
 
-- The owner: sign the GO, merge, run `DOMAIN-LAUNCH-RUNBOOK.md`.
+- The owner: run Codex round 2 on the final head; sign the GO and re-approve the AD-006 clause and PG-012; merge once
+  Codex approves; run `DOMAIN-LAUNCH-RUNBOOK.md`.
 - SYS1.5 next (D-L1-a), carrying §7 #19 (`htmlLimitedBots`).
 - ROADMAP §A: redirect the Vercel address once Search Console shows `www` indexed; the favicon check; §7 #20 and #21.
 - §7 #22 (the Community Contacts scroll race, if it recurs) and §7 #23 (the search overlay's Safari focus return,
