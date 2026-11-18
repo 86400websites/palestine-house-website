@@ -3181,6 +3181,59 @@
   }
 }
 
+/* --- Video player (L1) --------------------------------------------------- */
+/* Watch Video plays on the platform (owner, 2026-11-17). No mockup draws a
+   player, so this invents no new surface: it is the search overlay's own
+   dialog, panel, head and close control (.pw-overlay, .pw-modal,
+   .pw-modal-head, .pw-modal-close above), with the panel sized to the video and
+   centred rather than hung near the top. On a phone it is the same bottom sheet
+   as the search. */
+
+.pw-root .pw-video-overlay {
+  align-items: center;
+  padding: 24px 20px;
+}
+
+.pw-root .pw-video-modal {
+  /* As wide as the window allows, but never so wide that the 16:9 frame plus
+     the head (74px at most) would run past the panel's height cap: in a short,
+     wide window the width gives way, never the picture. */
+  width: min(960px, 100%, calc((86vh - 74px) * 16 / 9));
+}
+
+.pw-root .pw-video-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pw-root .pw-video-frame {
+  aspect-ratio: 16 / 9;
+  background: var(--pw-char-950);
+}
+
+.pw-root .pw-video-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (max-width: 620px) {
+  .pw-root .pw-video-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .pw-root .pw-video-modal {
+    width: min(100%, calc((94dvh - 74px) * 16 / 9));
+  }
+}
+
 /* --- Account (PP5) ------------------------------------------------------- */
 /* The second page the mockup does not draw. Like the reader it invents no
    value: the card is the Ask HQ panel's surface, the fields and the action row

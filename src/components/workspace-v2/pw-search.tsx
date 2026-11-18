@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, Search, X } from "lucide-react";
+import { lockPageScroll } from "@/components/workspace-v2/pw-scroll-lock";
 import { fetchSearchIndex } from "@/lib/workspace-v2/search";
 import {
   highlightRanges,
@@ -202,14 +203,11 @@ export function PwSearchProvider({ children }: { children: React.ReactNode }) {
     }
   }, [open]);
 
+  /* Shared with the video player, so two open layers release in any order
+     (pw-scroll-lock.ts). */
   React.useEffect(() => {
     if (!open) return;
-    const root = document.documentElement;
-    const previous = root.style.overflow;
-    root.style.overflow = "hidden";
-    return () => {
-      root.style.overflow = previous;
-    };
+    return lockPageScroll();
   }, [open]);
 
   /* Escape and the backdrop both fire `close` on the dialog itself, so state

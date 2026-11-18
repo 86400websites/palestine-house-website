@@ -39,6 +39,10 @@ export const metadata: Metadata = {
     type: "website",
     siteName: SITE_NAME,
     locale: "en_US",
+    /* og:url, resolved per route exactly like the canonical above (Next's
+       resolveAbsoluteUrlWithPathname reads "./" against each page's own path),
+       so a share of any address consolidates on the canonical one (L1). */
+    url: "./",
   },
   twitter: {
     card: "summary_large_image",
@@ -60,7 +64,9 @@ const jsonLd = {
       name: SITE_NAME,
       url: SITE_URL,
       description: SITE_TAGLINE,
-      logo: `${SITE_URL}/icon.svg`,
+      /* The full brand mark (289x303 PNG), not the 64x64 favicon simplification:
+         Google asks for an Organization logo of at least 112x112 (L1). */
+      logo: `${SITE_URL}/assets/logo/ph-logo-mark.png`,
     },
     {
       "@type": "WebSite",

@@ -1,4 +1,10 @@
-import { expect, test, type Browser, type BrowserContext } from "@playwright/test";
+import {
+  expect,
+  test,
+  type Browser,
+  type BrowserContext,
+  type Locator,
+} from "@playwright/test";
 import { writeFileSync } from "node:fs";
 import { DECLINED_HEADING, PENDING_HEADING, openPanel } from "./helpers/app";
 import { ROLES, rolePassword } from "./helpers/roles";
@@ -688,7 +694,7 @@ test("AD-004 (J7): the files manager uploads, serves, refuses and deletes", asyn
   }
 });
 
-test("AD-006 (J10): a video link pasted in the CMS goes live with no code change, and comes off again", async ({
+test("AD-006 (J10): a video link pasted in the CMS goes live with no code change, plays on the page, and comes off again", async ({
   browser,
   baseURL,
 }) => {
@@ -696,8 +702,12 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
   /* The owner adds finished videos without a sprint, so this is the promise: paste a
      link, save, and the partner's button works; clear it, and the placeholder is back.
      Both kinds of placement: the four on /dashboard (Pages screen) and the 22 on the
-     focus-area cards (Focus areas screen). The link is a well-formed id that is no video. */
+     focus-area cards (Focus areas screen). The link is a well-formed id that is no video.
+     Since L1 (2026-11-17) "works" means it plays on the page: a player that opens over
+     the card and closes back to it, never a link out to YouTube. */
   const LINK = "https://www.youtube.com/watch?v=aaaaaaaaaaa";
+  // Rebuilt from the id on the privacy-enhanced host, never the pasted address.
+  const EMBED = "https://www.youtube-nocookie.com/embed/aaaaaaaaaaa?autoplay=1&rel=0&playsinline=1";
   const GUIDE_LINE = "Robot test line, saved and then taken out again.";
   const LATE_LINE = "Robot test line typed while the Save was under way.";
   const GUIDE_PAGE = "/setup/get-ready-to-open/guide";
@@ -743,9 +753,41 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
   // Set just before the first Save on the card: that Save is meant to be refused, and if a
   // bug lets it through, the link and the edited guide are what the clean-up must put back.
   let guideBefore: string | null = null;
-  const dashboardVideos = () => p.getByRole("link", { name: "Watch Video" });
+  // A live Watch Video is a button named exactly that; a placeholder is named with its
+  // message ("Watch Video. Video coming soon."), so `exact` tells the two apart.
+  const dashboardVideos = () => p.getByRole("button", { name: "Watch Video", exact: true });
   const cardVideos = () =>
-    p.locator("#topic-get-ready-to-open").getByRole("link", { name: "Watch Video" });
+    p
+      .locator("#topic-get-ready-to-open")
+      .getByRole("button", { name: "Watch Video", exact: true });
+  const players = () => p.locator('iframe[src*="youtube-nocookie.com"]');
+  /* Nothing is framed before the press; the press opens a player named for its card,
+     framing exactly EMBED; closing it (Escape, or Close video) removes the frame, gives
+     focus back to Watch Video, and the partner never left the page. */
+  const playsOnThePage = async (
+    trigger: Locator,
+    title: string,
+    closeWith: "Escape" | "Close video",
+  ) => {
+    const at = p.url();
+    await expect(players()).toHaveCount(0);
+    // A press before hydration does nothing, so press until the player answers. Only
+    // while it is shut: once it is open the page behind is inert, and pressing again
+    // would wait on a button the modal covers.
+    const player = p.getByRole("dialog", { name: title, exact: true });
+    await expect(async () => {
+      if (!(await player.isVisible())) await trigger.click({ timeout: 2_000 });
+      await expect(player).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    await expect(player.locator("iframe")).toHaveAttribute("src", EMBED);
+    await expect(player.locator("iframe")).toHaveAttribute("title", title);
+    if (closeWith === "Escape") await p.keyboard.press("Escape");
+    else await player.getByRole("button", { name: "Close video" }).click();
+    await expect(player).toHaveCount(0);
+    await expect(players()).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    expect(p.url(), "Watch Video navigated").toBe(at);
+  };
 
   try {
     // The Overview: refused when it is not YouTube, live when it is, for that card only.
@@ -758,11 +800,11 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     await expect(m.getByText("Saved.")).toBeVisible({ timeout: 30_000 });
     await p.goto("/dashboard");
     await expect(dashboardVideos()).toHaveCount(1, { timeout: 60_000 });
-    await expect(dashboardVideos()).toHaveAttribute("href", LINK);
-    await expect(dashboardVideos()).toHaveAttribute("target", "_blank");
     await expect(
       p.getByRole("button", { name: "Watch Video. Video coming soon." }),
     ).toHaveCount(3);
+    await expect(p.getByRole("link", { name: "Watch Video" })).toHaveCount(0);
+    await playsOnThePage(dashboardVideos(), "Setup", "Escape");
 
     // A refusal loses nothing, and writes nothing: what was typed stays for correcting, and
     // the photo does not drop to the select's first option, which a second Save would write.
@@ -788,8 +830,49 @@ test("AD-006 (J10): a video link pasted in the CMS goes live with no code change
     await saveFocusArea(LINK);
     await saved();
     await p.goto("/setup");
-    await expect(cardVideos()).toHaveAttribute("href", LINK, { timeout: 60_000 });
-    await expect(p.getByRole("link", { name: "Watch Video" })).toHaveCount(1);
+    await expect(cardVideos()).toHaveCount(1, { timeout: 60_000 });
+    await expect(p.getByRole("button", { name: "Watch Video", exact: true })).toHaveCount(1);
+    await expect(p.getByRole("link", { name: "Watch Video" })).toHaveCount(0);
+    await playsOnThePage(cardVideos(), "Get Ready to Open", "Close video");
+
+    /* The L1 review (Codex, round 1): the search opened over the player, then Back, left
+       the page unscrollable once both had closed, because each layer restored the page's
+       scroll from its own saved copy. Both now share one lock (pw-scroll-lock.ts): locked
+       while either is open, released when the last one closes, in any order. */
+    const pageOverflow = () => p.evaluate(() => document.documentElement.style.overflow);
+    const search = p.getByRole("dialog", { name: "Search Resources" });
+    const cardPlayer = p.getByRole("dialog", { name: "Get Ready to Open", exact: true });
+    // The reviewer's exact path. /setup is reached by the header link, not a page load, so
+    // Back stays inside the app and the shared layout (and its search) survives it; after a
+    // page load, Back reloads the whole document and takes the search with it.
+    await p.goto("/dashboard");
+    const setupLink = p
+      .locator("#pw-header")
+      .getByRole("link", { name: "Setup", exact: true })
+      .filter({ visible: true })
+      .first();
+    await expect(async () => {
+      if (!/\/setup$/.test(p.url())) await setupLink.click({ timeout: 2_000 });
+      await expect(p).toHaveURL(/\/setup$/, { timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
+    await expect(cardVideos()).toHaveCount(1, { timeout: 60_000 });
+    await expect(async () => {
+      if (!(await cardPlayer.isVisible())) await cardVideos().click({ timeout: 2_000 });
+      await expect(cardPlayer).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    await p.keyboard.press("Control+k");
+    await expect(search).toBeVisible({ timeout: 30_000 });
+    expect(await pageOverflow(), "locked with both layers open").toBe("hidden");
+    await p.goBack();
+    await expect(p).toHaveURL(/\/dashboard$/, { timeout: 60_000 });
+    await expect(cardPlayer).toHaveCount(0);
+    await expect(search).toBeVisible();
+    expect(await pageOverflow(), "still locked while the search is open").toBe("hidden");
+    await p.keyboard.press("Escape");
+    await expect(search).toBeHidden();
+    await expect
+      .poll(pageOverflow, { message: "the page scrolls again once both have closed" })
+      .toBe("");
 
     // That Save did not send the guide, because nobody touched it. One that was edited is
     // sent, and the partner reads it. The clean-up below puts the text back.
