@@ -1325,6 +1325,75 @@
   height: 6px;
 }
 
+/* §7 — Special thanks to Casa Palestina (EXP1, 2026-11-20). Ported value for
+   value from the owner's mockup (docs/Experience Last Section Addition.html):
+   photo left / copy right on the cream card, stacking at 720px. The button
+   greens, body ink and focus copper are the mockup's own literals, scoped
+   here like the /bring-ph CTA. */
+#special-thanks {
+  scroll-margin-top: 5rem;
+  background: var(--cream-100);
+  color: var(--ink-900);
+}
+.exp-thanks-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 6rem);
+  padding-block: clamp(3rem, 7vw, 6.5rem);
+}
+.exp-thanks-photo {
+  border-radius: 14px;
+  aspect-ratio: 4 / 3;
+}
+.exp-thanks-copy h2 {
+  font-size: clamp(2.15rem, 3.8vw, 3.65rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  max-width: 16ch;
+  margin: 1rem 0;
+}
+.exp-thanks-copy p {
+  font-size: clamp(1rem, 1.28vw, 1.125rem);
+  line-height: 1.65;
+  max-width: 51ch;
+  margin: 0 0 1.6rem;
+  color: #53493e;
+}
+.exp-thanks-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  min-height: 44px;
+  padding: 0.7rem 1.15rem;
+  border-radius: 7px;
+  background: #526241;
+  color: #fffaf1;
+  font-weight: 600;
+  text-decoration: none;
+}
+.exp-thanks-button:hover {
+  background: #3e4c30;
+  color: #fffaf1;
+}
+.exp-thanks-button:focus-visible {
+  outline: 3px solid #a64f26;
+  outline-offset: 4px;
+}
+@media (max-width: 720px) {
+  .exp-thanks-layout {
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+  .exp-thanks-photo {
+    aspect-ratio: 3 / 2;
+  }
+  .exp-thanks-copy h2 {
+    max-width: 20ch;
+  }
+}
+
 /* ===========================================================================
    Bring a House (/bring-ph) — page-specific (BringAHouse.html)
    ======================================================================== */
