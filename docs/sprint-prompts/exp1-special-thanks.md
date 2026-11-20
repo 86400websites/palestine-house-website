@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Date merged** | — (built 2026-11-20; Codex approved `19f0288..92a30ee` the same day; awaiting the owner's Preview spot-check and merge) |
+| **Date merged** | — (built 2026-11-20; Codex approved `19f0288..92a30ee` the same day; the owner approved the final version, "This is perfect", and merges PR #112) |
 | **Branch / PR** | `claude/exp1-special-thanks` (from `main` = `19f0288`) / [#112](https://github.com/86400websites/palestine-house-website/pull/112) |
 | **Review** | [`code-reviews/exp1-special-thanks.md`](../code-reviews/exp1-special-thanks.md): **APPROVE**, no findings |
 | **Goal** | Add the owner's mockup section "Special thanks to Casa Palestina" as the last section of `/experience`, and change nothing else. |
@@ -91,4 +91,4 @@ typecheck ✅ · lint ✅ · build ✅ · public-copy checker 74/74 ✅ · local
 - The mockup HTML (4.8 MB, with embedded images) sits untracked at `docs/`. It isn't committed, like the other owner mockups, which live in gitignored folders.
 
 ## Follow-ups
-- **Owner decision:** the mockup also adds a "Special thanks" link (`/experience#special-thanks`) to the footer's Explore column. The footer is locked chrome that's identical on every page, and the brief said "no other changes", so it didn't ship. If wanted, it's a one-line change in its own small PR.
+- None. **Resolved 2026-11-20:** the mockup also added a "Special thanks" link (`/experience#special-thanks`) to the footer's Explore column. The footer is locked chrome, so it didn't ship, and the owner then declined it ("No need for footer"). The footer stays as it is.
