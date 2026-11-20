@@ -267,6 +267,52 @@ export default function ExperiencePage() {
           />
         </div>
       </section>
+
+      {/* 7 — Special thanks to Casa Palestina (EXP1, owner mockup
+          docs/Experience Last Section Addition.html, 2026-11-20): the page's
+          last section, crediting the photographs. Copy verbatim from the
+          mockup; it reuses §2's day-room photo, as the mockup does. */}
+      <section id="special-thanks" aria-labelledby="thanks-heading">
+        <div className="ph-container exp-thanks-layout">
+          <Photo
+            assetId="ph-photo-exp-cafe-day"
+            alt="The room by day — guests at wooden tables under the arches, listening in."
+            className="exp-thanks-photo"
+            sizes="(max-width: 720px) 100vw, 45vw"
+          />
+          <div className="exp-thanks-copy">
+            <span className="exp-orn exp-orn--eyebrow" aria-hidden="true">
+              <span />
+            </span>
+            <h2 id="thanks-heading">Special thanks to Casa Palestina</h2>
+            <p>
+              To the team at Casa Palestina, thank you for letting us share
+              your photographs on our website and in our videos. We’re grateful
+              for your generosity and proud to share these glimpses of
+              Palestinian culture with our community.
+            </p>
+            <a
+              className="exp-thanks-button"
+              href="https://casapalestina.pt/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Visit Palestine House in Lisbon
+              <svg
+                aria-hidden="true"
+                width="15"
+                height="15"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <path d="M3 13 13 3M4 3h9v9" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
