@@ -2,8 +2,9 @@
 
 | | |
 |---|---|
-| **Date merged** | — (built 2026-11-20; awaiting the owner's Codex review and merge) |
-| **Branch / PR** | `claude/exp1-special-thanks` (from `main` = `19f0288`) / PR to be recorded at merge |
+| **Date merged** | — (built 2026-11-20; Codex approved `19f0288..92a30ee` the same day; awaiting the owner's Preview spot-check and merge) |
+| **Branch / PR** | `claude/exp1-special-thanks` (from `main` = `19f0288`) / [#112](https://github.com/86400websites/palestine-house-website/pull/112) |
+| **Review** | [`code-reviews/exp1-special-thanks.md`](../code-reviews/exp1-special-thanks.md): **APPROVE**, no findings |
 | **Goal** | Add the owner's mockup section "Special thanks to Casa Palestina" as the last section of `/experience`, and change nothing else. |
 
 ## What shipped
